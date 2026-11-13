@@ -24,9 +24,15 @@
 
 ## 待做
 
-1. 讲义 `src/slides/*.qmd`：在 CI 里生成，使 `/slides/chapN.html` 存在，再把 `src/teaching.qmd` 里的讲义链接改成相对路径。
-2. 术语一致性复查（整站渲染已通过一次：11 个页面全部产出，exit 0）。
-3. 决定是否修掉 `src/chap4.qmd` 中上游那 12 个未闭合的 `:::`（风格指南第 5 节第 15 条），这属于有意偏离原文，需要你先确认。
+1. 讲义 `src/slides/*.qmd`：在 CI 里生成，使 `/slides/chapN.html` 存在，再把 `src/teaching.qmd` 里的讲义链接改成相对路径。（不在原定目标范围内，属于额外工作，未开工。）
+2. 决定是否修掉 `src/chap4.qmd` 中上游那 12 个未闭合的 `:::`（风格指南第 5 节第 15 条），这属于有意偏离原文，需要你先确认。
+
+## 已完成的复查
+
+- 术语一致性复查（整站 + 习题集）：按风格指南第 4 节逐词统计主译名，未发现同一概念两个译名。检查中发现习题里 `elicitation` 有 8 处译作"引出"，与正文的"征询"不一致，已统一为"征询"（提交 `zh: 术语统一——习题中的 elicitation 改为与正文一致的"征询"`）。另外 4 处"引出"是"由此引出…"这类普通动词用法，保留。人名按表执行：Bradley-Terry、Dwork、Sen、Lipschitz、Gumbel 保留拉丁，阿罗、博尔达、孔多塞、贝叶斯、汤普森、拉普拉斯用中文；"无限臂老虎机"是 infinite-armed bandit 的构词，不是"多臂老虎机"的另一种译法。
+- 结构与不变量：15 个文件逐个跑 `check-translation.py`，`license`/`chap4–7`/`notation`/`teaching`/`pset1–3` 全部 ALL_OK；`index`、`chap1`、`chap2`、`chap3`、`glossary` 显示 HAS_DIFF，差异全部对应风格指南第 5 节已登记的条目（第 2、9、10、12 条），无新增偏离。
+- 整站渲染：`.github/workflows/render-zh.yml` 对分支 `zh` 的最新提交 `0d8f619` 构建并部署成功（`gh run watch 43465352846 --exit-status` 退出码 0）。线上已核对：首页、`src/chap4.html`、`src/chap7.html`、`src/psets/pset2.html`、`src/psets/pset3.html` 均返回 200 且标题为中文；`src/teaching.html` 的习题链接指向相对路径 `psets/psetN.html`。
+
 
 ## 已放弃的旧条目
 
