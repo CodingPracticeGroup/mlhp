@@ -2624,16 +2624,16 @@ print(f"\nTrue best action: 2 (utility = {true_utilities[2]:.1f})")
 
 :::
 
-### Connections
+### 与前后的联系
 
-The progression from bandits (single-step) to RL (sequential) to preference-based RL (RLHF, GRPO) mirrors this chapter's arc from simple to complex decision-making. The **policy gradient theorem** (@eq-policy-gradient-theorem) provides the mathematical bridge: it tells us how to optimize *any* parameterized policy using only sampled trajectories and rewards. When those rewards come from a learned preference model (Bradley-Terry), we recover the modern alignment pipeline.
+从老虎机（单步）到强化学习（序贯）再到基于偏好的强化学习（RLHF、GRPO），这条演进路线正对应本章由简到繁的脉络。**策略梯度定理**（@eq-policy-gradient-theorem）是其中的数学桥梁：它告诉我们，只靠采样出来的轨迹和奖励，就能优化*任意*参数化的策略。而当这些奖励来自一个学出来的偏好模型（Bradley-Terry）时，我们就得到了今天这套对齐流程。
 
-- **Forward to CIRL** (next section): The MDP framework developed here provides the formal setting for CIRL, where the single-agent MDP becomes a two-player cooperative game with shared rewards.
-- **Forward to Chapter 7**: Chapter 7 discusses the practical lessons from deploying RLHF and GRPO at scale, including reward hacking and the gap between learned and true rewards.
-- **Back to Chapter 3**: The log-linear policy assumption used in ADPO---$\pi(y \mid x; \theta) \propto \exp(\phi(x,y)^\top \theta)$---is a special case of the parameterized policy $\pi_\theta$, specifically the softmax policy class common in RL.
+- **通向 CIRL**（下一节）：本节建立的 MDP 框架正是 CIRL 的正式设定——单智能体 MDP 在那里变成一场共享奖励的双人合作博弈。
+- **通向第 7 章**：第 7 章讨论 RLHF 与 GRPO 大规模部署时的实际教训，包括奖励投机，以及学到的奖励与真实奖励之间的差距。
+- **回到第 3 章**：ADPO 用到的对数线性策略假定——$\pi(y \mid x; \theta) \propto \exp(\phi(x,y)^\top \theta)$——其实就是参数化策略 $\pi_\theta$ 的一个特例，具体说就是强化学习里常见的 softmax 策略族。
 
-::: {.callout-tip title="Key Takeaway: From Bandits to RL to Preferences"}
-GRPO further simplifies the RL pipeline by replacing the value function with group-relative comparisons, connecting RL optimization back to the pairwise comparison paradigm that runs throughout this book. The key equations---Bradley-Terry preference probabilities (Chapter 1), Fisher information and score functions (Chapter 3), and the policy gradient theorem (this section)---all share the same mathematical core: the log-derivative of a parameterized probability model.
+::: {.callout-tip title="本章要点：从老虎机到强化学习再到偏好"}
+GRPO 把 RL 这条流水线又简化了一步：用组内的相对比较代替价值函数，于是 RL 的优化又回到了"两两比较"这个贯穿全书的范式上。而本章用到的几条关键公式——Bradley-Terry 的偏好概率（第 1 章）、费雪信息与得分函数（第 3 章）、策略梯度定理（本节）——数学内核是同一个：一个参数化概率模型的对数求导。
 :::
 
 ## 人与智能体的协作：CIRL
