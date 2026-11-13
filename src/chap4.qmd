@@ -2875,43 +2875,43 @@ CIRL 这套合作框架假定：人是**大致最优**地行动的——按他�
 - **@thaler2008nudge**, *Nudge: Improving Decisions About Health, Wealth, and Happiness* —— "选择架构"的奠基之作，记录了呈现顺序、框架效应与默认选项怎样影响人的选择——而这些是标准偏好模型没有刻画的内容。
 - **@kahneman_tversky_1979**, "Prospect Theory: An Analysis of Decision Under Risk" —— 前景理论的经典论文，说明人在系统性地偏离期望效用最大化；这正是"两两比较（偏好型贝叶斯优化）往往比打绝对分更可靠"的行为学依据。
 
-## Exercises
+## 练习
 
-### Basic (*)
+### 基础（*）
 
-1. **Posterior Sampling**: Given a logistic regression model with prior $U \sim \mathcal{N}(0, I)$ and two observations $(V_1, Y_1=1)$ and $(V_2, Y_2=0)$ with $V_1 = [1, 0]^\top$ and $V_2 = [0, 1]^\top$, write down the log-posterior and identify the form of the Laplace approximation.
+1. **后验采样**：给定一个逻辑回归模型，先验为 $U \sim \mathcal{N}(0, I)$，观测到两条数据 $(V_1, Y_1=1)$ 与 $(V_2, Y_2=0)$，其中 $V_1 = [1, 0]^\top$、$V_2 = [0, 1]^\top$。请写出对数后验，并说明它的拉普拉斯近似是什么形式。
 
-2. **Regret Calculation**: Consider a dueling bandit with 3 arms where the preference matrix is:
+2. **计算遗憾**：设有一个 3 臂的对决老虎机，偏好矩阵为
    $$P = \begin{pmatrix} 0.5 & 0.6 & 0.7 \\ 0.4 & 0.5 & 0.6 \\ 0.3 & 0.4 & 0.5 \end{pmatrix}$$
-   Identify the Condorcet winner and compute the expected regret of always choosing arms $(2, 3)$.
+   指出其中的孔多塞胜者，并算出"每次都选 $(2, 3)$ 这对"的期望遗憾。
 
-3. **Copeland Score**: For the preference matrix in Exercise 2, compute the Copeland score for each arm.
+3. **科佩兰分数**：对第 2 题那张偏好矩阵，算出每一只老虎机的科佩兰分数。
 
-4. **(Optional) MDP for LLM Generation**: Formally define the MDP for autoregressive text generation. What is the state space? Action space? When is reward received? What is the discount factor? How does the horizon $T$ relate to the generated sequence length?
+4. **（选做）大模型生成的 MDP**：为自回归文本生成正式地定义出它的 MDP。状态空间是什么？行动空间是什么？奖励在什么时候给出？折扣因子是多少？步长 $T$ 与生成序列的长度是什么关系？
 
-### Intermediate (**)
+### 进阶（**）
 
-4. **GP Classification**: Implement GP classification with Laplace approximation for a 1D toy problem. Generate binary labels from a latent sinusoidal function passed through a sigmoid, then fit a GP and visualize the posterior mean and uncertainty.
+4. **高斯过程分类**：在一个一维的小例子上实现"带拉普拉斯近似的高斯过程分类"。先让一个潜藏的正弦函数经过 sigmoid 生成二值标签，再拟合一个高斯过程，把后验均值与不确定性画出来。
 
-5. **Thompson Sampling Simulation**: Implement Thompson Sampling for a linear bandit with Gaussian prior. Run simulations comparing Thompson Sampling to UCB and $\varepsilon$-greedy on a synthetic problem. Plot cumulative regret curves.
+5. **汤普森采样模拟**：为带高斯先验的线性老虎机实现汤普森采样。在一个构造的问题上跑模拟，把它与 UCB、$\varepsilon$-贪心作比较，画出累计遗憾曲线。
 
-6. **Dueling Bandit Simulation**: Implement the Interleaved Filter algorithm and test it on a dueling bandit problem with 5 arms. Compare its sample complexity to uniform exploration for finding the Condorcet winner.
+6. **对决老虎机模拟**：实现交错筛选算法，并在一个 5 臂的对决老虎机问题上测试它。比较它与"均匀探索"在找出孔多塞胜者时所需的样本量。
 
-7. **(Optional) Policy Gradient Derivation**: Starting from the trajectory probability $p(\tau \mid \theta) = \rho_0(s_0) \prod_t \pi_\theta(a_t \mid s_t) P(s_{t+1} \mid s_t, a_t)$, derive the policy gradient theorem. Show that subtracting a state-dependent baseline $b(s_t)$ from the return does not bias the gradient estimate.
+7. **（选做）推导策略梯度**：从轨迹概率 $p(\tau \mid \theta) = \rho_0(s_0) \prod_t \pi_\theta(a_t \mid s_t) P(s_{t+1} \mid s_t, a_t)$ 出发，推出策略梯度定理。并证明：在回报里减去一个只依赖状态的基线 $b(s_t)$，不会让梯度估计产生偏差。
 
-### Advanced (***)
+### 高级（***）
 
-7. **Laplace Approximation Derivation**: Starting from the GP binary classification model, derive the full Laplace approximation including the Hessian computation for the posterior covariance. Show that the resulting approximation is Gaussian with the correct mean and covariance.
+7. **推导拉普拉斯近似**：从高斯过程二分类模型出发，把整个拉普拉斯近似推完整，包括为后验协方差计算海森矩阵。证明最后得到的近似是一个高斯分布，且均值与协方差都正确。
 
-8. **qEI Failure Case**: Reproduce the proof that qEI can fail to converge by implementing the counterexample from the chapter. Verify empirically that qEI gets stuck while qEUBO converges.
+8. **qEI 失效的例子**：把本章那个反例实现出来，重现"qEI 可能不收敛"的结论。用实验验证：qEI 会卡住，而 qEUBO 会收敛。
 
-9. **POP-BO Regret Bound**: Following the proof sketch in the chapter, derive the regret bound for POP-BO with a linear kernel. Explain how the covering number $\mathcal{N}(\mathcal{B}_f, \epsilon, \|\cdot\|_\infty)$ appears in the bound.
+9. **POP-BO 的遗憾界**：沿着本章给出的证明要点，推出使用线性核时 POP-BO 的遗憾界。说明覆盖数 $\mathcal{N}(\mathcal{B}_f, \epsilon, \|\cdot\|_\infty)$ 是怎样出现在这个界里的。
 
-10. **Custom Acquisition Function**: Design and implement a novel acquisition function for preferential Bayesian optimization that balances exploration and exploitation in a different way than qEUBO. Provide theoretical justification or empirical evidence for its effectiveness.
+10. **自设采集函数**：为偏好型贝叶斯函数设计并实现一种新的采集函数，用不同于 qEUBO 的方式平衡探索与利用。给出理论上的理由，或给出实验上的证据，说明它为什么有效。
 
-11. **(Optional) GRPO Implementation**: Implement GRPO for a contextual bandit with Bradley-Terry rewards. Compare convergence and gradient variance against REINFORCE with a learned baseline for group sizes $G \in \{2, 4, 8, 16\}$. Investigate: for what group size does the marginal benefit of additional samples diminish?
+11. **（选做）实现 GRPO**：在带 Bradley-Terry 奖励的上下文老虎机上实现 GRPO。与"带可学习基线的 REINFORCE"相比，取组大小 $G \in \{2, 4, 8, 16\}$，比较收敛速度与梯度方差。再研究一下：组大小到多少之后，再加样本的收益就变得不大了？
 
-12. **(Optional) KL-Constrained Optimization**: The RLHF objective includes a KL penalty $\beta \, \text{KL}[\pi_\theta \| \pi_{\text{ref}}]$. Derive the optimal policy in closed form (it has the form $\pi^*(y \mid x) \propto \pi_{\text{ref}}(y \mid x) \exp(r(x,y)/\beta)$). Show that this is exactly the DPO implicit reward from Chapter 1.
+12. **（选做）带 KL 约束的优化**：RLHF 的目标里有一项 KL 惩罚 $\beta \, \text{KL}[\pi_\theta \| \pi_{\text{ref}}]$。请推出最优策略的闭式解（它的形式是 $\pi^*(y \mid x) \propto \pi_{\text{ref}}(y \mid x) \exp(r(x,y)/\beta)$），并说明这正是第 1 章里 DPO 的隐式奖励。
 
 
 <!--
