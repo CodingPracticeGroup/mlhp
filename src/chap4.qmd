@@ -1679,35 +1679,35 @@ $S_t \leftarrow S_{t-1} \cup \{(x_t, a_t^1, a_t^2, y_t)\}$.
 :::
 ::::
 
-::: {.callout-tip title="Key Takeaway: Choosing an Algorithm"}
-The dueling bandit algorithms covered above address different problem settings:
+::: {.callout-tip title="本章要点：怎么选算法"}
+上面介绍的对决老虎机算法各自针对不同的问题设定：
 
-| Algorithm | Action Space | Context? | Winner Concept | Key Strength |
+| 算法 | 行动空间 | 是否有上下文 | 胜者概念 | 主要长处 |
 |-----------|-------------|----------|----------------|--------------|
-| Interleaved Filter | Finite | No | Condorcet | Simple, provable |
-| DBGD | Continuous | No | Reward maximizer | Gradient-free optimization |
-| Sparring EXP4 | Finite | Yes | Copeland | Adversarial robustness |
-| Feel-good TS | Finite | Yes | Von Neumann | Bayesian, posterior sampling |
+| 交错筛选（Interleaved Filter） | 有限 | 无 | 孔多塞胜者 | 简单、有理论保证 |
+| DBGD | 连续 | 无 | 奖励最大化者 | 无需梯度的优化 |
+| Sparring EXP4 | 有限 | 有 | 科佩兰（Copeland）胜者 | 对抗环境下稳健 |
+| Feel-good TS | 有限 | 有 | 冯·诺依曼胜者 | 贝叶斯方法、后验采样 |
 
-When choosing an algorithm, consider: (1) Is the action space discrete or continuous? (2) Does the optimal action depend on context? (3) What computational resources are available? Thompson Sampling-based methods are generally preferred when a good posterior approximation is available, while adversarial methods like Sparring EXP4 are more robust when the preference model is misspecified.
+选算法时，可以按三个问题来判断：（1）行动空间是离散的还是连续的？（2）最优行动是否依赖上下文？（3）手上有多少算力？在有不错的后验近似可用时，一般优先选基于汤普森采样的方法；而偏好模型可能设错时，Sparring EXP4 这类对抗式方法更扛得住。
 :::
 
-### Applications
+### 应用
 
-The dueling bandit and Thompson Sampling frameworks developed above have broad applicability whenever systems must learn from preference feedback rather than scalar rewards. We highlight two case studies that illustrate how these methods connect to the book's central themes.
+只要一个系统必须靠偏好反馈而不是实数奖励来学习，上面这套对决老虎机和汤普森采样就能派上用场。下面挑两个案例，说明这些方法与本书的主线是怎么接上的。
 
-#### Case Study 1: LLM Response Selection as a Dueling Bandit
+#### 案例一：将大模型回答选择视为对决老虎机
 
-Consider an LLM serving system that generates $K$ candidate responses to each user prompt and must select which to display. This is exactly a contextual dueling bandit problem:
+设想一个提供大模型服务的系统：对每条用户提问都生成 $K$ 个候选回答，要挑一个展示给用户。这正是一个上下文对决老虎机问题：
 
-- **Context**: The user prompt $x_t$ and its embedding
-- **Actions**: The $K$ candidate responses $\{y_1, \ldots, y_K\}$
-- **Preference feedback**: The user indicates which response they prefer (via explicit rating, continued engagement, or regeneration requests)
-- **Objective**: Maximize user satisfaction while learning which response characteristics users value
+- **上下文**：用户的提问 $x_t$ 及其向量表示
+- **行动**：$K$ 个候选回答 $\{y_1, \ldots, y_K\}$
+- **偏好反馈**：用户指出自己更喜欢哪个回答（通过明确打分、继续往下看、还是点了"重新生成"）
+- **目标**：让用户满意程度最大，同时学会用户看重回答的哪些特点
 
-The preference model is Bradley-Terry over response embeddings: $p(y_j \succ y_k \mid x) = \sigma(\beta \log \frac{\pi_\theta(y_j \mid x)}{\pi_{\text{ref}}(y_j \mid x)} - \beta \log \frac{\pi_\theta(y_k \mid x)}{\pi_{\text{ref}}(y_k \mid x)})$, exactly the DPO formulation from Chapter 2. Thompson Sampling provides a principled way to select which pair of responses to show: sample a reward function from the posterior and present the pair with the highest expected information gain.
+偏好模型建在回答的向量表示上，用 Bradley-Terry：$p(y_j \succ y_k \mid x) = \sigma(\beta \log \frac{\pi_\theta(y_j \mid x)}{\pi_{\text{ref}}(y_j \mid x)} - \beta \log \frac{\pi_\theta(y_k \mid x)}{\pi_{\text{ref}}(y_k \mid x)})$，正是第 2 章讲过的 DPO 写法。汤普森采样给了一个有章法的办法来决定该把哪一对回答端出来：从后验里抽一个奖励函数，然后把"期望信息增益最高"的那一对摆出来。
 
-This connects the bandit framework to the RLHF pipeline: **online DPO is essentially Thompson Sampling on the Bradley-Terry preference model**. The exploration-exploitation tradeoff determines whether the system shows responses it is confident about (exploitation) or tries novel response styles to learn user preferences (exploration).
+这把老虎机框架和 RLHF 流程连到了一起：**在线 DPO 本质上就是在 Bradley-Terry 偏好模型上做汤普森采样**。探索与利用的取舍，决定了系统是端出自己有把握的回答（利用），还是试试新的回答风格去摸清用户偏好（探索）。
 
 ```{pyodide-python}
 #| autorun: true
