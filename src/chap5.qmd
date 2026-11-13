@@ -1131,32 +1131,32 @@ MIP 框架虽然给出了漂亮的理论保证，真正落地却有几重困难�
 
 ## 文献说明
 
-**Social Choice Theory**: The foundational results in social choice are due to Arrow [-@arrow1951], who proved his impossibility theorem, and Gibbard [-@gibbard1973] and Satterthwaite [-@satterthwaite1975], who independently proved the manipulability theorem. Black [-@black1948rationale] introduced single-peaked preferences, and Moulin [-@moulin1980strategy] characterized strategy-proof rules on this domain. For comprehensive treatments of social choice theory, see @sen1970collective and @austen-smith_banks_2000.
+**社会选择理论**：这一领域的奠基性成果属于 Arrow [-@arrow1951]（他证明了不可能定理），以及各自独立证明"可操纵性定理"的 Gibbard [-@gibbard1973] 与 Satterthwaite [-@satterthwaite1975]。Black [-@black1948rationale] 提出了单峰偏好，Moulin [-@moulin1980strategy] 刻画了该定义域上的策略免疫规则。想系统了解社会选择理论，可读 @sen1970collective 与 @austen-smith_banks_2000。
 
-**Domain Restrictions**: Beyond single-peakedness, various restricted domains have been studied. See @gaertner2001domain for a survey. The connection between single-peaked preferences and the median voter theorem goes back to @black1948rationale and @downs1957economic.
+**定义域限制**：除了单峰性，人们还研究过多种受限定义域，综述见 @gaertner2001domain。单峰偏好与中位投票者定理之间的联系，可追溯到 @black1948rationale 与 @downs1957economic。
 
-**Borda Count and Scoring Rules**: The Borda count was proposed by Jean-Charles de Borda in 1781. Modern treatments include @young1974axiomatization, who characterized Borda axiomatically. The connection between Borda and pairwise comparisons is explored in @fishburn1977condorcet. The DPO-Borda connection builds on insights from @rafailov2023direct.
+**博尔达计分法与计分规则**：博尔达计分法由 Jean-Charles de Borda 于 1781 年提出。现代的处理见 @young1974axiomatization（他给出了博尔达法的公理化刻画）。博尔达法与两两比较之间的联系在 @fishburn1977condorcet 中有讨论。博尔达与 DPO 的联系建立在 @rafailov2023direct 的洞见之上。
 
-**Nosy Preferences and Liberalism**: Sen's [-@sen1970impossibility] Liberal Paradox sparked extensive literature on the conflict between liberty and efficiency. See @hausman2012preference for philosophical discussion and @gaertner1988when for domain restriction approaches.
+**"管得宽"的偏好与自由主义**：森 [-@sen1970impossibility] 的自由悖论引发了大量关于"自由与效率冲突"的研究。哲学层面的讨论见 @hausman2012preference，从限制定义域出发的做法见 @gaertner1988when。
 
-**Contextual Integrity**: Nissenbaum's [-@nissenbaum2009privacy] framework has been influential in privacy scholarship. Applications to machine learning appear in recent work on contextual data use.
+**情境完整性**：Nissenbaum [-@nissenbaum2009privacy] 的框架在隐私研究中影响很大。它在机器学习中的应用见于近年关于"按情境使用数据"的工作。
 
-**Mechanism Design**: Vickrey [-@vickrey1961] introduced the second-price auction. The VCG mechanism was developed by Vickrey, Clarke [-@clarke1971], and Groves [-@groves1973]. Myerson's [-@myerson1981] optimal auction theory is foundational. The Bulow-Klemperer theorem appears in @bulow-klemperer1996. For textbook treatments, see @krishna2009auction and @borgers2015introduction.
+**机制设计**：第二价格拍卖由 Vickrey [-@vickrey1961] 提出。VCG 机制由 Vickrey、Clarke [-@clarke1971] 与 Groves [-@groves1973] 发展起来。Myerson [-@myerson1981] 的最优拍卖理论是这一方向的基石。Bulow–Klemperer 定理见 @bulow-klemperer1996。教材式的讲解见 @krishna2009auction 与 @borgers2015introduction。
 
-**Peer Prediction**: The Mutual Information Paradigm was introduced by @kongschoenebeck2019. Earlier work on peer prediction includes @miller2005eliciting and @prelec2004bayesian. Applications to peer grading appear in @jasonH2020 and @jasonH2023.
+**同行预测**：互信息范式由 @kongschoenebeck2019 提出。更早的同行预测工作包括 @miller2005eliciting 与 @prelec2004bayesian。用于同伴互评的应用见 @jasonH2020 与 @jasonH2023。
 
-**Incentive-Compatible Bandits**: The study of exploration under strategic agents is developed in @mansour2019bayesianincentivecompatiblebanditexploration and @mansour2021bayesianexplorationincentivizingexploration. Connections to information design are explored in @bergemann2019information.
+**激励相容的老虎机**：主体讲策略时的探索问题在 @mansour2019bayesianincentivecompatiblebanditexploration 与 @mansour2021bayesianexplorationincentivizingexploration 中有系统发展。与信息设计（information design）的联系见 @bergemann2019information。
 
-**AI Alignment and Aggregation**: Jury learning and methods for aggregating diverse annotator preferences are studied in @gordon2022jury. Scalable oversight through recursive reward modeling appears in @christiano2018supervising. AI-assisted debate is proposed in @irving2018ai. Community Notes is described in X/Twitter's public documentation.
+**AI 对齐与偏好汇总**：评审学习以及汇总多元标注员偏好的方法见 @gordon2022jury。通过递归奖励建模实现可扩展监督见 @christiano2018supervising。AI 辅助辩论见 @irving2018ai。Community Notes 的说明见 X/Twitter 的公开文档。
 
-::: {.callout-tip title="Essential Reading" collapse="true"}
-If you read only five papers from this chapter's references, make them these:
+::: {.callout-tip title="必读文献" collapse="true"}
+如果本章的参考文献里只挑五篇读，就读这五篇：
 
-1. **@arrow1951** — Arrow's Impossibility Theorem: the foundational impossibility result for preference aggregation
-2. **@gibbard1973** — The Gibbard-Satterthwaite theorem: strategy-proofness is incompatible with non-dictatorship
-3. **@sen1970impossibility** — The Impossibility of a Paretian Liberal: liberty vs. efficiency in social choice
-4. **@gordon2022jury** — Jury learning: aggregating diverse annotator preferences for fairer AI systems
-5. **@kongschoenebeck2019** — The Mutual Information Paradigm for incentive-compatible preference elicitation
+1. **@arrow1951** —— 阿罗不可能定理：偏好汇总领域的奠基性不可能结果
+2. **@gibbard1973** —— 吉巴德—萨特斯维特定理：策略免疫与非独裁不可兼得
+3. **@sen1970impossibility** —— 帕累托自由的不可能性：社会选择中的自由与效率
+4. **@gordon2022jury** —— 评审学习：汇总多元标注员的偏好，让 AI 系统更公平
+5. **@kongschoenebeck2019** —— 用于激励相容偏好征询的互信息范式
 :::
 
 ## 延伸阅读
