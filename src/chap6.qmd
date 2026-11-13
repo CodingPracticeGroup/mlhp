@@ -1213,65 +1213,65 @@ print(f"  → Converges to community standard, reduces diversity")
 
 Finally, we'll see how all four pipeline stages compound unfairness through feedback loops.
 
-### How Unfairness Compounds: The Full Pipeline {#sec-compounding-unfairness}
+### 不公平怎样叠加：走完整条流水线 {#sec-compounding-unfairness}
 
-We've seen how each pipeline stage introduces bias:
-- **Elicitation** (@sec-elicitation-fairness): Productive sampling undersamples juniors
-- **Learning** (@sec-learning-assumptions): IIA mismodels overburdened reviewers
-- **Aggregation** (@sec-aggregation-fairness): Volume-weighting privileges high-participation groups
-- **Decision** (@sec-liberal-illiberal): Liberal assistance amplifies existing biases
+前面已经看到每个阶段各自引入了什么偏差：
+- **征询**（@sec-elicitation-fairness）：按产出采样，少采了资浅审稿人
+- **学习**（@sec-learning-assumptions）：独立无关备选把负担过重的审稿人建歪了
+- **汇总**（@sec-aggregation-fairness）：按数量加权，偏向参与度高的群体
+- **决策**（@sec-liberal-illiberal）：自由主义式的协助把已有的偏见放大
 
-Now we trace how these biases **compound across stages** through feedback loops, creating widening disparities over time.
+接下来我们要追的是：这些偏差怎样通过反馈回路**跨阶段叠加**，让差距随时间越拉越大。
 
-#### The Feedback Loop {#sec-feedback-loop}
+#### 反馈回路 {#sec-feedback-loop}
 
-Consider the full AI review assistant pipeline:
+看看这位 AI 审稿助手的完整流水线：
 
-**Stage 1—Elicitation**: System queries productive reviewers more (senior researchers write longer reviews due to more time). Junior reviewers, non-native speakers provide less training data.
+**阶段 1——征询**：系统更多地去问有产出的审稿人（资深研究者时间多，写得更长）。资浅审稿人、非英语母语者贡献的训练数据就更少。
 
-**Stage 2—Learning**: Model assumes IIA (ignores context-dependence). Works poorly for overburdened reviewers (disproportionately junior, caregivers). Learning error is higher for juniors.
+**阶段 2——学习**：模型假定独立无关备选成立（忽略情境依赖）。对负担过重的审稿人（其中资浅者、需要照顾家人的人占多数）效果很差。资浅者这一组的拟合误差更大。
 
-**Stage 3—Aggregation**: DPO weights by review volume. Senior reviewers' style dominates the reference policy $\pi_{\text{ref}}$.
+**阶段 3——汇总**：DPO 按审稿量加权。资深审稿人的风格在参考策略 $\pi_{\text{ref}}$ 里占了主导。
 
-**Stage 4—Decision**: Liberal assistance maximizes each reviewer's productivity. But junior reviewers using the assistant get suggestions that don't fit their style (trained on senior reviewers), so the assistant is less helpful.
+**阶段 4——决策**：自由主义式的协助以"让每位审稿人效率最高"为目标。可资浅审稿人用了助手，得到的建议并不合他的风格（模型是用资深审稿人的数据训的），于是助手对他帮助更小。
 
-**Feedback**: Junior reviewers find the assistant unhelpful, use it less, provide even less training data → cycle repeats. Senior reviewers find it very helpful, use it more, dominate training data further. **The gap widens exponentially**.
+**反馈**：资浅审稿人觉得这助手不好用，用得更少，提供的训练数据更少 → 循环重来一遍。资深审稿人觉得很好用，用得更多，在训练数据里更加占主导。**差距呈指数式扩大**。
 
-**Key Insight**: Each stage's unfairness amplifies the next. A small bias at Stage 1 (20% less data from juniors) becomes a large bias at Stage 4 (assistant is 50% less helpful to juniors), which feeds back to Stage 1 (juniors provide 40% less data in the next round).
+**关键洞见**：每个阶段的不公平都会把下一个阶段放大。阶段 1 的一点偏差（资浅者的数据少 20%），到阶段 4 就变成很大的偏差（助手对资浅者的帮助少 50%），再反馈回阶段 1（下一轮资浅者提供的数据少 40%）。
 
-This is a **positive feedback loop** (in the technical sense): deviations from fairness grow over time rather than self-correcting.
+这是一种**正反馈回路**（按技术上的含义）：偏离公平的程度随时间自己长大，而不是自我纠正。
 
-#### Mathematical Model of Compounding Bias {#sec-compounding-model}
+#### 叠加偏差的数学模型 {#sec-compounding-model}
 
-Let's formalize this feedback loop. Let $q_t^{(g)}$ denote the number of queries to group $g$ at time $t$, and $a_t^{(g)}$ denote the assistant quality for group $g$ at time $t$.
+我们把这个反馈回路写清楚。用 $q_t^{(g)}$ 表示到时刻 $t$ 时向群体 $g$ 发出的询问数量，用 $a_t^{(g)}$ 表示到时刻 $t$ 时助手对群体 $g$ 的质量。
 
-**Stage 1 (Elicitation)**: Queries proportional to productivity (measured by past assistant usage):
+**阶段 1（征询）**：询问数量与产出成正比（产出以过去对助手的使用来度量）：
 $$
 q_{t+1}^{(g)} \propto a_t^{(g)}
 $$ {#eq-feedback-elicitation}
-Groups with better assistance get queried more.
+得到帮助更好的群体，被问得更多。
 
-**Stages 2-3 (Learning + Aggregation)**: Assistant quality depends on training data:
+**阶段 2–3（学习 + 汇总）**：助手的质量取决于训练数据：
 $$
 a_{t+1}^{(g)} = f(q_{t+1}^{(g)})
 $$ {#eq-feedback-learning}
-where $f$ is increasing (more queries → more data → better learning).
+其中 $f$ 是递增的（问得多 → 数据多 → 学得好）。
 
-**Feedback**: Combining these:
+**反馈**：把两式合起来：
 $$
 a_{t+1}^{(g)} \propto f(a_t^{(g)})
 $$ {#eq-feedback-combined}
 
-If $f$ is superlinear (e.g., $f(x) = x^{1.2}$), then small initial advantages grow exponentially. If Group A starts with slightly better assistance ($a_0^{(A)} = 1.1 \cdot a_0^{(B)}$), after $T$ rounds:
+如果 $f$ 是超线性的（例如 $f(x) = x^{1.2}$），那么一开始的一点点优势就会指数式地长大。若群体 A 起始时得到的帮助略好（$a_0^{(A)} = 1.1 \cdot a_0^{(B)}$），经过 $T$ 轮之后：
 $$
 \frac{a_T^{(A)}}{a_T^{(B)}} = \left(\frac{a_0^{(A)}}{a_0^{(B)}}\right)^{1.2^T} \to \infty \text{ as } T \to \infty
 $$ {#eq-feedback-exponential}
 
-**Result**: Small initial biases explode into permanent disparities.
+**结果**：起初的小偏差会爆炸成永久性的差距。
 
-#### Code Example: Simulating Compounding Bias {#sec-code-compounding}
+#### 代码示例：模拟叠加偏差 {#sec-code-compounding}
 
-Let's simulate the full four-stage pipeline and watch disparities widen over time:
+下面把四个阶段的整条流水线模拟出来，看差距随时间怎样拉大：
 
 ```{pyodide-python}
 #| echo: true
