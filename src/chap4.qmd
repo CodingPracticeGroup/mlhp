@@ -2863,30 +2863,30 @@ This chapter developed methods for sequential decision-making with preference fe
 - **(Optional)** The **policy gradient theorem** provides the mathematical bridge from bandit methods to full RL-based preference optimization. **GRPO** eliminates the need for a learned value function by using group-relative advantages, connecting RL optimization back to the pairwise comparison paradigm.
 - As system designers, we are **choice architects**: order effects, framing, and defaults influence human choices in ways that standard models (IIA) do not capture, requiring awareness of these biases in deployment.
 
-## Quick Check
+## 快问快答
 
-Test your understanding before proceeding to the exercises.
+在做课末练习之前，先用这几道题检验一下自己的理解。
 
-1. Thompson Sampling draws from the posterior and acts greedily under the sample. Why does this produce exploration, even though each individual decision is "greedy"?
+1. 汤普森采样是从后验里抽一个样本，再对这个样本贪心行动。既然每一次决策都是"贪心"的，为什么整体仍然会去探索？
 
-2. Construct a 3-arm preference matrix where the Condorcet winner and Borda winner differ. (Hint: the Condorcet winner beats all others head-to-head but may have low average win rates.)
+2. 构造一张 3 臂的偏好矩阵，让孔多塞胜者和博尔达胜者不是同一个。（提示：孔多塞胜者在两两对决里赢过所有对手，但平均胜率可能并不高。）
 
-3. Why does the qEI acquisition function fail to converge in some settings while qEUBO provably converges? What is the key difference in their objectives?
+3. 为什么 qEI 这个采集函数在某些设定下发散不了，而 qEUBO 可以被证明收敛？两者的目标差在哪里？
 
-4. In CIRL, what changes if the human acts as a *teacher* (choosing informative demonstrations) rather than a *demonstrator* (acting optimally for themselves)?
+4. 在 CIRL 里，如果人是*老师*（主动挑有信息量的示范），而不是*示范者*（只按自己的最优行动），会发生什么变化？
 
-5. (Optional) The policy gradient theorem uses $\nabla_\theta \log \pi_\theta(a \mid s)$ to estimate the gradient of the RL objective. Why do the environment's transition dynamics $P(s' \mid s, a)$ not appear in the gradient, even though they affect the trajectory distribution?
+5. （选做）策略梯度定理用 $\nabla_\theta \log \pi_\theta(a \mid s)$ 来估 RL 目标的梯度。环境的转移动力学 $P(s' \mid s, a)$ 明明影响着轨迹分布，为什么它不出现在梯度里？
 
-::: {.callout-tip title="Essential Reading" collapse="true"}
-If you read only five papers from this chapter's references, make them these:
+::: {.callout-tip title="必读文献" collapse="true"}
+这一章的参考文献里，最该读的就是下面这几篇：
 
-1. **@thompson1933likelihood** — Thompson Sampling: the original 1933 paper on probability matching for sequential decisions
-2. **@russo2018tutorial** — A modern tutorial on Thompson Sampling with theory and applications
-3. **@sui2017multi** — Multi-dueling bandits: extending pairwise comparisons to multi-way preference feedback
-4. **@brochu2010tutorial** — A tutorial on Bayesian optimization, the foundation for preferential BO
-5. **@hadfield2016cooperative** — CIRL: cooperative inverse reinforcement learning for value alignment
-6. **@suttonrl** — Reinforcement Learning: An Introduction, the standard reference for MDP formulations and policy gradient methods
-7. **@shao2024deepseekmath** — DeepSeekMath: the paper introducing GRPO for LLM alignment
+1. **@thompson1933likelihood** —— 汤普森采样的原始论文（1933 年），讲用概率匹配做序贯决策
+2. **@russo2018tutorial** —— 汤普森采样的现代综述式教程，含理论与应用
+3. **@sui2017multi** —— 多对决老虎机：把两两比较推广到一次多个选项的偏好反馈
+4. **@brochu2010tutorial** —— 贝叶斯优化教程，是偏好型贝叶斯优化的基础
+5. **@hadfield2016cooperative** —— CIRL：面向价值对齐的合作逆强化学习
+6. **@suttonrl** —— 《Reinforcement Learning: An Introduction》，MDP 建模与策略梯度方法的标准参考书
+7. **@shao2024deepseekmath** —— DeepSeekMath：提出 GRPO 用于大模型对齐的论文
 :::
 
 ## Discussion Questions
