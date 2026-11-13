@@ -1369,29 +1369,29 @@ print("Mechanism: Better assistance → more usage → more queries → even bet
 
 **结果解读**：
 
-1. **Round 0**: Seniors have slightly better assistance (10% advantage) due to initial data imbalance.
+1. **第 0 轮**：因为初始数据就不均衡，资深者得到的帮助略好一些（优势 10%）。
 
-2. **Rounds 1-5**: Seniors find the assistant more helpful → use it more → provide more queries → system learns their preferences better → assistance quality improves. Juniors find it less helpful → use it less → provide fewer queries → system learns their preferences worse → assistance quality degrades.
+2. **第 1–5 轮**：资深者觉得助手更管用 → 用得更勤 → 提供的询问更多 → 系统把他们的偏好学得更好 → 帮助质量又提高。资浅者觉得不太管用 → 用得少 → 提供的询问更少 → 帮助质量更差。差距开始拉开。
 
-3. **Rounds 6-15**: The gap widens exponentially. What started as a 10% difference becomes a 30-40% difference. Seniors get excellent assistance; juniors get poor assistance.
+3. **第 6–15 轮**：差距指数式扩大。起初 10% 的差别，变成 30–40%。资深者得到很好的帮助，资浅者得到的很差。
 
-4. **Endstate**: Without intervention, the system converges to serving seniors well and juniors poorly—even though initial expertise was similar.
+4. **最终状态**：不干预的话，系统就稳定在"把资深者服务得很好、把资浅者服务得很差"上——尽管两组一开始的专业水平差不多。
 
-**Key Insight**: Small biases at each stage multiply through the feedback loop. This is why **end-to-end fairness analysis** is critical—optimizing each stage independently is insufficient.
+**关键洞见**：每个阶段的小偏差，都会通过反馈回路相互乘起来。这正是为什么**端到端的公平性分析**必不可少——把每个阶段单独做好是不够的。
 
-**Design Principle**: Audit for compounding unfairness:
-1. **Map the full pipeline**: Trace how data flows from elicitation → learning → aggregation → decision → back to elicitation
-2. **Test feedback loops**: Simulate the system over multiple rounds. Does disparity grow or shrink?
-3. **Monitor per-group metrics over time**: If average performance improves but subgroup performance worsens, you have compounding bias
-4. **Intervene early**: Small biases are easier to correct than large ones. Don't wait for disparities to explode
+**设计原则**：审计不公平的叠加：
+1. **把整条流水线画出来**：追踪数据怎样从征询 → 学习 → 汇总 → 决策 → 又回到征询。
+2. **检验反馈回路**：把系统模拟多轮。差距在变大还是变小？
+3. **按时间监控各组指标**：如果平均表现在改善、某个子群的表现却在变差，那就是叠加偏差。
+4. **尽早干预**：小偏差比大偏差好修，别等差距已经失控。
 
 **与现实系统的对应**：
-- **RLHF for LLMs**: If early training data is demographically imbalanced, the model learns certain users better → they provide more feedback → model improves for them → gap widens.
-- **Recommender systems**: "Rich get richer" dynamics—popular items get recommended more → viewed more → become more popular.
-- **Search engines**: High-ranked results get more clicks → clicks are used as relevance signal → high-ranked results rank even higher.
-- **Social media**: Viral content gets more engagement → platforms show it to more users → it gets even more engagement.
+- **大模型的 RLHF**：早期训练数据在人群上不均衡，模型就把某些用户学得更准 → 他们给更多反馈 → 模型对他们更好 → 差距继续扩大。
+- **推荐系统**："富者愈富"——热门内容被推得更多 → 被看得更多 → 就更热门。
+- **搜索引擎**：排名靠前的结果点击更多 → 点击又被当作相关性信号 → 排名更加靠前。
+- **社交媒体**：热门内容互动更多 → 平台推给更多人 → 互动进一步增加。
 
-All these systems have the same mathematical structure: **positive feedback loops amplifying initial biases**.
+这些系统的数学结构是同一个：**正反馈回路把最初的偏差不断放大**。
 
 #### 截断这条反馈回路 {#sec-breaking-feedback}
 
@@ -1631,17 +1631,17 @@ print(f"  → Violates individual fairness: Group B papers matched sub-optimally
 
 **结果解读**：
 
-1. **Greedy matching** (individual fairness): Each paper gets its best-available reviewer. Group A papers get high-expertise reviewers (many available). Group B papers get lower-expertise reviewers (few available). **Satisfies individual fairness** (similar papers within a group get similar treatment) but **violates group fairness** (systematic disparity between groups).
+1. **贪心匹配**（个体公平）：每篇论文都配上当时能找到的最好的审稿人。于是子领域 A 的论文配上很对口的专家（人多），子领域 B 的论文只能配上专业程度低一些的（人少）。**满足个体公平**（相似主题的论文拿到相似水平的审稿人），**但破坏群体公平**（两组平均得到的审稿质量不同）。
 
-2. **Group-fair matching**: Forces both groups to have similar average reviewer quality. For Group B, this means finding better-matched reviewers even if sub-optimal for individual papers. **Satisfies group fairness** (equal outcomes on average) but **violates individual fairness** (some Group B papers get worse matches than similar Group A papers would).
+2. **群体公平的匹配**：强制两组平均拿到的审稿质量相近。对子领域 B 来说，这意味着即便对某一篇论文不是最优，也要去找更对口的审稿人。**满足群体公平**（两组结果相当），**但破坏个体公平**（同样是主题相近的论文，可能因为所在子领域不同而被区别对待）。
 
-**Key Insight**: This is not a failure of implementation—it's a **mathematical impossibility**. Dwork et al. proved you cannot satisfy both criteria simultaneously in settings like this.
+**关键洞见**：这不是实现得不好，而是**数学上的不可能**。Dwork 等人证明了：在这类设定下，两条标准无法同时满足。
 
-**Design Principle**: You must choose which fairness criterion to prioritize:
-- **Individual fairness**: When "merit" / topic-match is well-defined and important (e.g., expertise matching)
-- **Group fairness**: When systemic disparities need correction and outcomes matter more than process (e.g., ensuring underrepresented subfields get quality reviews)
+**设计原则**：你必须选一条公平标准优先：
+- **个体公平**：当"优劣"或主题是否对口有明确标准又很重要时（例如专业与主题的匹配）。
+- **群体公平**：当系统性的差距需要纠正、结果比过程更要紧时（例如保证代表性不足的子领域也能得到有质量的评审）。
 
-Make this choice consciously and transparently, documenting why.
+这个选择要有意识地做、摆在明面上做，并写下为什么。
 
 ### 过程公平与结果公平 {#sec-process-outcome-fairness}
 
