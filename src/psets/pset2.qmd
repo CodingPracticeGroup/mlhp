@@ -147,14 +147,9 @@ if __name__ == "__main__":
 ```
 :::
 
-(b) **Parametric Linear Model Estimated Using Metropolis-Hastings (11
-    points)**
+(b) **用 Metropolis-Hastings 估计的参数化线性模型（11 分）**
 
-    (i) **(Written, 3 points)**. Assume a prior on $\theta$ such that
-        $\theta \sim \mathcal{N}(0, \sigma^2 I)$, where $\sigma^2$ is
-        the variance and $I$ is the identity matrix. Derive the
-        expression for the posterior distribution
-        $P(\theta | \mathcal{D})$ up to a normalization constant.
+(i) **（笔答，3 分）**。设 $\theta$ 的先验为 $\theta \sim \mathcal{N}(0, \sigma^2 I)$，其中 $\sigma^2$ 是方差，$I$ 是单位矩阵。请推出后验分布 $P(\theta | \mathcal{D})$ 的表达式（差一个归一化常数即可）。
 
 (ii) **（编程，6 分）**。在 `uncertainty_quantification/metropolis.py` 中实现 Metropolis-Hastings 算法，从 $\theta$ 的后验分布中采样。
 
@@ -274,22 +269,13 @@ expected_calibration_error(torch.sigmoid(x_test @ averaged_weights).numpy(), y_t
 ```
 :::
 
-(c) **Parametric Neural Network Model Estimated Using Hamiltonian Monte
-    Carlo (11 points)**
+(c) **用哈密顿蒙特卡洛估计的参数化神经网络模型（11 分）**
 
-    (i) **(Written, 2 points)**. Explain why Hamiltonian Monte Carlo
-        (HMC) is suitable for sampling from the posterior distribution
-        of neural network parameters compared to Metropolis-Hastings.
+(i) **（笔答，2 分）**。说明与 Metropolis-Hastings 相比，哈密顿蒙特卡洛（HMC）为什么更适合从神经网络参数的后验分布中采样。
 
-    (ii) **(Coding, 7 points)**. Implement HMC to sample from the
-         posterior distribution of the parameters $\theta$ of a neural
-         network $f(x; \theta)$ used for preference prediction in
-         `uncertainty_quantification/hmc_nn.py`. This will require a GPU
-         and take around 5 minutes on it!
+(ii) **（编程，7 分）**。在 `uncertainty_quantification/hmc_nn.py` 中实现 HMC，从用于偏好预测的神经网络 $f(x; \theta)$ 的参数 $\theta$ 的后验分布中采样。这需要 GPU，在 GPU 上大约要跑 5 分钟！
 
-    (iii) **(Written, 2 points)**. Briefly describe the performance of
-          the HMC and Metropolis-Hastings models and provide the
-          accuracy numbers.
+(iii) **（笔答，2 分）**。简要说明 HMC 模型与 Metropolis-Hastings 模型的表现，并给出准确率数值。
 
 ::: {.callout-note title="代码"}
 ```{python ex2-q1-3}
@@ -406,22 +392,13 @@ if __name__ == "__main__":
 ```
 :::
 
-(d) **Non-Parametric Model with Gaussian Process (GP) (7 points)**
+(d) **使用高斯过程（GP）的非参数模型（7 分）**
 
-    (i) **(Written, 2 point)**. Describe how a Gaussian Process can be
-        used for preference learning in this context (i.e., describe how
-        the latent function is used for classification).
+(i) **（笔答，2 分）**。说明在这个场景下高斯过程可以用于偏好学习的方式（也就是说，说明那个潜在函数是怎么用来做分类的）。
 
-    (ii) **(Coding, 2 points)**. Run the GP classification for
-         preference learning code in\
-         `uncertainty_quantification/gaussian_process.py` and provide
-         the accuracy numbers. This can only be run on a CPU and may
-         take around 10 minutes to complete.
+(ii) **（编程，2 分）**。运行 `uncertainty_quantification/gaussian_process.py` 中用高斯过程分类做偏好学习的代码，并给出准确率数值。这段只能在 CPU 上跑，完成大约需要 10 分钟。
 
-    (iii) **(Written, 3 point)**. Discuss the computational complexity
-          of the GP model compared to the parametric models. What are
-          the advantages and disadvantages of using a GP in this
-          setting?
+(iii) **（笔答，3 分）**。比较 GP 模型与参数化模型的计算复杂度。在这个设定下用 GP 有什么好处、又有什么坏处？
 
 ::: {.callout-note title="代码"}
 ```{python ex2-q1-4}
