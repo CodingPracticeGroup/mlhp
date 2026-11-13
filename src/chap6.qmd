@@ -37,7 +37,7 @@ filters:
 
 ::: {.callout-note}
 
-By the end of this chapter you will be able to:
+学完本章，你应当能够：
 
 - **Identify** how technical design choices at each stage of the preference learning pipeline (elicitation, learning, aggregation, decision) embed value judgments about whose preferences matter and how they should be weighted.
 - **Explain** the inversion problem—why behavior ≠ mental state—and how optimizing for revealed preferences (clicks, bids, engagement) can systematically disadvantage groups whose behavior diverges from preferences due to context (fatigue, time constraints, cultural norms).
@@ -90,21 +90,21 @@ Chapters 2--6 provided powerful technical methods for learning from human prefer
 
 This chapter provides the missing normative framework: **whose preferences should we learn from, and how should we weigh them?**
 
-Every technical choice embeds value judgments. Choosing an active learning strategy determines *who gets asked* (efficiency vs. representation). Assuming IIA imposes structure on *what preferences are valid* (rational preferences vs. psychological reality). Selecting DPO's reference policy $\pi_{\text{ref}}$ determines *whose preferences count more* (high-volume users vs. equal weighting). Deciding when to override stated preferences determines *what preferences are respected* (liberal vs. illiberal assistance).
+每一个技术选择里都含着价值判断。选哪种主动学习策略，决定了*该问谁*（要效率还是要代表性）。假定独立无关备选（IIA）成立，就等于对*什么样的偏好才算合理*施加了结构（要"理性"的偏好，还是要符合真实的心理）。选定 DPO 的参考策略 $\pi_{\text{ref}}$，决定了*谁的偏好更有分量*（按使用量大的用户为主，还是一视同仁）。决定什么时候推翻用户说出来的偏好，决定了*哪些偏好会被尊重*（自由主义式的协助，还是非自由主义式的协助）。
 
-**The Central Insight**: These are not merely technical decisions—they are fairness decisions with real consequences. A system meant to "help all reviewers" may primarily help already-privileged users if we optimize for efficiency at each stage. Small biases compound: elicitation undersamples some groups → learning fits them poorly → aggregation downweights them → decisions provide poor assistance → they disengage → even less data. The gap widens.
+**核心洞见**：这些不只是技术决定，而是会带来真实后果的公平性决定。一个号称"帮助所有审稿人"的系统，如果每个阶段都只按效率优化，最后可能主要帮的还是本来就占优势的那批用户。小偏差会累积：征询阶段少采了某些群体 → 学习阶段在这些群体上拟合得差 → 汇总阶段又压低他们的权重 → 决策阶段给他们的帮助很差 → 他们干脆不用了 → 数据更少。差距就这样越拉越大。
 
-**The Roadmap**: This chapter traces the preference learning pipeline from elicitation through decision-making, analyzing how each stage embeds values and how unfairness accumulates. We formalize key fairness concepts (individual vs. group, process vs. outcome), provide concrete design principles for building fairer systems, examine governance mechanisms for value decisions, and ground the analysis in real-world case studies.
+**本章路线**：我们沿着偏好学习的流水线，从征询一路走到决策，逐阶段分析它里面含着什么价值、不公平又是怎么积累起来的。我们会把几个关键的公平概念写清楚（个体与群体、过程与结果），给出把系统做得更公平的具体设计原则，讨论价值决定可以交给哪些治理机制，最后用现实中的案例把整套分析落到实处。
 
-**Connection to Earlier Chapters**:
+**与前文的联系**：
 
-- IIA from Bradley-Terry (Chapter 2, @sec-iia) has fairness implications: it privileges "rational" preferences and may mismodel overburdened users.
-- DPO's reference policy (Chapter 3) implicitly weights by participation—high-volume users dominate if we don't correct for unequal engagement.
-- Active learning via Fisher information (Chapter 4) maximizes information gain but may undersample minority groups, creating representativeness issues.
-- Exploration strategies (Chapter 5) raise liberal vs. illiberal questions: explore what users *want* or what's *best* for them?
-- Aggregation impossibilities (Chapter 6, Arrow's theorem, Sen's Paretian Liberal) show that no mechanism satisfies all properties—fairness constraints further limit options.
+- Bradley-Terry 模型里的独立无关备选（第 1 章，@sec-iia）也有公平性含义：它偏袒"理性"的偏好，可能把负担过重的用户模型建歪了。
+- DPO 的参考策略（第 2 章）隐性地按参与程度加权——不纠正参与度不均，用量大的用户就会占主导。
+- 基于 Fisher 信息的主动学习（第 3 章）最大化信息增益，但可能少采到少数群体，带来代表性问题。
+- 探索策略（第 4 章）会引出自由主义与否的问题：是去探索用户*想要的*，还是探索对他们*更好的*？
+- 汇总方面的不可能性结论（第 5 章，阿罗定理、森的帕累托自由悖论）说明：没有哪种机制能满足所有好的性质——加上公平性要求，可选的余地只会更小。
 
-This chapter equips you to recognize value tradeoffs, make conscious fairness choices, and build systems that respect human dignity while acknowledging impossibility results and practical constraints.
+读完本章，你应当能识别出价值取舍、在公平问题上做出有意识的选择，并在承认不可能性结论与现实约束的前提下，建成尊重人的尊严的系统。
 
 ## Introduction: Whose Preferences Matter? {#sec-whose-preferences}
 
