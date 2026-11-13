@@ -2889,35 +2889,35 @@ This chapter developed methods for sequential decision-making with preference fe
 7. **@shao2024deepseekmath** —— DeepSeekMath：提出 GRPO 用于大模型对齐的论文
 :::
 
-## Discussion Questions
+## 讨论题
 
-1. **Measurement vs. Optimization**: How does the reward maximization perspective differ from the measurement perspective on preference learning? When might one approach be more appropriate than the other?
+1. **测量还是优化**：从"最大化奖励"的角度看偏好学习，与从"测量偏好"的角度看有什么不同？什么时候该用哪一种思路？
 
-2. **Thompson Sampling Intuition**: Explain in your own words how Thompson Sampling achieves the exploration-exploitation tradeoff. Why does sampling from the posterior distribution lead to exploration in uncertain regions?
+2. **汤普森采样的直觉**：用自己的话说清楚汤普森采样是怎样做到探索与利用兼顾的。为什么"从后验里抽样"会在不确定的地方带来探索？
 
-3. **Laplace Approximation**: Why is the Laplace approximation necessary for Thompson Sampling with binary feedback? What are the potential limitations of this approximation?
+3. **拉普拉斯近似**：在反馈是二值的情况下做汤普森采样，为什么非要用拉普拉斯近似？这种近似可能有哪些局限？
 
-4. **Regret Definitions**: Compare and contrast strong regret, weak regret, and Bayesian regret in the dueling bandit setting. Give an example scenario where each would be the most appropriate metric.
+4. **遗憾的定义**：在对决老虎机设定下，比较强遗憾、弱遗憾与贝叶斯遗憾的异同。各举一个场景，说明在那种场景下最该用哪一种指标。
 
-5. **Winner Concepts**: When might the Condorcet winner, Borda winner, and Von Neumann winner diverge? Construct a simple example with 3-4 alternatives where these concepts give different answers.
+5. **"胜者"的概念**：孔多塞胜者、博尔达胜者、冯·诺依曼胜者会在什么情况下给出不同的答案？请构造一个只有 3 到 4 个选项的简单例子，让这三个概念结果不一致。
 
-6. **Acquisition Functions**: What are the key tradeoffs between the UCB and Thompson Sampling acquisition functions? How does Pure Exploration differ in its objectives?
+6. **采集函数**：UCB 与汤普森采样这两种采集函数，关键的取舍差别在哪里？纯粹探索的目标又有什么不同？
 
-7. **qEUBO vs. qEI**: Why does qEUBO provably converge while qEI can fail to converge under the same assumptions? What does this suggest about designing acquisition functions for preferential feedback?
+7. **qEUBO 与 qEI 的对照**：在同样的假定下，为什么 qEUBO 能被证明收敛，而 qEI 可能不收敛？这对"为偏好反馈设计采集函数"说明了什么？
 
-8. **Copeland Score**: How does the soft-Copeland score relate to finding the Condorcet winner? Why might we prefer the soft version over the hard indicator-based version?
+8. **科佩兰分数**：软科佩兰分数与"找出孔多塞胜者"是什么关系？为什么宁可用软化版本，也不用那种带示性函数的硬版本？
 
-9. **Contextual Bandits**: How do contextual bandits extend the basic multi-armed bandit framework? Give three real-world examples where context is crucial for making good decisions.
+9. **上下文老虎机**：上下文老虎机在多臂老虎机的基本框架上多了什么？请举三个"必须结合上下文才能做好决策"的现实例子。
 
-10. **Exploration in Practice**: In recommendation systems, how might information asymmetry be used ethically to encourage exploration? What are the potential risks of this approach?
+10. **实践中的探索**：在推荐系统里，"信息不对称"怎样被合乎伦理地用来推动探索？这种做法有什么风险？
 
-11. **Bayesian Optimization Connection**: Explain the connection between Preferential Bayesian Optimization and traditional Bayesian optimization. How does the preference feedback model change the inference problem?
+11. **与贝叶斯优化的联系**：说明偏好型贝叶斯优化与传统贝叶斯优化之间的关系。把反馈换成偏好之后，推断问题发生了什么变化？
 
-12. **Scalability Challenges**: What are the main computational challenges in scaling dueling bandit and PBO algorithms to large action spaces? How might these be addressed?
+12. **可扩展性的难点**：要把对决老虎机和偏好型贝叶斯优化算法推到很大的行动空间上，主要会遇到哪些计算上的困难？可能怎么解决？
 
-13. **(Optional) GRPO vs. DPO**: Both GRPO and DPO optimize a policy using preference data. DPO is "offline" (optimizes directly on a fixed dataset), while GRPO is "online" (generates new samples during training). What are the tradeoffs? When might each be preferred?
+13. **（选做）GRPO 与 DPO 的对照**：两者都用偏好数据来优化策略。DPO 是"离线"的（直接在一个固定数据集上优化），GRPO 是"在线"的（训练过程中不断生成新样本）。各有什么代价？什么情况下更该用哪一个？
 
-14. **(Optional) Variance Reduction**: GRPO uses a group-relative baseline while classical REINFORCE uses a learned value function baseline. Compare the computational and statistical tradeoffs. How does the group size $G$ affect the bias-variance tradeoff?
+14. **（选做）降低方差：GRPO 与 REINFORCE 的对照**：GRPO 用的是组内相对基线，经典 REINFORCE 用的是学出来的价值函数基线。请比较两者在计算量和统计性质上的取舍。组大小 $G$ 怎样影响偏差—方差的权衡？
 
 ## Further Reading
 
