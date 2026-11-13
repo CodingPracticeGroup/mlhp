@@ -1161,19 +1161,19 @@ MIP 框架虽然给出了漂亮的理论保证，真正落地却有几重困难�
 
 ## 延伸阅读
 
-For readers who want to go deeper into the topics introduced in this chapter, we recommend the following:
+想在本章开头介绍的这些主题上再往深里走，可以读下面这些材料：
 
-- **@sen1970collective**, *Collective Choice and Social Welfare* — Sen's classic text connecting social choice theory to welfare economics, providing the rigorous foundations for Arrow's theorem, the liberal paradox, and interpersonal comparability of utility.
-- **@borgers2015introduction**, *An Introduction to the Theory of Mechanism Design* — An accessible introduction to auctions, VCG mechanisms, and incentive compatibility, covering the game-theoretic foundations of the mechanism design topics in this chapter.
-- **@austen-smith_banks_2000**, *Positive Political Theory I* — A rigorous treatment of voting theory, impossibility results, and domain restrictions, suitable for readers who want the formal proofs behind the results surveyed here.
-- **@list2011group**, *Group Agency* — Extends impossibility results from preference aggregation to judgment aggregation (aggregating beliefs, not just preferences), showing that related impossibilities arise when groups try to maintain consistent collective beliefs.
-- **@gordon2022jury**, "Jury Learning: Integrating Dissenting Voices into Machine Learning" — Proposes methods for integrating diverse annotator perspectives rather than collapsing to majority vote, directly relevant to pluralistic approaches to LLM alignment.
-- **@miller2005eliciting**, "Eliciting Informative Feedback: The Peer-Prediction Method" — The foundational work on eliciting truthful reports without verification, providing the theoretical basis for the peer prediction and MIP frameworks discussed in this chapter.
-- **@conitzer2024social**, "Social Choice for AI Policy" — Recent work on applying social choice theory to AI governance and alignment, arguing for maintaining multiple preference models rather than collapsing to a single aggregate.
+- **@sen1970collective**, *Collective Choice and Social Welfare* —— 森的经典著作，把社会选择理论与福利经济学连起来，为阿罗定理、自由悖论以及效用的人际可比性提供了严格的基础。
+- **@borgers2015introduction**, *An Introduction to the Theory of Mechanism Design* —— 讲拍卖、VCG 机制与激励相容的入门教材，本章机制设计部分所需的博弈论基础它都有覆盖。
+- **@austen-smith_banks_2000**, *Positive Political Theory I* —— 对投票理论、不可能性结果与定义域限制的严格处理。想看到本章所介绍那些结论背后的正式证明，这本正合适。
+- **@list2011group**, *Group Agency* —— 把不可能性结论从偏好汇总推广到判断汇总（汇总的是信念，不只是偏好），说明一个群体想让自己的集体信念保持一致时，会遇到类似的不可能性。
+- **@gordon2022jury**, "Jury Learning: Integrating Dissenting Voices into Machine Learning" —— 提出如何把标注员的多元视角整合进来，而不是直接压成多数意见，与"多元的大模型对齐"思路直接相关。
+- **@miller2005eliciting**, "Eliciting Informative Feedback: The Peer-Prediction Method" —— 在无法核验的情况下如何让人们如实报告，是这一方向的奠基工作，也是本章同行预测与互信息范式的理论基础。
+- **@conitzer2024social**, "Social Choice for AI Policy" —— 把社会选择理论用于 AI 治理与对齐的近期工作，主张保留多个偏好模型，而不是压成一个汇总结果。
 
 ## 练习
 
-### Exercise 1: Condorcet Cycles (*)
+### 练习 1：孔多塞循环（*）
 
 Consider three voters with the following preferences over alternatives $\{A, B, C\}$:
 
@@ -1187,7 +1187,7 @@ Consider three voters with the following preferences over alternatives $\{A, B, 
 
 **(c)** Does this preference profile have a Condorcet winner? Explain.
 
-### Exercise 2: Single-Peaked Preferences (**)
+### 练习 2：单峰偏好（**）
 
 Consider five voters with peaks at positions $\{1, 3, 5, 7, 9\}$ on a line (total order).
 
@@ -1197,7 +1197,7 @@ Consider five voters with peaks at positions $\{1, 3, 5, 7, 9\}$ on a line (tota
 
 **(c)** Suppose voter 1 (with true peak at 1) misreports their peak as 0. Does this change the outcome? Use this to argue informally why the generalized median is strategy-proof.
 
-### Exercise 3: DPO-Borda Connection (**)
+### 练习 3：博尔达与 DPO 的联系（**）
 
 Consider three responses $\{y_1, y_2, y_3\}$ to a prompt $x$. Suppose annotators have the following pairwise preferences:
 
@@ -1209,7 +1209,7 @@ Consider three responses $\{y_1, y_2, y_3\}$ to a prompt $x$. Suppose annotators
 
 **(b)** If responses are sampled uniformly at random from a reference policy, which response would DPO upweight most strongly? Connect to the DPO-Borda theorem.
 
-### Exercise 4: Virtual Valuations and Optimal Reserve (**)
+### 练习 4：虚拟估值与最优保留价（**）
 
 For bidders with values drawn i.i.d. from $\text{Uniform}[0, 1]$:
 
@@ -1219,7 +1219,7 @@ For bidders with values drawn i.i.d. from $\text{Uniform}[0, 1]$:
 
 **(c)** With two bidders, compute the expected revenue of a second-price auction with reserve $r = 0.5$ and compare to expected revenue without a reserve.
 
-### Exercise 5: VCG Payments (**)
+### 练习 5：VCG 付款（**）
 
 In a combinatorial auction with items $\{A, B\}$ and three bidders with the following valuations:
 
@@ -1233,7 +1233,7 @@ In a combinatorial auction with items $\{A, B\}$ and three bidders with the foll
 
 **(b)** Compute the VCG payment for each winner using the externality formula.
 
-### Exercise 6: Nosy Preferences (***)
+### 练习 6："管得宽"的偏好（***）
 
 Formalize the Paretian Liberal paradox for a content moderation setting:
 
@@ -1243,7 +1243,7 @@ Formalize the Paretian Liberal paradox for a content moderation setting:
 
 **(c)** Propose a domain restriction that would resolve the paradox in this setting.
 
-### Exercise 7: Inversion Problem in RLHF (**)
+### 练习 7：RLHF 中的反演问题（**）
 
 An RLHF annotator's preferences become more random as they fatigue. Model this as follows: in the first hour, preferences follow Bradley-Terry with true utilities. After the first hour, choices become uniform random with probability $p_{\text{fatigue}} = 0.3$.
 
@@ -1253,7 +1253,7 @@ An RLHF annotator's preferences become more random as they fatigue. Model this a
 
 **(c)** Propose a weighting scheme to down-weight fatigued annotations in reward model training.
 
-### Exercise 8: Community Notes Factor Model (**)
+### 练习 8：Community Notes 的因子模型（**）
 
 Implement a simplified Community Notes model. Generate synthetic data as follows:
 
@@ -1267,7 +1267,7 @@ Implement a simplified Community Notes model. Generate synthetic data as follows
 
 **(c)** Compare your estimated $\hat{\beta}_j$ to the true $\beta_j$. How well does the model recover note quality?
 
-### Exercise 9: Pairwise Feedback Mechanisms for Digital Goods (***)
+### 练习 9：数字商品的两两反馈机制（***）
 
 Consider a marketplace for digital goods (such as personalized articles, artwork, or AI-generated data), where the exact utility derived from these goods is only revealed to buyers after the goods have been generated and delivered. To elicit truthful preferences from buyers who find it difficult to precisely quantify their valuations beforehand, the marketplace implements a pairwise feedback mechanism, inspired by the work of Robertson and Koyejo (2023).
 
@@ -1283,7 +1283,7 @@ Answer the following:
 
 (d) **Practical Implications:** Suggest one practical scenario outside the digital-goods marketplace where such a feedback-driven, pairwise comparison approach would be beneficial. Briefly justify your choice, mentioning challenges and benefits.
 
-### Exercise 10: Scalable Oversight in Complex Decision-Making (***)
+### 练习 10：复杂决策中的可扩展监督（***）
 
 In scenarios involving complex or high-dimensional outcomes (such as summarizing lengthy texts, assessing the quality of detailed AI-generated reports, or reviewing scientific papers), evaluating the quality of outputs can become infeasible for a single human overseer. One practical solution is scalable oversight, where the evaluation task is decomposed and distributed among multiple human evaluators or even assisted by AI agents. Consider a scalable oversight scenario inspired by recursive reward modeling, where complex evaluations are hierarchically decomposed into simpler tasks. Specifically, suppose you want to evaluate a lengthy report generated by an AI system. Answer the following:
 
