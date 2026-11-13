@@ -1824,71 +1824,27 @@ print(f"Final regret — TS: {regret_ts[-1]:.1f}, ε-Greedy: {regret_eg[-1]:.1f}
 
 针对人类偏好的这个问题，我们采用*偏好型贝叶斯优化（Preferential Bayesian Optimization, PBO）*。它的关键不同在于：我们可以通过数据点之间的两两比较（也就是*对决*）来询问偏好函数。这是对目标函数的一种间接观测，反而更贴近现实：我们常常只能靠偏好方面的数据来优化某个函数。对人来说，这一点已经被反复证实——人更擅长判断"差别"而不是"绝对大小"（@kahneman_tversky_1979），所以偏好型贝叶斯优化的模型能用在很多场景里。
 
-::: {.callout-important title="When Is Pairwise Feedback the Right Choice?"}
-PBO assumes the oracle can only provide **pairwise comparisons**, not scalar ratings. This is well-justified when absolute evaluations are cognitively difficult or poorly calibrated (e.g., "How good is this robot trajectory on a scale of 1-10?"), but in some domains scalar feedback is readily available and strictly more informative---each scalar observation constrains the reward function more than a binary comparison. When both modalities are feasible, standard Bayesian optimization with scalar feedback typically requires fewer queries to find the optimum. PBO is most valuable when: (1) comparisons are genuinely easier for humans than absolute ratings, (2) the rating scale is arbitrary or poorly anchored across evaluators, or (3) the goal is to find the *best* option rather than estimate the full reward function.
+::: {.callout-important title="什么时候才该用两两比较的反馈"}
+偏好型贝叶斯优化假定神谕只能给出**两两比较**，不给实数打分。当"给绝对分数"在认知上很难做到、或者给出的分数没什么可比性时（比如"这条机器人轨迹有多好，请打 1 到 10 分"），这个假定就很合理；但在有些领域，实数反馈随手可得，而且信息量严格更大——一个实数观测对奖励函数的约束比一次二元比较更强。两种反馈都能拿到时，用实数反馈的标准贝叶斯优化通常更少的询问次数就能找到最优点。偏好型贝叶斯优化在这几种情形下最有价值：（1）对人来说，比较确实比打绝对分更容易；（2）评分标准是随意的，或者不同评审之间对不上；（3）目标是找出*最好*的那个选项，而不是把整条奖励函数估出来。
 :::
 
-### Problem statement
+### 问题描述
 
-The problem of finding the optimum of a latent preference function
-defined on $\mathcal{X}$ can be reduced to determining a sequence of
-duels on $\mathcal{X} \times \mathcal{X}$. From each duel
-$\left[\mathbf{x}, \mathbf{x}^{\prime}\right] \in$
-$\mathcal{X} \times \mathcal{X}$ we obtain binary feedback $\{0,1\}$
-indicating whether or not $\mathbf{x}$ is preferred over
-$\mathbf{x}^{\prime}$ ($g(\mathbf{x}) < g(\mathbf{x}^{\prime})$). We
-consider that $\mathbf{x}$ is the winner of the duel if the output is
-$\{1\}$ and that $\mathbf{x}^{\prime}$ wins the duel if the output is
-$\{0\}$. The aim is to find $\mathbf{x}_{\min }$ by reducing as much as
-possible the number of queried duels.
+在 $\mathcal{X}$ 上求一张隐偏好函数的最值，可以归结为在 $\mathcal{X} \times \mathcal{X}$ 上决定一串对决。从每场对决 $\left[\mathbf{x}, \mathbf{x}^{\prime}\right] \in$ $\mathcal{X} \times \mathcal{X}$ 得到二值反馈 $\{0,1\}$，表示 $\mathbf{x}$ 是否被偏好于 $\mathbf{x}^{\prime}$（$g(\mathbf{x}) < g(\mathbf{x}^{\prime})$）。我们规定：输出为 $\{1\}$ 时 $\mathbf{x}$ 赢下这场对决，输出为 $\{0\}$ 时 $\mathbf{x}^{\prime}$ 赢。目标是求出 $\mathbf{x}_{\min }$，同时把询问对决的次数尽量少。
 
-The key idea in PBO is to learn a preference function in the space of
-duels using a Gaussian process. We define a joint reward
-$f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)$ on each
-duel which is never directly observed. Instead, the feedback we obtain
-after each pair is a binary output $y \in$ $\{0,1\}$ indicating which of
-the two inputs is preferred. One definition of f we will use (though
-others are possible) is
-$f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=g\left(\mathbf{x}^{\prime}\right)-g(\mathbf{x})$.
-The more $\mathbf{x}^{\prime}$ is preferred over $\mathbf{x}$, the
-bigger the reward.
+偏好型贝叶斯优化的核心思路，是用高斯过程在对决组成的空间里学出一个偏好函数。我们在每场对决上定义一个联合奖励 $f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)$，它本身永远不会被直接观测到；每一对输入之后我们拿到的只是一个二值输出 $y \in$ $\{0,1\}$，说明两个输入里更被偏好的是哪一个。下面我们会用到的一种 f 的定义是（也可以有别的定义）： $f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=g\left(\mathbf{x}^{\prime}\right)-g(\mathbf{x})$：$\mathbf{x}^{\prime}$ 相对 $\mathbf{x}$ 越被偏好，奖励越大。
 
-We define the model of preference using a Bernoulli likelihood, where
-$p\left(y=1 \mid\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=\pi_f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)$
-and
-$p\left(y=0 \mid\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=\pi_f\left(\left[\mathbf{x}^{\prime}, \mathbf{x}\right]\right)$
-for some inverse link function $\pi: \Re \times \Re \rightarrow[0,1]$.
-$\pi_f$ has the property that
-$\pi_f\left(\left[\mathbf{x}^{\prime}, \mathbf{x}\right]\right)=1-\pi_f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)$.
-A natural choice for $\pi_f$ is the logistic function
+偏好模型用伯努利似然来定义：$p\left(y=1 \mid\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=\pi_f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)$，$p\left(y=0 \mid\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=\pi_f\left(\left[\mathbf{x}^{\prime}, \mathbf{x}\right]\right)$，其中 $\pi: \Re \times \Re \rightarrow[0,1]$ 是某个逆连接函数。$\pi_f$ 有一个性质：$\pi_f\left(\left[\mathbf{x}^{\prime}, \mathbf{x}\right]\right)=1-\pi_f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)$。$\pi_f$ 一个自然的选择是逻辑斯蒂函数
 $$\label{eq:bernoulli_pref}
 \pi_f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=\sigma\left(f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)\right)=\frac{1}{1+e^{-f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)}},$$
-but others are possible. Therefore we have that for any duel
-$\left[\mathbf{x}, \mathbf{x}^{\prime}\right]$ in which
-$g(\mathbf{x}) \leq g\left(\mathbf{x}^{\prime}\right)$ it holds that
-$\pi_f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right) \geq 0.5$.
-$\pi_f$ is a preference function that maps each query
-$\left[\mathbf{x}, \mathbf{x}^{\prime}\right]$ to the probability of
-having a preference on the left input $\mathbf{x}$ over the right input
-$\mathbf{x}^{\prime}$.
+当然也可以换成别的。于是对任何满足 $g(\mathbf{x}) \leq g\left(\mathbf{x}^{\prime}\right)$ 的对决 $\left[\mathbf{x}, \mathbf{x}^{\prime}\right]$，都有 $\pi_f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right) \geq 0.5$。$\pi_f$ 就是一个偏好函数：把每次查询 $\left[\mathbf{x}, \mathbf{x}^{\prime}\right]$ 映射成"更偏好左边这个输入 $\mathbf{x}$、而不是右边这个 $\mathbf{x}^{\prime}$"的概率。
 
-When we marginalize over the right input $\mathbf{x}^{\prime}$ of $f$,
-the global minimum of $f$ in $\mathcal{X}$ coincides
-with $\mathbf{x}_{\min }$. We also introduce the definition of the
-*Copeland score function* for a point $\mathbf{x}$ as
+把 $f$ 的右输入 $\mathbf{x}^{\prime}$ 边缘化之后，$f$ 在 $\mathcal{X}$ 上的全局最小值就正好落在 $\mathbf{x}_{\min }$ 上。我们还需要给出某一点 $\mathbf{x}$ 的*科佩兰得分函数（Copeland score function）*：
 $$S(\mathbf{x})=\operatorname{Vol}(\mathcal{X})^{-1} \int_{\mathcal{X}} \mathbb{I}_{\left\{\pi_f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right) \geq 0.5\right\}} d \mathbf{x}^{\prime}$$ {#eq-copeland-score}
-where
-$\operatorname{Vol}(\mathcal{X})=\int_{\mathcal{X}} d \mathbf{x}^{\prime}$
-is a normalizing constant that bounds $S(\mathbf{x})$ in the interval
-$[0,1]$. If $\mathcal{X}$ is a finite set, the Copeland score is simply
-the proportion of duels that a certain element $\mathbf{x}$ will win
-with probability larger than 0.5. A soft variant we will use instead of
-the Copeland score is the *soft-Copeland score*, defined as
+其中 $\operatorname{Vol}(\mathcal{X})=\int_{\mathcal{X}} d \mathbf{x}^{\prime}$ 是归一化常数，用来把 $S(\mathbf{x})$ 限制在区间 $[0,1]$ 之内。如果 $\mathcal{X}$ 是有限集，科佩兰分数就是"某个元素 $\mathbf{x}$ 能以大于 0.5 的概率赢下对决"的那些对决所占的比例。后面我们实际用的是它的软化版本——*软科佩兰分数（soft-Copeland score）*，定义为
 $$\label{eq:soft-copeland}
 C(\mathbf{x})=\operatorname{Vol}(\mathcal{X})^{-1} \int_{\mathcal{X}} \pi_f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right) d \mathbf{x}^{\prime}$$
-where the probability function $\pi_f$ is integrated over $\mathcal{X}$.
-This score aims to capture the average probability of $\mathbf{x}$ being
-the winner of a duel.
+这里对概率函数 $\pi_f$ 在整个 $\mathcal{X}$ 上做了积分。这个分数想要刻画的是：$\mathbf{x}$ 赢下一场对决的平均概率有多大。
 
 We define the *Condorcet winner* $\mathbf{x}_c$ as the point with
 maximal soft-Copeland score. Note that this corresponds to the global
