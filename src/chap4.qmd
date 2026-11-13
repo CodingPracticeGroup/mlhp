@@ -1173,7 +1173,7 @@ $$\hat{C}_t = \left( \hat{P}_t - c_t, \hat{P}_t + c_t \right),$$ {#eq-confidence
 
 ::: {.callout-note title="Code: Pizza Voting Example - When Winners Diverge" collapse="false"}
 
-This example demonstrates a scenario where three groups have different pizza preferences, resulting in no Condorcet winner. The Borda winner and Von Neumann winner provide alternative solutions.
+这个例子展示的是一种"三组人爱吃不同的比萨，结果没有孔多塞胜者"的情形。博尔达胜者和冯·诺依曼胜者给出了两种替代的解决办法。
 
 ```{pyodide-python}
 #| autorun: true
@@ -1360,21 +1360,9 @@ $$P(a_t = a) =
 0 & \text{otherwise}
 \end{cases}$$ {#eq-ucb}
 
-#### Interleaved Filter
+#### 交错筛选（Interleaved Filter）
 
-This algorithm tries to find the best bandit (Condorcet Winner) in a
-discrete, limited bandit-space via pairwise comparisons of the bandits.
-We will now introduce the algorithm for the Interleaved Filter as
-provided in [@YUE20121538] to solve a dueling bandit setup. It starts
-with a randomly defined *best bandit* $\hat{b}$ and iteratively compares
-it to set $W$ containing the remaining bandits $b$ resulting in winning
-probabilities $\hat{P}_{\hat{b},b}$ and confidence interval
-$\hat{C}_{\hat{b},b}$. If a bandit $b$ is *confidently worse* than
-$\hat{b}$, it is removed from $W$. If a bandit $b'$ is *confidently
-better* than $\hat{b}$, it is set as new *best bandit* $\hat{b}$ and
-bandit $\hat{b}$ as well as every other bandit $b$ *worse* than
-$\hat{b}$ are removed from $W$. This is done, until $W$ is empty,
-leaving the final $\hat{b}$ as the predicted best bandit.
+这个算法要在离散、有限的老虎机空间里，靠两两比较找出最好的那只老虎机（孔多塞胜者）。下面介绍的是 [@YUE20121538] 为解决对决老虎机问题给出的交错筛选（Interleaved Filter）算法。它先随机定一只*最佳老虎机* $\hat{b}$，再不断拿它去和剩下的老虎机组成的集合 $W$ 里的每只 $b$ 比较，由此得到 $\hat{b}$ 胜过 $b$ 的胜率 $\hat{P}_{\hat{b},b}$ 与置信区间 $\hat{C}_{\hat{b},b}$。若某只 $b$ *有把握地比 $\hat{b}$ 差*，就从 $W$ 中删掉它；若某只 $b'$ *有把握地更好*，就把它立为新的*最佳老虎机* $\hat{b}$，并把原来那只 $\hat{b}$ 和其余所有比新 $\hat{b}$ *更差*的 $b$ 一并从 $W$ 中删掉。这样一直做到 $W$ 为空，最后留下的 $\hat{b}$ 就是预测出的最佳老虎机。
 
 :::: algorithm
 ::: algorithmic
@@ -1394,7 +1382,7 @@ Comparisons Made $(\hat{b}, \hat{T})$
 :::
 ::::
 
-Parameter Initialization
+参数初始化
 
 :   算法第 1-6 行读入参数，先算出用来构造置信区间的 $\delta$。接着从全部老虎机 $\mathcal{B}$ 中均匀随机抽一个，作为最优老虎机的初始猜测 $\hat{b}$。同时维护一个候选集合 $W$，初始化为 $\mathcal{B} \setminus \{\hat{b}\}$。到这一步，我们还把经验估计 $\hat{P}, \hat{C}$ 初始化好。
     接下来重复下面几步，直到候选集 $W$ 为空。
@@ -1415,7 +1403,7 @@ Parameter Initialization
 
 算法定义好了，接下来看它在"找出最优策略"方面提供的几条保证。相关的证明与推导见 [@YUE20121538]。
 
-首先，该方法保证：在给定的时间范围 $T$ 下，算法返回正确老虎机的概率满足 $P \ge 1 - \frac{1}{T}$。有一点既有趣又有用：如果你对"找对老虎机"的概率有很硬的要求，就可以反推出达到该概率所需的时间范围 $T$。另外，$T$ 取 1 时不给任何成功概率的保证，而继续加大 $T$ 的边际收益会递减。其次，如果算法返回了错误的那个老虎机，所造成的最大遗憾关于 $T$ 是线性的，即 $\mathcal(O)(T)$。这一点同样有用，因为它让我们能对最坏情形的总代价做出估计。综合这两条，就能算出运行交错筛选算法的期望累计遗憾：
+首先，该方法保证：在给定的时间范围 $T$ 下，算法返回正确老虎机的概率满足 $P \ge 1 - \frac{1}{T}$。有一点既有趣又有用：如果你对"找对老虎机"的概率有很硬的要求，就可以反推出达到该概率所需的时间范围 $T$。另外，时间范围只取 1 时，不给任何成功概率的保证；而继续加大 $T$ 的收益是递减的。其次，如果算法返回了错误的那个老虎机，所造成的最大遗憾关于 $T$ 是线性的，即 $\mathcal(O)(T)$。这一点同样有用，因为它让我们能对最坏情形的总代价做出估计。综合这两条，就能算出运行交错筛选算法的期望累计遗憾：
 $$\mathbb{E}\left[R_T\right] \le \left(1 - \frac{1}{T}\right) \mathbb{E}\left[ R_T^{IF} \right] + \frac{1}{T}\mathcal{O}(T) \\
 = \mathcal{O}\left(\mathbb{E}\left[ R_T^{IF} \right] + 1\right)$$ {#eq-if-regret-bound}
 
