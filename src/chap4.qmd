@@ -1419,91 +1419,34 @@ Comparisons Made $(\hat{b}, \hat{T})$
 
 Parameter Initialization
 
-:   In lines 1-6 of the algorithm, we take the inputs and first compute
-    the value $\delta$ which is used to compute our confidence
-    intervals. We select an initial guess of an optimal bandit $\hat{b}$
-    by uniformly sampling from all bandits $\mathcal{B}$. We also keep a
-    running set of bandit candidates $W$, which is initialized to be
-    $\mathcal{B} \setminus \{\hat{b}\}$. At this point, we also
-    initialize our empirical estimates for $\hat{P}, \hat{C}$.
+:   算法第 1-6 行读入参数，先算出用来构造置信区间的 $\delta$。接着从全部老虎机 $\mathcal{B}$ 中均匀随机抽一个，作为最优老虎机的初始猜测 $\hat{b}$。同时维护一个候选集合 $W$，初始化为 $\mathcal{B} \setminus \{\hat{b}\}$。到这一步，我们还把经验估计 $\hat{P}, \hat{C}$ 初始化好。
+    接下来重复下面几步，直到候选集 $W$ 为空。
 
-    Next, we will repeat several steps until our working set of bandit
-    candidates $W$ is empty.
+依据比较结果更新估计
 
-Update Estimates Based on Comparisons
+:   每一轮的第一步（第 8-11 行）是把 $W$ 里的所有候选逐一拿来和当前的猜测 $\hat{b}$ 比较，比较由神谕完成（比如问人：$\hat{b}$ 和 $b \in W$ 你更偏好哪个）。拿到这批新的胜负与比较次数后，更新 $\hat{P}, \hat{C}$。
 
-:   The first step at each iteration (lines 8-11) is to look at all
-    candidates in $W$, and compare them to our current guess $\hat{b}$
-    using an oracle (e.g. by asking a human which of $\hat{b}$ or
-    $b \in W$ is preferred). With this new set of wins and comparisons,
-    we update our estimates of $\hat{P}, \hat{C}$.
+剪掉次优的老虎机
 
-Prune Suboptimal Bandits
+:   第 12-13 行：有了更新后的胜率与相应的置信区间，我们就可以把那些*有把握*认定 $\hat{b}$ 比它更好的候选从 $W$ 中剔除。道理很直白：我们已经基本确定当前的最佳猜测优于某些候选，这些候选后面的轮次就不必再管了。
 
-:   In lines 12-13, with updated comparison win probabilities and
-    corresponding confidence intervals, we can remove bandit candidates
-    from $W$ that we are *confident* $\hat{b}$ is better than. The
-    intuition here is that we are mostly sure that our current best
-    guess is better than some of the candidates, and we don't need to
-    consider those candidates in future iterations.
+在候选集里找更好的老虎机
 
-Check for Better Bandits from Candidate Set
+:   候选集这时可能已经变小了。在第 15-21 行，我们检查有没有哪个 $b'$ 是我们*有把握*比当前最佳猜测更好的。真找到了，就把那些 $\hat{P}$ 显示*很可能*不如 $\hat{b}$ 的老虎机去掉。注意这一步不再要求概率落在置信区间之外，因为我们已经找到一个自认为明显更接近最优、比当前最佳猜测更好的候选了。
 
-:   Now that our candidate set of bandits may be smaller, in lines 15-21
-    we check if there are any bandits $b'$ that we are *confident* are
-    better than our current best guess. If we do find such a candidate,
-    we remove bandits which $\hat{P}$ indicates $b$ is *likely* worse
-    than $\hat{b}$. Note that in this step, we do not require the
-    probability to be outside the confidence interval, since we already
-    found one we believe to be significantly closer to optimal than our
-    current best guess.
+    把那些*很可能*不如 $\hat{b}$ 的候选去掉之后，就把 $b'$ 立为新的最佳猜测，即 $\hat{b} := b'$。接着把 $b'$ 从 $W$ 中移除，并把经验计数 $\hat{P}, \hat{C}$ 重新归零。
 
-    Once we remove the candidates *likely* worse than $\hat{b}$, we
-    crown $b'$ as the new best guess, e.g. $\hat{b} := b'$.
-    Consequently, we remove $b'$ from $W$ and reset our empirical win
-    counters $\hat{P}, \hat{C}$.
+算法定义好了，接下来看它在"找出最优策略"方面提供的几条保证。相关的证明与推导见 [@YUE20121538]。
 
-With this algorithm defined, let us look at some provisions of the
-method with respect to identifying the optimal strategy. Note that the
-proofs and derivations for these quantities are provided in
-[@YUE20121538].
-
-First, the method guarantees that for the provided time horizon $T$, the
-algorithm returns the correct bandit with probability
-$P \ge 1 - \frac{1}{T}$. It is interesting and useful to note that if
-one has a strict requirement for the probability of identifying the
-correct bandit, one can compute the time horizon $T$ that guarantees
-this outcome at that probability. Furthermore, a time horizon of 1
-leaves no probabilistic guarantee of a successful outcome, and
-increasing $T$ has diminishing returns. Second, in the event that the
-algorithm returns an incorrect bandit, the maximal regret incurred is
-linear with respect to $T$, e.g. $\mathcal(O)(T)$. This is also a useful
-provision as it allows us to estimate the overall cost in the worst case
-outcome. Based on these two provisions, we can compute the expected
-cumulative regret from running the Interleaved Filter algorithm, which
-is:
+首先，该方法保证：在给定的时间范围 $T$ 下，算法返回正确老虎机的概率满足 $P \ge 1 - \frac{1}{T}$。有一点既有趣又有用：如果你对"找对老虎机"的概率有很硬的要求，就可以反推出达到该概率所需的时间范围 $T$。另外，$T$ 取 1 时不给任何成功概率的保证，而继续加大 $T$ 的边际收益会递减。其次，如果算法返回了错误的那个老虎机，所造成的最大遗憾关于 $T$ 是线性的，即 $\mathcal(O)(T)$。这一点同样有用，因为它让我们能对最坏情形的总代价做出估计。综合这两条，就能算出运行交错筛选算法的期望累计遗憾：
 $$\mathbb{E}\left[R_T\right] \le \left(1 - \frac{1}{T}\right) \mathbb{E}\left[ R_T^{IF} \right] + \frac{1}{T}\mathcal{O}(T) \\
 = \mathcal{O}\left(\mathbb{E}\left[ R_T^{IF} \right] + 1\right)$$ {#eq-if-regret-bound}
 
-Interestingly, the original work shows that these bounds hold for both
-strong and weak regret. As demonstrated, the Interleaved Filter
-algorithm [\[fig-if\]](#fig-if){reference-type="ref" reference="fig-if"}
-provides a robust method to ascertain the optimal bandit or strategy
-given a set of options and only noisy comparisons. In most real-world
-scenarios for modeling human preferences, it is not possible to observe
-a real-world reward value, or at least a reliable one and as such this
-method is a useful way to properly model human preferences.
+有意思的是，原始工作证明了这些上界对强遗憾和弱遗憾都成立。如前所示，交错筛选算法 [\[fig-if\]](#fig-if){reference-type="ref" reference="fig-if"} 给出的是一种稳健的做法：在一组选项之中，只靠带噪声的比较就能确定最优的老虎机或策略。而在为人类偏好建模的现实场景里，通常观察不到真实的奖励值（或者至少不可靠），正因如此，这套方法是刻画人类偏好的一个好用的路子。
 
-Furthermore, the algorithm provides strong guarantees for the
-probability of selecting the correct bandit, maximal regret, and the
-number of comparisons required. It is even more impressive that the
-method can do so without severely limiting constraints; as demonstrated,
-the most commonly used models satisfy the imposed constraints.
+不仅如此，该算法还对"选对老虎机的概率""最大遗憾""所需比较次数"都给出了很强的保证。更难得的是，它做到这些并不需要苛刻的限制条件——前面也看到，常用的那些模型都满足它施加的约束。
 
-As we look to model human preferences, we can certainly leverage this
-method for k-armed dueling bandits to identify the best strategy to
-solve human-centric challenges, from video recommendation to meal
-selection and exoskeleton-assisted walking.
+当我们为人类偏好建模时，完全可以借助这套 k 臂对决老虎机方法，找出解决"与人有关"的挑战的最佳策略——从视频推荐、餐饮选择，到外骨骼辅助行走都是如此。
 
 ::: {.callout-note title="Code: Interleaved Filter Implementation" collapse="false"}
 
