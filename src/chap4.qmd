@@ -635,13 +635,13 @@ For **binary observations**,
 $$
 p(Y_{ij}=1 \mid h_i(V_j)) = \sigma(h_i(V_j)),
 $$ {#eq-gp-binary-likelihood}
-the likelihood is non-Gaussian, and the posterior
+似然就不是高斯的，后验
 $$
 p(h_i \mid \mathcal{D}_t) \propto p(Y_{1:t} \mid h_i) p(h_i)
 $$ {#eq-gp-posterior}
-becomes **intractable**. To approximate it, we again use the **Laplace approximation**.
+就算不出来了。为了做近似，我们再次请出**拉普拉斯近似**。
 
-Let $H_i = [h_i(V_1), \dots, h_i(V_t)]$. The log-posterior is
+记 $H_i = [h_i(V_1), \dots, h_i(V_t)]$。对数后验为
 $$
 \ell(H_i) = \log p(Y_{1:t} \mid H_i) - \tfrac{1}{2}H_i^\top K_t^{-1}H_i - \tfrac{1}{2}\log|K_t|.
 $$ {#eq-gp-log-posterior}
@@ -658,48 +658,48 @@ $$
 p(H_i \mid \mathcal{D}_t) \approx \mathcal{N}(\hat{H_i}, (K_t^{-1} + W)^{-1}).
 $$ -->
 
-Let
+令
 $$
 \hat H_i = \arg\max_{h} \ell(h)
 $$ {#eq-gp-map}
-be the **mode** (MAP).
+就是**众数**（MAP 估计）。
 
-The multivariate second-order Taylor expansion of a smooth scalar function $\ell(\cdot)$ around $\hat H_i$ is
+光滑标量函数 $\ell(\cdot)$ 在 $\hat H_i$ 处的多元二阶泰勒展开是
 $$
 \ell(H_i) \approx \ell(\hat H_i) + \nabla\ell(\hat H_i)^\top(H_i-\hat H_i) + \tfrac12(H_i-\hat H_i)^\top \nabla^2\ell(\hat H_i)(H_i-\hat H_i).
 $$ {#eq-taylor-expansion}
 
-* Because $\hat H_i$ is a maximizer, the gradient vanishes:
+* 因为 $\hat H_i$ 是极大值点，梯度为零：
   $$
   \nabla\ell(\hat H_i)=0.
   $$ {#eq-gradient-vanishes}
-* The Hessian at a maximum is **negative semidefinite**:
+* 在极大值处，Hessian 是**半负定的**：
   $$
   \nabla^2\ell(\hat H_i) \preceq 0.
   $$ {#eq-hessian-negative-semidefinite}
 
-So the expansion simplifies to
+于是展开式简化为
 $$
 \ell(H_i) \approx \ell(\hat H_i) + \tfrac12 (H_i-\hat H_i)^\top \nabla^2\ell(\hat H_i)(H_i-\hat H_i).
 $$ {#eq-taylor-simplified}
 
-Define the **negative Hessian** (a positive semidefinite matrix)
+定义**负 Hessian**（一个半正定矩阵）
 $$
 W := -\nabla^2\ell(\hat H_i) \succeq 0.
 $$ {#eq-negative-hessian}
 
-Then
+于是
 $$
 \ell(H_i) \approx \ell(\hat H_i) - \tfrac12 (H_i-\hat H_i)^\top W (H_i-\hat H_i).
 $$ {#eq-quadratic-approximation}
 
-Laplace's idea is: if the **log** posterior is approximately quadratic, then the **posterior** is approximately Gaussian. Exponentiate the quadratic approximation:
+拉普拉斯的想法是：如果**对数**后验近似是二次的，那么**后验**就近似是高斯的。把上面这个二次近似取指数：
 
 $$
 p(H_i\mid\mathcal D_t) \propto \exp\big(\ell(H_i)\big) \approx \exp \Big(\ell(\hat H_i)-\tfrac12(H_i-\hat H_i)^\top W (H_i-\hat H_i)\Big).
 $$ {#eq-exponentiated-approximation}
 
-Since $\exp(\ell(\hat H_i))$ is just a constant in $H_i$, this is proportional to the kernel of a multivariate normal with mean $\hat H_i$ and precision $W$ (i.e., covariance $W^{-1}$):
+由于 $\exp(\ell(\hat H_i))$ 相对于 $H_i$ 只是一个常数，上式正比于一个均值为 $\hat H_i$、精度为 $W$（也就是协方差为 $W^{-1}$）的多元正态核。
 
 $$
 p(H_i\mid\mathcal D_t) \approx \mathcal N\big(\hat H_i, W^{-1}\big).

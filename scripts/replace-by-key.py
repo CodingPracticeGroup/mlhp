@@ -44,6 +44,9 @@ def main() -> int:
     todo, seen = [], {}
     for key, body in blocks:
         hits = [i for i, ln in enumerate(lines) if key in ln]
+        if not any(line.strip() for line in body):  # 空正文会直接删掉整行，容易出事
+            print(f"!! 新内容为空（会删掉整行），跳过；确实要删请用 splice.py：{key[:40]}")
+            continue
         if len(hits) != 1:
             print(f"!! 匹配到 {len(hits)} 处，跳过：{key[:60]}")
             continue
