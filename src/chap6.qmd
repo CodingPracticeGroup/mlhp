@@ -106,57 +106,57 @@ This chapter provides the missing normative framework: **whose preferences shoul
 
 读完本章，你应当能识别出价值取舍、在公平问题上做出有意识的选择，并在承认不可能性结论与现实约束的前提下，建成尊重人的尊严的系统。
 
-## Introduction: Whose Preferences Matter? {#sec-whose-preferences}
+## 引言：谁的偏好才算数？ {#sec-whose-preferences}
 
-This book has taught you *how* to learn from human preferences. You can model preferences through Bradley-Terry (@sec-bradley-terry), estimate parameters via maximum likelihood (@sec-mle), actively collect informative comparisons (@sec-active-learning), make sequential decisions (@sec-liberal-illiberal), and aggregate heterogeneous preferences (@sec-aggregation). These are powerful technical tools.
+这本书前面教的是*怎样*从人类偏好中学习。你可以用 Bradley-Terry 给偏好建模（@sec-bradley-terry），用最大似然估计参数（@sec-mle），主动去收集有信息量的比较（@sec-active-learning），做序贯决策（@sec-liberal-illiberal），把各不相同的偏好汇总起来（@sec-aggregation）。这些都是很管用的技术工具。
 
-But now we ask a deeper question: **Whose preferences should we learn from, and how should we weigh them?**
+但接下来要问的是一个更深的问题：**我们该向谁的偏好学习，又该给他们各分多少权重？**
 
-This is not a technical question with an algorithmic answer—it is a *normative* question about values and fairness. Yet every technical decision you make embeds an answer to this question, whether you recognize it or not:
+这不是一个"有算法答案"的技术问题，而是一个关于价值与公平的*规范性*问题。可你所做的每一个技术决定，无论你自己有没有意识到，都藏着一个对它的回答：
 
-- When you choose an active learning strategy (Chapter 4), you determine **who gets asked**. Maximizing Fisher information is efficient but may undersample minority users. This is a fairness decision disguised as an optimization problem.
+- 当你选一种主动学习策略（第 3 章）时，你就决定了**该问谁**。把 Fisher 信息最大化很高效，但可能少采到少数用户。这其实是一个伪装成优化问题的公平性决定。
 
-- When you assume IIA for tractability (Chapter 2), you impose structure on **what preferences are valid**. Context-dependent preferences (fatigue, framing, load) are treated as "irrational" and ignored. But these violations disproportionately affect overburdened users.
+- 当你为了让计算可行而假定独立无关备选成立（第 1 章）时，你就对**什么样的偏好才算合理**施加了结构。情境依赖的偏好（疲劳、框架效应、负担重）被当作"不理性"直接忽略掉。可这类"违反"偏偏主要发生在负担过重的用户身上。
 
-- When you use DPO with a reference policy $\pi_{\text{ref}}$ (Chapter 3), you determine **whose preferences count more**. High-volume users dominate the reference policy. Is this fair? Or should all users be weighted equally?
+- 当你带着参考策略 $\pi_{\text{ref}}$ 使用 DPO（第 2 章）时，你就决定了**谁的偏好更有分量**。用量大的用户在参考策略里占主导。这公平吗？还是所有用户都该一视同仁？
 
-- When you decide whether to defer to stated preferences or override them (Chapter 5), you determine **what preferences are respected**. Should an AI review assistant help a reviewer be consistently harsh (liberal assistance) or nudge toward constructive feedback (illiberal assistance)?
+- 当你决定是听用户说的、还是替他改（第 4 章）时，你就决定了**哪些偏好会被尊重**。一个 AI 审稿助手，是该帮一位审稿人把他一贯的严厉风格保持下去（自由主义式的协助），还是把他往"写得更建设性"的方向推一把（非自由主义式的协助）？
 
-These choices have consequences. They determine who benefits from your system and who is harmed.
+这些选择是有后果的。它们决定了谁从你的系统里受益，谁被它伤到。
 
-### The Four-Stage Pipeline {#sec-pipeline}
+### 四个阶段的流水线 {#sec-pipeline}
 
-To analyze these fairness questions systematically, we introduce a **four-stage pipeline** for preference learning systems:
+为了有条理地分析这些公平性问题，我们给出偏好学习系统的**四阶段流水线**：
 
-1. **Elicitation** ($\mathcal{E}$): How do we collect preference data? Who do we query? What questions do we ask?
+1. **征询**（$\mathcal{E}$）：我们怎么收集偏好数据？去问谁？问什么问题？
 
-2. **Learning** ($\mathcal{L}$): What model structure do we assume? What preference patterns are considered valid?
+2. **学习**（$\mathcal{L}$）：我们假定什么样的模型结构？哪些偏好模式被认为是合理的？
 
-3. **Aggregation** ($\mathcal{A}$): How do we combine multiple users' preferences? Whose preferences are weighted more?
+3. **汇总**（$\mathcal{A}$）：怎么把多个用户的偏好合到一起？谁的权重更高？
 
-4. **Decision** ($\mathcal{D}$): When do we defer to user preferences vs. override them? What constitutes legitimate paternalism?
+4. **决策**（$\mathcal{D}$）：什么时候听用户的，什么时候替他改？什么样的家长主义算是站得住的？
 
-At each stage, we make choices that embed values. Often these choices compound: a bias introduced at elicitation amplifies through learning, aggregation, and decision-making, creating feedback loops that widen disparities over time.
+每一个阶段我们都在做含着价值的选择。而且这些选择常常会叠加：在征询阶段引入的偏差，会经过学习、汇总、决策一路放大，形成反馈回路，让差距随时间越拉越大。
 
-::: {.callout-important title="Identifying Stakeholders Systematically"}
-Before analyzing fairness at each pipeline stage, one must first identify **who is affected**. A useful framework distinguishes four categories: (1) **direct users** who interact with the system and provide preference data (e.g., reviewers using the AI assistant); (2) **affected parties** who are impacted by decisions but may not be users (e.g., paper authors whose work is reviewed); (3) **system designers** who set objectives and constraints (e.g., conference organizers); and (4) **society** broadly, which bears indirect consequences (e.g., the research community's trust in peer review). Different stakeholder groups may have conflicting interests, and a fairness analysis that considers only direct users can overlook harms to affected parties---a common failure mode in deployed preference learning systems.
+::: {.callout-important title="系统地识别利益相关者"}
+在逐阶段分析公平性之前，得先弄清楚**谁会被影响**。有一个好用的框架把相关方分成四类：(1) **直接用户**——和系统打交道、提供偏好数据的人（例如用这个 AI 助手的审稿人）；(2) **受影响方**——被系统的决定影响、但未必是用户的人（例如论文被评审的作者）；(3) **系统设计者**——设定目标与约束的人（例如会议组织者）；(4) 更广泛的**社会**——间接后果由它承担（例如整个研究社区对同行评审的信任）。不同群体的利益可能互相冲突；如果只考虑直接用户，就会漏掉对受影响方造成的伤害——这在已经上线的偏好学习系统里是很常见的一种失败方式。
 :::
 
-::: {.callout-important title="The Central Thesis"}
-**Every technical choice in the preference learning pipeline is a value choice about whose preferences matter and how they should be weighted.**
+::: {.callout-important title="本章主旨"}
+**偏好学习流水线里的每一个技术选择，都是一个价值选择：谁的偏好算数，各算多少。**
 
-You cannot avoid making these choices. You can only choose whether to make them *consciously* and *transparently*, or to hide them behind claims of "technical neutrality."
+这些选择你躲不掉。你唯一能选的，是*有意识地*、*摆在明面上*去做，还是把它们藏在"技术中立"的说法后面。
 
-This chapter provides frameworks for recognizing these choices, analyzing their fairness implications, and making principled tradeoffs.
+本章提供的是这样一些框架：帮你识别这些选择，分析它们在公平性上的后果，并做出有原则的取舍。
 :::
 
-::: {.callout-warning title="Common Pitfall: Assuming a Single 'Fair' Solution Exists"}
-A natural instinct is to treat fairness as an optimization problem — "find the system that is most fair." But the impossibility results throughout this book (Arrow's theorem, Gibbard-Satterthwaite, the incompatibility of individual and group fairness) mean there is **no single solution** that satisfies all fairness desiderata simultaneously. A system that is fair by one metric (e.g., calibration across groups) may be unfair by another (e.g., equalized odds). The pitfall is claiming technical neutrality: every design choice — what data to collect, which loss to minimize, how to aggregate, when to override — embeds a value judgment about whose preferences matter. The goal is not to find *the* fair solution but to make these tradeoffs **consciously and transparently**.
+::: {.callout-warning title="常见坑：以为存在唯一『公平』的解"}
+一种很自然的冲动，是把公平当成优化问题——"找出最公平的那个系统"。但这本书里一路遇到的不可能性结论（阿罗定理、吉巴德—萨特斯维特、个体公平与群体公平的不相容）说明：**同时满足所有公平要求的解并不存在**。按某个指标算公平的（例如各组都校准），按另一个指标算可能就不公平（例如均等化优势）。这里的坑在于宣称自己技术中立：每一个设计选择——收什么数据、最小化哪个损失、怎么汇总、什么时候替用户做主——都含着一个关于"谁的偏好算数"的价值判断。目标不是找到*那个*公平的解，而是把这些取舍**有意识地、摆在明面上**做出来。
 :::
 
-### Running Example: AI Review Assistant for Peer Review {#sec-review-assistant}
+### 贯穿全章的例子：帮同行审稿的 AI 助手 {#sec-review-assistant}
 
-To ground these abstract questions, we use a concrete running example throughout this chapter: an AI system that helps peer reviewers write paper reviews. The system learns from each reviewer's past reviews to assist them in evaluating new papers.
+为了让这些抽象问题落到实处，本章自始至终用同一个具体的例子：一个帮审稿人写审稿意见的 AI 系统。它从每位审稿人过去写的审稿意见中学习，帮他评审新的论文。
 
 **The Setting**: Consider a large ML conference with 10,000 submitted papers and 5,000 reviewers. Each paper needs at least 3 reviews. Reviewers bid on papers (prefer / willing / not-willing), and a matching algorithm assigns papers to reviewers. An AI assistant learns from past reviews to help reviewers write better, more efficient reviews.
 
