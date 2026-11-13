@@ -1152,7 +1152,7 @@ $$\hat{C}_t = \left( \hat{P}_t - c_t, \hat{P}_t + c_t \right),$$ {#eq-confidence
 
 更一般的胜者概念是**冯·诺依曼胜者（Von Neumann Winner）**，它描述的是一个概率分布，而不是某一个具体的老虎机。冯·诺依曼胜者就是给出一个分布 $W$，使得"从这个分布里抽一个"对上"从均匀分布里抽一个"时有 $p > 0.5$ 的概率占优。还用比萨的例子说：这相当于相信朋友会点他自己爱吃的，因为这样大概率比瞎点更好。形式上，若 $(j \sim W, k \sim R) [p(p(j \succ k) > 0.5) > 0.5]$，就称 $W$ 是一个冯·诺依曼胜者，其中 $R$ 是动作上的均匀分布。冯·诺依曼胜者这个概念在上下文老虎机里很有用（后面会讲）。在那类设定里，偏好矩阵随上下文而变，不同的上下文可能对应不同的博尔达胜者——就像不同的人群会投票给不同的比萨。
 
-::: {.callout-important title="No Universal Winner Concept"}
+::: {.callout-important title="没有哪一种是通用胜者"}
 三种"胜者"概念——孔多塞、博尔达、冯·诺依曼——可能把**不同**的物品判为"最好"，甚至可能连孔多塞胜者都不存在。因此，选哪种胜者概念是一个**带有价值取向的设计决定**，而不只是技术选择：它决定了"遗憾"是什么意思、算法在优化什么。这背后是阿罗不可能定理（@sec-aggregation）所形式化的更深矛盾：不存在同时满足所有良好性质的聚合规则。所以部署对决老虎机算法时，应当明确挑一个与自己应用场景价值观相符的胜者概念——多数碾压（孔多塞）、平均人气（博尔达），还是最坏情形下的稳健（冯·诺依曼）。
 :::
 
@@ -1166,9 +1166,8 @@ $$\hat{C}_t = \left( \hat{P}_t - c_t, \hat{P}_t + c_t \right),$$ {#eq-confidence
    E   -0.10    -0.08       -0.07     -0.05     0     0.03
    F   -0.11    -0.11       -0.09     -0.07   -0.03    0
 
-  : Violation of Condorcet Winner. Highlighted entries are different
-  from Table 1. No Condorcet winner exists as no arm could beat every
-  other arm.
+  : 孔多塞胜者不存在的情形。加粗的格子与表 1 不同。这里没有孔多塞胜者——没有任何一只
+  老虎机能赢过其他所有老虎机。
 :::
 
 ::: {.callout-note title="Code: Pizza Voting Example - When Winners Diverge" collapse="false"}
