@@ -1175,39 +1175,39 @@ MIP 框架虽然给出了漂亮的理论保证，真正落地却有几重困难�
 
 ### 练习 1：孔多塞循环（*）
 
-Consider three voters with the following preferences over alternatives $\{A, B, C\}$:
+设三位选民对候选项 $\{A, B, C\}$ 的偏好如下：
 
-- Voter 1: $A \succ B \succ C$
-- Voter 2: $B \succ C \succ A$
-- Voter 3: $C \succ A \succ B$
+- 选民 1：$A \succ B \succ C$
+- 选民 2：$B \succ C \succ A$
+- 选民 3：$C \succ A \succ B$
 
-**(a)** Show that majority rule produces a preference cycle. Specifically, determine the majority preference for each pair $(A, B)$, $(B, C)$, and $(A, C)$.
+**(a)** 证明多数规则会产生一个偏好循环。具体地，分别求出 $(A, B)$、$(B, C)$、$(A, C)$ 三对在多数规则下的结果。
 
-**(b)** Compute the Borda score for each alternative. Which alternative wins under Borda count?
+**(b)** 算出每个候选项的博尔达分数。按博尔达计分法，谁获胜？
 
-**(c)** Does this preference profile have a Condorcet winner? Explain.
+**(c)** 这份偏好档案有孔多塞胜者吗？请说明理由。
 
 ### 练习 2：单峰偏好（**）
 
-Consider five voters with peaks at positions $\{1, 3, 5, 7, 9\}$ on a line (total order).
+设五位选民的峰值在一条线（全序）上的位置是 $\{1, 3, 5, 7, 9\}$。
 
-**(a)** What is the outcome of the pure median rule (no phantom voters)?
+**(a)** 纯中位数规则（不设幻影票）的结果是多少？
 
-**(b)** Add two phantom voters at positions 2 and 8. Compute the generalized median outcome.
+**(b)** 在位置 2 和 8 各加一张幻影票，算出广义中位数规则的结果。
 
-**(c)** Suppose voter 1 (with true peak at 1) misreports their peak as 0. Does this change the outcome? Use this to argue informally why the generalized median is strategy-proof.
+**(c)** 假设选民 1（真实峰值在 1）把峰值谎报成 0。这会改变结果吗？借此不太严格地说明：为什么广义中位数机制是策略免疫的。
 
 ### 练习 3：博尔达与 DPO 的联系（**）
 
-Consider three responses $\{y_1, y_2, y_3\}$ to a prompt $x$. Suppose annotators have the following pairwise preferences:
+设某个提示 $x$ 有三个回答 $\{y_1, y_2, y_3\}$。假定标注员的两两偏好满足：
 
 - $\mathbb{P}(y_1 \succ y_2) = 0.7$
 - $\mathbb{P}(y_1 \succ y_3) = 0.6$
 - $\mathbb{P}(y_2 \succ y_3) = 0.8$
 
-**(a)** Compute the expected Borda score for each response (sum of pairwise win probabilities).
+**(a)** 算出每个回答的期望博尔达分数（即两两胜率之和）。
 
-**(b)** If responses are sampled uniformly at random from a reference policy, which response would DPO upweight most strongly? Connect to the DPO-Borda theorem.
+**(b)** 若回答是从参考策略中均匀随机采样的，DPO 会最强烈地提高哪个回答的概率？请与博尔达—DPO 定理联系起来说明。
 
 ### 练习 4：虚拟估值与最优保留价（**）
 
