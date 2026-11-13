@@ -2398,16 +2398,16 @@ $$ {#eq-rl-objective}
 
 When $T = 0$ (a single step with no state transitions), the MDP reduces to the **bandit** setting from earlier sections. The RL objective then reduces to maximizing expected immediate reward $\mathbb{E}_{a \sim \pi_\theta}[R(a)]$, recovering the reward maximization problem from @sec-thompson-sampling.
 
-::: {.callout-tip title="Example: LLM Generation as an MDP"}
-Autoregressive text generation fits naturally into the MDP framework:
+::: {.callout-tip title="例子：把大模型生成看成一个 MDP"}
+自回归的文本生成天然就能套进 MDP 这套框架：
 
-- **State** $s_t$: the prompt $x$ concatenated with tokens generated so far, $(x, y_1, \ldots, y_t)$
-- **Action** $a_t$: the next token $y_{t+1}$ from the vocabulary $\mathcal{V}$
-- **Transition**: deterministic---the new state appends the chosen token
-- **Reward**: $R(s_t, a_t) = 0$ for all intermediate steps; at the terminal step $T$, the reward is $r_\phi(x, y)$ from a learned reward model (e.g., trained on Bradley-Terry preferences as in Chapter 1)
-- **Discount**: $\gamma = 1$ (finite horizon, all tokens matter equally)
+- **状态** $s_t$：提示 $x$ 加上已经生成的 token，即 $(x, y_1, \ldots, y_t)$
+- **行动** $a_t$：从词表 $\mathcal{V}$ 中取出的下一个 token $y_{t+1}$
+- **转移**：确定的——新状态就是把选中的 token 接在后面
+- **奖励**：中间每一步都是 $R(s_t, a_t) = 0$；到终止那一步 $T$，奖励来自一个学出来的奖励模型 $r_\phi(x, y)$（例如第 1 章那样用 Bradley-Terry 偏好数据训练出来）
+- **折扣**：$\gamma = 1$（有限步，每个 token 一样重要）
 
-The policy $\pi_\theta(a_t \mid s_t)$ is the language model itself, producing a distribution over the next token given the context.
+策略 $\pi_\theta(a_t \mid s_t)$ 就是语言模型本身：给定上文，它输出下一个 token 上的分布。
 :::
 
 The next section introduces CIRL, which extends this single-agent MDP to a **two-player cooperative game** where a human and robot jointly optimize a shared reward.
