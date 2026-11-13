@@ -2149,47 +2149,37 @@ $\mathcal{D}_{\mathcal{I}(t+1)} = \mathcal{D}_{\mathcal{I}(t)} \cup \{\mathbf{x}
 :::
 ::::
 
-### Regret Analysis
+### 遗憾分析
 
-#### qEUBO Regret {#qeubo-regret .unnumbered}
+#### qEUBO 的遗憾 {#qeubo-regret .unnumbered}
 
-With the definition of Bayesian simple regret, we have that qEUBO
-converges to zero at a rate of $o(1/n)$, i.e.
+按贝叶斯简单遗憾的定义，qEUBO 的遗憾以 $o(1/n)$ 的速度收敛到零，也就是说
 
 ::: theorem
 $$\label{th:quebo_regret}
 \mathbb{E}\left[f\left(x^*\right)-f\left(\widehat{x}_n^*\right)\right]=o(1 / n)$$
 :::
 
-where $x^*=\operatorname{argmax}_{x \in \mathrm{X}} f(x)$ and
-$\widehat{x}_n^* \in \operatorname{argmax}_{x \in \mathrm{X}} \mathbb{E}_n[f(x)]$.
+其中 $x^*=\operatorname{argmax}_{x \in \mathrm{X}} f(x)$，$\widehat{x}_n^* \in \operatorname{argmax}_{x \in \mathrm{X}} \mathbb{E}_n[f(x)]$。
 
-This theorem holds under the following assumptions:
+这条定理成立需要下面几条假定：
 
-1.  **$f$ is injective** $\mathbf{P}(f(x)=f(y))=0$ for any
-    $x, y \in \mathbb{X}$ with $x \neq y$.
+1.  **$f$ 是单射**：对任意 $x, y \in \mathbb{X}$（$x \neq y$），都有 $\mathbf{P}(f(x)=f(y))=0$。
 
-2.  **$f$ represents the preferred option** $\exists a>1 / 2$ s.t.
+2.  **$f$ 代表被偏好的那个选项**：满足 $\exists a>1 / 2$，使得
     $\mathbf{P}\left(r(X) \in \operatorname{argmax}_{i=1, \ldots, 2} f\left(x_i\right) \mid f(X)\right) \geq a \forall$
-    $X=\left(x_1, x_2\right) \in \mathbb{X}^2$ with $x_1 \neq x_2$
-    almost surely under the prior on $f$.
+    一切 $X=\left(x_1, x_2\right) \in \mathbb{X}^2$（$x_1 \neq x_2$）都在 $f$ 的先验之下几乎必然成立。
 
-3.  **Expected difference in utility is proportional to probability of
-    greater utility** $\exists \Delta \geq \delta>0$ s.t.
-    $\forall \mathcal{D}^{(n)} \text{and} \forall x, y \in \mathbb{X}$
-    (potentially depending on $\mathcal{D}^{(n)}$),
+3.  **效用之差与"效用更大"的概率成正比**：满足 $\exists \Delta \geq \delta>0$，使得对
+    $\forall \mathcal{D}^{(n)} \text{and} \forall x, y \in \mathbb{X}$（这两个量也可能依赖 $\mathcal{D}^{(n)}$），
     $$\delta \mathbf{P}^{(n)}(f(x)>f(y)) \leq \mathbb{E}^{(n)}\left[\{f(x)-f(y)\}^{+}\right] \leq \Delta \mathbf{P}^{(n)}(f(x)>f(y))$$ {#eq-utility-probability-bounds}
-    almost surely under the prior on $f$.
+    在 $f$ 的先验之下几乎必然成立。
 
-Further lemmas leading to a proof of Theorem
-[\[th:quebo_regret\]](#th:quebo_regret){reference-type="ref"
-reference="th:quebo_regret"} is given in
-[@astudillo2023qeubo] Section B.
+定理 [\[th:quebo_regret\]](#th:quebo_regret){reference-type="ref" reference="th:quebo_regret"} 证明过程中用到的其它引理，见 @astudillo2023qeubo 附录 B。
 
-#### qEI Regret {#qei-regret .unnumbered}
+#### qEI 的遗憾 {#qei-regret .unnumbered}
 
-The following theorem shows that, under the same assumptions used for
-qEUBO regret, simple regret of qEI can fail to converge to 0.
+下面的定理说明：在与 qEUBO 遗憾分析相同的假定下，qEI 的简单遗憾可能无法收敛到 0。
 
 ::: theorem
 There exists a problem instance (i.e., $\mathbb{X}$ and Bayesian prior
