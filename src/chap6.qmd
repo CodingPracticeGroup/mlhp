@@ -459,94 +459,94 @@ for strategy in strategies:
 - Recommender systems: power users get better recommendations (more historical data)
 - Active learning for robotics: demonstrations from experienced users oversample certain interaction styles
 
-**Design Principle**: When elicitation strategy affects representation, stratify by relevant demographics to ensure fairness—even if it reduces statistical efficiency.
+**设计原则**：当征询策略会影响代表性时，就按相关的人口特征分层来做，以保证公平——哪怕这会降低统计效率。
 
-Next, we'll see how the learning stage compounds this bias by imposing structure (IIA) that works poorly for context-dependent preferences.
+接下来会看到，学习阶段会进一步加重这种偏差：它施加的结构（独立无关备选）在情境依赖的偏好上本就不太成立。
 
-### Learning: What Preference Structures Are Valid? {#sec-learning-assumptions}
+### 学习：什么样的偏好结构才算合理？ {#sec-learning-assumptions}
 
-**Technical Question**: What model structure should we assume for reviewers' preferences over papers?
+**技术问题**：对审稿人关于论文的偏好，我们该假定什么样的模型结构？
 
-Recall from Chapter 2 that the Bradley-Terry model (@sec-bradley-terry) assumes **Independence of Irrelevant Alternatives (IIA)**: if a reviewer prefers Paper A over Paper B, adding Paper C to the choice set shouldn't change this preference. Mathematically:
+回忆第 1 章：Bradley-Terry 模型（@sec-bradley-terry）假定了**独立无关备选（Independence of Irrelevant Alternatives, IIA）**：如果一位审稿人认为论文 A 比论文 B 好，那么往备选里再加一篇论文 C，不该改变他的这个偏好。用数学写就是：
 $$
 \frac{P(\text{choose } j \mid \{j, k\})}{P(\text{choose } k \mid \{j, k\})} = \frac{P(\text{choose } j \mid \{j, k, \ell\})}{P(\text{choose } k \mid \{j, k, \ell\})}
 $$ {#eq-iia-definition}
-This simplifying assumption reduces the model from $M!$ parameters to just $M$ item utilities $V_j$, making learning tractable.
+这条简化假定把模型从 $M!$ 个参数降到只要 $M$ 个物品效用 $V_j$，学习才算得动。
 
-But IIA is violated in peer review—and these violations have fairness consequences.
+可独立无关备选在同行评审里并不成立——而这些"不成立"在公平性上是有后果的。
 
-#### When IIA Fails in Peer Review {#sec-iia-violations}
+#### 独立无关备选在同行评审里什么时候失效 {#sec-iia-violations}
 
-Consider realistic violations of IIA in paper-reviewer matching:
+看看论文—审稿人匹配中几种真实的违反情形：
 
-**Violation 1: Complementarity**
-- Reviewer already reviewed 2 similar papers in the same subfield
-- Adding a third similar paper (Paper C) makes them less interested in Paper A (fatigue with the subfield)
-- Preference A ≻ B changes to B ≻ A when C is added
-- Context-dependence: preferences depend on the full choice set, not just pairwise comparisons
+**违反情形一：互补效应**
+- 一位审稿人已经审了同一子领域的 2 篇相似论文
+- 再给他第三篇同类的（论文 C），他对论文 A 的兴趣反而下降了（对这个领域审累了）
+- 加了 C 之后，偏好从 A ≻ B 变成了 B ≻ A
+- 情境依赖：偏好取决于整个备选集合，而不只是两两比较
 
-**Violation 2: Framing Effects**
-- Paper C is exceptionally high-quality
-- By comparison, Paper A (which seemed good) now looks mediocre
-- Preference A ≻ B changes to B ≻ A due to the reference point shift
-- The "red bus / blue bus" problem from discrete choice theory (@sec-iia)
+**违反情形二：框架效应**
+- 论文 C 质量特别高
+- 相比之下，本来看着不错的论文 A 就显得平平了
+- 因为参照点变了，偏好从 A ≻ B 变成 B ≻ A
+- 这就是离散选择理论里的"红巴士／蓝巴士问题"（@sec-iia）
 
-**Violation 3: Reviewer Load**
-- Reviewer's current assignment load is heavy
-- Adding Paper C (another assignment) changes their tolerance for marginal papers
-- Preference for Paper A decreases because accepting it means even more work
-- Context-dependence: preferences reflect current state (load), not just intrinsic paper quality
+**违反情形三：审稿任务量**
+- 这位审稿人手上的任务已经很重
+- 再派论文 C（又是一份任务），他对勉强能审的论文的态度就变了
+- 对论文 A 的偏好下降，因为接下来就意味着更多工作量
+- 情境依赖：偏好反映的是他当前的状态（任务量），不只是论文本身的质量
 
-By assuming IIA, we're effectively saying: **these violations are "irrational" and we'll ignore them**.
+假定独立无关备选成立，等于是在说：**这些"违反"是不理性的，我们就不管了**。
 
-**Value Embedded**: We privilege "rational economic preferences" (stable, context-free utilities) over the psychological reality of reviewer fatigue, comparison effects, and load-dependence.
+**里面含的价值**：我们把"理性的经济人偏好"（稳定的、与情境无关的效用）摆在前面，而把审稿人疲劳、对比效应、任务量影响这些真实的心理放在后面。
 
-#### Fairness Implications {#sec-iia-fairness}
+#### 公平性后果 {#sec-iia-fairness}
 
-Who is disadvantaged by assuming IIA?
+假定独立无关备选，谁处于不利？
 
-If we ignore context-dependent preferences, we mismodel reviewers who:
-- Are **overburdened** (heavy loads → preferences change with additional assignments)
-- Experience **fatigue** (late-night reviewing → different preferences than fresh morning reviews)
-- Have **complementarity effects** (reviewing similar papers → diminishing interest)
+如果忽略情境依赖的偏好，我们就会把下面这些审稿人模型建歪：
+- **负担过重**的（任务多 → 多派一份，偏好就变）
+- **正在疲劳**的（深夜审稿 → 和清晨精神好时判断不一样）
+- 有**互补效应**的（连着审相似的论文 → 兴趣递减）
 
-Crucially, these groups overlap with disadvantaged demographics:
-- **Junior reviewers**: Asked to review more (training for tenure), heavier teaching loads, less flexibility to decline
-- **Non-Western reviewers**: Time zone disadvantages for synchronous discussions, different academic calendar pressures
-- **Caregivers**: Less flexible time, reviewing happens in fragmented windows
+关键在于，这些人和处境不利的群体高度重合：
+- **资浅审稿人**：被要求审的更多（为了评职称要积累）、教学任务更重、更难推掉
+- **非西方的审稿人**：同步讨论正赶上他们的不便时段，学年的节奏也不一样
+- **需要照顾家人的人**：时间不灵活，只能挤零碎的时间来审
 
-An IIA-based model works well for senior reviewers with light loads and flexible schedules (their preferences are closer to context-free). It works poorly for overburdened reviewers whose preferences reflect their current state.
+基于独立无关备选的模型，对任务量轻、时间安排灵活的资深审稿人很好用（他们的偏好本来就接近与情境无关）。对负担过重的审稿人就不好用——他们的偏好正随着当前状态一起变。
 
-**This is individual unfairness**: Similar reviewers (by expertise) are treated differently (by assistance quality) due to structural factors.
+**这就是个体不公平**：按水平来看相似的审稿人，因为结构性因素，得到的帮助质量却不同。
 
-**Connection to Chapter 2**: The Bradley-Terry model's tractability comes from IIA (@sec-iia). But @sec-iia warned that IIA violations occur when utilities are correlated (the red bus / blue bus problem). In peer review, utilities for similar papers are correlated—reviewing one affects willingness to review another. We're sacrificing model correctness for computational convenience, and the cost falls disproportionately on certain groups.
+**承接第 1 章**：Bradley-Terry 模型之所以算得动，靠的就是独立无关备选（@sec-iia）。但 @sec-iia 也提醒过：效用相关时就会违反它（红巴士／蓝巴士问题）。而在同行评审里，相似论文的效用恰恰是相关的——审了一篇，就不太想审另一篇。我们是在用模型的正确性换计算的方便，而这个代价主要落在某些群体身上。
 
-#### Alternative: Contextual Bradley-Terry {#sec-contextual-bt}
+#### 另一种做法：带情境的 Bradley-Terry {#sec-contextual-bt}
 
-Instead of assuming context-free utilities $V_j$, we can model **context-dependent preferences**:
+与其假定效用与情境无关 $V_j$，不如把**情境依赖的偏好**直接建进模型：
 $$
 H_{ij} = U_i^\top V_j + f(C_i)
 $$ {#eq-contextual-preference}
-where:
-- $U_i$ and $V_j$ are latent factors (as in Chapter 2, @sec-factor-models)
-- $C_i$ is reviewer $i$'s current context (load, fatigue, recent reviews)
-- $f(C_i)$ is a function capturing how context shifts preferences
+其中：
+- $U_i$ 与 $V_j$ 是隐因子（同第 1 章 @sec-factor-models）
+- $C_i$ 是审稿人 $i$ 当前的情境（任务量、疲劳程度、最近审过哪些）
+- $f(C_i)$ 是一个函数，刻画情境怎样把偏好挪动
 
-For example, if Reviewer $i$ has already reviewed $n_i$ papers in the current round:
+例如，若审稿人 $i$ 在本轮已经审了 $n_i$ 篇：
 $$
 H_{ij} = U_i^\top V_j - \lambda n_i
 $$ {#eq-contextual-preference-load}
-The $-\lambda n_i$ term captures diminishing willingness as load increases.
+$-\lambda n_i$ 这一项刻画的就是：任务越重，愿意再审的意愿越低。
 
-This model doesn't satisfy IIA (preferences change with context), but it more accurately captures real reviewer behavior.
+这个模型不满足独立无关备选（偏好会随情境变化），但它对真实审稿行为的刻画更准。
 
-**The Tradeoff**: Contextual models require more data to fit (additional parameters $\lambda$, features $C_i$). Standard Bradley-Terry is simpler and works well for low-load reviewers. But it systematically misfits high-load reviewers.
+**这里的取舍**：带情境的模型要更多数据才拟合得动（多出的参数 $\lambda$、特征 $C_i$）。标准的 Bradley-Terry 更简单，对任务量轻的审稿人也够用。但它对任务量重的审稿人系统性拟合不准。
 
-Should we use the simpler model (works for some) or the complex model (works for all)? This is a fairness decision, not just a statistical one.
+是该用简单的那个（对一部分人管用），还是复杂的那个（对所有人都管用）？这是一个公平性决定，而不只是统计上的取舍。
 
-#### Code Example: Bradley-Terry with Context Features {#sec-code-learning}
+#### 代码示例：带情境特征的 Bradley-Terry {#sec-code-learning}
 
-Let's simulate reviewers with context-dependent preferences and see how standard vs. contextual Bradley-Terry perform:
+下面来模拟一批具有情境依赖偏好的审稿人，看看标准模型和带情境的模型各自表现如何。
 
 ```{pyodide-python}
 #| echo: true
