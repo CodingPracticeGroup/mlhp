@@ -2227,13 +2227,13 @@ The AI assistant can follow two policies:
 
 **Liberal assistance**: Maximize each reviewer's stated utility. Suggests tone matching their preference.
 
-**Illiberal assistance**: Nudge toward community standard $\text{tone}_{\text{standard}} = 0.3$. Suggests $\text{tone}_t = (1-\gamma) \cdot \text{preference}_i + \gamma \cdot \text{tone}_{\text{standard}}$ where $\gamma \in [0, 1]$ is nudge strength.
+**非自由主义式的协助**：把他往共同体标准 $\text{tone}_{\text{standard}} = 0.3$ 上推。建议的语气为 $\text{tone}_t = (1-\gamma) \cdot \text{preference}_i + \gamma \cdot \text{tone}_{\text{standard}}$，其中 $\gamma \in [0, 1]$ 是推的力度。
 
-**(a)** Under **liberal assistance** ($\gamma = 0$), reviewers follow their preferences. Papers receive reviews with tone distribution matching reviewer distribution. If 30% of reviewers are Type 1 (harsh), what is the average tone authors experience?
+**(a)** 在**自由主义式的协助**下（$\gamma = 0$），审稿人按自己的偏好来，论文收到的审稿语气分布就和审稿人本身的分布一致。如果有 30% 的审稿人属于类型 1（刻薄），作者感受到的平均语气是多少？
 
-**(b)** Under **illiberal assistance** ($\gamma = 0.5$), all reviewers are nudged halfway toward the standard. Compute the new average tone and variance across papers.
+**(b)** 在**非自由主义式的协助**下（$\gamma = 0.5$），所有审稿人都被往标准推了一半。请算出新的平均语气，以及各篇论文之间的方差。
 
-**(c)** Suppose harsh reviews harm authors (especially from disadvantaged groups who receive more harsh reviews). Formalize the **externality**: $e(\text{tone}) = \max(0, -\text{tone})$ (negative tone creates harm). Compute total harm under liberal vs. illiberal assistance. When is illiberal assistance justified by harm reduction?
+**(c)** 假设刻薄的审稿意见会伤害作者（尤其是那些本来就更常收到刻薄意见的处境不利群体的作者）。请把这种**外部性**形式化：$e(\text{tone}) = \max(0, -\text{tone})$（语气为负就造成伤害）。分别算出两种协助下的总伤害。在什么情况下，"减少伤害"足以说明非自由主义式的协助是正当的？
 
 ---
 
