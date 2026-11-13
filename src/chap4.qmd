@@ -820,7 +820,7 @@ print(f"Next item index: {j_star}")
 
 ::: {.callout-note title="Code: GP Posterior Visualization" collapse="false"}
 
-The following code visualizes how the GP posterior updates after observing binary responses. The shaded region shows the 95% credible interval.
+下面的代码演示：观测到二值回答之后，高斯过程的后验会怎样更新。图中带阴影的区域是 95% 可信区间。
 
 ```{pyodide-python}
 #| autorun: true
@@ -903,7 +903,7 @@ print("Green dots: Y=1 (positive response), Red dots: Y=0 (negative response)")
 
 ::: {.callout-note title="Code: Thompson Sampling Simulation" collapse="false"}
 
-This simulation shows Thompson Sampling in action, demonstrating how the algorithm balances exploration and exploitation over time.
+这个模拟展示的是汤普森采样真正跑起来的样子，可以看到它在探索与利用之间随时间的取舍。
 
 ```{pyodide-python}
 #| autorun: true
@@ -1021,65 +1021,25 @@ print(f"Final cumulative regret: {regret[-1]:.2f}")
 Thompson Sampling provides a remarkably simple and effective solution to the exploration-exploitation tradeoff: **sample a plausible world from your posterior beliefs, then act optimally within it**. This naturally concentrates exploration where uncertainty is highest, without requiring explicit exploration bonuses. Combined with Laplace approximation (for tractable posteriors) and Gaussian Processes (for flexible reward functions), Thompson Sampling provides a complete framework for sequential decision-making under preference uncertainty---connecting directly to the Bayesian inference tools developed in Chapter 2.
 :::
 
-## Dueling Bandit
+## 对决老虎机
 
-### From Multi-Armed Bandits to Dueling Bandits
+### 从多臂老虎机到对决老虎机
 
-The multi-armed bandit (MAB) problem involves a gambler deciding which lever to pull on an MAB
-machine to maximize the winning rate, despite not knowing which machine is the most rewarding. 
-This scenario highlights the need to balance exploration (trying new machines to discover potential 
-higher rewards) and exploitation (using current knowledge to maximize gains). MAB algorithms 
-address this dilemma by making decisions under uncertainty to achieve the best possible outcomes 
-based on gathered data. At the core of the MAB problem is a set of actions, or 'arms,' denoted by 
-$\mathcal{A} = \{1, 2, \ldots, K\}$, where $K$ signifies the total number of arms. For each round $t$, 
-the agent selects an arm $a_t \in \mathcal{A}$ and receives a reward $r_t$, sampled from an arm-specific,
-unknown probability distribution. The expected reward of pulling arm $a$ is represented as $\mu_a = \mathbb{E}[r_t | a]$.
+多臂老虎机（multi-armed bandit, MAB）问题讲的是：一个赌徒面前有一排老虎机，他不知道哪台最容易赢，却要决定每次去拉哪一台，使总赢取率最高。这个场景正好体现了探索与利用的张力：探索是去试没试过的机器，看看有没有更好的；利用是按已有的知识尽量多赢。多臂老虎机算法要解决的正是这种两难——在不确定的条件下做决策，靠已经收集到的数据争取最好的结果。这个问题的核心是一组行动，称为"臂"，记作 $\mathcal{A} = \{1, 2, \ldots, K\}$，$K$ 是臂的总数。每一轮 $t$，智能体选一个臂 $a_t \in \mathcal{A}$，拿到一个奖励 $r_t$，它来自某个臂各自的、未知的概率分布。拉臂 $a$ 的期望奖励记作 $\mu_a = \mathbb{E}[r_t | a]$。
 
-The multi-armed bandit framework can be extended in various ways to model more complex scenarios. 
-In the infinite-armed bandit problem, the set of possible arms $\mathcal{A}$ is either very large 
-or infinite. This introduces significant challenges in exploration, as the agent cannot afford to 
-explore each arm even once. Algorithms for infinite-armed bandits typically assume some regularity 
-or structure of the reward function across arms to make the problem tractable. The contextual bandit 
-problem extends the bandit framework by incorporating observable external states or contexts that 
-influence the reward distributions of arms. The agent's task is to learn policies that map contexts 
-to arms to maximize reward. This model is particularly powerful for personalized recommendations, where 
-the context can include user features or historical interactions. In dueling bandit problems, the agent 
-chooses two arms to pull simultaneously and receives feedback only on which of the two is better, not 
-the actual reward values. This pairwise comparison model is especially useful in scenarios where absolute 
-evaluations are difficult, but relative preferences are easier to determine, such as in ranking systems.
+多臂老虎机这个框架可以朝好几个方向扩展，用来描述更复杂的场景。**无限臂老虎机**里，可选的臂集合 $\mathcal{A}$ 极大甚至无穷，探索的困难随之变得很突出——连每个臂各试一次都做不到。这类问题的算法通常要对奖励函数在各臂之间的规律或结构做一些假设，问题才算得动。**上下文老虎机**则在框架里引入能观测到的外部状态或上下文，它会影响各臂的奖励分布；智能体要学的是一个"从上下文映射到臂"的策略，使奖励最大。这个模型在个性化推荐里特别有用，因为上下文可以包含用户特征或历史交互。**对决老虎机（dueling bandit）** 中，智能体一次同时选两个臂，反馈只告诉你两个里哪个更好，不给真实奖励值。这种两两比较的模型，在"绝对分数很难给、相对高下却容易判断"的场合特别合适，比如排序系统。
 
-Contextual bandits extend the multi-armed bandits by making decisions conditional on the state of the 
-environment and previous observations. The benefit of such a model is that observing the environment 
-can provide additional information, potentially leading to better rewards and outcomes. In each 
-iteration, the agent is presented with the context of the environment, then decides on an action 
-based on the context and previous observations. Finally, the agent observes the action's outcome and 
-reward. Throughout this process, the agent aims to maximize the expected reward.
+上下文老虎机（contextual bandit）在多臂老虎机之上加了一层：决策要依据环境的状态和此前的观测来做。这样做的好处是，观测环境能带来额外信息，从而拿到更好的结果。每一轮里，智能体先看到环境的上下文，再结合上下文和既往观测选一个行动，然后观察到这个行动的结果和奖励。整个过程的目标是最大化期望奖励。
 
-In many real-world contexts, one may not have a real-valued reward (or at least a reliable one) 
-associated with a decision. Instead, we may only have observations indicating which of a set of 
-bandits was optimal in a given scenario. The assumption is that within these observations of 
-preferred choices among a set of options, there is an implicit reward or payoff encapsulated in that 
-decision. Consider the following examples:
+现实里常常拿不到一个（可靠的）实数奖励来对应某个决策，能观测到的只是"在某次情形里，一组老虎机里哪个最好"。这类观测背后的假设是：这些"在一堆选项里更偏爱哪个"的记录之中，隐含着那个决策所代表的收益。下面几个例子说明了这一点：
 
-1.  **Dietary preferences**: When providing food recommendations to humans, it is often not possible 
-    to quantify an explicit reward from recommending a specific food item. Instead, we can offer meal 
-    options and observe which one the person selects.
+1.  **饮食偏好**：给人推荐餐食时，很难量化"推荐了某道菜"带来的明确收益。但我们能摆出几个菜品选项，观察他选了哪一个。
 
-2.  **Video recommendation**: Websites like YouTube and TikTok recommend specific videos to users. It is 
-    typically not feasible to measure the reward a person gains from watching a video. However, we can infer 
-    that a user preferred one video over another. From these relative preference observations, we can develop 
-    a strategy to recommend videos they are likely to enjoy.
+2.  **视频推荐**：YouTube、TikTok 这类网站给用户推荐具体视频。看视频带来的快乐很难量化，但我们可以推断出用户更喜欢哪一条而不是另一条。有了这些相对偏好的观测，就能制定策略，把用户大概率会喜欢的视频推上去。
 
-3.  **Exoskeleton gait optimization**: Tucker et al. (2020) created a framework that uses human-evaluated 
-    preferences for an exoskeleton gait algorithm to develop an optimal strategy for the exoskeleton to assist
-    a human in walking. A human cannot reliably produce a numerical value for how well the exoskeleton helped 
-    them walk but can reliably indicate which option performed best according to their preferences.
+3.  **外骨骼步态优化**：Tucker 等人（2020）搭了一套框架，让人来评价外骨骼的步态算法哪个好，由此学出一个帮人走路的最优策略。人很难给出"外骨骼帮了我几分"这种具体数值，却能够可靠地指出哪个方案更符合自己的偏好。
 
-Generally, we assume access to a set of actions. A noteworthy assumption is that any observations we make
-are unbiased estimates of the payoff. This means that if we observe a human preferred one option over another 
-(or several others), the preferred option had a higher implicit reward or payoff than the alternatives. In the 
-case of dietary preferences, this may mean that a human liked the preferred option; in the case of video 
-recommendations, a user was more entertained, satisfied, or educated by the video they selected than the other options.
+一般我们假定手上有一组可选行动。这里有个值得注意的假设：我们做出的任何观测，都是对收益的无偏估计。也就是说，如果我们观测到人在一组选项里更偏好某一个（或几个），那说明被偏好的那个选项隐式收益更高。放到前面那几个例子里：饮食偏好上，这意味着人更喜欢被选中的那道菜；视频推荐上，这意味着用户对自己点开的那条视频更开心、更满意或更有收获。
 
 The overarching context is that we do not have direct or reliable access to rewards. We may not have a 
 reward at all (for some decisions, it may be impossible to define a real value to the outcome), or it may be 
