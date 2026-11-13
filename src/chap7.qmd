@@ -108,40 +108,40 @@ AI 系统越来越能干，它们做的事也就越来越难由人来评。语�
 - **在线学习中的非平稳性**：Elo 等级分系统（第 2 章，@sec-online）其实通过固定的步长 $K$ 隐式地处理了非平稳——近期的观测权重更大。但最优的 $K$ 取决于变化的速率，这之间有个取舍：跟得上变化，还是保持稳定。
 - **追溯性的公平**：如果系统是从反映旧规范的历史数据里学偏好，那么把这些偏好部署出去，就等于是把过去的价值观延续下去。第 6 章的流水线框架（$\mathcal{E} \to \mathcal{L} \to \mathcal{A} \to \mathcal{D}$）正好提供了一个视角，用来看时间性的偏差是从哪一步进来的。
 
-### Heterogeneity and Personalization
+### 偏好各异与因人而异
 
-This book has established that preference heterogeneity is not a nuisance but a fundamental feature of human populations. Chapter 1 introduced mixture models and K-dimensional factor models to capture latent preference structure. Chapter 5's analysis of the inversion problem (@sec-inversion) showed that observed behavior can systematically misrepresent preferences for overburdened groups, and the liberal paradox (@sec-nosy-preferences) revealed when respecting diverse preferences conflicts with collective efficiency. Chapter 6 demonstrated how these issues compound through feedback loops across the preference learning pipeline.
+本书想说明的一点是：人与人之间偏好不同，不是一个麻烦，而是人群的基本特征。第 1 章介绍了混合模型与 K 维因子模型，用来刻画潜在的偏好结构。第 5 章关于反演问题（@sec-inversion）的分析说明：对负担过重的群体，观察到的行为会系统性地歪曲他们的偏好；而自由悖论（@sec-nosy-preferences）则说明，尊重多元偏好与集体效率在什么情况下会冲突。第 6 章进一步展示了：这些问题会通过反馈回路，沿着偏好学习的流水线一层层叠加。
 
-Yet significant open problems remain:
+但还有几个大问题没解决：
 
-- **Scalable mixture models** that identify latent preference clusters in high-dimensional settings without requiring users to self-identify. Variational inference and amortized methods show promise for scaling mixture-of-experts preference models to millions of users.
-- **Contextual preference models** that account for how the same user's preferences vary with cognitive load, time pressure, and framing—building on the contextual Bradley-Terry models introduced in Chapter 6. The challenge is distinguishing genuine context-dependence from IIA violations.
-- **Personalization with fairness constraints** that provide tailored assistance while ensuring no group is systematically underserved. Multi-objective optimization frameworks that Pareto-balance personalization and equity are an active area of research.
-- **Cold-start and few-shot preference learning**: How should a system behave for a new user with no preference history? Transfer learning from population-level models, combined with the active elicitation strategies from Chapter 3, can accelerate personalization while managing uncertainty.
+- **可扩展的混合模型**：在高维情形下自动找出潜在的偏好群体，而且不需要用户自己认领属于哪一类。变分推断与摊销化的方法，看来有望把"专家混合"式的偏好模型推到百万级用户。
+- **带情境的偏好模型**：处理同一个用户的偏好如何随认知负荷、时间压力、表述方式而变化——这建立在第 6 章介绍的带情境的 Bradley-Terry 模型之上。难点在于分清"真的与情境有关"和"只是违反了独立无关备选"。
+- **带公平性约束的个性化**：既要给每个人量身定制，又要保证没有哪个群体被系统性地怠慢。让个性化与公平在帕累托意义上取得平衡的多目标优化，是当前的研究热点。
+- **冷启动与少样本的偏好学习**：遇到一个没有任何偏好历史的新用户，系统该怎么办？从群体层面的模型做迁移学习，再配合第 3 章的主动征询策略，可以在控制住不确定性的同时加快个性化。
 
-The tension between personalization (giving each user what they want) and fairness (ensuring equitable outcomes across groups) is not fully resolved by the technical tools we have today. Progress requires both better algorithms and clearer normative frameworks for navigating these tradeoffs.
+个性化（给每个人他想要的）与公平（保证各群体的结果说得过去）之间的张力，以现有的技术工具还不能完全解决。要往前走，既需要更好的算法，也需要更清楚的规范性框架来指导怎么取舍。
 
-### Fairness and Value Alignment
+### 公平与价值对齐
 
-Chapter 6 introduced fairness considerations; making them operational requires ongoing research:
+第 6 章提出了公平方面的考虑；要把它们真正落地，还需要持续的研究：
 
-- **Fairness metrics for preference learning**: Standard fairness definitions (demographic parity, equalized odds) were developed for classification. What are the appropriate analogs for preference models? When is it fair for a system to learn different preference models for different groups? The pipeline framework from Chapter 6 suggests that fairness must be assessed at each stage ($\mathcal{E}, \mathcal{L}, \mathcal{A}, \mathcal{D}$), not just at the final output.
-- **Value alignment under disagreement**: When stakeholders have genuinely conflicting preferences, what should a system optimize for? Majority preferences? Pareto improvements? Maximin welfare? The social choice results of Chapter 5—particularly Arrow's theorem—tell us that no aggregation rule is universally satisfactory, but they also point toward domain restrictions and mechanism design as paths forward.
-- **Transparency and contestability**: Users should understand why a system makes the recommendations it does, and have meaningful recourse when they disagree. This requires preference models that are not only accurate but interpretable—a challenge for the high-dimensional factor models and GP-based approaches developed in earlier chapters.
-- **Pluralistic alignment**: Rather than learning a single aggregate preference model, maintain multiple models reflecting different value systems and allow users or institutions to choose among them. This connects to the mixture models of Chapter 1 and the multi-issue voting framework of Chapter 5.
+- **偏好学习该用什么公平指标**：常用的公平定义（人口均等、均等化优势）是为分类任务设计的。偏好模型里对应的是什么？系统在什么时候给不同群体学不同的偏好模型才算公平？第 6 章的流水线框架提示我们：公平要在每一个阶段（$\mathcal{E}, \mathcal{L}, \mathcal{A}, \mathcal{D}$）分别评估，而不能只看最后的输出。
+- **大家意见不同时，价值对齐对齐到什么**：当各方利益相关者的偏好确实互相冲突，系统该优化什么？多数人的偏好？帕累托改进？还是最小化最大损失（maximin）？第 5 章社会选择的结果——尤其是阿罗定理——告诉我们没有任何汇总规则能让所有人满意；但它们也指出了往前走的两条路：限制定义域，以及做机制设计。
+- **透明与可申诉**：用户应该能理解系统为什么给出这些推荐，不同意时也要有真正管用的申诉渠道。这要求偏好模型不光准，还要看得懂——对前面几章发展出来的高维因子模型与基于高斯过程的方法来说，这是很难的一点。
+- **多元对齐**：不去学一个"汇总的"偏好模型，而是同时维护多个反映不同价值体系的模型，让用户或机构从中选择。这和第 1 章的混合模型、第 5 章的多议题投票框架是相连的。
 
-These are not purely technical questions—they require engagement with philosophy, law, and democratic theory. But technical researchers must be part of the conversation, ensuring that fairness frameworks are implementable and that their limitations are well understood.
+这些不只是技术问题——它们需要与哲学、法律和民主理论对话。但技术研究者必须参与进来，确保提出的公平框架真能实现，也确保人们清楚它们的局限。
 
-### Foundation Model Alignment
+### 基础模型的对齐
 
-Large language models trained via RLHF and DPO represent the most prominent current application of preference learning. Yet significant challenges remain:
+用 RLHF 与 DPO 训练出来的大语言模型，是偏好学习目前最显眼的应用。但挑战还很多：
 
-- **Reward hacking**: Models may find ways to achieve high reward without actually satisfying human preferences—exploiting ambiguities in the reward signal rather than genuinely helpful behavior. This is a manifestation of Goodhart's Law: when the learned reward becomes the optimization target, it ceases to be a faithful proxy for human preferences. Mitigations include reward model ensembles, KL-constrained optimization (as in DPO's implicit KL penalty), and regular recalibration against fresh human judgments.
-- **Distributional shift**: Preferences collected in one context may not generalize to deployment settings, especially as models are used for novel tasks. The Bradley-Terry model assumes a fixed set of items with stable utilities, but in practice the "items" (model responses) change as the model improves, creating a moving target that requires online adaptation.
-- **Constitutional AI and rule-based approaches**: Can we move beyond learning from examples to learning from principles? Constitutional AI proposes specifying desirable behavior through written rules rather than example comparisons, raising questions about how to reconcile principle-based and preference-based approaches. The connection to single-peaked preferences (Chapter 5) is suggestive: if principles define a partial order over responses, they may restrict the preference domain enough to escape aggregation impossibilities.
-- **Multi-objective alignment**: Real-world alignment requires balancing multiple objectives simultaneously—helpfulness, harmlessness, honesty, and more. This is fundamentally a multi-objective optimization problem where different objectives can conflict, connecting to the social choice framework of Chapter 5.
+- **奖励投机**：模型可能找到办法拿到高奖励，却没有真的满足人类的偏好——它钻的是奖励信号里的空子，而不是真的变有帮助。这就是古德哈特定律的一种表现：学出来的奖励一旦成了优化目标，就不再是人类偏好的忠实替代。缓解的办法包括：用多个奖励模型做集成、加 KL 约束的优化（DPO 的隐式 KL 惩罚就是这个思路），以及定期用新的人类判断重新校准。
+- **分布偏移**：在一个情境下收集的偏好，未必能推广到实际部署的环境，尤其是模型开始被用于新任务时。Bradley-Terry 模型假定项目集合固定、效用稳定；可现实中的"项目"（模型的回答）会随着模型变强而不断变化，目标一直在移动，需要在线适应。
+- **宪法式 AI 与基于规则的方法**：能不能从"从例子中学"走向"从原则中学"？宪法式 AI 主张用写下来的规则来规定想要的行为，而不是用实例之间的比较，这就提出了一个问题：基于原则与基于偏好这两条路怎么协调。它与单峰偏好（第 5 章）的联系颇值得琢磨：如果原则能在回答之间定义出一个偏序，就可能把偏好定义域限制到足以绕开汇总的不可能性。
+- **多目标对齐**：现实中的对齐要同时兼顾多个目标——有用、无害、诚实，等等。这在本质上是一个多目标优化问题，各目标之间可能互相冲突，正对应第 5 章的社会选择框架。
 
-The alignment of foundation models with human values is arguably the most consequential application of preference learning today. Progress in this area requires both fundamental research on preference modeling and careful empirical work on what actually makes language model outputs helpful, harmless, and honest.
+把基础模型与人类的价值观对齐，可以说是偏好学习今天影响最大的应用。这个方向要进步，既需要偏好建模方面的基础研究，也需要扎实的实证工作，去搞清楚究竟是什么让语言模型的回答有用、无害、诚实。
 
 ## Capstone Projects
 
