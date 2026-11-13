@@ -2469,7 +2469,7 @@ $$ {#eq-policy-gradient-theorem}
 where $G_t = \sum_{t'=t}^{T} \gamma^{t'-t} R(s_{t'}, a_{t'})$ is the **return** (cumulative discounted reward) from time step $t$ onward.
 :::
 
-*证明要点。* 把 $J(\theta) = \mathbb{E}_{\tau \sim p(\cdot|\theta)}[R(\tau)]$ 写开，其中 $R(\tau) = \sum_t \gamma^t R(s_t, a_t)$。
+*证明要点。* 把 $J(\theta) = \mathbb{E}_{\tau \sim p(\cdot|\theta)}[R(\tau)]$ 写开，其中 $R(\tau) = \sum_t \gamma^t R(s_t, a_t)$。对轨迹分布用得分函数技巧（score function trick）：$\nabla_\theta J = \mathbb{E}_\tau[R(\tau) \nabla_\theta \log p(\tau|\theta)]$。再代入 @eq-log-trajectory-grad。最后注意：时刻 $t$ 的行动影响不了更早时刻的奖励，所以求和里的每一项都可以把 $R(\tau)$ 换成它之后的回报 $G_t$。$\square$
 
 ### REINFORCE 与降方差
 
