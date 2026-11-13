@@ -681,39 +681,40 @@ $$ {#eq-separable}
 
 **对 AI 对齐的意义**：自由悖论说明，当不同的利益相关方对 AI 的行为各有"管得宽"的偏好时，可能既尊重了每个人的自主、又保住集体的有效，二者不可兼得。内容审核的决定常常正卡在这对矛盾上——一位用户希望言论自由，另一位用户希望环境安全，二者直接冲突。
 
-## Case Study: Community Notes {#sec-community-notes}
+## 案例研究：Community Notes {#sec-community-notes}
 
-Community Notes (formerly Birdwatch) is a real-world system for aggregating preferences about content helpfulness that addresses some of the challenges discussed above.
+Community Notes（原名 Birdwatch）是一个真实在运行的系统，它汇总的是"哪条说明更有帮助"这类偏好，恰好应对了上面谈到的几个难题。
 
-### The Community Notes Model
+### Community Notes 的模型
 
-Community Notes uses a factor model to identify "bridging" notes—notes that receive positive ratings from users across ideological divides:
+Community Notes 用一个因子模型来找出"搭桥"的笔记——那些在立场对立的用户那里都得到正面评价的笔记：
 
 $$
 u(y; \alpha, p, \varepsilon) = \mu + \alpha_j + \beta_j + p^\top q_j + \varepsilon_j
 $$ {#eq-community-notes}
 
 where:
-- $\mu$ is a global intercept
-- $\alpha_j$ is a rater intercept (some raters are generally more positive)
-- $\beta_j$ is a note intercept (some notes are generally better)
-- $p$ and $q_j$ are $k$-dimensional factor vectors capturing ideological alignment
-- $\varepsilon_j$ is residual noise
+其中：
+- $\mu$ 是全局截距
+- $\alpha_j$ 是评分者的截距（有些人普遍打得更正面）
+- $\beta_j$ 是笔记的截距（有些笔记普遍就更好）
+- $p$ 与 $q_j$ 是 $k$ 维的因子向量，用来刻画立场上的契合程度
+- $\varepsilon_j$ 是残差噪声
 
-The key insight is that $\beta_j$ captures note quality *after controlling for ideological agreement*. A note is selected if $\beta_j \geq c$ for some threshold $c$. This means a note must be rated positively by users who *disagree* ideologically, not just by an ideological majority.
+关键在于：$\beta_j$ 刻画的是*在控制住立场一致之后*的笔记质量。当 $\beta_j \geq c$（$c$ 是某个阈值）时，这条笔记才会被选中。也就是说，一条笔记必须得到那些立场*不相同*的用户的正面评价，而不能只靠某一立场内部的多数。
 
-### Why Bridging Works
+### 为什么"搭桥"管用
 
-Traditional majority voting would select notes favored by the largest ideological group. Community Notes instead identifies notes with broad cross-partisan appeal. This is analogous to finding a Condorcet winner that beats all alternatives in pairwise comparisons across different subgroups.
+传统的多数表决会选出"最大那个立场群体"喜欢的笔记。Community Notes 走的是另一条路：找出那些跨立场都被认可的笔记。这相当于在找一位孔多塞胜者——在不同子群体的两两比较中，它都能赢过其他候选项。
 
-The factor model approach has connections to:
-- **Collaborative filtering**: The $p^\top q_j$ term is similar to matrix factorization in recommender systems
-- **Item response theory**: The model resembles the Rasch model from Chapter 1, extended with latent factors
-- **Jury theorems**: Under certain conditions, diverse juries aggregate to correct answers better than homogeneous majorities
+这套因子模型的做法与几条已有工作相通：
+- **协同过滤**：$p^\top q_j$ 这一项与推荐系统里的矩阵分解很像
+- **项目反应理论**：这个模型与第 1 章的 Rasch 模型相似，只是多了潜变量因子
+- **评审团定理**：在一定条件下，背景多样的评审团比同质的人群多数更能汇总出正确答案
 
-### Implementing Community Notes
+### 动手实现 Community Notes
 
-The following code implements a simplified Community Notes model. We generate synthetic ratings where users have ideological positions and notes have both quality (what we want to estimate) and ideological slant (what we want to control for). The key question is: can we recover true note quality by factoring out ideological agreement?
+下面的代码实现了一个简化版的 Community Notes 模型。我们生成合成的评分：用户有各自的立场，每条笔记既有质量（我们想估出来的东西），也有立场倾向（我们想剔除掉的东西）。要回答的问题是：把立场一致性这件事剥离出去之后，我们还能不能把笔记的真实质量找回来？
 
 ```{pyodide-python}
 #| autorun: true
