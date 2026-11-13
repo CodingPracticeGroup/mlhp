@@ -937,12 +937,12 @@ AI 系统什么时候可以推翻用户说出来的偏好？
 1. **要透明**：用户应当知道自己在什么时候、因为什么被推翻了偏好
 2. **允许用户否决**：用户应当可以坚持自己原本的选择
 3. **尽量少干预**：能达到目的的最轻的那种干预才该用
-4. **Justify interventions**: Each paternalistic choice should have a clear rationale
-5. **Update based on feedback**: Systems should learn when interventions are welcomed vs. resented
+4. **给出理由**：每一次家长式的干预都应当说得出明确的依据
+5. **根据反馈调整**：系统应当能学出来：哪时候用户欢迎它干预，哪时候反感
 
-**Example: AI Assistants Refusing Requests**
+**例子：AI 助手拒绝回答**
 
-When a user asks an AI assistant for harmful information (e.g., how to synthesize drugs), the refusal is paternalistic if motivated by protecting the user, or nosy if motivated by protecting others. In practice, refusals often serve both purposes.
+用户向 AI 助手问到某类有害的信息（例如怎么合成某种药物），如果它拒绝回答，就要看拒绝的动机是什么：为了**保护提问的用户自己**而拒绝，那是家长主义；为了**保护别人**（例如不希望这些内容流传出去），那是"管得宽"的偏好。这两者的实际处理办法往往不同，所以把它们分清楚并不是抠字眼。
 
 ## 机制设计 {#sec-mechanism-design}
 
