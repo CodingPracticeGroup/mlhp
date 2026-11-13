@@ -1948,68 +1948,68 @@ Mitigation: [e.g., Minimum sampling quotas for underrepresented groups]
 
 ---
 
-### Principle 4: Choose Fairness Definition Consciously {#sec-principle-fairness-choice}
+### 原则 4：有意识地选定公平的定义 {#sec-principle-fairness-choice}
 
-**Principle**: Accept that individual/group and process/outcome fairness are often incompatible (@sec-fairness-incompatibility). Choose based on domain and stakes. Be transparent about choice and justify.
+**原则**：承认个体公平与群体公平、过程公平与结果公平常常是不相容的（@sec-fairness-incompatibility）。按所在领域与后果的轻重来选，选定后公开说明并给出理由。
 
-**Rationale**: Impossibility theorems (Dwork et al. for individual/group, Sen for process/outcome) prove you cannot satisfy all criteria. Attempting to satisfy all leads to incoherent systems. Better to prioritize explicitly.
+**理由**：不可能性定理（个体／群体之间是 Dwork 等人的结果，过程／结果之间是森的结果）证明了所有标准不可能同时满足。硬要全满足，只会得到一个自相矛盾的系统。不如明明白白地定个优先次序。
 
-**Decision framework**:
+**一个决策框架**：
 
-| Context | Prioritize | Rationale |
+| 场景 | 优先考虑 | 理由 |
 |---------|-----------|-----------|
-| High-stakes domains (hiring, credit, healthcare) | **Outcome fairness** | Systemic disparities must be corrected; outcomes matter more than process |
-| Domains with well-defined merit (paper-topic matching) | **Individual fairness** | Similar entities should get similar treatment; topic expertise is measurable |
-| Domains requiring diversity (creative work, research) | **Group fairness** | Ensure all perspectives represented; avoid homogenization |
-| Low-stakes personal domains (entertainment, shopping) | **Process fairness** | Autonomy paramount; respect stated preferences |
+| 后果很重的领域（招聘、信贷、医疗） | **结果公平** | 系统性的差距必须纠正；结果比过程更要紧 |
+| 优劣标准明确的领域（论文与主题的匹配） | **个体公平** | 相似的个体应得到相似的对待；主题是否对口是可以度量的 |
+| 需要多样性的领域（创作、研究） | **群体公平** | 保证各种观点都被代表；避免千篇一律 |
+| 后果很轻的个人领域（娱乐、购物） | **过程公平** | 自主最重要；尊重用户说出来的偏好 |
 
 **具体做法**：
-- For peer review: Prioritize individual fairness (expertise-topic match) but constrain for group fairness (minimum quality per subfield).
-- Document choice in values statement (Principle 1).
-- Measure violations of non-prioritized criteria and report them (transparency).
+- 就同行评审而言：以个体公平为先（专业与主题要匹配），同时用群体公平作约束（每个子领域都要有最低质量）。
+- 把选定结果写进价值观说明（原则 1）。
+- 对没有被优先考虑的那条标准，也要测量它被违反的程度并报告出来（这是透明度的要求）。
 
-**Connection**: Formalizes the tradeoffs from @sec-individual-group-fairness and @sec-process-outcome-fairness.
+**对应的问题**：把 @sec-individual-group-fairness 与 @sec-process-outcome-fairness 里的取舍写成可操作的规则。
 
 ---
 
-### Principle 5: Use Stratification, Not Just Optimization {#sec-principle-stratification}
+### 原则 5：分层报告，而不是只看整体优化 {#sec-principle-stratification}
 
-**Principle**: Report performance per subgroup, not just average. Set **minimum thresholds per subgroup**. Use constrained optimization: maximize utility subject to fairness constraints.
+**原则**：按子群报告表现，不要只报平均值。**为每个子群设最低门槛**。用带约束的优化：在满足公平性约束的前提下最大化效用。
 
-**Rationale**: Optimization on average hides disparities. A system can improve for 80% of users while degrading for 20%. Averages increase, but unfairness grows. Stratified reporting reveals this.
+**理由**：按平均值优化会掩盖差距。一个系统可以在 80% 的用户身上变好、同时在 20% 的用户身上变差：平均值涨了，不公平却增加了。分层报告才能看出来。
 
 **具体做法**：
-- Don't report "95% accuracy"—report "98% for Group A, 87% for Group B" (stratified).
-- Set constraints: "No group below 90% accuracy" rather than "average 95% accuracy."
-- Optimization formulation:
+- 别只报"准确率 95%"——要分层报"群体 A 98%，群体 B 87%"。
+- 把约束写清楚："任何群体不得低于 90% 准确率"，而不是"平均 95% 准确率"。
+- 优化的写法是：
 $$
 \max_{\theta} \text{Utility}(\theta) \quad \text{subject to} \quad \min_{g \in \mathcal{G}} \text{Quality}_g(\theta) \geq \tau
 $$ {#eq-fairness-constrained-optimization}
-where $\mathcal{G}$ is the set of protected groups and $\tau$ is the fairness threshold.
+其中 $\mathcal{G}$ 是受保护群体的集合，$\tau$ 是公平性的门槛。
 
-**Example**: In the review assistant, don't just measure "average assistant quality"—measure quality for seniors, juniors, native speakers, non-native speakers separately. Ensure all exceed a minimum bar.
+**例子**：在这位审稿助手里，别只测"平均帮助质量"——要分别测资深者、资浅者、英语母语者、非英语母语者各自得到的帮助质量，并保证每一组都在门槛之上。
 
-**Statistical note**: Small subgroups have high variance. Use confidence intervals. Require statistically significant disparities before intervening (avoid overreacting to noise).
+**统计上的注意**：样本少的子群方差很大。要用置信区间；等差距在统计上显著之后再动手干预（别被噪声带着跑）。
 
-**Connection**: Addresses aggregation bias (@sec-aggregation-fairness) and compounding unfairness (@sec-compounding-unfairness).
+**对应的问题**：针对汇总带来的偏差（@sec-aggregation-fairness）与不公平的叠加（@sec-compounding-unfairness）。
 
 ---
 
-### Principle 6: When in Doubt, Ask {#sec-principle-participatory}
+### 原则 6：拿不准就去问 {#sec-principle-participatory}
 
-**Principle**: Involve affected communities early and throughout. Ongoing feedback loops, not one-time consultation. Be willing to redesign based on stakeholder input.
+**原则**：请受影响的群体尽早参与，并持续参与。要的是长期的反馈回路，不是一次性的咨询。并且要愿意根据利益相关者的意见重新设计。
 
-**Rationale**: Designers often lack lived experience of disadvantaged groups. Assumptions about "what's fair" reflect designer privilege. Participatory design surfaces issues invisible to designers.
+**理由**：设计者往往没有处境不利群体的亲身经历。关于"什么算公平"的设想，反映的是设计者自己的处境优势。参与式设计能把这些设计者看不见的暴露出来。
 
 **具体做法**：
-- Form advisory boards with junior reviewers, underrepresented subfields, international scholars.
-- Show them stratified metrics (Principle 5). Ask: "Is this disparity acceptable? What would make it better?"
-- Iterate: Design → Deploy to subset → Gather feedback → Redesign → Repeat.
-- Provide **recourse mechanisms**: Users can report unfairness, flag bad suggestions, opt out of assistance.
+- 组建咨询小组，成员包括资浅审稿人、代表性不足的子领域学者、海外学者。
+- 把分层指标给他们看（原则 5），并问："这样的差距能接受吗？怎样会更好？"
+- 反复迭代：设计 → 小范围上线 → 收集反馈 → 重新设计 → 再来一轮。
+- 提供**救济渠道**：用户可以举报不公平、标记不合适的建议、也可以退出这项协助。
 
-**Caution**: Participatory design is costly and doesn't scale perfectly. But it's essential for high-stakes systems affecting marginalized groups. Low-stakes systems can use lighter-weight feedback (surveys, usage analytics).
+**注意**：参与式设计成本高，也不容易规模化。但对影响边缘群体、后果又重的系统，它是必要的。后果轻的系统可以用更轻量的反馈（问卷、使用数据）。
 
-**Connection**: Governance considerations are woven throughout this chapter. Complements Principle 1 (make tradeoffs explicit) by involving stakeholders in the tradeoff decisions.
+**对应的问题**：治理方面的考虑在本章各处都有涉及。这一条让利益相关者直接参与取舍的决定，正好与原则 1（把价值取舍摆到明面上）配套。
 
 ---
 
