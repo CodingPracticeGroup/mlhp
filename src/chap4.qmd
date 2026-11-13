@@ -2795,16 +2795,16 @@ CIRL 这套合作框架假定：人是**大致最优**地行动的——按他�
 本章解决的是**单个**用户的偏好反馈下的序贯决策问题。可如果**很多**用户偏好各不相同呢？第 5 章（聚合）会用社会选择理论与机制设计来回答这个问题。这里引入的几种"胜者"概念——孔多塞、博尔达、冯·诺依曼——会在那一章重新出现。特别是，第 5 章有一个重要结论：把众多标注者的偏好汇总起来时，DPO 实际上隐含地在优化**博尔达分数**——这就把本章的对决老虎机框架与偏好聚合的社会选择理论连到了一起。第 6 章接着问的是规范性的问题：我们该为*谁*的偏好做优化，又该加上哪些公平性约束？
 :::
 
-## Summary
+## 本章小结
 
-- This chapter shifts perspective from **measuring** preferences (Chapter 3) to **making decisions** under preference uncertainty---managing uncertainty to maximize cumulative reward rather than merely reducing it.
-- **Thompson Sampling** ("sample a plausible world, act optimally within it") naturally balances exploration and exploitation by sampling from the posterior. Combined with the Laplace approximation, it handles both linear and nonlinear (GP-based) preference models.
-- **Dueling bandits** formalize decision-making when only pairwise comparisons are observable. Three winner concepts---**Condorcet** (beats all others), **Borda** (highest average win rate), and **von Neumann** (minimax optimal mixed strategy)---can diverge, and the choice of winner concept shapes what "regret" means.
-- **Preferential Bayesian Optimization (PBO)** tackles the continuous-armed case where the goal is to find the best option in a large or infinite space using only preference feedback. The **qEUBO** acquisition function provably converges while the seemingly natural **qEI** can fail.
-- Regret bounds for PBO scale as $R_T = O(\sqrt{\beta_T \gamma_T T})$, where $\gamma_T$ is the maximum information gain---providing convergence guarantees that depend on the kernel's complexity.
-- **Cooperative Inverse Reinforcement Learning (CIRL)** models humans as strategic agents who actively teach rather than passively demonstrate, enabling more efficient preference communication through cooperative interaction.
-- **(Optional)** The **policy gradient theorem** provides the mathematical bridge from bandit methods to full RL-based preference optimization. **GRPO** eliminates the need for a learned value function by using group-relative advantages, connecting RL optimization back to the pairwise comparison paradigm.
-- As system designers, we are **choice architects**: order effects, framing, and defaults influence human choices in ways that standard models (IIA) do not capture, requiring awareness of these biases in deployment.
+- 本章的视角从**测量**偏好（第 3 章）转向在偏好不确定时**做决策**——重点是怎样管住不确定性，使累计奖励最大，而不是单纯把它降下来。
+- **汤普森采样**（"抽一个可能的世界，在其中按最优行事"）从后验里抽样，天生就把探索和利用平衡了起来。再配上拉普拉斯近似，线性与非线性（基于高斯过程的）偏好模型它都能处理。
+- **对决老虎机**刻画的是"只能观察到两两比较"时的决策问题。三种胜者概念——**孔多塞**（赢过其余每一个）、**博尔达**（平均胜率最高）、**冯·诺依曼**（极小极大的最优混合策略）——可能各说各话；选哪一种胜者概念，决定了"遗憾"是什么意思。
+- **偏好型贝叶斯优化（PBO）** 处理的是连续臂的情形：只有偏好反馈，却要在很大甚至无穷的空间里找出最好的选项。**qEUBO** 这个采集函数可以被证明收敛，而看起来最自然的 **qEI** 却可能失效。
+- PBO 的遗憾界按 $R_T = O(\sqrt{\beta_T \gamma_T T})$ 这个规模增长，其中 $\gamma_T$ 是最大信息增益——它给出的收敛保证取决于核函数所确定的函数类有多复杂。
+- **合作逆强化学习（CIRL）** 把人建模成会主动教的策略主体，而不是只会被动示范的来源；通过合作式交互，偏好的传递可以更高效。
+- **（选学）** **策略梯度定理**是从老虎机方法通往"用强化学习做偏好优化"的数学桥梁。**GRPO** 用组相对优势取代了要学的价值函数，从而不需要价值网络，也让 RL 的优化重新回到两两比较这个范式上。
+- 作为系统的设计者，我们也是**选择架构**的搭建者：顺序效应、框架效应与默认选项都会影响人的选择，而这些是标准模型（IIA）没有刻画到的，部署时必须心里有数。
 
 ## 快问快答
 
