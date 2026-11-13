@@ -143,104 +143,104 @@ AI 系统越来越能干，它们做的事也就越来越难由人来评。语�
 
 把基础模型与人类的价值观对齐，可以说是偏好学习今天影响最大的应用。这个方向要进步，既需要偏好建模方面的基础研究，也需要扎实的实证工作，去搞清楚究竟是什么让语言模型的回答有用、无害、诚实。
 
-## Capstone Projects
+## 综合项目
 
-The chapters of this book develop a rich toolkit---from preference models and estimation to active elicitation, sequential decisions, social aggregation, and fairness---but the deepest understanding comes from applying these ideas to open-ended problems. The following capstone projects are designed as extended investigations suitable for individual or small-team work. Each project is inspired by the format of the CS329H course project: students produce a pre-analysis plan, a final manuscript in NeurIPS format (up to 8 pages), and reproducible code. Projects span the book's six main chapters and range from focused empirical studies to more ambitious research contributions. Difficulty is indicated by stars: \* (one person, roughly four weeks), \*\* (one to two people, roughly six weeks), and \*\*\* (two to three people, eight or more weeks).
+前面各章给了一套很全的工具——从偏好模型与估计，到主动征询、序贯决策、社会汇总，再到公平。但对这些问题最深的理解，还是来自把它们用到开放的问题上。下面这些综合项目按"较长的独立探索"来设计，适合个人或三五人的小组完成。每个项目都参照 CS329H 课程作业的形式：学生要交一份预分析计划、一篇按 NeurIPS 格式写的最终报告（不超过 8 页），以及可复现的代码。项目覆盖本书六个主要章节，难度从具体的实证研究到更有雄心的研究工作都有。难度用星号标注：\*（一人，约四周）、\*\*（一到两人，约六周）、\*\*\*（两到三人，八周以上）。
 
-### Project 1: When Does IIA Fail? Detecting and Modeling Context Effects in Preference Data (\*)
+### 项目 1：独立无关备选什么时候会失效？——在偏好数据中检测并建模情境效应（\*）
 
-**Description.** The Independence of Irrelevant Alternatives assumption (@sec-iia) is the backbone of Bradley-Terry and Plackett-Luce models, yet it is routinely violated in practice---the "red-bus/blue-bus" problem being the canonical example. This project investigates *when and how much* IIA violations matter by designing controlled experiments (or analyzing existing preference datasets) to detect context effects, then comparing Bradley-Terry against richer models that relax IIA.
+**题目说明。** 独立无关备选（@sec-iia）是 Bradley-Terry 与 Plackett-Luce 模型的骨架，但它在实践中经常被违反——"红巴士／蓝巴士"就是最典型的例子。这个项目要研究的是：*在什么情况下、在多大程度上*，违反它会带来影响。做法是设计受控实验（或分析已有的偏好数据集）来检测情境效应，然后把 Bradley-Terry 与放宽这一假定的更丰富模型做对比。
 
-**Suggested methods.**
+**建议方法。**
 
-- Fit a standard Bradley-Terry model (@sec-bradley-terry) and a mixed logit or nested logit model (@sec-beyond-bradley-terry) to the same preference data.
-- Use likelihood ratio tests or AIC/BIC (@sec-model-selection) to quantify whether the richer model provides a statistically significant improvement.
-- Construct synthetic "red-bus/blue-bus" scenarios by introducing near-duplicate items into a choice set and measuring the distortion in estimated utilities.
+- 在同一份偏好数据上，分别拟合标准的 Bradley-Terry 模型（@sec-bradley-terry）与混合 logit 或嵌套 logit 模型（@sec-beyond-bradley-terry）。
+- 用似然比检验或 AIC/BIC（@sec-model-selection），量化更复杂的模型是否带来了统计上显著的提升。
+- 人造一些"红巴士／蓝巴士"情景：往一组选择里加入近似重复的项目，测量估计出来的效用被扭曲了多少。
 
-**Expected deliverables.** A manuscript reporting (1) a dataset with documented IIA violations, (2) a quantitative comparison of Bradley-Terry vs. at least one IIA-relaxing model, and (3) practical guidelines for when practitioners should move beyond Bradley-Terry. Code for all experiments with reproducible results.
+**预期成果。** 一篇报告，内容包括：(1) 一份已证实存在独立无关备选违反的数据集；(2) Bradley-Terry 与至少一个放宽该假定的模型的定量对比；(3) 给实践者的建议：什么时候不该继续用 Bradley-Terry。所有实验的代码与可复现的结果。
 
-### Project 2: Bayesian vs. Frequentist Preference Learning on Real Annotation Data (\*)
+### 项目 2：在真实标注数据上比较贝叶斯与频率学派的偏好学习（\*）
 
-**Description.** Chapter 2 presents three estimation paradigms---maximum likelihood (@sec-mle), Bayesian inference via MCMC (@sec-bayesian), and online learning via the Elo system (@sec-online). How do these approaches compare on real-world human preference data, especially in low-data regimes where uncertainty quantification matters most? This project conducts a systematic comparison using publicly available LLM preference datasets.
+**题目说明。** 第 2 章给出了三种估计范式——最大似然（@sec-mle）、用 MCMC 做贝叶斯推断（@sec-bayesian）、用 Elo 系统做在线学习（@sec-online）。在真实的人类偏好数据上，这几种方法各表现如何？特别是在最需要对不确定性做量化的低数据场景里。这个项目用公开的 LLM 偏好数据集做一次系统的对比。
 
-**Suggested methods.**
+**建议方法。**
 
-- Implement MLE with L2 regularization (@sec-regularization), Bayesian inference with the Laplace approximation (@sec-gp-inference), and Elo updates (@sec-online) for the same Bradley-Terry model.
-- Evaluate predictive accuracy (AUC), calibration, and posterior coverage as a function of dataset size by subsampling.
-- Assess computational cost and convergence diagnostics (@sec-optimization).
+- 分别实现带 L2 正则的最大似然（@sec-regularization）、用拉普拉斯近似做的贝叶斯推断（@sec-gp-inference），以及 Elo 更新（@sec-online）。
+- 通过对数据做子采样，测出预测准确率（AUC）、标定程度与后验覆盖率各自随数据量的变化。
+- 评估计算开销与收敛的诊断指标（@sec-optimization）。
 
-**Expected deliverables.** A manuscript with learning curves showing accuracy and calibration vs. sample size for each method, a discussion of when Bayesian uncertainty is worth the computational overhead, and fully documented code including data preprocessing scripts.
+**预期成果。** 一篇报告，给出各方法的准确率与标定程度随样本量变化的学习曲线，讨论贝叶斯的不确定性量化在什么情况下值回它的计算开销，并附上完整文档化的代码，包括数据预处理的脚本。
 
 ### Project 3: Active Preference Elicitation for Personalized Recommendation (\*\*)
 
-**Description.** When human feedback is expensive, active query selection can dramatically reduce annotation cost. This project builds an end-to-end active preference elicitation system for a concrete domain---such as food preferences, music taste, or movie recommendations---and measures how much the Fisher information framework improves over random querying.
+**题目说明。** When human feedback is expensive, active query selection can dramatically reduce annotation cost. This project builds an end-to-end active preference elicitation system for a concrete domain---such as food preferences, music taste, or movie recommendations---and measures how much the Fisher information framework improves over random querying.
 
-**Suggested methods.**
+**建议方法。**
 
 - Implement a Rasch or factor model (@sec-factor-models) with Fisher-information-based query selection (@sec-measurement, @sec-fisher-information).
 - Compare A-optimal, D-optimal, and E-optimal criteria (@sec-factor-models-active) for selecting the next comparison to present.
 - Collect real preference data from at least 10 participants (or use a realistic simulator) and measure the reduction in queries needed to reach a target prediction accuracy.
 - Optionally extend to the pairwise setting using the active pair selection framework from @sec-pairwise-active.
 
-**Expected deliverables.** A working interactive system (command-line or web-based) that adaptively selects queries, an empirical evaluation showing query savings relative to random selection, and a manuscript discussing the practical benefits and limitations of active elicitation.
+**预期成果。** A working interactive system (command-line or web-based) that adaptively selects queries, an empirical evaluation showing query savings relative to random selection, and a manuscript discussing the practical benefits and limitations of active elicitation.
 
 ### Project 4: Dueling Bandits for A/B Testing with Preference Feedback (\*\*)
 
-**Description.** Traditional A/B testing compares treatments using scalar metrics (click-through rate, revenue), but in many settings the outcome of interest is a human preference judgment---e.g., "Which UI layout do you prefer?" This project formulates A/B testing as a dueling bandit problem and evaluates whether dueling bandit algorithms can identify the best variant faster than naive round-robin comparisons.
+**题目说明。** Traditional A/B testing compares treatments using scalar metrics (click-through rate, revenue), but in many settings the outcome of interest is a human preference judgment---e.g., "Which UI layout do you prefer?" This project formulates A/B testing as a dueling bandit problem and evaluates whether dueling bandit algorithms can identify the best variant faster than naive round-robin comparisons.
 
-**Suggested methods.**
+**建议方法。**
 
 - Implement at least two dueling bandit algorithms from Chapter 4, such as RUCB or Double Thompson Sampling, targeting different winner concepts (Condorcet vs. Borda, @sec-borda).
 - Define appropriate regret metrics for the A/B testing setting and track cumulative regret over time.
 - Simulate a realistic A/B testing scenario with 5--10 variants and heterogeneous user preferences (using mixture models from @sec-factor-models to generate synthetic users).
 - Compare sample efficiency against uniform random pairing and standard Thompson Sampling (@sec-thompson-sampling) on scalar proxy metrics.
 
-**Expected deliverables.** A manuscript presenting regret curves and sample complexity comparisons, a discussion of which winner concept is most appropriate for A/B testing, and modular code that could be adapted to other dueling bandit applications.
+**预期成果。** A manuscript presenting regret curves and sample complexity comparisons, a discussion of which winner concept is most appropriate for A/B testing, and modular code that could be adapted to other dueling bandit applications.
 
 ### Project 5: Preferential Bayesian Optimization for Human-in-the-Loop Design (\*\*)
 
-**Description.** Preferential Bayesian Optimization (PBO) enables optimization of complex objectives---such as the taste of a recipe, the aesthetics of a generated image, or the comfort of a robot trajectory---from pairwise human feedback alone. This project applies PBO to a concrete design problem where scalar evaluation is difficult but pairwise comparison is natural.
+**题目说明。** Preferential Bayesian Optimization (PBO) enables optimization of complex objectives---such as the taste of a recipe, the aesthetics of a generated image, or the comfort of a robot trajectory---from pairwise human feedback alone. This project applies PBO to a concrete design problem where scalar evaluation is difficult but pairwise comparison is natural.
 
-**Suggested methods.**
+**建议方法。**
 
 - Implement the GP-based PBO framework from Chapter 4, including a Gaussian Process preference model with Laplace approximation (@sec-gp-inference) and an acquisition function (Expected Improvement of the Copeland score or Thompson Sampling).
 - Choose a design domain with a continuous parameter space (e.g., color palettes, font configurations, audio equalization settings, or procedurally generated environments).
 - Collect preference feedback from at least 5 participants and track convergence to their preferred design.
 - Compare PBO against random search and, if a scalar proxy is available, against standard Bayesian Optimization.
 
-**Expected deliverables.** A manuscript reporting convergence rates and user satisfaction, a working PBO system with a human-facing interface, and an analysis of how posterior uncertainty evolves with the number of comparisons.
+**预期成果。** A manuscript reporting convergence rates and user satisfaction, a working PBO system with a human-facing interface, and an analysis of how posterior uncertainty evolves with the number of comparisons.
 
 ### Project 6: The DPO-Borda Connection: Empirical Validation on Multi-Annotator Data (\*\*)
 
-**Description.** Chapter 5 establishes a theoretical connection between Direct Preference Optimization and the Borda count (@sec-borda-dpo): DPO finds the policy that maximizes pairwise win rate, i.e., the Borda winner. But does this hold empirically when annotators are heterogeneous and preferences are noisy? This project tests the DPO-Borda connection on real multi-annotator preference data and investigates when the Borda winner diverges from other social choice solutions.
+**题目说明。** Chapter 5 establishes a theoretical connection between Direct Preference Optimization and the Borda count (@sec-borda-dpo): DPO finds the policy that maximizes pairwise win rate, i.e., the Borda winner. But does this hold empirically when annotators are heterogeneous and preferences are noisy? This project tests the DPO-Borda connection on real multi-annotator preference data and investigates when the Borda winner diverges from other social choice solutions.
 
-**Suggested methods.**
+**建议方法。**
 
 - Use a publicly available multi-annotator preference dataset (e.g., from Chatbot Arena or similar).
 - Compute the Borda ranking, Condorcet ranking (if it exists), and plurality ranking from raw annotations.
 - Train a DPO model and compare its implicit ranking to each social choice solution.
 - Analyze cases where the rankings diverge: are these cases where annotators have genuinely heterogeneous preferences, or where the data is simply noisy? Use the mixture model framework from @sec-factor-models to test for latent preference clusters.
 
-**Expected deliverables.** A manuscript quantifying the agreement between DPO-implied rankings and classical social choice rankings, an analysis of when and why they diverge, and reproducible code for all experiments.
+**预期成果。** A manuscript quantifying the agreement between DPO-implied rankings and classical social choice rankings, an analysis of when and why they diverge, and reproducible code for all experiments.
 
 ### Project 7: Auditing a Preference Learning Pipeline for Compounding Bias (\*\*)
 
-**Description.** Chapter 6 demonstrates that small biases at each stage of the preference learning pipeline---elicitation, learning, aggregation, decision---can compound into large disparities (@sec-compounding-unfairness). This project operationalizes that insight by constructing a complete pipeline simulation, injecting realistic biases at each stage, and measuring how they interact.
+**题目说明。** Chapter 6 demonstrates that small biases at each stage of the preference learning pipeline---elicitation, learning, aggregation, decision---can compound into large disparities (@sec-compounding-unfairness). This project operationalizes that insight by constructing a complete pipeline simulation, injecting realistic biases at each stage, and measuring how they interact.
 
-**Suggested methods.**
+**建议方法。**
 
 - Build a simulated preference learning pipeline following the four-stage framework ($\mathcal{E} \to \mathcal{L} \to \mathcal{A} \to \mathcal{D}$) from @sec-pipeline.
 - Model two or more user groups with different base rates of participation, different noise levels, and different preference distributions.
 - At each pipeline stage, introduce a specific bias mechanism: (1) undersampling a group in elicitation (@sec-elicitation-fairness), (2) IIA misspecification for context-dependent preferences (@sec-learning-assumptions), (3) volume-weighted aggregation (@sec-aggregation-fairness), and (4) liberal vs. illiberal decision-making (@sec-liberal-illiberal).
 - Measure group-level disparities in recommendation quality at the pipeline output, and decompose total disparity into contributions from each stage.
 
-**Expected deliverables.** A manuscript with a bias decomposition showing how much each pipeline stage contributes to overall unfairness, concrete recommendations for which stage to prioritize when mitigating bias, and a reusable simulation framework.
+**预期成果。** A manuscript with a bias decomposition showing how much each pipeline stage contributes to overall unfairness, concrete recommendations for which stage to prioritize when mitigating bias, and a reusable simulation framework.
 
 ### Project 8: Mechanism Design for Incentive-Compatible Preference Elicitation (\*\*\*)
 
-**Description.** When users have strategic incentives---e.g., inflating ratings to influence recommendations, or misreporting preferences in a voting system---naive preference elicitation produces biased data. This project designs and evaluates an incentive-compatible mechanism for a specific preference learning application, drawing on the mechanism design framework from Chapter 5 (@sec-mechanism-design).
+**题目说明。** When users have strategic incentives---e.g., inflating ratings to influence recommendations, or misreporting preferences in a voting system---naive preference elicitation produces biased data. This project designs and evaluates an incentive-compatible mechanism for a specific preference learning application, drawing on the mechanism design framework from Chapter 5 (@sec-mechanism-design).
 
-**Suggested methods.**
+**建议方法。**
 
 - Choose a concrete setting where strategic misreporting is plausible (e.g., peer review, course evaluation, or collaborative filtering).
 - Design a mechanism that incentivizes truthful reporting, building on VCG mechanisms or peer prediction from @sec-mechanism-design.
@@ -248,33 +248,33 @@ The chapters of this book develop a rich toolkit---from preference models and es
 - Simulate strategic agents using a mixture of truthful and strategic types, and compare preference estimation quality under your mechanism vs. naive elicitation.
 - Analyze the mechanism's efficiency cost (the "price of incentive compatibility") relative to a setting with truthful agents.
 
-**Expected deliverables.** A manuscript with a formal mechanism description, theoretical analysis of incentive properties, simulation results comparing truthful vs. strategic settings, and implementation code. If applicable, include a discussion of how the mechanism interacts with the fairness considerations from Chapter 6 (@sec-design-principles).
+**预期成果。** A manuscript with a formal mechanism description, theoretical analysis of incentive properties, simulation results comparing truthful vs. strategic settings, and implementation code. If applicable, include a discussion of how the mechanism interacts with the fairness considerations from Chapter 6 (@sec-design-principles).
 
 ### Project 9: Cooperative Inverse Reinforcement Learning for Interactive Preference Learning (\*\*\*)
 
-**Description.** The CIRL framework from Chapter 4 models preference learning as a cooperative game between a human and an agent, where the agent's actions serve both to accomplish tasks and to elicit information about the human's reward function. This project implements a CIRL-style agent in a simplified domain and studies how cooperative interaction compares to passive preference observation.
+**题目说明。** The CIRL framework from Chapter 4 models preference learning as a cooperative game between a human and an agent, where the agent's actions serve both to accomplish tasks and to elicit information about the human's reward function. This project implements a CIRL-style agent in a simplified domain and studies how cooperative interaction compares to passive preference observation.
 
-**Suggested methods.**
+**建议方法。**
 
 - Define a gridworld or simple continuous environment where a human has a latent reward function over outcomes.
 - Implement a CIRL agent that maintains a belief over reward functions and selects actions to jointly maximize expected reward and information gain, following the framework from Chapter 4.
 - Compare against (1) a passive agent that observes demonstrations and infers preferences via inverse reinforcement learning, and (2) an active agent that can ask explicit comparison queries (@sec-active-learning).
 - Measure convergence rate to the true reward function, cumulative regret, and the human's perceived interaction quality (if using human participants) or simulated interaction cost.
 
-**Expected deliverables.** A manuscript presenting the CIRL formulation for your domain, regret comparisons across the three approaches, an analysis of when cooperative interaction provides the most benefit (e.g., ambiguous rewards, high-dimensional preference spaces), and well-documented code.
+**预期成果。** A manuscript presenting the CIRL formulation for your domain, regret comparisons across the three approaches, an analysis of when cooperative interaction provides the most benefit (e.g., ambiguous rewards, high-dimensional preference spaces), and well-documented code.
 
 ### Project 10: Pluralistic Alignment---Learning and Serving Multiple Preference Models (\*\*\*)
 
-**Description.** Most preference learning systems collapse diverse human preferences into a single aggregate model. Drawing on Arrow's Impossibility Theorem (@sec-aggregation), the DPO-Borda connection (@sec-borda-dpo), and the fairness framework of Chapter 6, this project explores an alternative: learning *multiple* preference models that represent distinct value systems, and allowing users or institutions to choose among them.
+**题目说明。** Most preference learning systems collapse diverse human preferences into a single aggregate model. Drawing on Arrow's Impossibility Theorem (@sec-aggregation), the DPO-Borda connection (@sec-borda-dpo), and the fairness framework of Chapter 6, this project explores an alternative: learning *multiple* preference models that represent distinct value systems, and allowing users or institutions to choose among them.
 
-**Suggested methods.**
+**建议方法。**
 
 - Start with a multi-annotator preference dataset and fit a mixture model to discover latent preference clusters (@sec-factor-models, @sec-bayesian).
 - Train separate DPO or reward models for each cluster and evaluate whether cluster-specific models outperform a single aggregate model on within-cluster prediction accuracy.
 - Investigate the social choice properties of the cluster-level approach: does serving cluster-specific models avoid Arrow-style impossibilities? Under what conditions does it introduce new fairness concerns (e.g., stereotype reinforcement)?
 - Design a user-facing mechanism for selecting among preference models, and evaluate whether users can meaningfully choose the model that best represents their values.
 
-**Expected deliverables.** A manuscript with (1) evidence that latent preference clusters exist in real data, (2) a comparison of pluralistic vs. aggregate alignment, (3) a discussion of the fairness trade-offs involved, and (4) code for cluster discovery, model training, and evaluation. This project connects nearly every chapter of the book and is suitable for an ambitious team.
+**预期成果。** A manuscript with (1) evidence that latent preference clusters exist in real data, (2) a comparison of pluralistic vs. aggregate alignment, (3) a discussion of the fairness trade-offs involved, and (4) code for cluster discovery, model training, and evaluation. This project connects nearly every chapter of the book and is suitable for an ambitious team.
 
 ## A Practitioner's Checklist
 
