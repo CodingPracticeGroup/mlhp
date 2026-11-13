@@ -63,8 +63,7 @@ preference: $x_1 \succ x_2$ implies $f(x_1) > f(x_2)$.
         `pbo/forrester_duel.py`.
 
     (ii) **Copeland Acquisition (Coding, 4 points):** Implement
-         `copeland_acquisition`. Run `forrester_duel.py` and briefly
-         discuss any patterns you observe in the chosen duels (black Xs
+         实现 `copeland_acquisition`。运行 `forrester_duel.py`，并简要讨论被选中的对决（图中的黑色 X）呈现出的规律。
          on the heatmap).
 
 ::: {.callout-note title="code"}
@@ -259,22 +258,15 @@ if __name__ == "__main__":
 
 ### Question 2: Linear Dueling Bandit (30 points) {#sec-question-2-linear-dueling-bandit-30-points .unnumbered}
 
-In the linear dueling bandit problem, feedback is provided through
-pairwise comparisons between actions, rather than direct rewards.
-Consider a finite set of $K$ actions, each represented by a feature
-vector $x_1, x_2, \dots, x_K \in \mathbb{R}^d$. Let the unknown
-preference scores be $f(x_i) = \theta^\top x_i$ and
-$f(x_j) = \theta^\top x_j$, where $\theta \in \mathbb{R}^d$ is an
-unknown parameter vector. The goal is to identify the best action by
-iteratively comparing pairs of actions while minimizing cumulative
-regret. Using qEUBO from <https://arxiv.org/pdf/2303.15746>, complete
+在线性对决老虎机问题中，反馈来自动作之间的两两比较，而不是直接的奖励。考虑一个有 $K$ 个动作的有限集合，每个动作用一个特征向量
+表示，$x_1, x_2, \dots, x_K \in \mathbb{R}^d$。设未知的偏好得分为 $f(x_i) = \theta^\top x_i$ 与 $f(x_j) = \theta^\top x_j$，
+其中 $\theta \in \mathbb{R}^d$ 是未知的参数向量。目标是通过反复比较动作对来找出最好的动作，同时把累计遗憾降到最低。
+请依据 qEUBO（<https://arxiv.org/pdf/2303.15746>）完成下面的问题。
 the following:
 
 (a) **Acquisition Functions for Regret Minimization (Written, 10
-    points)**: Write out the expression for the acquisition function
-    Expected Improvement discussed in Q1 and qEUBO in the context of the
-    linear dueling bandit. Discuss conditions under which each
-    acquisition function could outperform the others in minimizing
+    分）** 请分别写出第 1 题讨论过的期望改进采集函数，以及 qEUBO，在线性对决老虎机中的表达式。
+    讨论在什么条件下，某一种采集函数在降低累计遗憾上会优于另一种。
     cumulative regret.
 
 (b) **Experimental Evaluation of Acquisition Functions (Written +
