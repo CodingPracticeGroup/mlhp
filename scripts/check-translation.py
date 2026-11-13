@@ -32,11 +32,32 @@ def feats(t: str):
     f["cell_opts"] = sorted(re.findall(r"^#\|\s*([A-Za-z0-9_.-]+)", t, flags=re.M))
     f["html_attrs"] = sorted(re.findall(r"\{\\.([A-Za-z0-9_#.\-=\s]+)\}", t))
     f["math_cmds"] = sorted(set(re.findall(r"\\[A-Za-z]+\{", t)))
+    # 代码围栏内的内容必须逐字符一致（代码注释也不翻译）
+    f["code_blocks"] = re.findall(r"^```(?:\{[^}]*\})?\n(.*?)^```", t, flags=re.S | re.M)
     f["_items"] = {
         "display_math": re.findall(r"\$\$(?:.*?)\$\$", t, flags=re.S),
-        "inline_math": re.findall(r"(?<!\$)\$(?!\$)(?:[^$\n]|\\.)+?\$(?!\$)", t),
+        "inline_math": math_spans(t),
     }
     return f
+
+
+def math_spans(t: str):
+    """按行取 $...$ 之间的内容（跳过代码围栏）。用奇偶配对，不受相邻中文引号影响。"""
+    # 先去掉行间公式，避免一行里出现成对的 $$ 打乱奇偶
+    t = re.sub(r"\$\$(?:.|\n)*?\$\$", " ", t)
+    out, in_fence = [], False
+    for line in t.splitlines():
+        if line.lstrip().startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence or "$" not in line:
+            continue
+        parts = line.split("$")
+        for i in range(1, len(parts), 2):
+            span = parts[i]
+            if span and "\n" not in span:
+                out.append(span)
+    return out
 
 
 def item_diff(key, base, new):

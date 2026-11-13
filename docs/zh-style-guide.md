@@ -188,14 +188,23 @@
 1. `docs/`、`scripts/`、`.github/` 是本分支新增的，不属于书的内容。
 2. `index.qmd` 开头增加一个"关于这个中文译本"的说明框（原文没有）。
 3. `_quarto.yml`：新增 `lang: zh`；`crossref` 前缀改为中文/`§`；删掉 `language.crossref-ch-prefix`、`google-analytics`、`downloads: [pdf]`；`repo-url` 指向本 fork；书名副标题注明是译本。
-4. 习题：新增 `src/psets/_quarto.yml`（嵌套项目，渲染到 `_book/src/psets/`），并给 `pset1`–`pset3` 加了带标题的 YAML 头（原文没有 front matter，直接渲染出来是无标题页）。原因见 `_quarto.yml` 顶部注释第 5 条。
+4. 习题：`src/psets/pset1.qmd`–`pset3.qmd` 原文没有 YAML front matter，译稿加上带标题的头部，否则直接渲染出来是没有标题、没有书壳的裸页。曾尝试新增嵌套项目 `src/psets/_quarto.yml`，但它引用的 SCSS 字体路径相对于该目录解析，构建报 `lstat .../resources/fonts/et-book/roman-line-figures.ttf` 不存在而失败，因此删除；习题目前仍未接入构建，`src/teaching.qmd` 里的习题链接暂时指向 GitHub 上的源文件。`project.render` 里追加习题文件也无效（book 类型只渲染书内文件，实测仍只输出 11 页）。
 5. `src/teaching.qmd`：习题 4 一行注明"上游仓库里的这个文件是空的，暂未提供内容"（`src/psets/pset4.qmd` 为 0 字节）。
 6. `license.qmd`：删掉 hits.seeyoufarm 访客计数徽章（它统计的是 mlhp.stanford.edu 的访问量，放在译本上会误导读者），改为写明原作与本译本的授权归属。
 7. `src/notation.qmd`：原英文那句"Introduced 列标明符号首次出现的章节"，表里其实没有这一列，因此译成"每一节标明这些记号主要出现在哪一章"。这是 upstream 自身的文实不符。
 8. 上游正文有 3 处引用在 `src/references.bib` 里没有对应条目（`auer_cesa-bianchi_fischer_2002`、`kahneman_tversky_1979`、`mcfadden1981econometric`），渲染时显示为空。原文即如此，本分支未擅自补造条目。
-5. `license.qmd`：删掉 hits.seeyoufarm 访客计数徽章（它统计的是 mlhp.stanford.edu 的访问量，放在译本上会误导读者），改为写明原作与本译本的授权归属。
-6. `src/notation.qmd`：原英文那句"Introduced 列标明符号首次出现的章节"，表里其实没有这一列，因此译成"每一节标明这些记号主要出现在哪一章"。这是 upstream 自身的文实不符。
-7. 上游正文有 3 处引用在 `src/references.bib` 里没有对应条目（`auer_cesa-bianchi_fischer_2002`、`kahneman_tversky_1979`、`mcfadden1981econometric`），渲染时显示为空。原文即如此，本分支未擅自补造条目。
+9. `src/chap1.qmd`：原"本章视频导览"框里的 `{{< video animations/ch1/chapter1_narrated.mp4 >}}` 已删除，改为一句说明：该 mp4 被仓库 `.gitignore` 的 `*.html`/`*.mp4` 规则排除、未随仓库发布，且上游站点同一路径返回 404。
+10. `src/chap1.qmd`：Metropolis-Hastings 那段原文有一句语法不完整的句子（`the distribution is a proposal $P$ for $x_{t+1}$ is made via sampling from ...`，其中 $P$ 在下文没有出现，公式里用的是 $\tilde Q$）。译文按上下文与公式译为"从概率核 $Q(\bullet | x_t)$ 采样得到提议分布 $\tilde Q(\bullet | x_t)$"，未保留悬空的 $P$。
+11. `src/chap1.qmd`：一处把 `[@breiman2001statistical; @rudin2022interpretable]` 写成两条并排的 `@` 引用，渲染结果相同。
+
+## 5.1 校验脚本的输出怎么读
+
+`scripts/check-translation.py` 有两类已知的假阳性，出现时要人工核对而不是直接改正文：
+
+1. `inline_math`：脚本按行用 `$` 配对切分，中英混排时切分边界会偏移，导致若干条目"看似丢失/新增"（例如原文 `$k > 2$` 与译文 `$k>2$` 会被算成两条）。核对方法是把差异条目在译文里逐个搜索。第 1 章已逐条核对，5 处"丢失"均在正文中。
+2. 有意偏离（见本节）产生的 `div_blocks`、`shortcodes` 差异。
+
+其余项（标题、行间公式、代码块、引用键、标签、单元格选项、`\text{}` 等命令）必须完全一致。
 
 ## 6. 交付前自查
 
