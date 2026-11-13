@@ -402,7 +402,7 @@ print(f"Next item to recommend: {j_star}")
 
 ::: {.callout-note title="Code: Linear Thompson Sampling Simulation" collapse="false"}
 
-This simulation runs Thompson Sampling with linear utility over multiple rounds, tracking how the posterior concentrates and regret accumulates.
+这段模拟让线性效用下的汤普森采样跑很多轮，观察后验如何收紧、遗憾如何累积。
 
 ```{pyodide-python}
 #| autorun: true
@@ -531,58 +531,58 @@ print(f"Final cumulative regret: {regret[-1]:.2f}")
 
 :::
 
-## Thompson Sampling under Nonlinear Objective
+## 非线性目标下的汤普森采样
 
-The linear formulation assumes that a user’s latent utility varies linearly with item features. In practice, preference landscapes are often **highly nonlinear**: users may favor intermediate difficulty, exhibit saturation, or respond differently to combinations of attributes. To capture such complex relations, we move from a **parametric vector representation** $(U_i)$ to a **nonparametric function representation** $(h_i)$.
+线性写法假定用户的潜在效用随物品特征线性变化。可现实里，偏好的地形常常**强烈非线性**：有人偏爱难度适中的东西，有人会有"饱和"现象（好到一定程度就不再更满意），还有人面对几个属性组合时的反应完全不一样。为了刻画这种复杂关系，我们从**参数化的向量表示** $(U_i)$ 转向**非参数的函数表示** $(h_i)$。
 
-A **Gaussian Process (GP)** defines a distribution over functions:
+**高斯过程（Gaussian Process, GP）** 定义的是"函数上的分布"：
 $$
 h_i \sim \mathcal{GP}(m(\cdot), k(\cdot, \cdot)),
 $$ {#eq-gp-prior}
-where $m(V)$ is the mean function (often assumed to be zero) and $k(V, V')$ is the **kernel**, encoding similarity between items. Intuitively, a GP asserts that **similar items yield similar utilities**, with the kernel controlling smoothness and generalization.
+这里 $m(V)$ 是均值函数（通常直接取零），$k(V, V')$ 是**核函数**，用来刻画两个物品之间的相似度。直观上，高斯过程就是在主张"**相似的物品，效用也相似**"，而有多相似、能外推到多远，全由核函数控制。
 
-For any finite collection of inputs $V_{1:T}$, the corresponding function values
+任取有限一组输入 $V_{1:T}$，对应的函数值
 $$
 H_{i, 1:M} = [h_i(V_1), \dots, h_i(V_M)]
 $$ {#eq-gp-function-values}
-follow a multivariate normal distribution:
+服从多元正态分布：
 $$
 H_{i, 1:M} \sim \mathcal{N}(m_{1:M}, K_{1:M,1:M}),
 $$ {#eq-gp-multivariate-normal}
-where $(K)_{jj'} = k(V_j, V_{j'})$.
+其中 $(K)_{jj'} = k(V_j, V_{j'})$。
 
 
-The probability density function (PDF) of a multivariate normal random variable
+多元正态随机变量
 $$
 H \sim \mathcal{N}(m, K)
 $$ {#eq-mvn-definition}
-is given by
+的概率密度函数（PDF）为
 $$
 p(H) = \frac{1}{(2\pi)^{t/2} |K|^{1/2}}
 \exp \Big(-\tfrac{1}{2}(H-m)^\top K^{-1} (H-m) \Big).
 $$ {#eq-mvn-pdf}
-Taking the logarithm yields
+取对数得到
 $$
 \log p(H) = -\tfrac{1}{2}(H-m)^\top K^{-1} (H-m) - \tfrac{1}{2}\log|K| - \tfrac{t}{2}\log(2\pi).
 $$ {#eq-mvn-log-pdf}
 
-In most inference contexts, constant terms (those not depending on $H$) can be dropped, since they cancel when normalizing the posterior.
+在大多数推断场合，与 $H$ 无关的常数项可以直接丢掉——归一化后验时它们会被约掉。
 
-This nonparametric formulation is advantageous because:
+这种非参数的写法有几个好处：
 
-* It **automatically adapts model complexity** to the data through the kernel.
-* It **provides closed-form posterior updates** under Gaussian noise.
-* It **generalizes across items** by exploiting smoothness in feature space.
+* 它通过核函数**让模型复杂度自动适应数据**。
+* 高斯噪声下，它**有闭式的后验更新**。
+* 它利用特征空间里的光滑性，**能对没见过的物品做外推**。
 
-The **RBF (Radial Basis Function) kernel** is particularly common:
+最常用的是 **RBF（径向基，Radial Basis Function）核函数**：
 $$
 k(V, V') = \sigma^2 \exp\left(-\frac{\|V - V'\|^2}{2\ell^2}\right),
 $$ {#eq-rbf-kernel}
-where $\ell$ is the **lengthscale** (controlling smoothness) and $\sigma^2$ is the **variance** (controlling amplitude). Small lengthscales produce wiggly functions; large lengthscales produce smooth functions.
+其中 $\ell$ 是**长度尺度（lengthscale）**，控制函数有多平滑；$\sigma^2$ 是**方差**，控制起伏的幅度。长度尺度小，函数就扭来扭去；长度尺度大，函数就很平缓。
 
 {{< include _plt_setup.qmd >}}
 
-::: {.callout-note title="Code: Kernel Comparison and GP Prior Samples" collapse="false"}
+::: {.callout-note title="代码：核函数对比与高斯过程先验采样" collapse="false"}
 
 ```{pyodide-python}
 #| autorun: true
