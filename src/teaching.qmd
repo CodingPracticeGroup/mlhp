@@ -23,9 +23,9 @@ format: html
 
 | 习题 | 涉及主题 |
 |:------------|:-------|
-| [习题 1](https://github.com/CodingPracticeGroup/mlhp/blob/zh/src/psets/pset1.qmd) | 基础 |
-| [习题 2](https://github.com/CodingPracticeGroup/mlhp/blob/zh/src/psets/pset2.qmd) | 学习 |
-| [习题 3](https://github.com/CodingPracticeGroup/mlhp/blob/zh/src/psets/pset3.qmd) | 偏好征询 |
+| [习题 1](psets/pset1.html) | 基础 |
+| [习题 2](psets/pset2.html) | 学习 |
+| [习题 3](psets/pset3.html) | 偏好征询 |
 | 习题 4 | 决策（上游仓库里的这个文件是空的，暂未提供内容） |
 
 目前习题链接指向的是仓库里的源文件：习题正文需要真正执行代码（第 1 题就要 `torch`、`transformers`、`peft`），本译本还没把它接进构建；上游站点同样没有发布习题页面。

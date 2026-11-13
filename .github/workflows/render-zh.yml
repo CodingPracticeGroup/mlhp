@@ -48,6 +48,11 @@ jobs:
       - name: 渲染 HTML
         run: quarto render --to html
 
+      # 习题集是嵌套项目（src/psets/_quarto.yml），主项目不会渲染它们，需单独渲染到 _book/src/psets/
+      - name: 渲染习题集
+        working-directory: src/psets
+        run: quarto render pset1.qmd pset2.qmd pset3.qmd
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _book

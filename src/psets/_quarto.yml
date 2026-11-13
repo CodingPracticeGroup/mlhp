@@ -6,7 +6,9 @@
 #   2. execute: eval: false —— 习题里的代码单元要 GPU 和外部数据集（pset1 要下载 Gemma，
 #      pset2/pset3 要真实数据集），CI 里跑不动，网页上也不该执行；上游站点上的习题页
 #      同样只有代码、没有执行结果。
-#   3. 主项目不会渲染这些文件（book 类型的 project.render 只渲染 chapters 列出的页面），
+#   3. 这里用 `resources` 软链接指回仓库根的 resources/：主题 scss 里的字体是按项目根相对路径
+#      引用的（resources/fonts/...），嵌套项目的根是本目录，不链接就会报找不到字体而渲染失败。
+#   4. 主项目不会渲染这些文件（book 类型的 project.render 只渲染 chapters 列出的页面），
 #      所以这里显式列出三份习题；pset4.qmd 在上游是 0 字节空文件，不纳入。
 
 project:
@@ -33,8 +35,8 @@ execute:
 format:
   html:
     theme:
-      light: [flatly, ../../resources/scss/global.scss]
-      dark: [darkly, ../../resources/scss/global.scss]
+      light: [flatly, resources/scss/global.scss]
+      dark: [darkly, resources/scss/global.scss]
     code-fold: false
     code-overflow: scroll
     code-line-numbers: true
