@@ -142,7 +142,7 @@ In the **nonlinear case**, a common choice is to place a Gaussian process prior 
 
 {{< include _plt_setup.qmd >}}
 
-::: {.callout-note title="Code: Exploration vs Exploitation Visualization" collapse="false"}
+::: {.callout-note title="代码：探索与利用的可视化" collapse="false"}
 
 ```{pyodide-python}
 #| autorun: true
@@ -232,88 +232,88 @@ print(f"Thompson Sampling selected best arm {int(counts_ts[best_arm])}/{T} times
 
 :::
 
-## Thompson Sampling under Linear Objective {#sec-thompson-sampling}
+## 线性目标下的汤普森采样 {#sec-thompson-sampling}
 
-Thompson Sampling (TS) is among the most conceptually transparent and empirically successful methods for decision-making under uncertainty. It converts Bayesian inference into a simple randomized decision rule: sample a plausible world, then act optimally within it. Formally, suppose we maintain a posterior distribution over the latent user embedding $p(U_i \mid \mathcal{D}_t) \propto p(\mathcal{D}_t \mid U_i) p(U_i),$ where $\mathcal{D}_t = {(V_j, Y_{ij})}_{j=1}^t$ denotes the user’s observed responses. At each round $t+1$, Thompson Sampling draws a single sample $\tilde{U}_i^{(t)} \sim p(U_i \mid \mathcal{D}_t),$
-and then chooses the next item that maximizes the sampled expected utility: $j^* = \arg\max_j \tilde{U}_i^{(t)\top} V_j.$
-This randomized strategy naturally balances exploration and exploitation: if posterior uncertainty is large, different draws $\tilde{U}_i^{(t)}$ lead to diverse item choices; as the posterior concentrates, the policy converges to greedy exploitation.
+汤普森采样（Thompson Sampling, TS）是"不确定条件下如何做决策"这个问题上思路最透明、实测也最有效的方法之一。它把贝叶斯推断变成一条很简单的随机化决策规则：先抽出一个可能的世界，然后在这个世界里做最优选择。形式化地说，假设我们一直维护着隐用户向量的后验 $p(U_i \mid \mathcal{D}_t) \propto p(\mathcal{D}_t \mid U_i) p(U_i)$，其中 $\mathcal{D}_t = {(V_j, Y_{ij})}_{j=1}^t$ 是这位用户截至目前的观测结果。
+然后在第 $t+1$ 轮，抽出单个样本 $\tilde{U}_i^{(t)} \sim p(U_i \mid \mathcal{D}_t)$，接着选那个"在这个抽样下期望效用最大"的物品：$j^* = \arg\max_j \tilde{U}_i^{(t)\top} V_j$。
+这种随机化的策略天生就在探索与利用之间取得平衡：后验不确定性大时，不同的抽样 $\tilde{U}_i^{(t)}$ 会导向不同的选择；随着后验收紧，策略就收敛到贪心利用。
 
-::: {.callout-warning title="Common Pitfall: Thompson Sampling Requires a Correct Posterior"}
-Thompson Sampling's theoretical guarantees depend on maintaining an **accurate posterior** over the latent parameters. A common mistake is to use a poor approximation (e.g., a point estimate, or a Gaussian approximation when the true posterior is multimodal) and still expect TS to explore effectively. If the posterior is overconfident, TS degenerates to greedy exploitation too early; if underconfident, it wastes rounds exploring suboptimal items. The **Laplace approximation** works well for logistic likelihoods (Bradley-Terry), but always check that the posterior is unimodal. Also, do **not** add explicit exploration bonuses (as in UCB) on top of Thompson Sampling — the randomization *is* the exploration mechanism, and adding bonuses breaks the balance.
+::: {.callout-warning title="常见坑：汤普森采样要求后验是对的"}
+汤普森采样的理论保证，依赖于对隐参数维护一个**准确的后验**。常见的错误是：用一个很粗糙的近似（比如一个点估计，或者真实后验明明是多个峰却硬用高斯去近似），却仍然指望汤普森采样能有效探索。后验过于自信，它很早就退化成贪心利用；后验过于保守，它就把轮次浪费在次等物品上。**拉普拉斯近似**对逻辑斯蒂似然（Bradley-Terry）效果不错，但一定要先确认后验是单峰的。还有一点：**别**在汤普森采样上再加显式的探索奖励（像 UCB 那样）——随机化*本身*就是它的探索机制，再叠一层奖励反而破坏了平衡。
 :::
 
-::: {.callout-caution title="Worked Example: Thompson Sampling Intuition" collapse="false"}
-Suppose we have 3 items and a 1D user embedding. After 5 observations, the posterior over $U$ is approximately $\mathcal{N}(1.2, 0.5^2)$.
+::: {.callout-caution title="完整算例：汤普森采样为什么会自己探索" collapse="false"}
+设有 3 个物品，用户嵌入是一维的。观测 5 次之后，$U$ 的后验近似为 $\mathcal{N}(1.2, 0.5^2)$。
 
-**Round 1:** Draw $\tilde{U} = 1.6$ (high sample). With item features $V_1 = 0.5, V_2 = 1.0, V_3 = -0.3$:
+**第 1 轮：** 抽出 $\tilde{U} = 1.6$（偏大的样本）。物品特征为 $V_1 = 0.5, V_2 = 1.0, V_3 = -0.3$：
 
-- Expected utilities: $\tilde{U} \cdot V_1 = 0.80$, $\tilde{U} \cdot V_2 = 1.60$, $\tilde{U} \cdot V_3 = -0.48$
-- Select $j^* = 2$ (highest utility under this sample)
+- 期望效用：$\tilde{U} \cdot V_1 = 0.80$、$\tilde{U} \cdot V_2 = 1.60$、$\tilde{U} \cdot V_3 = -0.48$
+- 选 $j^* = 2$（在这个样本下效用最高）
 
-**Round 2:** Draw $\tilde{U} = 0.7$ (low sample). Now:
+**第 2 轮：** 抽出 $\tilde{U} = 0.7$（偏小的样本）。此时：
 
-- Expected utilities: $0.35$, $0.70$, $-0.21$
-- Still select $j^* = 2$, but the margin is smaller
+- 期望效用：$0.35$、$0.70$、$-0.21$
+- 仍然选 $j^* = 2$，但领先的优势变小了
 
-**Round 3:** Draw $\tilde{U} = -0.1$ (rare tail sample). Now:
+**第 3 轮：** 抽出 $\tilde{U} = -0.1$（少见的尾部样本）。此时：
 
-- Expected utilities: $-0.05$, $-0.10$, $0.03$
-- Select $j^* = 3$ — **exploration!** The unlikely sample led us to try a different item.
+- 期望效用：$-0.05$、$-0.10$、$0.03$
+- 于是选 $j^* = 3$——**这就是探索！** 一个不太可能出现的样本，带着我们去试了另一件物品。
 
-**Key insight:** Thompson Sampling explores *automatically* because posterior uncertainty generates diverse samples. Early on (wide posterior), many different items get selected. As the posterior narrows around the true $U$, exploration decreases naturally — no explicit exploration schedule needed.
+**关键洞见：** 汤普森采样会*自动*探索——因为后验的不确定性自然会造出五花八门的样本。开头（后验很宽）会选中很多不同的物品；随着后验收窄到真实的 $U$ 附近，探索自然减少——不需要另外安排什么"探索计划表"。
 :::
 
-Under binary or preference feedback modeled by a logistic link,
+当观测是二值的、或者按逻辑斯蒂连接函数建模的偏好反馈时，
 $$
 p(Y_{ij}=1 \mid U_i, V_j) = \sigma(U_i^\top V_j),
 $$ {#eq-logistic-link}
-the posterior becomes non-Gaussian and analytically intractable. We therefore approximate it with a Laplace approximation, replacing the true posterior with a local Gaussian centered at the mode (the MAP estimate).
+后验就不再是高斯的，也没有解析形式。因此我们用拉普拉斯近似来做替代：用一个以众数（即 MAP 估计）为中心的局部高斯去代替真实后验。
 
-Let the log-posterior be:
+记对数后验为：
 $$
 \ell(U_i) = \log p(U_i) + \sum_{j \in \mathcal{D}_t} \log p(Y_{ij} \mid U_i).
 $$ {#eq-log-posterior}
-We expand $\ell(U_i)$ around its maximum a posteriori estimate $\hat{U}_i$:
+把 $\ell(U_i)$ 在后验众数 $\hat{U}_i$ 附近展开：
 $$
 \ell(U_i) \approx \ell(\hat{U}_i) - \tfrac{1}{2}(U_i - \hat{U}_i)^\top G (U_i - \hat{U}_i),
 $$ {#eq-laplace-expansion}
-where $G = -\nabla^2_{U_i} \ell(\hat{U}_i)$ is the negative Hessian of the log-posterior. This yields the Gaussian approximation:
+其中 $G = -\nabla^2_{U_i} \ell(\hat{U}_i)$ 是对数后验的负 Hessian。于是得到高斯近似：
 $$
 p(U_i \mid \mathcal{D}_t) \approx \mathcal{N}(\hat{U}_i, G^{-1}).
 $$ {#eq-laplace-approximation}
 
-In the logistic model,
+在逻辑斯蒂模型里，
 $$
 G = I + \sum_{j} p_j(1-p_j) V_j V_j^\top,
 $$ {#eq-hessian-logistic}
-where $p_j = \sigma(\hat{U}_i^\top V_j)$ and $I$ arises from the Gaussian prior $p(U_i) = \mathcal{N}(0, I)$.
+其中 $p_j = \sigma(\hat{U}_i^\top V_j)$，而 $I$ 来自高斯先验 $p(U_i) = \mathcal{N}(0, I)$。
 
-At each time step $t$:
+每一时刻 $t$ 做四步：
 
-1. **Update posterior approximation**
-   Compute $\hat{U}_i$ by maximizing the log-posterior:
+1. **更新后验近似**
+   用最大对数后验算出 $\hat{U}_i$：
 $$
 \hat{U}_i = \arg\max_{U_i} \Big[\sum_{j\in\mathcal{D}_t} Y_{ij}\log\sigma(U_i^\top V_j) + (1-Y_{ij})\log(1-\sigma(U_i^\top V_j)) - \tfrac{1}{2}|U_i|^2 \Big].
 $$ {#eq-map-estimate}
 
-2. **Compute Hessian at the mode**
+2. **在众数处算 Hessian**
    $$
    G = I + \sum_{j} p_j(1-p_j) V_j V_j^\top.
    $$ {#eq-hessian-step}
 
-3. **Sample a posterior draw**
+3. **从后验里抽一个样本**
    $$
    \tilde{U}_i^{(t)} \sim \mathcal{N}(\hat{U}_i, G^{-1}).
    $$ {#eq-posterior-sample}
 
-4. **Select next item**
+4. **选出下一个物品**
    $$
    j^* = \arg\max_j \tilde{U}_i^{(t)\top} V_j.
    $$ {#eq-item-selection}
 
-This algorithm naturally unifies measurement and decision: the posterior (a measurement construct) drives the sampling rule (a decision construct).
+这套算法把测量与决策自然地合到了一起：后验（一个测量意义上的概念）驱动了抽样规则（一个决策意义上的动作）。
 
-::: {.callout-note title="Code: Thompson Sampling with Laplace Approximation"}
+::: {.callout-note title="代码：带拉普拉斯近似的汤普森采样"}
 
 ```{pyodide-python}
 import torch

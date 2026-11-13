@@ -14,7 +14,8 @@
     PYEOF
 
 规则：命中的那一行到"下一条空行之前的最后一行"会被整段替换？——不会，
-这里只替换匹配到的**那一行**；需要一次替换多行时，把起止行写清楚用 splice.py。
+这里只替换匹配到的**那一行**，所以给出的新内容必须是这一行的完整内容。
+同一段里的两个片段若落到同一行，会互相覆盖——脚本会跳过第二段并提醒。
 """
 import sys
 
@@ -40,12 +41,16 @@ def main() -> int:
         blocks.append(cur)
 
     lines = open(path, encoding="utf-8").read().split("\n")
-    todo = []
+    todo, seen = [], {}
     for key, body in blocks:
         hits = [i for i, ln in enumerate(lines) if key in ln]
         if len(hits) != 1:
             print(f"!! 匹配到 {len(hits)} 处，跳过：{key[:60]}")
             continue
+        if hits[0] in seen:  # 两段新内容落到同一行会互相覆盖，必须避免
+            print(f"!! 与「{seen[hits[0]][:40]}」落在同一行 {hits[0] + 1}，跳过：{key[:40]}")
+            continue
+        seen[hits[0]] = key
         todo.append((hits[0], body, key))
     for idx, body, key in sorted(todo, reverse=True):
         lines[idx : idx + 1] = body
