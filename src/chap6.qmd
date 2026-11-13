@@ -2268,25 +2268,25 @@ $$ {#eq-exercise-nosy-utility}
 
 下面这些开放题，请就偏好学习系统中的公平、价值与治理做多一步的思考。可用于课堂讨论、书面作业或小组项目。
 
-1. **Inversion Problem Severity**: When is the inversion problem (@sec-inversion-problem) most severe? Consider domains where behavior strongly diverges from mental state (addiction, manipulation, fatigue, time pressure). How should preference learning systems handle cases where clicks/engagement ≠ satisfaction? Should they attempt to infer mental state, or is that itself a form of paternalism?
+1. **反演问题什么时候最严重**：反演问题（@sec-inversion-problem）在哪些场景里最严重？请考虑那些行为与心理状态差别很大的领域（成瘾、被引导、疲劳、时间压力）。当点击和使用时长 ≠ 满意时，偏好学习系统该怎么办？它该去推断心理状态吗——这本身算不算一种家长主义？
 
-2. **Sen's Nosy Preferences**: Sen's framework (@sec-liberal-illiberal) distinguishes nosy from non-nosy preferences. But many "nosy" preferences seem justified—parents' preferences over children's choices, experts' preferences over safety regulations, community standards for harmful content. What formal criteria could distinguish *justified* from *unjustified* nosy preferences? Where do you draw the line?
+2. **森的"管得宽"的偏好**：森的框架（@sec-liberal-illiberal）区分"管得宽"与非"管得宽"的偏好。可很多"管得宽"的偏好看起来很有道理——父母对子女选择的意见、专家对安全规制的意见、共同体对有害内容的标准。能不能给出形式化的判据，把*有道理的*"管得宽"偏好与*没道理的*区分开？你认为线该划在哪里？
 
-3. **Fairness Prioritization in Your Domain**: Individual and group fairness are often incompatible (@sec-individual-group-fairness). In a preference learning system for your research domain or project, which would you prioritize? How would you justify this choice to stakeholders who care about the other criterion? What constraints or compensating measures could partially satisfy the non-prioritized criterion?
+3. **在你自己的领域里怎么排优先级**：个体公平与群体公平常常不相容（@sec-individual-group-fairness）。在你研究的领域或手上的项目里，做一个偏好学习系统，你会优先满足哪一条？怎么向更在意另一条的利益相关者解释？可以用哪些约束或补偿措施，把没被优先考虑的那条也部分满足？
 
-4. **Institutional Structures for Value Choices**: This chapter argues that technical choices are never value-neutral—engineers embed values whether they acknowledge it or not. But engineers often lack training in ethics, political philosophy, and affected communities' lived experiences. What institutional structures should guide these value choices? Professional standards (like medical ethics)? Regulatory oversight (like FDA for drugs)? Participatory design (community advisory boards)? Some combination? Defend your answer.
+4. **价值选择该由什么制度来把关**：本章主张技术选择从来不是价值中立的——工程师承认与否，价值都已经被写进去了。可工程师大多没有受过伦理学、政治哲学的训练，也缺少受影响群体的亲身经历。这些价值选择该由什么制度来引导？职业规范（像医学伦理那样）？监管（像药监部门审药那样）？参与式设计（社区咨询小组）？还是几种组合？请说明你的理由。
 
-5. **Fairness-Constrained Active Learning**: Chapter 4's active learning (@sec-fisher-information) maximizes information gain by querying where the model is most uncertain. But this may undersample minority groups (if their preferences are simpler or they're initially underrepresented). How would you modify Fisher information or D-optimal design to satisfy fairness constraints? Specifically, design an objective that trades off information gain against ensuring minimum representation per group. What's the cost in sample efficiency?
+5. **带公平性约束的主动学习**：第 3 章的主动学习（@sec-fisher-information）通过"去问模型最不确定的地方"来最大化信息增益。但这样可能少采到少数群体（他们的偏好可能更简单，或一开始样本就少）。你会怎么改造 Fisher 信息或 D-最优设计，让它满足公平性约束？具体来说，请设计一个目标函数，在"信息增益"与"每组至少有多少样本"之间做权衡。这会多花多少样本？
 
-6. **Equal Weighting in DPO**: DPO (@eq-dpo) from Chapter 3 implicitly weights preferences by data volume—high-volume users dominate the reference policy $\pi_{\text{ref}}$. If you wanted equal weighting across demographic groups (not individuals), how would you modify the DPO objective? Would this require collecting demographic information at training time? What privacy/fairness tradeoffs arise?
+6. **在 DPO 里做到等权重**：第 2 章的 DPO（@eq-dpo）隐式地按数据量给偏好加权——用量大的用户在参考策略 $\pi_{\text{ref}}$ 里占主导。如果你想让各人口群体（不是每个人）等权重，会怎么改 DPO 的目标函数？这需不需要在训练时就收集人口特征？这会带来哪些隐私与公平之间的取舍？
 
-7. **Stakes and Fairness**: The chapter argues that fairness considerations differ for high-stakes (loan approvals, medical decisions, hiring) vs. low-stakes (music recommendations, entertainment) applications. Do you agree with this distinction? Or should all systems be held to the same fairness standards regardless of stakes? If you agree with the distinction, where exactly is the boundary? Classify these cases: college admissions, dating apps, social media content ranking, job recommendations, bail decisions, credit cards.
+7. **后果轻重与公平**：本章认为，后果重的应用（贷款审批、医疗决策、招聘）与后果轻的应用（音乐推荐、娱乐内容）在公平上的要求不一样。你同意这个区分吗？还是不管后果轻重，所有系统都该满足同一套公平标准？如果你同意这个区分，界线具体在哪里？请判断这些例子各属哪一类：大学招生、交友软件、社交媒体的内容排序、岗位推荐、保释决定、信用卡。
 
-8. **Detecting Compounding Bias**: Feedback loops (@sec-compounding-unfairness) can amplify initial unfairness exponentially. What monitoring systems would you build to detect compounding bias *before* it causes significant harm? How would you distinguish "acceptable disparity due to preference differences" from "unacceptable disparity due to system bias"? What statistical tests would you use, and what significance thresholds?
+8. **怎样发现叠加偏差**：反馈回路（@sec-compounding-unfairness）会把起初的不公平指数式放大。你会建什么样的监测系统，在它造成明显伤害*之前*就发现？怎么区分"因为偏好不同而产生的可以接受的差距"与"因为系统有偏而产生的不能接受的差距"？你会用哪些统计检验？显著性水平定在哪？
 
-9. **Stratified Reporting with Small Samples**: Principle 5 (@sec-principle-stratification) advocates stratified reporting—measuring performance per subgroup, not just overall. But for small subgroups (e.g., 10 users), per-group metrics have high variance and wide confidence intervals. How do you balance fairness transparency (reporting disparities) with statistical validity (avoiding false alarms)? Would you report metrics for groups below size $n$? Set a minimum group size? Use Bayesian shrinkage?
+9. **样本很小时怎么做分层报告**：原则 5（@sec-principle-stratification）主张分层报告——按子群测表现，不只看整体。可子群很小时（例如只有 10 位用户），分组指标的方差很大、置信区间很宽。你要怎么平衡公平的透明度（把差距报出来）与统计上的可靠性（别误报）？规模小于 $n$ 的群体还要不要报指标？还是设一个最小组规模？或者用贝叶斯收缩？
 
-10. **Aggregation Impossibilities Compounded**: Chapter 6 proved impossibility results for aggregation—Arrow's theorem, Gibbard-Satterthwaite, Sen's Paretian Liberal. This chapter adds fairness constraints (individual vs. group, process vs. outcome). Does adding fairness make the impossibilities *worse* (even fewer mechanisms satisfy expanded criteria), or can fairness constraints help *break ties* between incompatible criteria from Chapter 6? Analyze specific cases.
+10. **汇总的不可能性会加倍吗**：第 5 章证明了汇总方面的不可能性结论——阿罗定理、吉巴德—萨特斯维特、森的帕累托自由悖论。本章又加上公平性约束（个体与群体、过程与结果）。加上公平要求，会不会让不可能性*更严重*（满足全部条件的机制更少）？还是说，公平性约束反而能帮第 5 章那几条互不相容的标准*打破僵局*？请分析具体的例子。
 
 ---
 
