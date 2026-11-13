@@ -430,23 +430,16 @@ expected_calibration_error(y_pred_probs, y_test, model_name="Gaussian Process Cl
 ```
 :::
 
-### Question 2: Active Learning for Preference Learning (40 points) {#sec-question-2-active-learning-for-preference-learning-40-points .unnumbered}
+### 第 2 题：偏好学习中的主动学习（40 分） {#sec-question-2-active-learning-for-preference-learning-40-points .unnumbered}
 
-In this question, you will explore active learning strategies for
-preference learning using a linear model. We will use expected
-information gain as the acquisition function to select the most
-informative queries, where each query is a pair of items. Assume that we
-model the preferences using a simple linear model. Given feature vectors
-$x_1$ and $x_2$ corresponding to two items, the probability that $x_1$
-is preferred over $x_2$ is modeled using a logistic regression model,
-i.e.,
+本题要探索用线性模型做偏好学习时的主动学习策略。我们用期望信息增益作为采集函数，挑出
+最有信息量的提问——这里的"问题"是成对的项目。假设我们用一个简单的线性模型来刻画偏好。
+给定两个项目对应的特征向量 $x_1$ 与 $x_2$，"$x_1$ 更被偏好"的概率
+（相比 $x_2$）用逻辑回归建模，也就是
 
 $$P(x_1 \succ x_2 | \theta) = \sigma(\theta^\top (x_1 - x_2)),$$
 
-where $\theta \in \mathbb{R}^d$ is the model parameter vector, and
-$\sigma(z)$ is the sigmoid function $\sigma(z) = \frac{1}{1 + e^{-z}}$.
-The goal is to sequentially select pairs of items to maximize the
-information gained about $\theta$ through preference queries.
+其中 $\theta \in \mathbb{R}^d$ 是模型的参数向量，$\sigma(z)$ 是 sigmoid 函数 $\sigma(z) = \frac{1}{1 + e^{-z}}$。目标是依次挑选项目对，使通过偏好提问获得的关于 $\theta$ 的信息最多。
 
 (a) **Expected Information Gain (15 points)**
 
