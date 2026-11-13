@@ -1095,118 +1095,118 @@ print(f"Active achieves {mse_random[-1]/mse_active[-1]:.1f}x lower error")
 
 ### 什么时候该用高斯过程主动学习
 
-| Scenario | Recommendation |
+| 场景 | 建议 |
 |----------|----------------|
-| Nonlinear reward structure | GP strongly preferred |
-| Low-to-moderate dimensions ($d \lesssim 10$) | GP works well |
-| Expensive human feedback | Active learning essential |
-| Need uncertainty quantification | GP provides this naturally |
-| Large datasets ($n > 1000$) | Consider sparse GP approximations |
-| Very high dimensions | Linear models may be more practical |
+| 奖励结构是非线性的 | 强烈建议用高斯过程 |
+| 维度较低到中等（$d \lesssim 10$） | 高斯过程效果很好 |
+| 人工反馈很贵 | 必须用主动学习 |
+| 需要给出不确定性 | 高斯过程天生就能给 |
+| 数据量大（$n > 1000$） | 考虑稀疏高斯过程近似 |
+| 维度非常高 | 线性模型也许更实际 |
 
-## Active Learning for Direct Preference Optimization {#sec-adpo}
+## 面向直接偏好优化的主动学习 {#sec-adpo}
 
-We now turn to a specific, important application: **active learning for DPO (Direct Preference Optimization)** in large language model alignment. Chapter 2 introduced DPO and its connection to Bradley-Terry; here we show how to apply active learning principles to reduce the number of human comparisons needed.
+下面看一个具体而重要的应用：**大语言模型对齐中对 DPO（直接偏好优化，Direct Preference Optimization）做主动学习**。第 2 章介绍过 DPO 以及它和 Bradley-Terry 模型的关系，这里说明怎样把主动学习的原则用上去，减少所需的人工比较。
 
-### The DPO Setting
+### DPO 的设定
 
 Recall from @sec-llm-example that DPO directly optimizes a policy $\pi_\theta$ on preference data without learning an explicit reward model. The key insight is that DPO implicitly assumes Bradley-Terry preferences:
 $$
 p(y_w \succ y_l \mid x) = \sigma\left(\beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}\right)
 $$ {#eq-dpo-bradley-terry}
 
-**Challenge:** Large language models have billions of parameters, making exact Fisher information computation intractable. How can we apply the D-optimal design principles from Sections 1-2?
+**困难在于：** 大语言模型动辄上十亿参数，精确计算费雪信息根本算不动。前面讲的那些 D 最优设计原则，在这里怎么用？
 
-### The Log-Linear Policy Assumption
+### 对数线性策略假设
 
-The key insight is to approximate the policy as **log-linear** in the last-layer features:
+关键的思路是把策略近似成**关于最后一层特征对数线性**的形式：
 $$
 \pi(y \mid x; \theta) \propto \exp(\phi(x, y)^\top \theta)
 $$ {#eq-log-linear-policy}
 
-where $\phi(x, y)$ is the feature representation from the model's last layer. This assumption is justified by the **neural tangent kernel** perspective: for sufficiently large networks, the dynamics during training are approximately linear in the parameters.
+这里 $\phi(x, y)$ 是模型最后一层给出的特征表示。这个假设有**神经正切核（neural tangent kernel）**的观点作为依据：网络足够大时，训练过程中的动力学近似对参数是线性的。
 
-Under this assumption, the DPO loss Hessian takes the form:
+在这个假设下，DPO 损失的 Hessian 呈如下形式：
 $$
 H(\theta) = \sum_{i=1}^n p_i(1-p_i) \cdot \Delta\phi_i \Delta\phi_i^\top
 $$ {#eq-dpo-hessian}
 
-where $\Delta\phi_i = \phi(x_i, y_{w,i}) - \phi(x_i, y_{l,i})$ is the feature difference between winning and losing responses, and $p_i$ is the predicted preference probability.
+其中 $\Delta\phi_i = \phi(x_i, y_{w,i}) - \phi(x_i, y_{l,i})$ 是"被选中回答"与"落选回答"之间的特征差，$p_i$ 是模型预测的偏好概率。
 
-**Key observation:** This Hessian is exactly the **Fisher information matrix** for the DPO model! The D-optimal criterion becomes:
+**关键观察：** 这个 Hessian 恰好就是 DPO 模型的**费雪信息矩阵**！于是 D 最优准则变成：
 $$
 \max_S \log\det\left(\sum_{i \in S} p_i(1-p_i) \cdot \Delta\phi_i \Delta\phi_i^\top\right)
 $$ {#eq-dpo-d-optimal}
 
-### The ADPO Algorithm
+### ADPO 算法
 
-The **Active DPO (ADPO)** algorithm applies D-optimal design to select preference comparisons:
+**主动 DPO（Active DPO, ADPO）** 算法把 D 最优设计用来挑要问的比较：
 
-::: {.callout-note title="Algorithm: Active DPO (ADPO)"}
-**Input:** Reference policy $\pi_{\text{ref}}$, prompt set $\{x_i\}$, response pairs $\{(y_{i,1}, y_{i,2})\}$, budget $T$
+::: {.callout-note title="算法：主动 DPO（ADPO）"}
+**输入：** 参考策略 $\pi_{\text{ref}}$、提示集合 $\{x_i\}$、成对的回答 $\{(y_{i,1}, y_{i,2})\}$、提问预算 $T$
 
-**Initialize:** $\theta_0 = \theta_{\text{ref}}$, $S_0 = \emptyset$
+**初始化：** $\theta_0 = \theta_{\text{ref}}$，$S_0 = \emptyset$
 
-**For** $t = 1, \ldots, T$:
+**对** $t = 1, \ldots, T$ 依次执行：
 
-1. **Compute features:** For each candidate pair $(x_i, y_{i,1}, y_{i,2})$:
+1. **算特征：** 对每个候选三元组 $(x_i, y_{i,1}, y_{i,2})$：
    - $\Delta\phi_i = \phi(x_i, y_{i,1}) - \phi(x_i, y_{i,2})$
    - $p_i = \sigma(\beta(\log\pi_{\theta_{t-1}}(y_{i,1}|x_i) - \log\pi_{\theta_{t-1}}(y_{i,2}|x_i)))$
 
-2. **D-optimal selection:** Select query maximizing:
+2. **D 最优挑选：** 选出使下式最大的问题：
    $$i^* = \arg\max_i \log\det\left(I + p_i(1-p_i) H_t^{-1} \Delta\phi_i \Delta\phi_i^\top\right)$$ {#eq-adpo-selection}
-   where $H_t$ is the current Fisher information matrix
+   其中 $H_t$ 是当前的费雪信息矩阵
 
-3. **Query oracle:** Obtain human preference $y_t$ for pair $(x_{i^*}, y_{i^*,1}, y_{i^*,2})$
+3. **问人：** 就 $(x_{i^*}, y_{i^*,1}, y_{i^*,2})$ 取得人类的偏好 $y_t$
 
-4. **Update:** $S_t = S_{t-1} \cup \{(i^*, y_t)\}$, retrain $\theta_t$ on $S_t$ using DPO loss
+4. **更新：** 令 $S_t = S_{t-1} \cup \{(i^*, y_t)\}$，用 DPO 损失在 $S_t$ 上重新训练出 $\theta_t$
 
-**Return:** Final policy $\pi_{\theta_T}$
+**返回：** 最终的策略 $\pi_{\theta_T}$
 :::
 
-::: {.callout-warning title="When the Log-Linear Policy Assumption Fails"}
-ADPO's theoretical guarantees rely on the **log-linear policy assumption**: that $\log \pi_\theta(y \mid x)$ is approximately linear in $\theta$, which holds in the neural tangent kernel (NTK) regime near the reference policy. This approximation degrades when: (1) the policy is fine-tuned **far from the reference** (large $\|\theta - \theta_{\text{ref}}\|$), (2) the model is **small** relative to the data complexity so the NTK regime does not hold, or (3) the loss landscape is **highly non-convex** with multiple basins. In these settings, the Fisher information computed under the log-linear assumption may poorly reflect the actual curvature of the loss, leading to suboptimal query selection. Practitioners should monitor whether the D-optimal gains predicted by the linear model correlate with actual improvements in policy quality.
+::: {.callout-warning title="对数线性策略假设什么时候不成立"}
+ADPO 的理论保证依赖**对数线性策略假设**：$\log \pi_\theta(y \mid x)$ 对 $\theta$ 近似线性，在参考策略附近、神经正切核（NTK）适用的范围内这个假设成立。以下情况它会失效：(1) 策略被微调得**离参考策略很远**（$\|\theta - \theta_{\text{ref}}\|$ 很大）；(2) 模型相对于数据的复杂度来说**太小**，不在 NTK 适用的范围内；(3) 损失面**高度非凸**、存在多个谷。这些情形下，按对数线性假设算出的费雪信息可能很不符合损失真正的弯曲程度，选题因此不够好。实践中应当盯着一点：线性模型预测的 D 最优增益，是否真的和政策质量的提升同步。
 :::
 
-### Theoretical Guarantees
+### 理论保证
 
-Under standard regularity conditions, ADPO achieves the following convergence rate:
+在常规的正则性条件下，ADPO 有如下收敛速率：
 
-::: {.callout-note title="Theorem: ADPO Convergence Rate"}
+::: {.callout-note title="定理：ADPO 的收敛速率"}
 ::: {#thm-adpo-convergence}
-Let $\theta^*$ be the optimal policy parameters. Under the log-linear policy assumption and standard regularity conditions, ADPO with $n$ actively selected comparisons achieves:
+记 $\theta^*$ 为最优策略的参数。在对数线性策略假设和常规的正则性条件下，用 ADPO 主动挑选 $n$ 次比较可达到：
 $$
 \|\hat\theta_n - \theta^*\| = O\left(\frac{d}{\sqrt{n}}\right)
 $$ {#eq-adpo-convergence}
-where $d$ is the effective dimension (rank of the Fisher information matrix). This matches the **minimax optimal rate** for $d$-dimensional estimation.
+其中 $d$ 是有效维度（即费雪信息矩阵的秩）。这个速度与 $d$ 维估计的**极小极大最优速率（minimax optimal rate）**一致。
 :::
 
-The key insight is that D-optimal design ensures the Fisher information grows proportionally to $n$, leading to $O(1/\sqrt{n})$ estimation error.
+关键在于：D 最优设计能保证费雪信息随 $n$ 成比例增长，于是估计误差是 $O(1/\sqrt{n})$。
 
-### ADPO+ for Offline Settings
+### 面向离线设定的 ADPO+
 
-In many practical settings, we have access to a fixed pool of unlabeled preference pairs (e.g., model outputs) but cannot generate new queries. **ADPO+** adapts the algorithm for this offline setting:
+实际中常常是这样：手头有一批没有标签的配对样本（比如模型生成的输出），但没法再造新的问题。**ADPO+** 把算法改造成这种离线设定：
 
-1. **Pool-based selection:** Instead of synthesizing queries, select from the existing pool
-2. **Batch selection:** Select $b$ queries at once to enable parallel annotation
-3. **Diversity regularization:** Add penalty for selecting similar queries
+1. **从池子里挑：** 不去新造问题，只在已有的池子里选
+2. **批量挑选：** 一次挑 $b$ 个问题，方便并行标注
+3. **加多样性惩罚：** 选出的问题彼此太像就扣分
 
-The D-optimal criterion naturally encourages diversity: selecting redundant queries provides diminishing information gain.
+D 最优准则本身就会促使所选问题各不相同：重复的问题带来的信息增量越来越少。
 
-### Empirical Guidance: When Does Active Learning Help?
+### 经验之谈：主动学习什么时候真有用
 
-| Factor | Active Learning Beneficial? |
+| 因素 | 主动学习有用吗？ |
 |--------|---------------------------|
-| **Annotation cost** | High cost → Active learning essential |
-| **Data heterogeneity** | Diverse prompts → More room for strategic selection |
-| **Budget constraints** | Limited budget → Active learning shows larger gains |
-| **Model capacity** | Larger models → Active learning helps reduce overfitting |
-| **Query pool size** | Large pool → More room for intelligent selection |
+| **标注成本** | 成本高 → 主动学习很有必要 |
+| **数据差异大** | 提示五花八门 → 有更多可以挑的余地 |
+| **预算受限制** | 预算越少 → 主动学习的提升越明显 |
+| **模型容量** | 模型越大 → 主动学习能帮着减轻过拟合 |
+| **候选问题池规模** | 池子越大 → 智能挑选的余地越大 |
 
-**Practical recommendation:** Active learning for DPO provides the largest gains when:
-- Annotation budget is limited (< 10K comparisons)
-- Prompts cover diverse topics or difficulty levels
-- The goal is sample efficiency over raw performance
+**实践建议：** 下面这些情形里，给 DPO 加主动学习收益最大：
+- 标注预算有限（少于 1 万次比较）
+- 提示涵盖的主题或难度比较分散
+- 目标是"用更少的样本学会"，而不是单纯刷高分
 
 :::
 ::: {.callout-tip title="Comparison: GP Active Learning vs. ADPO"}
