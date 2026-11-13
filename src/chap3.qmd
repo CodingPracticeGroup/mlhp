@@ -462,7 +462,7 @@ def one_step_update(U_hat, Sigma, x, b, y):
 print("Helper functions defined.")
 ```
 
-Set up simulation parameters and precompute candidate pairs:
+设定模拟参数，并预先算好所有候选配对：
 
 ```{pyodide-python}
 #| autorun: true
@@ -481,7 +481,7 @@ B = Z[pairs[:,0]] - Z[pairs[:,1]]  # pairwise bias differences
 print(f"Setup: {N} users, {M} items, {len(pairs)} candidate pairs, {T} queries each")
 ```
 
-Define selection policies and run the simulation:
+定义选题策略并运行模拟：
 
 ```{pyodide-python}
 #| autorun: true
@@ -514,7 +514,7 @@ mse_r, rel_r = run_policy(active=False)
 print("Simulation complete!")
 ```
 
-Visualize the results:
+把结果画出来：
 
 ```{pyodide-python}
 #| autorun: true
@@ -536,78 +536,78 @@ print(f"Final MSE  | Random: {mse_r[-1]:.3f} | D-opt: {mse_d[-1]:.3f}")
 print(f"Final Rel. | Random: {rel_r[-1]:.3f} | D-opt: {rel_d[-1]:.3f}")
 ```
 
-::: {.callout-important title="Key Takeaway: D-Optimal Design"}
-For multi-dimensional preference vectors, D-optimal selection maximizes $\log\det(\mathcal{I})$, shrinking the posterior ellipsoid in all directions. The Sherman-Morrison formula enables efficient computation: each candidate pair requires only a vector-matrix-vector product $x^\top \Sigma x$. D-optimal design naturally encourages diversity---selecting pairs with redundant information directions provides diminishing log-det gain.
+::: {.callout-important title="本章要点：D 最优设计"}
+对多维的偏好向量，D 最优选题最大化 $\log\det(\mathcal{I})$，让后验椭球在每个方向上都缩小。Sherman-Morrison 公式让这一步算得很快：每一对候选只需要一次"向量—矩阵—向量"乘法 $x^\top \Sigma x$。D 最优设计天然会促使所选问题彼此**不重复**——信息方向重复的那些配对，带来的行列式对数增益会越来越小。
 :::
 
-### Metric Elicitation: Exploiting Quasiconcavity {#sec-metric-elicitation}
+### 度量征询：利用拟凹性 {#sec-metric-elicitation}
 
-The metric elicitation problem has special structure that enables even more efficient elicitation than general D-optimal design. A *Linear Performance Metric (LPM)* has the form:
+度量征询这个问题带有特殊结构，比一般的 D 最优设计还能更省提问。一个*线性性能度量（Linear Performance Metric, LPM）*长这样：
 $$
 \phi(C) = m_{11} \cdot \text{TP} + m_{00} \cdot \text{TN} + m_0
 $$ {#eq-lpm}
-where the weights $(m_{11}, m_{00})$ encode tradeoffs between true positives and true negatives. Since only the ratio matters, we can parametrize as $\mathbf{m} = (\cos\theta, \sin\theta)$ for $\theta \in [0, 2\pi]$.
+其中权重 $(m_{11}, m_{00})$ 表示真阳性与真阴性之间怎么权衡。由于只有两者的比值有意义，可以参数化为 $\mathbf{m} = (\cos\theta, \sin\theta)$，取 $\theta \in [0, 2\pi]$。
 
-For medical diagnosis, $m_{11} > m_{00}$ weights sensitivity (catching disease) over specificity (avoiding false alarms). For spam filtering, the reverse may hold. The key is that the practitioner's implicit metric $\mathbf{m}^*$ is unknown---we must learn it from pairwise comparisons.
+在医学诊断中，$m_{11} > m_{00}$ 表示更看重"查到病"（灵敏度）而不是"不误报"（特异度）；换到垃圾邮件过滤，可能正好相反。要点在于：工程师心里那把隐含的尺子 $\mathbf{m}^*$ 我们并不知道，必须从两两比较里把它学出来。
 
-::: {.callout-note title="Proposition: Quasiconcavity of LPM Composition"}
+::: {.callout-note title="命题：LPM 复合函数的拟凹性"}
 ::: {#prp-quasiconcave}
-For a quasiconcave LPM $\phi$ that is monotonically increasing in TP and TN, and a parametrization $\rho^+(\theta)$ of the upper boundary of the confusion matrix space $\mathcal{C}$, the composition $\phi \circ \rho^+$ is **quasiconcave and unimodal** on $[0, \pi/2]$.
+设 LPM $\phi$ 拟凹、且关于 TP 与 TN 单调递增；又设 $\rho^+(\theta)$ 是混淆矩阵空间 $\mathcal{C}$ 上边界的参数化，那么复合函数 $\phi \circ \rho^+$ 在 $[0, \pi/2]$ 上**拟凹且单峰**。
 :::
 :::
 
-Quasiconcavity means the function has a single peak---no local maxima to trap us. This enables binary search rather than gradient-based optimization:
+拟凹意味着函数只有一个峰——不存在会让人卡住的局部极大值。于是可以用二分搜索，不必用梯度法去优化：
 
-::: {.callout-tip title="Algorithm: LPM Elicitation via Binary Search"}
-**Input:** Tolerance $\epsilon > 0$, oracle $\Omega$
+::: {.callout-tip title="算法：用二分搜索做 LPM 征询"}
+**输入：** 容差 $\epsilon > 0$、神谕 $\Omega$
 :::
 
-**Initialize:** $\theta_a = 0$, $\theta_b = \pi/2$
+**初始化：** $\theta_a = 0$，$\theta_b = \pi/2$
 
-**While** $|\theta_b - \theta_a| > \epsilon$:
+**当** $|\theta_b - \theta_a| > \epsilon$ 时重复：
 
-1. Divide $[\theta_a, \theta_b]$ into four equal intervals with boundaries $A, B, C, D, E$
-2. Compute confusion matrices $C_A, C_B, C_C, C_D, C_E$ for classifiers at each $\theta$
-3. Query oracle: compare all adjacent pairs to find which interval contains the maximum
-4. Update $[\theta_a, \theta_b]$ to the interval containing the maximum
+1. 把 $[\theta_a, \theta_b]$ 四等分，分界点记为 $A, B, C, D, E$
+2. 算出各 $\theta$ 处分类器的混淆矩阵 $C_A, C_B, C_C, C_D, C_E$
+3. 问神谕：把所有相邻的一对拿来比，找出最大值落在哪个小区间
+4. 把 $[\theta_a, \theta_b]$ 更新为含最大值的那个区间
 
-**Return:** $\hat{\mathbf{m}} = (\cos\hat\theta, \sin\hat\theta)$ where $\hat\theta = (\theta_a + \theta_b)/2$
+**返回：** $\hat{\mathbf{m}} = (\cos\hat\theta, \sin\hat\theta)$，其中 $\hat\theta = (\theta_a + \theta_b)/2$
 
-Each iteration uses 4 queries and shrinks the search interval by factor of 2, giving **$O(\log(1/\epsilon))$ query complexity**---exponentially better than the $O(1/\epsilon^2)$ rate for general 2D estimation.
+每一轮只需要 4 次提问，却能把搜索区间缩小一半，因此提问复杂度是 **$O(\log(1/\epsilon))$**——比在二维上做一般估计所需的 $O(1/\epsilon^2)$ 好得多。
 
-::: {.callout-note title="Proposition: Bayes Optimal Classifier from LPM"}
+::: {.callout-note title="命题：由 LPM 得到贝叶斯最优分类器"}
 ::: {#prp-bayes-classifier}
-Given learned metric weights $\mathbf{m} = (m_{11}, m_{00})$ with $m_{11} + m_{00} > 0$, the Bayes optimal classifier is:
+已知学到的度量权重 $\mathbf{m} = (m_{11}, m_{00})$ 且 $m_{11} + m_{00} > 0$，贝叶斯最优分类器就是：
 $$
 \bar{h}(x) = \mathbf{1}\left[\eta(x) \geq \frac{m_{00}}{m_{11} + m_{00}}\right]
 $$
-where $\eta(x) = P(Y=1 \mid X=x)$ is the conditional class probability.
+其中 $\eta(x) = P(Y=1 \mid X=x)$ 表示给定特征时该样本属于正类的条件概率。
 :::
 :::
 
-This connects metric elicitation to decision theory: learning the metric $\mathbf{m}$ is equivalent to learning the optimal classification threshold.
+这就把度量征询和决策论接上了：学会度量 $\mathbf{m}$，等价于学会最优的分类阈值。
 
-**Extension to Linear-Fractional Metrics.** The $F_\beta$ score and Jaccard similarity are not linear but *linear-fractional*:
+**推广到线性分式度量。** $F_\beta$ 分数和 Jaccard 相似度不是线性的，而是*线性分式*的：
 $$
 \phi(C) = \frac{p_{11} \cdot \text{TP} + p_{00} \cdot \text{TN} + p_0}{q_{11} \cdot \text{TP} + q_{00} \cdot \text{TN} + q_0}
 $$
-These can be elicited by first finding both the maximizer and minimizer of the implicit linear numerator (two binary searches), then solving for the fractional parameters. The query complexity remains $O(\log(1/\epsilon))$.
+这类度量可以先分别求出隐含线性分子的最大值点和最小值点（各做一次二分搜索），再据此解出分式的参数。提问复杂度仍是 $O(\log(1/\epsilon))$。
 
-**Multiclass Extension.** For $K$-class problems, diagonal linear performance metrics (DLPMs) weight correct predictions: $\psi(\mathbf{d}) = \sum_k a_k d_k$ where $d_k$ is the rate of correctly predicting class $k$. Binary search over each pair of classes $(k_1, k_2)$ recovers the relative weights $a_{k_2}/a_{k_1}$, with total complexity $O(K^2 \log(1/\epsilon))$.
+**推广到多分类。** 对于 $K$ 分类问题，可以用对角线性性能度量（diagonal linear performance metric, DLPM）给"预测正确的样本"赋权：$\psi(\mathbf{d}) = \sum_k a_k d_k$，其中 $d_k$ 是把第 $k$ 类预测正确的比例。对每一对类别 $(k_1, k_2)$ 各做一次二分搜索，就能恢复出相对权重 $a_{k_2}/a_{k_1}$，总提问复杂度为 $O(K^2 \log(1/\epsilon))$。
 
-## Measurement of User Preference Function {#sec-preference-function}
-Suppose items $j$ have feature vectors $X_j \in \mathbb R^d$. Instead of learning a free scalar parameter $V_j$ for each item, we assume $V_j = W^\top X_j,$ where $W \in \mathbb R^d$ is shared across items. The probability that item $j$ beats item $k$ is $p(j \succ k) = \sigma(V_j - V_k) = \sigma (W^\top(X_j - X_k)).$ This is simply logistic regression on pairwise feature differences. Given one comparison outcome $y \in \{0,1\}$ for pair $(j,k)$ with difference $x_{jk} = X_j - X_k$,
+## 用户偏好函数的测量 {#sec-preference-function}
+设物品 $j$ 有特征向量 $X_j \in \mathbb R^d$。我们不再给每个物品单独学一个自由的标量参数 $V_j$，而是假定 $V_j = W^\top X_j$，其中 $W \in \mathbb R^d$ 由所有物品共用。物品 $j$ 胜过物品 $k$ 的概率为 $p(j \succ k) = \sigma(V_j - V_k) = \sigma (W^\top(X_j - X_k))$。这就是在配对的特征差上做逻辑回归。给定一对 $(j,k)$（特征差为 $x_{jk} = X_j - X_k$）的一次比较结果 $y \in \{0,1\}$，
 $$\ell(W) = y\log \sigma(W^\top x_{jk}) + (1-y)\log(1-\sigma(W^\top x_{jk})).
 $$ {#eq-logistic-loglik}
-Gradient: $\nabla_W \ell = (y - p) x_{jk}, \quad p = \sigma( W^\top x_{jk} ).$ 费雪信息 (expected negative Hessian): $\mathcal I(W) = \mathbb E\big[(y-p)^2 x_{jk}x_{jk}^\top\big] = p(1-p),x_{jk}x_{jk}^\top.$
+梯度：$\nabla_W \ell = (y - p) x_{jk}, \quad p = \sigma( W^\top x_{jk} ).$ 费雪信息（即负的期望 Hessian）：$\mathcal I(W) = \mathbb E\big[(y-p)^2 x_{jk}x_{jk}^\top\big] = p(1-p),x_{jk}x_{jk}^\top.$
 
-With Gaussian prior $W \sim \mathcal N(0,\sigma_0^2 I)$, a Laplace approximation yields posterior covariance $\Sigma \approx (\sigma_0^{-2}I + \sum_t p_t(1-p_t) x_t x_t^\top)^{-1}.$ So, as in the Rasch case, Fisher information accumulates to form posterior precision. At each step, pick a candidate pair $(j,k)$ and compute
+取高斯先验 $W \sim \mathcal N(0,\sigma_0^2 I)$，用拉普拉斯近似可得到后验协方差 $\Sigma \approx (\sigma_0^{-2}I + \sum_t p_t(1-p_t) x_t x_t^\top)^{-1}$。所以，和 Rasch 模型的情形一样，费雪信息是一条条累加成后验精度的。每一步先取一个候选配对 $(j,k)$，算出
 $$
 \Delta_D(j,k) = \log \det(\Lambda + w x_{jk} x_{jk}^\top) - \log\det(\Lambda), \quad w = p(1-p),
 $$ {#eq-d-optimal-criterion}
-where $\Lambda = \Sigma^{-1}$. This is the D-optimal criterion, maximizing the expected log-determinant gain in information. A-optimal or E-optimal criteria are similarly defined. We’ll simulate item features, a ground-truth $W$, and comparisons. Then we compare active D-optimal elicitation vs random pair selection for estimating $W$. Performance metrics are MSE of $\hat W$ vs true $W$, and reliability.
+其中 $\Lambda = \Sigma^{-1}$。这就是 D 最优准则：让信息量的对数行列式增益的期望最大。A 最优、E 最优准则也可以类似地写出来。接下来我们会模拟物品特征、一个真实的 $W$，以及由此产生的比较结果，然后比较"主动按 D 最优征询"和"随机选配对"在估计 $W$ 上的差别。用的指标是 $\hat W$ 与真实 $W$ 之间的均方误差，以及信度。
 
-First, set up the simulation with item features and ground-truth weights:
+先搭好模拟环境：生成物品特征和真实的权重：
 
 ::: {.callout-note title="Code"}
 ```{pyodide-python}
@@ -629,7 +629,7 @@ print(f"Setup: {M} items, {d}-dim features, {T} queries")
 ```
 :::
 
-Define the Fisher gain and Bayesian update functions:
+定义费雪信息增益与贝叶斯更新这两个函数：
 
 ::: {.callout-note title="Code"}
 ```{pyodide-python}
@@ -657,7 +657,7 @@ print(f"Functions defined. {len(pairs)} candidate pairs.")
 ```
 :::
 
-Run the simulation comparing D-optimal vs random selection:
+跑模拟，把 D 最优选题与随机选配对做个比较：
 
 ::: {.callout-note title="Code"}
 ```{pyodide-python}
