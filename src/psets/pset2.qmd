@@ -454,11 +454,7 @@ $$P(x_1 \succ x_2 | \theta) = \sigma(\theta^\top (x_1 - x_2)),$$
     &P(y=0 | x_1, x_2, \theta) D_{\text{KL}}\left( P(\theta | y = 0, \mathcal{D}) \parallel P(\theta | \mathcal{D}) \right)
 \end{aligned}$$
 
-        Derive this expression for the expected information gain of
-        selecting the pair $(x_1, x_2)$ for a preference query. Start by
-        explaining how the KL divergence measures the information gain,
-        and break down the expectation over the possible outcomes of the
-        query.
+        请推出上式，也就是"选择项目对 $(x_1, x_2)$ 提问"的期望信息增益。先从说明 KL 散度如何衡量信息增益开始，再把这个期望按提问可能得到的各种结果展开。
 
 (ii) **化简 KL 散度（笔答，4 分）。** 假设关于 $\theta$ 的先验与后验都是高斯的（即 $P(\theta) \sim \mathcal{N}(\mu, \Sigma)$ 且 $P(\theta | \mathcal{D}) \sim \mathcal{N}(\mu', \Sigma')$），证明高斯后验对高斯先验的 KL 散度可化简为：
         $$\begin{aligned}
@@ -477,29 +473,24 @@ $$P(x_1 \succ x_2 | \theta) = \sigma(\theta^\top (x_1 - x_2)),$$
 在我们这个以 Bradley-Terry 模型作为似然的场景中，请忽略归一化常数，把 $-\log P(\theta | \mathcal{D})$ 以及它的 Hessian 化简。
 
 (b) **主动学习算法（25 分）** 本节要实现一个主动学习算法，用期望信息增益准则挑出最有信息量的提问。
-    implement an active learning algorithm for selecting the most
-    informative queries using the expected information gain criterion.
 
     (i) **(Coding, 4 points).** Implement `kl_divergence_gaussians` in
         `active_learning/main.py`.
 
     (ii) **(Coding, 4 points).** Following your derived Laplace
-         approximation, implement `negative_log_posterior`.
+         按照你推出的拉普拉斯近似，实现 `negative_log_posterior`。
 
     (iii) **(Coding, 4 points).** Implement `compute_hessian` that is
-          used to obtain the inverse of the covariance matrix.
+          用它得到协方差矩阵的逆。
 
     (iv) **(Coding, 3 points).** Implement `expected_information_gain`.
 
     (v) **(Coding, 4 points).** Finally, implement `active_learning`.
 
-    (vi) **(Coding + Written, 6 points).** Plot the $L^2$ norm of the
-         covariance matrix for each loop of the active learning loop.
-         Additionally, on the same plot, implement a random baseline and
-         plot its $L^2$ covariance matrix norm. The random baseline
-         should randomly select a point in the dataset and not use any
-         acquisition function. Interpret your plot and use it to compare
-         the two methods.
+    (vi) **（编程 + 笔答，6 分）**。画出主动学习每一轮中协方差矩阵的 $L^2$ 范数；
+         另外，在同一张图上实现并画出一个随机基线的协方差矩阵 $L^2$ 范数：
+         这个基线随机选取数据集中的一个点，不使用任何采集函数。解读这张图，
+         并借此比较两种方法。
 
 ::: {.callout-note title="代码"}
 ```{python ex2-q2-1}
