@@ -213,37 +213,37 @@ This chapter provides the missing normative framework: **whose preferences shoul
 
 | 阶段 | 技术选择 | 里面含的价值 | 谁受益 | 谁受损 |
 |:---|:---|:---|:---|:---|
-| **Elicitation** $\mathcal{E}$ | Query reviewers with highest Fisher information | Efficiency over representation | Well-represented subfields | Niche/emerging areas |
-| **Learning** $\mathcal{L}$ | Fit Bradley-Terry (assumes IIA) | Assumes context-independent preferences | Average-context reviewers | Overburdened reviewers whose preferences are context-dependent |
-| **Aggregation** $\mathcal{A}$ | Simple majority across annotators | Equal weight per person | Majority subfield | Interdisciplinary or minority perspectives |
-| **Decision** $\mathcal{D}$ | Always follow the model's recommendation | Trust the system | Users well-served by the model | Edge cases, novel paper types |
+| **征询** $\mathcal{E}$ | 去问 Fisher 信息最高的那些审稿人 | 要效率，不要代表性 | 样本充足的子领域 | 冷门与新兴方向 |
+| **学习** $\mathcal{L}$ | 拟合 Bradley-Terry（假定独立无关备选成立） | 假定偏好不随情境变化 | 处于一般情境下的审稿人 | 偏好随情境变化的、负担过重的审稿人 |
+| **汇总** $\mathcal{A}$ | 在各标注员之间做简单多数 | 每人权重相同 | 人数占优的子领域 | 交叉学科或少数的观点 |
+| **决策** $\mathcal{D}$ | 一律照模型的建议来 | 相信系统 | 模型服务得好的那批用户 | 边界情形、新型论文 |
 
-**Compounding effect:** If elicitation undersamples postdocs $\to$ the model learns senior-faculty preferences $\to$ aggregation weights those preferences equally (but they're overrepresented in data) $\to$ the assistant serves senior faculty well, who use it more, generating more data. A 10% sampling bias at stage $\mathcal{E}$ can become a 40% performance gap after one feedback cycle.
+**叠加效应：** 如果征询阶段少采了博士后 $\to$ 模型学到的就是资深教师的偏好 $\to$ 汇总阶段虽然给这些偏好同样的权重（可它们在数据里本来就过多） $\to$ 助手把资深用户服务得很好，他们用得更多，又生出更多数据。在阶段 $\mathcal{E}$ 上 10% 的抽样偏差，一轮反馈回路之后就可能变成 40% 的表现差距。
 
-**Intervention:** Stratified sampling at $\mathcal{E}$ (ensure equal representation by career stage), fairness-constrained learning at $\mathcal{L}$ (equalize subgroup AUC), and regular auditing at $\mathcal{D}$ (compare subgroup satisfaction) break the feedback loop.
+**干预：** 在 $\mathcal{E}$ 用分层抽样（按职业阶段保证各组的代表性），在 $\mathcal{L}$ 用带公平性约束的学习（把各分组的 AUC 拉平），在 $\mathcal{D}$ 定期审计（比较各分组的满意度）——这条反馈回路就能被截断。
 :::
 
-We now trace the AI review assistant example through all four pipeline stages, analyzing the value tradeoffs and fairness implications at each step.
+接下来我们带着这位 AI 审稿助手走完四个阶段，逐步分析其中的价值取舍与公平性后果。
 
-### Elicitation: Who Gets Queried? {#sec-elicitation-fairness}
+### 征询：该问谁？ {#sec-elicitation-fairness}
 
-**Technical Question**: How should we collect data to train the review assistant? Which reviewers should we observe more carefully?
+**技术问题**：该怎样收集数据来训练这位审稿助手？该更仔细地观察哪些审稿人？
 
-Consider three design options for elicitation policy $\mathcal{E}$:
+征询策略 $\mathcal{E}$ 有三种设计方案：
 
-1. **Universal querying**: Observe all reviewers equally (every review provides training data)
-2. **Productivity-based**: Query "productive" reviewers more—those who write detailed, timely reviews
-3. **Active learning**: Use Fisher information (@sec-fisher-information) to query where the model is most uncertain
+1. **一律采集**：对所有审稿人一视同仁地观察（每份审稿意见都算训练数据）
+2. **按产出采集**：多问"有产出"的审稿人——即那些写得详细、交得及时的人
+3. **主动学习**：用 Fisher 信息（@sec-fisher-information）去问模型最不确定的地方
 
-**Value Embedded**: Options 2 and 3 prioritize *efficiency* (maximize information gain per query) over *representation* (ensure all reviewer types contribute training data).
+**里面含的价值**：方案 2 和 3 把*效率*（每次询问换回的信息最多）排在*代表性*（各类审稿人都贡献训练数据）之前。
 
-This seems like a purely technical optimization decision. But it has profound fairness consequences.
+这看起来纯粹是个技术上的优化决定。可它在公平性上的后果很深。
 
-#### The Inversion Problem {#sec-inversion-problem}
+#### 反演问题 {#sec-inversion-problem}
 
-The core issue is what we call the **inversion problem**: observable behavior does not equal underlying mental state.
+核心症结在于我们所说的**反演问题**：看得见的行为，不等于背后的心理状态。
 
-Let $B$ denote observed behavior (e.g., writing a detailed review), $M$ denote mental state (true expertise and preferences), and $C$ denote context (time availability, fatigue, language proficiency). The relationship is:
+用 $B$ 表示观察到的行为（例如写了一份详细的审稿意见），$M$ 表示心理状态（真正的水平与偏好），$C$ 表示所处情境（有没有时间、疲不疲劳、语言是否流利）。三者之间的关系是：
 $$
 P(B \mid M, C) \neq P(B \mid M)
 $$ {#eq-inversion-problem}
