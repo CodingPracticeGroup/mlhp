@@ -1,5 +1,5 @@
 ---
-title: Elicitation
+title: 偏好征询
 format:
   html:
     include-after-body:
@@ -36,110 +36,109 @@ filters:
 
 
 ::: {.callout-note}
-## Intended Learning Outcomes
+## 学习目标
 
-By the end of this chapter you will be able to:
+读完本章，你应当能够：
 
-- **Define** the measurement problem for user preference elicitation and distinguish it from the learning problem in Chapter 3.
-- **Derive** the Fisher information for Rasch/Bradley-Terry models and explain why items with $p \approx 0.5$ are most informative.
-- **Compare** A-optimal, D-optimal, and E-optimal design criteria for selecting informative queries.
-- **Apply** Laplace approximation to update posterior beliefs about user preferences in real-time.
-- **Implement** active selection policies that outperform random sampling in sample efficiency.
-- **Extend** Fisher information analysis to non-linear scoring functions via local linearization.
-- **Apply** information-theoretic acquisition functions to actively select queries for Gaussian Process preference models, building on the GP foundations from Chapters 2-3.
-- **Explain** how D-optimal design applies to Direct Preference Optimization (DPO) for LLM alignment and derive the ADPO algorithm.
-- **Analyze** active preference learning in robotics, including trajectory comparison and reward function inference.
+- **说明**用户偏好征询中的测量问题，并把它与第 2 章的学习问题区分开。
+- **推导**Rasch/Bradley-Terry 模型的 Fisher 信息，并解释为什么 $p \approx 0.5$ 的物品最有信息量。
+- **比较**用于挑选有价值提问的 A 最优、D 最优、E 最优三种设计准则。
+- **应用**拉普拉斯近似，实时更新对用户偏好的后验信念。
+- **实现**在样本效率上超过随机抽样的主动选题策略。
+- **推广**：通过局部线性化，把 Fisher 信息分析用到非线性打分函数上。
+- **应用**信息论的采集函数，为高斯过程偏好模型主动挑选要问的比较（GP 的基础见第 2 章与第 3 章）。
+- **解释**D 最优设计如何应用于语言模型对齐中的直接偏好优化（DPO），并导出 ADPO 算法。
+- **分析**机器人场景下的主动偏好学习，包括轨迹比较与奖励函数推断。
 :::
 
-## Chapter Overview
+## 本章内容安排
 
-Chapter 1 developed models for how preferences arise from latent utilities. Chapter 2 showed how to estimate these utilities from observed comparisons. This chapter addresses the complementary question: **given that human feedback is expensive, how should we choose which comparisons to request?**
+第 1 章给出了"偏好如何从隐在效用产生"的模型，第 2 章讲了怎么从观测到的比较中估计这些效用。本章要回答的是与之互补的一个问题：**既然人类的反馈很贵，那我们该挑哪些比较去问？**
 
-This is the *measurement problem* in preference elicitation. Unlike the learning problem (which assumes data is given), the measurement problem actively designs experiments to maximize information gained per query. Consider training an LLM via RLHF: collecting 100,000 human preference labels is expensive and time-consuming. If we could achieve the same alignment quality with 20,000 strategically selected comparisons, we would save 80% of annotation cost.
+这就是偏好征询中的**测量问题**。学习问题假定数据已经有了；测量问题则主动设计试验，让每一次提问带来的信息最多。设想用 RLHF 训练一个大语言模型：收集 10 万条人类偏好标注既花钱又花时间。如果只问 2 万条精心挑选的比较就能达到同样的对齐效果，标注成本就省下了 80%。
 
-The central insight is that **not all comparisons are equally informative**. Asking whether humans prefer "Hello!" to "Hi there!" reveals little about model quality. Comparing two substantively different responses to a complex prompt provides more signal. The mathematical framework of *Fisher information* and *optimal experimental design* formalizes this intuition.
+核心认识是：**并不是所有比较都一样有用**。问人"'Hello!' 和 'Hi there!' 哪个好'几乎问不出模型的优劣；而对一个复杂提示下两个实质不同的回答作比较，信号就强得多。*Fisher 信息*与*最优试验设计*这套数学工具，正好把这个直觉形式化。
 
-**Chapter Structure.** We build from simple to complex settings:
+**本章结构。** 我们从简单情形一步步走到复杂情形：
 
-1. **Scalar preferences** (@sec-measurement): The Rasch model and Fisher information
-2. **Multi-dimensional preferences** (@sec-factor-models-active): Factor models and optimal design criteria (A/D/E-optimal)
-3. **Preference functions** (@sec-preference-function): Linear and non-linear scoring functions
-4. **Nonparametric models** (@sec-active-learning): GP-based active learning with information-theoretic acquisition
-5. **LLM alignment** (@sec-adpo): Active DPO for large language models
-6. **Applications**: Metric elicitation (@sec-metric-elicitation) and robotics (@sec-robotics-trajectory)
+1. **标量偏好**（@sec-measurement）：Rasch 模型与 Fisher 信息
+2. **多维偏好**（@sec-factor-models-active）：因子模型与最优设计准则（A/D/E 最优）
+3. **偏好函数**（@sec-preference-function）：线性与非线性的打分函数
+4. **非参数模型**（@sec-active-learning）：基于高斯过程的主动学习，用信息论的采集函数
+5. **语言模型对齐**（@sec-adpo）：面向大语言模型的主动 DPO
+6. **应用**：度量征询（@sec-metric-elicitation）与机器人（@sec-robotics-trajectory）
 
-**Connections to Prior Chapters:**
+**与前面几章的衔接：**
 
-| Concept | Chapter 1-2 | This Chapter |
+| 概念 | 第 1-2 章 | 本章 |
 |---------|------------|--------------|
-| Bradley-Terry model | Likelihood, MLE (@sec-bradley-terry) | Fisher information, query selection |
-| Factor models $U^\top V$ | Parameter estimation (@sec-latent-variable) | D-optimal pair selection |
-| GP preference models | Laplace inference (@sec-gp-inference) | Information-gain acquisition |
-| DPO loss | Objective function (@sec-llm-example) | ADPO active selection |
+| Bradley-Terry 模型 | 似然、最大似然估计（@sec-bradley-terry） | Fisher 信息、挑选要问的比较 |
+| 因子模型 $U^\top V$ | 参数估计（@sec-latent-variable） | 用 D 最优选比较对 |
+| 高斯过程偏好模型 | 拉普拉斯推断（@sec-gp-inference） | 信息增益采集函数 |
+| DPO 损失 | 目标函数（@sec-llm-example） | ADPO 主动挑选 |
 
-**Historical Notes.** Active learning for preferences has roots in multiple fields:
+**历史脉络。** 主动式偏好学习在好几个领域都有源头：
 
-- **Psychometrics (1960s)**: Computer-adaptive testing used Fisher information to select test items matching student ability
-- **Optimal experimental design (1970s)**: Fedorov and Kiefer developed A/D/E-optimality for linear models
-- **Bayesian experimental design (1990s)**: Chaloner & Verdinelli unified information-theoretic approaches
-- **RLHF/Active DPO (2020s)**: Applying these ideas to LLM alignment at scale
+- **心理测量学（1960 年代）**：计算机化自适应测验用 Fisher 信息挑选与学生水平相匹配的题目
+- **最优试验设计（1970 年代）**：Fedorov 与 Kiefer 为线性模型建立了 A/D/E 最优性理论
+- **贝叶斯试验设计（1990 年代）**：Chaloner 与 Verdinelli 把信息论方法统一起来
+- **RLHF / 主动 DPO（2020 年代）**：把这些想法用到大规模的语言模型对齐上
 
-> "The purpose of optimal design is to achieve the desired precision with minimum cost." --- V.V. Fedorov (1972)
+> "最优设计的目的，是用最小的代价达到所要求的精度。"—— V. V. Fedorov（1972）
+## 用户偏好向量的测量 {#sec-measurement}
 
-## Measurement of User Preference Vector {#sec-measurement}
+如果各物品的吸引力 $V_j$ 已知或早已标定好，那么只要在线挑那些有信息量的物品，就能很快学出一位新用户 $U$ 的胃口。只问太简单的或只问太难的，回答几乎总是确定的，学不到东西。用来量化"有没有信息量"的关键工具就是 Fisher 信息。
 
-When items' appeals $V_j$ are known or pre-calibrated, we can learn a new user's appetite $U$ quickly by choosing informative items online. Asking only easy or only hard items gives near-deterministic responses that teach little. The key tool for quantifying "informativeness" is Fisher information.
-
-::: {.callout-note title="Definition: Fisher Information"}
+::: {.callout-note title="定义：Fisher 信息"}
 ::: {#def-fisher-info}
-For a parametric model $p(Y \mid \theta)$, the **Fisher Information** about parameter $\theta$ is:
+对参数模型 $p(Y \mid \theta)$，关于参数 $\theta$ 的**Fisher 信息（Fisher Information）**定义为：
 $$
 \mathcal{I}(\theta) = \mathbb{E}\left[-\frac{\partial^2}{\partial \theta^2} \log p(Y \mid \theta)\right] = \mathbb{E}\left[\left(\frac{\partial}{\partial \theta} \log p(Y \mid \theta)\right)^2\right]
 $$
-Fisher Information quantifies how much a single observation reveals about $\theta$. Higher Fisher Information means more precise estimation from each observation. The Cramér-Rao bound states that the variance of any unbiased estimator is at least $\mathcal{I}(\theta)^{-1}$.
+Fisher 信息衡量的是：一条观测量能透露多少关于 $\theta$ 的信息。Fisher 信息越大，每条观测能达到的估计精度就越高。Cramér-Rao 下界指出：任何无偏估计的方差都不小于 $\mathcal{I}(\theta)^{-1}$。
 :::
 :::
 
-The Rasch model makes this precise. Recall from @sec-latent-variable that for a candidate item $j$, the Bernoulli success probability is $p_j(U) = \sigma(U + V_j).$ The Fisher information about $U$ from a single response is
+Rasch 模型把这个说法变得确切。回想 @sec-latent-variable：对某个候选物品 $j$，伯努利成功概率是 $p_j(U) = \sigma(U + V_j)$。单条回答关于 $U$ 的 Fisher 信息是
 $$\mathcal I_j(U) = \mathbb{E} \left[-\frac{\partial^2}{\partial U^2}\log p(Y \mid U, V_j)\right] = p_j(U) (1 - p_j(U)).$$ {#eq-rasch-fisher-info}
 
-::: {.callout-note title="Proposition: Optimal Item Difficulty"}
+::: {.callout-note title="命题：题目的最优难度"}
 ::: {#prp-fisher-max}
-For the Rasch model with $p_j(U) = \sigma(U + V_j)$, the Fisher Information $\mathcal{I}_j(U) = p_j(1-p_j)$ is **maximized when $p_j(U) = 0.5$**, which occurs when item difficulty $-V_j$ equals user ability $U$.
+对满足 $p_j(U) = \sigma(U + V_j)$ 的 Rasch 模型，Fisher 信息 $\mathcal{I}_j(U) = p_j(1-p_j)$ **在 $p_j(U) = 0.5$ 时最大**，也就是题目难度 $-V_j$ 恰好等于用户能力 $U$ 的时候。
 :::
 :::
 
-::: {.callout-tip title="Proof" collapse="true"}
-The function $f(p) = p(1-p)$ is a downward parabola with roots at $p=0$ and $p=1$. Taking the derivative: $f'(p) = 1 - 2p = 0 \Rightarrow p = 0.5$. At this point, $f(0.5) = 0.25$, which is the maximum. Since $p_j(U) = \sigma(U + V_j) = 0.5$ when $U + V_j = 0$, the optimal item has $V_j = -U$.
+::: {.callout-tip title="证明" collapse="true"}
+函数 $f(p) = p(1-p)$ 是一条开口向下的抛物线，根在 $p=0$ 与 $p=1$。求导：$f'(p) = 1 - 2p = 0 \Rightarrow p = 0.5$。此处 $f(0.5) = 0.25$，就是最大值。而 $p_j(U) = \sigma(U + V_j) = 0.5$ 当且仅当 $U + V_j = 0$，所以最优物品满足 $V_j = -U$。
 :::
 
-::: {.callout-caution title="Worked Example: Fisher Information for Item Selection" collapse="false"}
-A user has estimated ability $\hat{U} = 1.0$. We have three candidate items with appeals $V_1 = -2.0$ (hard), $V_2 = -1.0$ (matched), and $V_3 = 1.0$ (easy). Which item should we ask next?
+::: {.callout-caution title="完整算例：用 Fisher 信息挑物品" collapse="false"}
+已知某用户能力的估计是 $\hat{U} = 1.0$。手上有三个候选物品，吸引力分别为 $V_1 = -2.0$（难）、$V_2 = -1.0$（匹配）、$V_3 = 1.0$（简单）。下一个该问哪个？
 
-**Step 1.** Compute predicted success probabilities:
+**第 1 步。** 算出预测的成功概率：
 $$p_1 = \sigma(1.0 + (-2.0)) = \sigma(-1.0) \approx 0.269$$
 $$p_2 = \sigma(1.0 + (-1.0)) = \sigma(0.0) = 0.500$$
 $$p_3 = \sigma(1.0 + 1.0) = \sigma(2.0) \approx 0.881$$
 
-**Step 2.** Compute Fisher information for each item:
+**第 2 步。** 算出每个物品的 Fisher 信息：
 $$\mathcal{I}_1 = p_1(1-p_1) = 0.269 \times 0.731 \approx 0.197$$
 $$\mathcal{I}_2 = p_2(1-p_2) = 0.500 \times 0.500 = 0.250$$
 $$\mathcal{I}_3 = p_3(1-p_3) = 0.881 \times 0.119 \approx 0.105$$
 
-**Step 3.** Select the most informative item: $j^* = \arg\max_j \mathcal{I}_j = 2$ (the matched item).
+**第 3 步。** 选出信息量最大的物品：$j^* = \arg\max_j \mathcal{I}_j = 2$（就是难度与能力匹配的那个）。
 
-**Interpretation:** Item 2, whose difficulty $-V_2 = 1.0$ matches the user's ability $\hat{U} = 1.0$, is most informative because it produces responses closest to 50-50. The easy item ($V_3$) is least informative --- the user almost certainly succeeds, so the response tells us little about their ability. This is the principle behind *computerized adaptive testing*: the test "follows" the student, always selecting questions near their ability level.
+**解读：** 2 号物品的难度 $-V_2 = 1.0$ 正好对应用户的能力估计 $\hat{U} = 1.0$，所以它最有信息量——它的回答最接近五五开。那个简单物品（$V_3$）信息量最少：用户几乎肯定成功，这一条回答几乎告诉不了我们他的能力。这正是*计算机化自适应测验*背后的原理：测验会"跟着"学生走，始终挑难度贴近他当前水平的题。
 :::
 
-This result has a natural interpretation: items that are too easy ($p \approx 1$) or too hard ($p \approx 0$) yield near-deterministic responses that teach little about the user. Items matched to the user's ability ($p \approx 0.5$) are maximally informative. So the best next item is one whose difficulty ($-V_j$) is close to the current estimate of $U$. Active elicitation policies therefore "hover" around the user’s current location, rapidly shrinking uncertainty. Place a Gaussian prior $U \sim \mathcal N(0,\sigma_0^2)$. After observing independent items $\mathcal J$, a Laplace (or IRLS) update for $U$ uses the score and observed information
+这个结论的解释很自然：太简单（$p \approx 1$）或太难（$p \approx 0$）的物品，回答几乎总是确定的，问不出关于用户多少信息；难度与用户水平匹配（$p \approx 0.5$）的物品信息量最大。所以下一个好物品，就是难度（$-V_j$）接近当前对 $U$ 的估计的那个。因此主动征询策略会"贴着"用户当前的位置来回试探，让不确定性快速缩小。设高斯先验 $U \sim \mathcal N(0,\sigma_0^2)$。观测到若干相互独立的物品 $\mathcal J$ 之后，对 $U$ 做拉普拉斯（也就是 IRLS）更新，要用到得分函数与观测信息量
 $$S(U) = \sum_{j\in\mathcal J} (y_j - p_j(U)), \qquad \mathcal I(U) = \sum_{j\in\mathcal J}p_j(U) (1 - p_j(U)) + \tau_0, \quad \tau_0 = \sigma_0^{-2}. $$ {#eq-rasch-score-info}
-A Newton step is $\hat U \leftarrow \hat U + S(\hat U)\mathcal I(\hat U)^{-1}.$ The approximate posterior variance is $\widehat{\mathrm{Var}}(U) \approx \mathcal I(\hat U)^{-1}.$ An item-selection rule that maximizes expected \textbf{incremental} information picks $j_t = \arg\max_j \; p_j(\hat U_{t-1}) (1 - p_j(\hat U_{t-1})).$ For evaluation, we can use reliability. With population variance $\mathrm{Var}(U^\star)=\sigma_U^2$, reliability is the fraction of total variance explained by the test rather than estimation noise:
+牛顿迭代的一步是 $\hat U \leftarrow \hat U + S(\hat U)\mathcal I(\hat U)^{-1}$，近似的后验方差为 $\widehat{\mathrm{Var}}(U) \approx \mathcal I(\hat U)^{-1}$。要想让**增量**信息量的期望最大，选题规则就是取 $j_t = \arg\max_j \; p_j(\hat U_{t-1}) (1 - p_j(\hat U_{t-1}))$。评估时可以用信度（reliability）。设总体方差为 $\mathrm{Var}(U^\star)=\sigma_U^2$，信度就是"能被测验解释的那部分方差"所占的比例，剩下的则归给估计噪声：
 $$
 \text{Rel} \approx 1 - \frac{1}{N}\sum_{i=1}^N \frac{\widehat{\mathrm{Var}}(U_i)}{\sigma_U^2}.
 $$ {#eq-reliability}
-Below, the code simulates many users, a bank of calibrated items, and compares an Fisher policy to a random policy. We track reliability after each query count $t$.
+下面的代码模拟很多用户和一个已经标定好的题库，把"按 Fisher 信息选题"的策略与随机策略作对比，并统计提问 $t$ 次之后的信度。
 
-First, we set up the simulation with $N$ users, $M$ calibrated items, and define helper functions for Bayesian updating:
+首先搭好模拟环境：$N$ 个用户、$M$ 个已经标定好的物品，并定义几个做贝叶斯更新的辅助函数。
 
 {{< include _plt_setup.qmd >}}
 

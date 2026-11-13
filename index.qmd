@@ -1,7 +1,7 @@
 # 引言 {.unnumbered #sec-intro}
 
 ::: {.callout-note title="关于这个中文译本"}
-这是《Machine Learning from Human Preferences》的简体中文译本，由 [CodingPracticeGroup](https://github.com/CodingPracticeGroup/mlhp) 在原作者桑 T. 特龙（Sang T. Truong）、安德烈亚斯·豪普特（Andreas Haupt）、桑米·科约（Sanmi Koyejo）原作的基础上翻译整理，原作与译文都按 CC BY-NC 4.0 授权。公式、代码、伪代码、文献引用一律保持原样，只译文字部分。译文若有理解偏差，责任在译者；原书请见 [mlhp.stanford.edu](https://mlhp.stanford.edu/)。本译本面向本科低年级读者，所以每处抽象定义后面都尽量跟一个具体例子；术语第一次出现时给出英文原词。
+这是《Machine Learning from Human Preferences》的简体中文译本，由 [CodingPracticeGroup](https://github.com/CodingPracticeGroup/mlhp) 在原作者桑 T. 特龙（Sang T. Truong）、安德烈亚斯·豪普特（Andreas Haupt）、桑米·科约（Sanmi Koyejo）原作的基础上翻译整理，原作与译文都按 CC BY-NC 4.0 授权。公式、代码、伪代码、文献引用一律保持原样，只译文字部分。译文若有理解偏差，责任在译者；原书请见 [mlhp.stanford.edu](https://mlhp.stanford.edu/)。本译本面向本科低年级读者，所以每处抽象定义后面都尽量跟一个具体例子；术语第一次出现时给出英文原词。原稿正文里有几处"Chapter N"这样的章节交叉引用与实际章节号相差一章（早期书稿含有一篇引言章，后来合并了，编号没跟着改），本译本按本书的实际章节编号翻译，读者按编号跳转即可。相对原作的全部有意改动，都记录在仓库的 `docs/zh-style-guide.md`。
 :::
 
 机器学习正在越来越多地影响我们生活的各个方面，从教育、医疗到科学发现。要做出值得信任的智能系统，一个关键难题是：让系统的判断和人的偏好对得上。从人的反馈里学习，被认为是解决这个难题的一条可行路子。这本书讲的就是"按人类偏好来学习"这件事的基本原理和实际用法。以前的做法是人工事先定好学习目标；这本书讲的是另一套办法：把人的反馈放进学习过程里，让它来引导学习。这方面的思路不少来自经济学、心理学、人机交互这些相邻领域。全书在讲方法的同时，也一直盯着方法的前提、局限，以及"什么时候能用、什么时候不能用"。搞清一个模型在什么时候会失效，和搞清它在什么时候有效，同样重要。读完这本书，你应当能够自己设计出真正贴合人类偏好的系统，并知道该用哪些概念和工具去做。
