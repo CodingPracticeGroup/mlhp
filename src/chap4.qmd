@@ -2129,17 +2129,13 @@ $$\label{th:quebo_regret}
 下面的定理说明：在与 qEUBO 遗憾分析相同的假定下，qEI 的简单遗憾可能无法收敛到 0。
 
 ::: theorem
-There exists a problem instance (i.e., $\mathbb{X}$ and Bayesian prior
-distribution over f) satisfying the assumptions described in Theorem
-[\[th:quebo_regret\]](#th:quebo_regret){reference-type="ref"
-reference="th:quebo_regret"} such that if the sequence of queries is
-chosen by maximizing qEI, then
+存在一个问题实例（也就是 $\mathbb{X}$ 和定义在 f 上的贝叶斯先验分布），它满足定理
+[\[th:quebo_regret\]](#th:quebo_regret){reference-type="ref" reference="th:quebo_regret"} 中列出的那些假定；但对这样的实例，若查询序列是靠最大化 qEI 选出来的，就有
 $\mathbb{E}\left[f\left(x^*\right)-\right.$
-$\left.f\left(\widehat{x}_n^*\right)\right] \geq R$ for all $n$, for a
-constant $R>0$.
+$\left.f\left(\widehat{x}_n^*\right)\right] \geq R$ 对所有 $n$ 成立，其中 $R>0$ 是一个常数。
 :::
 
-*Proof sketch.* The counterexample constructs four functions on $\mathcal{X} = \{1,2,3,4\}$ with a carefully chosen prior. The key insight is that qEI optimizes improvement over the *current best estimate*, which in this construction is always $x = 2$ (with $f(2) = 0$). Since comparing $x = 3$ vs. $x = 4$ always yields the highest expected improvement over $f(2) = 0$, qEI perpetually selects the query $(3, 4)$---never querying the pairs that would reveal whether the true optimum lies at $x = 3$ or $x = 4$. One can show by induction that this trapping behavior persists for all $n$, yielding constant Bayesian simple regret $R = p > 0$. In contrast, qEUBO avoids this trap because it maximizes the expected utility of the *best option shown*, which naturally encourages diverse queries. See @astudillo2023qeubo Section B for the full induction argument. $\square$
+*证明要点。* 这个反例在 $\mathcal{X} = \{1,2,3,4\}$ 上构造了四个函数，并为它们配了一个精心挑选的先验。关键洞见是：qEI 优化的是相对*当前最优估计*的改进，而在这一构造里当前最优估计始终是 $x = 2$（且 $f(2) = 0$）。由于比较 $x = 3$ 与 $x = 4$ 相对 $f(2) = 0$ 的期望改进总是最高，qEI 便永远在选那场对决 $(3, 4)$——从不去问那些本可以看出真实最优究竟在 $x = 3$ 还是 $x = 4$ 的配对。可以用归纳法说明：这种"被卡住"的行为对所有 $n$ 都持续存在，于是贝叶斯简单遗憾是一个常数 $R = p > 0$。相比之下，qEUBO 不会掉进这个陷阱，因为它最大化的是*被展示出来的最优选项*的期望效用，这本身就会鼓励问出多样的组合。完整的归纳论证见 @astudillo2023qeubo 附录 B。$\square$
 
 #### POP-BO 的遗憾 {#pop-bo-regret .unnumbered}
 
