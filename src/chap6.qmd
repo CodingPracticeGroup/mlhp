@@ -1393,49 +1393,49 @@ print("Mechanism: Better assistance → more usage → more queries → even bet
 
 All these systems have the same mathematical structure: **positive feedback loops amplifying initial biases**.
 
-#### Breaking the Feedback Loop {#sec-breaking-feedback}
+#### 截断这条反馈回路 {#sec-breaking-feedback}
 
-How do we prevent compounding unfairness?
+怎么防止不公平一路叠加？
 
-**Option 1: Stratified elicitation** (@sec-stratified-sampling)
-- Ensure minimum queries from each group regardless of current assistance quality
-- Breaks the Stage 1 → Stage 2 link in the feedback loop
+**办法 1：分层征询**（@sec-stratified-sampling）
+- 不论当前帮助质量如何，保证每组都有最低限度的询问
+- 这样就切断了回路里"阶段 1 → 阶段 2"这一环
 
-**Option 2: Fairness-constrained learning**
-- Don't just minimize overall error—minimize *maximum per-group error*
-- Ensures all groups are learned well, even if some provide less data
+**办法 2：带公平性约束的学习**
+- 不只看整体误差最小——而是让*各组中最大的那个误差*最小
+- 保证每一组都学得好，哪怕他们提供的数据更少
 
-**Option 3: Equal-weight aggregation** (@sec-equal-weight)
-- Don't weight by volume—weight by population proportion
-- Breaks the Stage 3 bias that privileges high-participation groups
+**办法 3：等权重汇总**（@sec-equal-weight）
+- 不按数量加权——按人口比例加权
+- 这样就切断了阶段 3 里偏向高参与度群体的那一步
 
-**Option 4: Illiberal assistance with equity goals** (@sec-liberal-illiberal)
-- Override individual preferences when they create group disparities
-- E.g., cap assistance quality for advantaged groups until disadvantaged groups catch up
+**办法 4：以公平为目标的非自由主义式协助**（@sec-liberal-illiberal）
+- 当个人偏好会造成群体差距时，替他推翻这个偏好
+- 例如：在处境不利的群体赶上来之前，先给条件好的群体的帮助质量设一个上限
 
-**Option 5: Regular re-initialization**
-- Periodically reset the system to equal assistance for all groups
-- Prevents long-run divergence (though fairness issues persist short-run)
+**办法 5：定期重新初始化**
+- 定期把系统重置为"对各群体提供同样的帮助"
+- 可以防止长期越跑越远（但短期内的公平问题仍然存在）
 
-**The Tradeoff**: All these interventions sacrifice some efficiency (overall system quality) for fairness (reducing disparities). You cannot optimize both simultaneously.
+**这里的取舍**：这些干预都要为公平（缩小差距）牺牲一些效率（系统的整体质量）。两头不可能同时最优。
 
-**Recommended Approach**: Combine multiple interventions across stages. No single-stage fix prevents compounding—you need fairness constraints at multiple pipeline stages.
+**建议的做法**：跨阶段同时用几种干预。只在一个阶段动手挡不住叠加——需要在流水线的多个阶段都加上公平性约束。
 
-This completes our analysis of the four-stage pipeline. Next, we formalize key fairness concepts that appeared throughout this section.
+四个阶段的分析到此结束。接下来把这一节里反复出现的几个公平概念正式写清楚。
 
-## Fairness Concepts and Impossibilities {#sec-fairness-concepts}
+## 公平的概念与不可能性 {#sec-fairness-concepts}
 
-Throughout Section 7.2, we encountered fairness tensions: efficiency vs. representation (@sec-elicitation-fairness), IIA vs. context-dependence (@sec-learning-assumptions), volume-weighting vs. equal-weighting (@sec-aggregation-fairness), liberal vs. illiberal (@sec-liberal-illiberal). These aren't implementation details—they reflect deep conflicts between incompatible fairness criteria.
+在上一节里，我们一路遇到这些公平上的张力：效率与代表性（@sec-elicitation-fairness）、独立无关备选与情境依赖（@sec-learning-assumptions）、按数量加权与等权重（@sec-aggregation-fairness）、自由主义式与非自由主义式（@sec-liberal-illiberal）。这些都不是实现细节，而是互不相容的公平标准之间的深层冲突。
 
-This section formalizes two fundamental tensions:
-1. **Individual vs. group fairness** (incompatible by theorem)
-2. **Process vs. outcome fairness** (incompatible in practice)
+本节把两组根本性的张力写清楚：
+1. **个体公平与群体公平**（有定理证明二者不相容）
+2. **过程公平与结果公平**（在实践中不相容）
 
-Understanding these impossibilities helps us make conscious tradeoffs rather than searching for nonexistent perfect solutions.
+理解这些不可能性，是为了让我们做出有意识的取舍，而不是去找那个并不存在的完美方案。
 
-### Individual vs. Group Fairness {#sec-individual-group-fairness}
+### 个体公平与群体公平 {#sec-individual-group-fairness}
 
-**Individual fairness** (Dwork et al., 2012): Similar individuals should be treated similarly.
+**个体公平**（Dwork 等人，2012）：相似的个体应当被相似地对待。
 
 **Formal definition**: For distance metric $d$ on individuals and outcomes, a decision function $f$ is individually fair if:
 $$
