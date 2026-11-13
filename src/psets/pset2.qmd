@@ -1138,39 +1138,20 @@ plt.show()
 ```
 :::
 
-### Question 5: Nonparametric Metric Elicitation (30 points) {#sec-question-5-nonparametric-metric-elicitation-30-points .unnumbered}
+### 第 5 题：非参数的指标引出（30 分） {#sec-question-5-nonparametric-metric-elicitation-30-points .unnumbered}
 
-In this question, we explore the problem of performance metric
-elicitation using a Gaussian Process (GP) to map the elements of the
-confusion matrix, specifically false positives (FP) and false negatives
-(FN), to an unknown performance metric. The goal is to learn a
-non-linear function that maps FP and FN to the metric, using relative
-preferences from pairwise classifier comparisons. We will use elliptical
-slice sampling for posterior inference.
+本题讨论用高斯过程（GP）来做性能指标的引出：把混淆矩阵中的元素——假正率（FP）与假负率（FN）——映射到一个未知的性能指标上。目标是用分类器两两比较得到的相对偏好，学出一个把 FP、FN 映射到该指标的非线性函数。后验推断用椭圆切片采样（elliptical slice sampling）。
 
-(a) **Gaussian Process for Metric Elicitation (10 points)**
+(a) **用高斯过程做指标引出（10 分）**
 
-    (i) **(Written, 2 points).** Assume that the performance metric
-        $\phi(C)$ is a non-linear function of the confusion matrix $C$.
-        For simplicity, assume that $\phi$ depends only on FP and FN,
-        i.e., $$\phi(\text{FP}, \text{FN}) \sim \mathcal{GP}(0, k((\text{FP}, \text{FN}), (\text{FP}', \text{FN}'))),$$ 
-        where $k$ is the covariance kernel function of
-        the Gaussian Process. Explain why using a GP allows for flexible
-        modeling of the metric $\phi$ as a non-linear function of FP and
-        FN. What are the advantages of using a GP over a linear model in
-        this context?
+    (i) **（笔答，2 分）** 假设性能指标 $\phi(C)$ 是混淆矩阵 $C$ 的非线性函数。为简单起见，设 $\phi$ 只依赖 FP 与 FN，即
+        $$\phi(\text{FP}, \text{FN}) \sim \mathcal{GP}(0, k((\text{FP}, \text{FN}), (\text{FP}, \text{FN})))$$
+        其中 $k$ 是高斯过程的协方差核函数。请说明：为什么用 GP 就能把指标 $\phi$ 灵活地建模成 FP 与 FN 的非线性函数？在这个场景里，用 GP 相比线性模型有什么好处？
 
-    (ii) **(Written, 2 points).** Suppose we observe pairwise
-         comparisons between classifiers, where a user provides feedback
-         on which classifier they prefer based on the unknown metric
-         $\phi$. Given two classifiers with confusion matrices
-         $C_1 = (\text{FP}_1, \text{FN}_1)$ and
-         $C_2 = (\text{FP}_2, \text{FN}_2)$, the user indicates their
-         relative preference. Let the observed preference be modeled by
-         Bradley-Terry as: $$\Pr(C_1 \succ C_2) = \sigma(\phi(\text{FP}_1, \text{FN}_1) - \phi(\text{FP}_2, \text{FN}_2)).$$ 
-         where we view $\phi$ as the reward function.
-         How does this likelihood affect the posterior inference in the
-         GP? Where does it introduce additional complexity?
+    (ii) **（笔答，2 分）** 假设我们观察到分类器之间的两两比较，用户根据那个未知的指标 $\phi$ 反馈他更喜欢哪个分类器。
+         给定两个分类器，其混淆矩阵为 $C_1 = (\text{FP}_1, \text{FN}_1)$ 与 $C_2 = (\text{FP}_2, \text{FN}_2)$，用户给出相对偏好。设观察到的偏好用 Bradley-Terry 建模为：
+         $$\Pr(C_1 \succ C_2) = \sigma(\phi(\text{FP}_1, \text{FN}_1) - \phi(\text{FP}_2, \text{FN}_2))$$
+         这里我们把 $\phi$ 看作奖励函数。这样的似然会怎样影响 GP 中的后验推断？它在哪些地方引入了额外的复杂度？
 
     (iii) **(Written + Coding, 6 points).** Given a set of observed
           pairwise comparisons, derive the posterior distribution over
@@ -1181,45 +1162,25 @@ slice sampling for posterior inference.
           normalization constant. Implement the likelihood function in
           `loglik_from_preferences`.
 
-(b) **Elliptical Slice Sampling for Posterior Inference (20 points)**
+(b) **用椭圆切片采样做后验推断（20 分）**
 
-    (i) **(Written, 3 points).** Read
-        <https://proceedings.mlr.press/v9/murray10a/murray10a.pdf>.
-        Elliptical slice sampling is a sampling method used to generate
-        samples from the posterior distribution of a Gaussian Process.
-        Explain the key idea behind elliptical slice sampling and why it
-        is well-suited for sampling from the GP posterior in this
-        context.
+    (i) **（笔答，3 分）** 阅读 <https://proceedings.mlr.press/v9/murray10a/murray10a.pdf>。
+        椭圆切片采样是一种从高斯过程后验分布中采样样本的方法。请说明它的核心思想，
+        以及为什么它很适合用来从本节的 GP 后验中采样。
 
-    (ii) **(Coding, 10 points).** Implement elliptical slice sampling in
-         `npme/elliptical_sampler.py` by following Figure 2 in the
-         paper.
+    (ii) **（编程，10 分）** 参照论文中的图 2，在 `npme/elliptical_sampler.py` 中实现椭圆切片采样。
 
-    (iii) **(Written, 3 points).** Run the algorithm on a synthetic
-          preference dataset of confusion matrices with pairwise
-          preferences. The synthetic data will be constructed using the
-          metric
-          $$\phi_{\text{true}}(\text{FP}, \text{FN}) = \log(1 + \text{FP}) + \log(1 + \text{FN}),$$
-          which captures the idea that the human oracle perceives both
-          false positives and false negatives in a way that flattens out
-          as these values increase (i.e., marginal increases in FP and
-          FN have diminishing effects on the performance metric).
-          Explain the psychological motivation behind this non-linear
-          function. Why might a logarithmic form be appropriate for
-          modeling human perception of classification errors?
+    (iii) **（笔答，3 分）** 在一个由混淆矩阵的两两偏好构成的合成数据集上运行该算法。这些合成数据用下面的指标构造：
+          $$\phi_{\text{true}}(\text{FP}, \text{FN}) = \log(1 + \text{FP}) + \log(1 + \text{FN})$$
+          它表达的是一种设定：人类裁判在感知假正例与假负例时，随着这些数值增大，感受会变得平缓
+          （也就是说，FP 与 FN 的边际增加对性能指标的影响越来越小）。请说明这个非线性函数背后的心理学动机，
+          以及为什么用对数形式来刻画人类对分类错误的感知可能是合适的。
 
-          Run the file `npme/main.py` and attach the plot of
-          $\phi_{\text{true}}$ vs your elicited metric. What do you
-          notice in the plot?
+          运行 `npme/main.py`，附上 $\phi_{\text{true}}$ 与你引出的指标之比较的图。你在图里注意到了什么？
 
-    (iv) **(Written + Coding, 4 points).** Once the GP has been trained
-         and posterior samples of the function
-         $\phi(\text{FP}, \text{FN})$ have been obtained, how can we
-         evaluate the quality of the elicited metric? Propose a method
-         to evaluate how well the elicited metric $\phi$ aligns with the
-         user's true preferences and implement it in
-         `evaluate_elicited_metric` taking into the plot you saw in part
-         (iii).
+    (iv) **（笔答 + 编程，4 分）** GP 训练好、也拿到了函数 $\phi(\text{FP}, \text{FN})$ 的后验样本之后，
+         我们该怎么评估引出的这个指标的质量？请提出一种方法来评估引出的指标 $\phi$ 与用户真实偏好的符合程度，
+         并在 `evaluate_elicited_metric` 中实现它（可以结合你在 (iii) 中看到的图）。
 
 ::: {.callout-note title="代码"}
 ```{python ex2-q5-1}
