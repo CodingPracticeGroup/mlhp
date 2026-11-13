@@ -1148,69 +1148,24 @@ for i, label in enumerate(labels):
 
 :::
 
-To accurately model the preferences between bandits in our framework of pairwise bandit comparisons and regret, 
-we must track certain parameters in our algorithm. First, we will maintain a running empirical estimate of the probability 
-of bandit preferences based on our observations. It is important to note that we do not have direct access to an $\epsilon$ 
-function. Instead, we must present two bandits to a human, who selects a winner. To do this, we define:
+要在"两两比较的老虎机 + 遗憾"这套框架里准确刻画老虎机之间的偏好，算法里必须维护几个量。首先，要根据观测持续更新对偏好概率的经验估计。要注意：我们并不能直接读到某个 $\epsilon$ 函数，只能把两只老虎机摆给人看，由人挑出更好的那个。为此定义：
 $$\hat{P}_{i, j} = \frac{\# b_i\ \text{wins}}{\# \text{comparisons between}\ i \text{and}\ j}.$$ {#eq-empirical-preference}
 
-We will also compute confidence intervals at each timestep for each of the entries in $\hat{P}$ as
+我们还会在每个时刻给 $\hat{P}$ 的每个条目算置信区间：
 $$\hat{C}_t = \left( \hat{P}_t - c_t, \hat{P}_t + c_t \right),$$ {#eq-confidence-interval}
-where $c_t = \sqrt{\frac{4\log(\frac{1}{\delta})}{t}}$. Note that $\delta = \frac{1}{TK^2}$, where $T$ is the 
-time horizon and $K$ is the number of bandits.
+其中 $c_t = \sqrt{\frac{4\log(\frac{1}{\delta})}{t}}$。注意 $\delta = \frac{1}{TK^2}$，这里 $T$ 是时间范围，$K$ 是老虎机的个数。
 
-Previously, we discussed approaches for finding the best action in a specific context. Now, we consider changing contexts, 
-which means there is no longer a static hidden preference matrix $P$. Instead, at every time step, there is a preference 
-matrix $P_C$ depending on context $C$. We consider a context $C$ and a preference matrix $P_C$ to be chosen by nature as a 
-result of the given environment (Yue et al., 2012). The goal of a contextual bandits algorithm is to find a policy $\pi$ that 
-maps contexts to a Von Neumann winner distribution over our bandits. That is, our policy $\pi$ should map any context to some 
-distribution over our bandits such that sampling from that distribution is preferred to a random action for that context.
+前面讨论的是"在某个特定上下文里找到最好的行动"。现在改成上下文会变化，也就是说不再有那张一成不变的隐偏好矩阵 $P$；取而代之的是，每个时刻都有一张依赖于上下文 $C$ 的偏好矩阵 $P_C$。我们把"上下文 $C$ 和偏好矩阵 $P_C$ 由环境决定、由自然给定"当作设定（Yue et al., 2012）。上下文老虎机算法的目标是找一个策略 $\pi$，把上下文映射到我们老虎机上的一个冯·诺依曼胜者分布。换句话说，对任何上下文，$\pi$ 应当给出老虎机上的某个分布，使得"从这个分布里抽一个"比"随机选一个行动"更被偏好。
 
-### Regret
+### 遗憾
 
-The agent aims to pick a sequence of arms $(a_1, a_2, \ldots, a_T)$
-across a succession of time steps $t = 1$ to $t = T$ to maximize the
-total accumulated reward. Formally, the strategy seeks to maximize the
-sum of the expected rewards:
-$\max_{a_1, \ldots, a_T} \mathbb{E} \left[\sum_{t=1}^{T} r_t\right]$.
-Regret is defined as the difference between the cumulative reward that
-could have been obtained by always pulling the best arm (in hindsight,
-after knowing the reward distributions) and the cumulative reward
-actually obtained by the algorithm. Formally, if $\mu^*$ is the expected
-reward of the best arm and $\mu_{a_t}$ is the expected reward of the arm
-chosen at time $t$, the regret after $T$ time steps is given by
-$R(T) = T \cdot \mu^* - \sum_{t=1}^{T} \mu_{a_t}$. The objective of a
-bandit algorithm is to minimize this regret over time, effectively
-learning to make decisions that are as close as possible to the
-decisions of an oracle that knows the reward distributions beforehand.
-Low regret indicates an algorithm that has often learned to choose
-well-performing arms, balancing the exploration of unknown arms with the
-exploitation of arms that are already known to perform well. Thus, an
-efficient bandit algorithm exhibits sub-linear regret growth, meaning
-that the average regret per round tends to zero as the number of rounds
-$T$ goes to infinity: $\lim_{T \to \infty} \frac{R(T)}{T} = 0$.
-Minimizing regret is a cornerstone in the design of bandit algorithms,
-and its analysis helps in understanding the long-term efficiency and
-effectiveness of different bandit strategies.
+智能体的目标是在 $t = 1$ 到 $t = T$ 这一串时刻里选出一列臂 $(a_1, a_2, \ldots, a_T)$，使累计奖励最大。形式化地，策略要最大化期望奖励之和：$\max_{a_1, \ldots, a_T} \mathbb{E} \left[\sum_{t=1}^{T} r_t\right]$。**遗憾（regret）** 定义为："一直拉最好的臂能拿到的累计奖励"（这是事后诸葛亮——已经知道了奖励分布）与"算法实际拿到的累计奖励"之差。形式化地说，若 $\mu^*$ 是最好臂的期望奖励、$\mu_{a_t}$ 是时刻 $t$ 所选臂的期望奖励，则 $T$ 步之后的遗憾为 $R(T) = T \cdot \mu^* - \sum_{t=1}^{T} \mu_{a_t}$。老虎机算法的目标就是让这点遗憾尽量小，也就是学会做出尽量接近"事先就知道奖励分布的先知"的决策。遗憾小说明算法经常能选到表现好的臂——它把"探索没试过的臂"和"利用已知好用的臂"平衡得好。因此，高效的老虎机算法遗憾增长是**次线性**的，即平均每轮遗憾随着轮数 $T$ 增多趋于零：$\lim_{T \to \infty} \frac{R(T)}{T} = 0$。最小化遗憾是设计老虎机算法时的核心问题，对它的分析也有助于理解各种老虎机策略的长期效率与效果。
 
-As previously discussed, our goal is to select the bandit that minimizes
-a quantity that reflects regret or the cost of not selecting the optimal
-bandit at all times. We can leverage our comparison model to define a
-quantity for regret over some time horizon $T$, which is the number of
-decisions we make (selecting what we think is the best bandit at each
-iteration). Assuming we know the best bandit $b^*$ (and we know that
-there *is* a best bandit, since there is a total ordering of our
-discrete bandits), we can define two notions of regret:
+前面说过，我们的目标是选出那个使某个"反映遗憾、也就是没在每一步都选出最优老虎机的代价"最小的老虎机。借助比较模型，可以在一段时间范围 $T$（做决定的总次数，每次都是选我们认为最好的老虎机）上定义遗憾。假设我们已知最好的老虎机是 $b^*$（而且确信*存在*这样一个最好的老虎机，因为有限个离散老虎机之间可以排出全序），那么可以定义两种遗憾：
 
--   Strong regret: aims to capture the fraction of users who would
-    prefer the optimal bandit $b^*$ over the *worse* of the options
-    $b_1, b_2$ we provide at a given
-    step:$R_T = \sum_{t = 1}^T \text{max} \left\{ \epsilon(b^*, b_1^{(t)}), \epsilon(b^*, b_2^{(t)}) \right\}$
+-   强遗憾（strong regret）：想刻画的是"会偏好最优老虎机 $b^*$ 多过我们在这一步给出的**更差**那个选项 $b_1, b_2$"的那部分用户占比：$R_T = \sum_{t = 1}^T \text{max} \left\{ \epsilon(b^*, b_1^{(t)}), \epsilon(b^*, b_2^{(t)}) \right\}$
 
--   Weak regret: aims to capture the fraction of users who would prefer
-    the optimal bandit $b^*$ over the *better* of the options $b_1, b_2$
-    we provide at a given
-    step:$\tilde{R}_T = \sum_{t = 1}^T \text{min} \left\{ \epsilon(b^*, b_1^{(t)}), \epsilon(b^*, b_2^{(t)}) \right\}$
+-   弱遗憾（weak regret）：想刻画的是"会偏好最优老虎机 $b^*$ 多过我们在这一步给出的**更好**那个选项 $b_1, b_2$"的那部分用户占比：$\tilde{R}_T = \sum_{t = 1}^T \text{min} \left\{ \epsilon(b^*, b_1^{(t)}), \epsilon(b^*, b_2^{(t)}) \right\}$
 
 ### Winner Concepts {#sec-borda}
 
