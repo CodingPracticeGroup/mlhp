@@ -2304,42 +2304,42 @@ print(f"Final distance to optimum: {distances[-1]:.4f}")
 
 :::
 
-## Reinforcement Learning Foundations for Preference Optimization (Optional) {#sec-rl-foundations}
+## 面向偏好优化的强化学习基础（选学） {#sec-rl-foundations}
 
 ::: {.callout-note}
-This section is optional and covers reinforcement learning (RL) foundations that underlie modern preference optimization methods like RLHF, PPO, and GRPO. It provides the formal framework for CIRL (next section) and connects the bandit methods from earlier sections to the full sequential setting used in language model alignment. Readers familiar with RL may wish to skim Sections 4.6.1--4.6.2 and focus on Sections 4.6.3--4.6.5, which develop the policy gradient theorem and GRPO in the preference optimization context.
+本节是选学内容，介绍现代偏好优化方法（如 RLHF、PPO、GRPO）所依赖的强化学习（RL）基础。它为下一节的 CIRL 提供正式框架，并把前面几节的老虎机方法与语言模型对齐中用到的完整序贯设定连接起来。已经熟悉强化学习的读者，可以略读本节开头的"马尔可夫决策过程"与"价值函数与优势"两小节，直接看后面的"策略梯度定理""REINFORCE 与降方差"以及 GRPO 相关内容——那里讲的是偏好优化情境下的策略梯度定理与 GRPO。
 :::
 
-The bandit and Bayesian optimization methods developed so far operate in **single-step** or **myopic** settings: at each round, the learner selects an arm or a query pair, observes feedback, and updates its model. But the RLHF pipeline introduced in Chapter 1 and the CIRL framework in the next section both require reasoning over **sequences** of decisions, where early actions influence future states.
+到这里为止讲的老虎机和贝叶斯优化方法，处理的都是**单步**或**近视**的设定：每一轮，学习者选一个臂或一对查询，观察反馈，再更新模型。但第 1 章介绍的 RLHF 流程，以及下一节的 CIRL 框架，都需要在**一序列**决策上做推理——早期的行动会影响之后的状态。
 
-This section develops the RL machinery needed for these settings, culminating in **GRPO** (Group Relative Policy Optimization)---a modern method that directly connects policy gradient optimization to the Bradley-Terry preference model from Chapter 1. The progression from bandits to full RL mirrors this chapter's arc from simple to complex decision-making under uncertainty.
+本节就来搭建这些设定所需的 RL 工具，最后落到 **GRPO**（Group Relative Policy Optimization，组相对策略优化）——这是一个把策略梯度优化与第 1 章的 Bradley-Terry 偏好模型直接对接起来的现代方法。从老虎机一路走到完整的强化学习，也正对应本章从简单到复杂的这条线索：不确定条件下如何做决策。
 
-### Markov Decision Processes
+### 马尔可夫决策过程
 
-The **Markov Decision Process** (MDP) generalizes the bandit setting by introducing *states* that evolve over time based on the learner's actions.
+**马尔可夫决策过程（Markov Decision Process, MDP）** 把老虎机的设定做了推广：引入*状态*，而状态会随着学习者的行动随时间变化。
 
-::: {.callout-note title="Definition: Markov Decision Process (MDP)"}
-An MDP is a tuple $(\mathcal{S}, \mathcal{A}, P, R, \gamma, \rho_0)$ where:
+::: {.callout-note title="定义：马尔可夫决策过程（MDP）"}
+一个 MDP 是一个元组 $(\mathcal{S}, \mathcal{A}, P, R, \gamma, \rho_0)$，其中：
 
-- $\mathcal{S}$: state space
-- $\mathcal{A}$: action space
-- $P(s' \mid s, a)$: transition probability from state $s$ to $s'$ under action $a$
-- $R(s, a)$: reward function, $R: \mathcal{S} \times \mathcal{A} \to \mathbb{R}$
-- $\gamma \in [0, 1]$: discount factor
-- $\rho_0$: initial state distribution
+- $\mathcal{S}$：状态空间
+- $\mathcal{A}$：行动空间
+- $P(s' \mid s, a)$：在行动 $a$ 下，从状态 $s$ 转移到 $s'$ 的转移概率
+- $R(s, a)$：奖励函数，$R: \mathcal{S} \times \mathcal{A} \to \mathbb{R}$
+- $\gamma \in [0, 1]$：折扣因子
+- $\rho_0$：初始状态分布
 :::
 
-A **policy** $\pi_\theta(a \mid s)$ maps states to distributions over actions, parameterized by $\theta$. An agent following policy $\pi$ generates a **trajectory**:
+**策略** $\pi_\theta(a \mid s)$ 把状态映射成行动上的分布，由参数 $\theta$ 参数化。按策略 $\pi$ 行事的智能体会生成一条**轨迹**：
 $$
 \tau = (s_0, a_0, s_1, a_1, \ldots, s_T, a_T), \quad s_0 \sim \rho_0, \; a_t \sim \pi(\cdot \mid s_t), \; s_{t+1} \sim P(\cdot \mid s_t, a_t)
 $$ {#eq-trajectory}
 
-The **RL objective** is to find the policy that maximizes expected cumulative reward:
+**RL 的目标**是找到使累计奖励期望最大的那条策略：
 $$
 J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}\left[\sum_{t=0}^{T} \gamma^t R(s_t, a_t)\right]
 $$ {#eq-rl-objective}
 
-When $T = 0$ (a single step with no state transitions), the MDP reduces to the **bandit** setting from earlier sections. The RL objective then reduces to maximizing expected immediate reward $\mathbb{E}_{a \sim \pi_\theta}[R(a)]$, recovering the reward maximization problem from @sec-thompson-sampling.
+当 $T = 0$（只有一步、没有状态转移）时，MDP 就退化成本章前面讲过的**老虎机**设定。此时 RL 目标变成最大化期望即时奖励 $\mathbb{E}_{a \sim \pi_\theta}[R(a)]$，也就是 @sec-thompson-sampling 里那个奖励最大化问题。
 
 ::: {.callout-tip title="例子：把大模型生成看成一个 MDP"}
 自回归的文本生成天然就能套进 MDP 这套框架：
