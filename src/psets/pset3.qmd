@@ -6,104 +6,55 @@ lang: zh
 ## Exercises
 ### Question 1: Preferential Bayesian Optimization (30 points) {#sec-question-1-preferential-bayesian-optimization-30-points .unnumbered}
 
-**Preferential Bayesian Optimization (PBO)** is a variant of Bayesian
-Optimization (BO) designed to handle scenarios where feedback is
-provided in terms of preferences between alternatives rather than
-explicit numeric evaluations. Suppose you are optimizing an unknown
-function $f$ over a space $\mathcal{X}$, but instead of receiving
-function values, you only receive pairwise comparisons between different
-points in the input space. That is, given two points
+**偏好式贝叶斯优化（Preferential Bayesian Optimization, PBO）** 是贝叶斯优化（BO）的一个变体，用来处理"反馈是备选项之间的偏好、而不是明确的数值评分"的场景。
+设你要在空间 $\mathcal{X}$ 上优化一个未知函数 $f$，但得到的不是函数值，只是输入空间中两两点的比较结果。也就是说，给定两个点
 $x_1, x_2 \in \mathcal{X}$, you receive feedback in the form of a
 preference: $x_1 \succ x_2$ implies $f(x_1) > f(x_2)$.
 
-The **Gaussian Process (GP)** framework is used to model $f$, and the
-optimization is guided by this model. Let $p(x_1 \succ x_2 | f)$ be the
-probability that $x_1$ is preferred over $x_2$, which can be modeled
-using a Bradley-Terry or Thurstone model based on the GP prior.
+这里用**高斯过程（GP）**框架来给 $f$ 建模，优化就由这个模型引导。记 $p(x_1 \succ x_2 | f)$ 为"$x_1$ 比 $x_2$ 更被偏好"的概率，
+它可以基于 GP 先验用 Bradley-Terry 或 Thurstone 模型来建模。
 
-Using the paper "Preferential Bayesian Optimization"
-(<https://proceedings.mlr.press/v70/gonzalez17a/gonzalez17a.pdf>),
-answer the following:
+请借助论文 "Preferential Bayesian Optimization"（<https://proceedings.mlr.press/v70/gonzalez17a/gonzalez17a.pdf>），回答下面的问题。
 
-(a) **Modeling Preferences (6 points)**
+(a) **偏好建模（6 分）**
+        给定两个点 $x_1$ 与 $x_2$ 及其对应的潜在函数值 $f(x_1)$、$f(x_2)$，用 Bradley-Terry 模型
+        推出出现偏好 $x_1 \succ x_2$ 的似然。答案就写在这里。
 
-    (i) **Likelihood Derivation (Written, 2 points):** Given two points
-        $x_1$ and $x_2$ and their corresponding latent function values
-        $f(x_1)$ and $f(x_2)$, derive the likelihood of a preference
-        $x_1 \succ x_2$ using the Bradley-Terry model. Your solution
-        here.
+    (ii) **接入 GP（笔答，2 分）** 说明这个似然怎样并入 GP 框架，从而以概率方式刻画偏好。
+         具体请说明 GP 的协方差函数如何影响偏好的联合分布，并讨论你对 $f$ 的光滑性或结构作了哪些假定。
 
-    (ii) **Incorporating into GP (Written, 2 points):** Explain how this
-         likelihood can be incorporated into the GP framework to model
-         preferences probabilistically. Specifically, describe how the
-         covariance function of the GP affects the joint distribution of
-         preferences and discuss any assumptions made regarding the
-         smoothness or structure of $f$.
+    (iii) **后验更新（笔答，2 分）** 利用基于此前观察到的偏好的后验预测分布，写出新查询点处后验均值与方差的表达式
+          （不必化简，因为它没有解析的可处理形式）。再给出一种可以近似这两个量的方法。
 
-    (iii) **Posterior Update (Written, 2 points):** Write out an
-          expression for the posterior mean and variance at new query
-          points by using the posterior predictive distribution based on
-          previously observed preferences (no need to simplify since
-          it's intractable analytically). Suggest an approach that can
-          be used to approximate the mean and variance.
+(b) **采集函数的改造（6 分）**
+        说明在 PBO 中，期望改进（Expected Improvement, EI）采集函数怎样被改造，以便处理"偏好"而不是"绝对函数值"。这一问请阅读论文。
 
-(b) **Acquisition Function Adaptation (6 points)**
+    (ii) **两两比较下的 EI 计算（笔答，2 分）** 推出处理两两比较时的 EI 表达式，说明它与标准贝叶斯优化中的 EI 计算有何不同，
+         并讨论这里怎样用到 GP 模型的不确定性。
 
-    (i) **Expected Improvement (EI) for Preferences (Written, 2
-        points):** Explain how the Expected Improvement (EI) acquisition
-        function is adapted in the context of PBO to handle preferences
-        rather than absolute function values. Please read the paper for
-        this.
-
-    (ii) **EI Computation for Pairwise Comparisons (Written, 2
-         points):** Derive the expression for EI when dealing with
-         pairwise comparisons. Show how the computation of EI differs
-         from the standard BO setting and discuss how uncertainty in the
-         GP model is used in this context.
-
-    (iii) **Selection Strategy (Written, 2 points):** Describe how the
-          acquisition function uses the pairwise preference data to
-          select the next query point. Provide a rigorous justification
-          for this selection strategy in terms of maximizing expected
-          information gain.
+    (iii) **选择策略（笔答，2 分）** 说明采集函数如何利用两两偏好的数据来选下一个查询点，
+          并从"最大化期望信息增益"的角度为这一选择策略给出严格的论证。
 
 (c) **Exploration-Exploitation Balance in PBO (6 points)**
 
-    (i) **Exploration Mechanism (Written, 2 points):** Explain how
-        exploration is handled in the PBO framework. Describe how
-        uncertainty in the preference model (the GP posterior)
-        influences the selection of new points for evaluation.
+    (i) **探索机制（笔答，2 分）** 说明 PBO 框架里是怎么处理探索的：
+        偏好模型（也就是 GP 后验）中的不确定性，怎样影响新评估点的选择。
 
-    (ii) **Uncertainty Quantification (Written, 2 points):** Define how
-         the variance in the GP posterior represents uncertainty in the
-         model and show how this uncertainty is updated as new
-         preferences are observed.
+    (ii) **不确定性量化（笔答，2 分）** 说明 GP 后验中的方差如何表示模型的不确定性，并给出这种不确定性随新观察到的偏好怎样更新。
 
-    (iii) **Empirical Validation (Written, 2 points):** Design an
-          experiment to empirically validate the balance between
-          exploration and exploitation in PBO. Describe the setup,
-          including the objective function, the experimental conditions,
-          and the evaluation metric for measuring the quality of
-          exploration-exploitation balance.
+    (iii) **实证验证（笔答，2 分）** 设计一个实验，实证检验 PBO 中探索与利用之间的平衡。写清实验设定，
+          包括目标函数、实验条件，以及用来衡量"探索—利用平衡"好坏的评价指标。
 
-(d) **Scalability and Practical Considerations (6 points)**
-
-    (i) **Challenges in Preference Feedback (Written, 2 points):**
+(d) **可扩展性与实际考虑（6 分）**
         Discuss the challenges associated with preference feedback in
         real-world applications, such as inconsistency in user
         preferences and potential biases.
 
-    (ii) **GP Scalability (Written, 2 points):** Explain how the
-         scalability of the GP model affects the performance of PBO,
-         especially as the number of observations increases. Include a
-         discussion on computational complexity and possible solutions.
+    (ii) **GP 的可扩展性（笔答，2 分）** 说明 GP 模型的可扩展性怎样影响 PBO 的表现，尤其是观察数量增加时。
+         请同时讨论计算复杂度以及可行的解决办法。
 
-    (iii) **Extensions for Large-Scale Problems (Written, 2 points):**
-          Propose potential extensions or modifications to improve the
-          applicability of PBO to large-scale optimization problems. For
-          example, discuss the feasibility of sparse GPs or other
-          approximation techniques and evaluate their potential impact
-          on PBO performance.
+    (iii) **面向大规模问题的扩展（笔答，2 分）** 提出可以改进 PBO 在大规模优化问题上适用性的扩展或改动。
+          例如，讨论稀疏 GP 或其他近似技术的可行性，并评估它们对 PBO 表现的潜在影响。
 
 (e) **Empirical Experimentation (6 points)**
 
