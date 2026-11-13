@@ -2837,10 +2837,10 @@ As designers of preference learning systems, we are **choice architects**: the o
 - **Framing effects**: How options are described changes perceived value
 - **Default effects**: Pre-selected options are chosen more often
 
-These effects are typically not captured in standard choice models (which assume IIA or similar properties). Responsible deployment of preference learning systems requires awareness of these biases.
+这些效应，标准的选择模型通常都没有刻画（它们假定了独立无关备选（IIA）或类似的性质）。要把偏好学习系统部署好，就必须意识到这些偏差的存在。
 
-::: {.callout-tip title="Key Takeaway: Beyond Passive Oracles"}
-The transition from measurement to decision-making revealed that uncertainty should be managed, not just reduced. The transition from passive oracles to active humans reveals that **humans themselves are strategic agents** whose behavior depends on their beliefs about the system. CIRL provides a principled framework for this cooperative setting.
+::: {.callout-tip title="本章要点：人不是被动的『神谕』"}
+从"测量"走到"决策"，让我们看清不确定性是要去管理的，而不只是把它降下去；从"被动的神谕"走到"主动的人"，则让我们看清**人本身就是会权衡的策略主体**，他的行为取决于他对这套系统的判断。CIRL 为这种合作情形提供了一个有章法的框架。
 :::
 
 ::: {.callout-warning title="Assumption: Approximately Rational Humans"}
