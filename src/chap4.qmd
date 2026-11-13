@@ -1846,19 +1846,9 @@ $$\label{eq:soft-copeland}
 C(\mathbf{x})=\operatorname{Vol}(\mathcal{X})^{-1} \int_{\mathcal{X}} \pi_f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right) d \mathbf{x}^{\prime}$$
 这里对概率函数 $\pi_f$ 在整个 $\mathcal{X}$ 上做了积分。这个分数想要刻画的是：$\mathbf{x}$ 赢下一场对决的平均概率有多大。
 
-We define the *Condorcet winner* $\mathbf{x}_c$ as the point with
-maximal soft-Copeland score. Note that this corresponds to the global
-minimum of $f$, since the defining integral takes maximum value for
-points $\mathbf{x} \in \mathcal{X}$ where
-$f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=$
-$g\left(\mathbf{x}^{\prime}\right)-g(\mathbf{x})>0$ or all
-$\mathbf{x}^{\prime}$, occurring only if $\mathbf{x}_c$ is a minimum of
-$f$. Therefore, if the preference function $\pi_f$ can be learned by
-observing the results of duels then our optimization problem of finding
-the minimum of $f$ can be solved by finding the Condorcet winner of the
-Copeland score.
+我们把*孔多塞胜者* $\mathbf{x}_c$ 定义为软科佩兰分数最大的那一点。注意它正好对应 $f$ 的全局最小值：按定义，那个积分只在 $\mathbf{x} \in \mathcal{X}$ 中满足下面条件的那些点上取到最大值，即对所有 $\mathbf{x}^{\prime}$ 都有 $f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=$ $g\left(\mathbf{x}^{\prime}\right)-g(\mathbf{x})>0$，而这只有 $\mathbf{x}_c$ 是 $f$ 的最小值点时才可能。因此，只要能通过对决的结果把偏好函数 $\pi_f$ 学出来，"求 $f$ 的最小值"这个优化问题就可以转化为求科佩兰分数的孔多塞胜者。
 
-::: {.callout-note title="Code: Copeland Score Visualization" collapse="false"}
+::: {.callout-note title="代码：科佩兰分数的可视化"}
 
 ```{pyodide-python}
 #| autorun: true
