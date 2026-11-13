@@ -1878,24 +1878,24 @@ These aren't failures of engineering—they're **impossibility results**. No sys
 
 Next, we provide eight concrete design principles for navigating these impossibilities in practice.
 
-## Design Principles for Fair Preference Learning {#sec-design-principles}
+## 面向公平偏好学习的设计原则 {#sec-design-principles}
 
-The pipeline analysis (@sec-design-choices) and fairness impossibilities (@sec-fairness-concepts) reveal fundamental tensions. No system satisfies all desirable properties. But we're not helpless—conscious design choices can mitigate unfairness even if we can't eliminate it entirely.
+上面沿流水线做的分析（@sec-design-choices）和公平方面的不可能性（@sec-fairness-concepts）揭示的是根本性的张力。没有哪个系统能满足所有好的性质。但我们并非无能为力——即使无法彻底消除不公平，有意识的设计选择也能把它减轻。
 
-This section provides **eight actionable principles** for building fairer preference learning systems, distilled from the chapter's analysis and real-world experience. Each principle addresses specific failure modes from earlier sections.
+本节给出**八条可落地的原则**，用来建造更公平的偏好学习系统。它们来自本章的分析与真实经验，每条针对前面各节中出现过的某种具体失败方式。
 
-### Principle 1: Make Value Tradeoffs Explicit {#sec-principle-explicit}
+### 原则 1：把价值取舍摆到明面上 {#sec-principle-explicit}
 
-**Principle**: Document what values are prioritized, what's sacrificed, who benefits, and who is harmed. Create **values documents** alongside technical design docs.
+**原则**：写清楚优先考虑的是什么价值、牺牲了什么、谁受益、谁受损。在技术设计文档之外，同时写一份**价值观说明**。
 
-**Rationale**: Every technical choice embeds value judgments (@sec-whose-preferences). Claiming "technical neutrality" hides these choices, preventing scrutiny and accountability. Explicit documentation enables informed debate.
+**理由**：每个技术选择都含着价值判断（@sec-whose-preferences）。宣称"技术中立"只是把这些选择藏起来，让人无从审视、无人负责。写明白了，讨论才有依据。
 
-**In practice**:
-- For the AI review assistant: Document that productivity-based sampling prioritizes efficiency over representation, benefiting senior reviewers at the expense of juniors.
-- Create a "fairness impact statement" for each pipeline stage: Who gets more/less? Why is this acceptable?
-- Include this in design reviews, not just code reviews.
+**具体做法**：
+- 对这位 AI 审稿助手：写明"按产出采样"把效率放在代表性之前，受益的是资深审稿人，代价由资浅审稿人承担。
+- 为流水线的每个阶段写一份"公平性影响说明"：谁多、谁少？为什么这样是可以接受的？
+- 把这份说明纳入设计评审，而不只是代码评审。
 
-**Example template**:
+**模板**（模板各行依次为：设计决定／优先考虑的价值／牺牲的价值／谁受益／谁受损／理由／缓解措施；模板本身保持英文，可直接抄用）：
 ```
 Design Decision: Use DPO with volume-weighted reference policy
 Value Prioritized: Statistical efficiency (lower variance)
@@ -1906,34 +1906,34 @@ Justification: [Your reasoning here]
 Mitigation: [e.g., Minimum sampling quotas for underrepresented groups]
 ```
 
-**Connection**: Addresses the hidden value judgments in elicitation (@sec-elicitation-fairness), learning (@sec-iia-fairness), aggregation (@sec-aggregation-fairness), and decisions (@sec-liberal-illiberal-fairness).
+**对应的问题**：针对征询（@sec-elicitation-fairness）、学习（@sec-iia-fairness）、汇总（@sec-aggregation-fairness）与决策（@sec-liberal-illiberal-fairness）中被隐藏的价值判断。
 
 ---
 
-### Principle 2: Distinguish Behavior from Mental State {#sec-principle-inversion}
+### 原则 2：把行为与心理状态分开 {#sec-principle-inversion}
 
-**Principle**: Don't optimize for clicks, bids, or engagement without asking if they reflect true preferences. Model **context** explicitly. Weight less-automatic signals more heavily.
+**原则**：在没弄清点击、表态、使用时长是否反映真实偏好之前，别直接拿它们当优化目标。把**情境**明确建进模型，给那些不那么"自动"产生的信号更高的权重。
 
-**Rationale**: The inversion problem (@sec-inversion-problem): $P(B \mid M, C) \neq P(B \mid M)$. Behavior conflates mental state with context. Groups with worse context (fatigue, time pressure, language barriers) appear less expert when measured by behavior alone.
+**理由**：反演问题（@sec-inversion-problem）：$P(B \mid M, C) \neq P(B \mid M)$。行为把心理状态和情境混在了一起。只按行为衡量，情境更差的群体（疲劳、时间紧、语言障碍）就显得更不外行。
 
-**In practice**:
-- Don't query reviewers proportional to review length—use stratified sampling to ensure representation.
-- If using engagement metrics (time spent, clicks), adjust for accessibility (slow internet, screen readers, non-native language comprehension).
-- Collect explicit preference signals (ratings, comparisons) in addition to implicit behavior.
+**具体做法**：
+- 不要按审稿意见的长短来决定去问谁的比例——用分层抽样来保证代表性。
+- 如果用参与度指标（停留时长、点击），要为可及性做调整（网速慢、用读屏软件、非母语理解）。
+- 除了隐式的行为，还要收集明确的偏好信号（评分、比较）。
 
-**Red flag**: If you're using revealed preferences (purchase history, clicks, review volume) as ground truth without modeling context, you're committing the inversion fallacy.
+**危险信号**：把显示偏好（购买记录、点击、审稿量）直接当作标准答案、又不建情境模型，那就犯了反演谬误。
 
-**Connection**: Core issue in elicitation (@sec-elicitation-fairness). Productivity-based sampling systematically undersamples groups with poor context.
+**对应的问题**：这是征询环节的核心问题（@sec-elicitation-fairness）。按产出采样会系统性地少采那些情境不好的群体。
 
 ---
 
-### Principle 3: Audit for Compounding Unfairness {#sec-principle-compounding}
+### 原则 3：审计不公平的叠加 {#sec-principle-compounding}
 
-**Principle**: Map the full pipeline (elicitation → learning → aggregation → decision). Simulate over time. Test: Does disparity grow or shrink? If it grows, intervene urgently.
+**原则**：把整条流水线画出来（征询 → 学习 → 汇总 → 决策），按时间做模拟，检验：差距在变大还是变小？在变大就要立即干预。
 
-**Rationale**: Section @sec-compounding-unfairness showed how small biases multiply through feedback loops. A 10% initial advantage becomes 40% after 15 rounds. Endstate: system serves privileged groups excellently, disadvantaged groups poorly.
+**理由**：@sec-compounding-unfairness 说明了小偏差怎样通过反馈回路成倍放大。起初 10% 的优势，15 轮之后就变成 40%。最终状态：系统把条件好的群体服务得很好，把处境不利的群体服务得很差。
 
-**In practice**:
+**具体做法**：
 - Before deployment: Run simulations with different initial conditions (varied group sizes, participation rates).
 - After deployment: Track per-group metrics over time. Plot disparity trends. If widening, pause and redesign.
 - Set **circuit breakers**: If disparity exceeds threshold (e.g., 2x gap in quality), trigger automatic review.
@@ -1963,7 +1963,7 @@ Mitigation: [e.g., Minimum sampling quotas for underrepresented groups]
 | Domains requiring diversity (creative work, research) | **Group fairness** | Ensure all perspectives represented; avoid homogenization |
 | Low-stakes personal domains (entertainment, shopping) | **Process fairness** | Autonomy paramount; respect stated preferences |
 
-**In practice**:
+**具体做法**：
 - For peer review: Prioritize individual fairness (expertise-topic match) but constrain for group fairness (minimum quality per subfield).
 - Document choice in values statement (Principle 1).
 - Measure violations of non-prioritized criteria and report them (transparency).
@@ -1978,7 +1978,7 @@ Mitigation: [e.g., Minimum sampling quotas for underrepresented groups]
 
 **Rationale**: Optimization on average hides disparities. A system can improve for 80% of users while degrading for 20%. Averages increase, but unfairness grows. Stratified reporting reveals this.
 
-**In practice**:
+**具体做法**：
 - Don't report "95% accuracy"—report "98% for Group A, 87% for Group B" (stratified).
 - Set constraints: "No group below 90% accuracy" rather than "average 95% accuracy."
 - Optimization formulation:
@@ -2001,7 +2001,7 @@ where $\mathcal{G}$ is the set of protected groups and $\tau$ is the fairness th
 
 **Rationale**: Designers often lack lived experience of disadvantaged groups. Assumptions about "what's fair" reflect designer privilege. Participatory design surfaces issues invisible to designers.
 
-**In practice**:
+**具体做法**：
 - Form advisory boards with junior reviewers, underrepresented subfields, international scholars.
 - Show them stratified metrics (Principle 5). Ask: "Is this disparity acceptable? What would make it better?"
 - Iterate: Design → Deploy to subset → Gather feedback → Redesign → Repeat.
@@ -2019,7 +2019,7 @@ where $\mathcal{G}$ is the set of protected groups and $\tau$ is the fairness th
 
 **Rationale**: Fairness violations are often invisible to designers. Users experience harm but can't prove it (disparities are statistical, not individual). Observability makes the invisible visible.
 
-**In practice**:
+**具体做法**：
 - **Logging**: Record all queries, model predictions, assistant suggestions with user demographics and context. Enables post-hoc auditing.
 - **Dashboards**: Real-time stratified metrics (Principle 5) visible to stakeholders, not just developers.
 - **Feedback channels**: "Report unfairness" button. User submissions trigger review.
