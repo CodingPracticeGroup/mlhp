@@ -244,59 +244,59 @@ plt.show()
 print("\nCondorcet paradox: With 3 voters (A>B>C, B>C>A, C>A>B),")
 print("majority rule cycles: A beats B (2-1), B beats C (2-1), C beats A (2-1).")
 print("No Condorcet winner exists — every alternative loses to some other.")
-``` To guide the design of social choice functions, several desirable properties or axioms have been proposed. Three classical fairness criteria are:
+``` 为了指导社会选择函数的设计，人们提出过一些"好性质"或公理。经典的三条公平性标准是：
 
-1. Unanimity (Pareto efficiency): If all individuals strictly prefer one alternative $x$ over another $y$ (i.e. $x \succ_i y$ for every voter $i$), then the group ranking should prefer $x$ over $y$ as well ($x \succ^* y$).
-2. Independence of Irrelevant Alternatives (IIA): The social preference between any two alternatives $x$ and $y$ should depend only on the individual preferences between $x$ and $y$. In other words, if we change individuals’ rankings of other “irrelevant” alternatives (not $x$ or $y$) in any way, the group’s relative ordering of $x$ and $y$ should remain unchanged.
-3. Non-dictatorship: The aggregation should not simply follow a single individual’s preference regardless of others. There is no voter $i$ who always gets their top choice as the social choice (or whose rankings always become the social ranking), irrespective of other voters’ preferences.
+1. 一致同意（帕累托有效）：如果所有人都严格更喜欢 $x$ 而不是 $y$（即对每位选民 $i$ 都有 $x \succ_i y$），那么群体排序也应当把 $x$ 排在 $y$ 前面（$x \succ^* y$）。
+2. 独立无关备选（Independence of Irrelevant Alternatives, IIA）：社会对任意两个候选项 $x$ 与 $y$ 的偏好，只应取决于每个人自己在 $x$ 和 $y$ 之间怎么排。换句话说，只要不动大家对 $x$、$y$ 之外的"无关"候选项的排序——怎么改都行——群体对 $x$ 与 $y$ 的相对次序就不该改变。
+3. 非独裁：汇总结果不能不管别人怎么选，一律照某个人的偏好来。不存在这样一位选民 $i$：无论别人怎么投，最终选出的总是他最想要的那一个（或者他排的序总是直接成为社会排序）。
 
-Additionally, we assume an unrestricted domain (universal admissibility): individuals may have any transitive preference ordering over the $m$ alternatives (no restrictions like single-peaked preferences unless explicitly imposed). One might hope that a fair voting rule exists that satisfies all the above properties for three or more alternatives. Surprisingly, a seminal negative result shows this is impossible.
+此外我们还假定**定义域不受限制**（universal admissibility）：每个人对那 $m$ 个候选项可以有任意的传递偏好次序（除非特别说明，不施加单峰偏好之类的限制）。也许我们会希望：只要候选项不少于三个，总能找到一条同时满足上面各条性质的公平投票规则。令人意外的是，一个开创性的结论说明这做不到。
 
-::: {.callout-caution title="Worked Example: Same Voters, Three Different Winners" collapse="false"}
-Consider 7 RLHF annotators ranking three model responses $\{A, B, C\}$ to a prompt:
+::: {.callout-caution title="完整算例：同一批选民，三种规则选出三个胜者" collapse="false"}
+设有 7 位 RLHF 标注员，对同一个提示给出的三个模型回答 $\{A, B, C\}$ 排序：
 
-| Annotators | Ranking |
+| 标注员 | 排序 |
 |:---:|:---:|
-| 3 annotators | $A \succ B \succ C$ |
-| 2 annotators | $B \succ C \succ A$ |
-| 2 annotators | $C \succ B \succ A$ |
+| 3 位标注员 | $A \succ B \succ C$ |
+| 2 位标注员 | $B \succ C \succ A$ |
+| 2 位标注员 | $C \succ B \succ A$ |
 
-**Plurality:** Count first-place votes: $A$ gets 3, $B$ gets 2, $C$ gets 2. Winner: **A**.
+**简单多数制：** 数第一名的票数：$A$ 得 3 票，$B$ 得 2 票，$C$ 得 2 票。胜者：**A**。
 
-**Borda Count:** With 3 alternatives, assign 2 points for 1st, 1 for 2nd, 0 for 3rd:
+**博尔达计分法：** 3 个候选项时，第一名 2 分、第二名 1 分、第三名 0 分：
 
 - $A$: $3 \times 2 + 2 \times 0 + 2 \times 0 = 6$
 - $B$: $3 \times 1 + 2 \times 2 + 2 \times 1 = 9$
 - $C$: $3 \times 0 + 2 \times 1 + 2 \times 2 = 6$
 
-Winner: **B** (with 9 points).
+胜者：**B**（9 分）。
 
-**Condorcet:** Check pairwise majorities:
+**孔多塞：** 逐对检查多数意见：
 
 - $A$ vs $B$: 3 prefer $A$, 4 prefer $B$ $\Rightarrow$ $B$ wins
 - $A$ vs $C$: 3 prefer $A$, 4 prefer $C$ $\Rightarrow$ $C$ wins
 - $B$ vs $C$: 5 prefer $B$, 2 prefer $C$ $\Rightarrow$ $B$ wins
 
-$B$ beats both $A$ and $C$ in pairwise majority. Condorcet winner: **B**.
+$B$ 在两两多数比较中同时赢过 $A$ 和 $C$。孔多塞胜者：**B**。
 
-**Takeaway:** Plurality selects $A$ (most first-place votes), but $A$ actually *loses* to both $B$ and $C$ in head-to-head matchups! The Borda and Condorcet methods agree on $B$, which has broader support. In RLHF, this matters: if annotator preferences are aggregated via majority-of-first-choices (like "pick the best"), the selected response may not be the one with the broadest appeal.
+**要点：** 简单多数制选出的是 $A$（第一名票数最多），可 $A$ 在两两比较里其实*既输给* $B$ *也输给* $C$！博尔达法和孔多塞法都同意选 $B$，因为它的支持面最广。这在 RLHF 里很要紧：如果用"大家的第一选择取多数"（也就是"挑最好的那个"）来汇总标注员的偏好，最后选中的回答很可能不是受众最广的那一个。
 :::
 
-#### Arrow's Impossibility Theorem {#sec-arrow}
+#### 阿罗不可能定理 {#sec-arrow}
 
-Arrow's Impossibility Theorem [@arrow1951] is a cornerstone of social choice theory. It states that when there are three or more alternatives ($m\ge 3$), no social welfare function can simultaneously satisfy Unanimity, IIA, and Non-dictatorship – unless it is a trivial dictatorial rule. In other words, any aggregation mechanism that is not dictatorial will inevitably violate at least one of the fairness criteria. The theorem is usually proven by contradiction: assuming a social welfare function satisfies all conditions, one can show that one voter’s preferences always decide the outcome, hence the rule is dictatorial. Intuitively, Arrow’s theorem is driven by the possibility of preference cycles in majority voting. Even if individual preferences are transitive, aggregated majorities can prefer $A$ to $B$, $B$ to $C$, and $C$ to $A$ in a cycle, as in the Condorcet paradox. Under Unanimity and IIA, the social ranking must locally match these pairwise preferences, but this produces a contradiction with transitivity unless one voter’s ranking is given overriding authority. A sketch of Arrow’s proof is as follows: one shows that under the axioms, the social ranking between any two alternatives $x$ and $y$ must agree with some particular voter’s preference (the “pivotal” voter for that pair). With IIA, the identity of the pivotal voter must be the same across all pairs of alternatives, otherwise by cleverly constructing profiles one can derive a conflict. This single pivotal voter then effectively dictates the entire social order, violating Non-dictatorship. Hence, the axioms are incompatible.
+阿罗不可能定理 [@arrow1951] 是社会选择理论的基石。它说的是：当候选项不少于三个（$m\ge 3$）时，没有任何社会福祉函数能同时满足一致同意、独立无关备选与非独裁——除非它本来就是一条平凡的独裁规则。换句话说，只要一种汇总机制不是独裁的，就必然违反至少一条公平标准。这一定理的证明通常用反证法：假定某个社会福祉函数满足全部条件，就能推出某一位选民的偏好总是决定结果，于是这条规则其实是独裁的。直观上，阿罗定理之所以成立，是因为多数投票可能出现偏好循环。即使每个人的偏好都是传递的，汇总出来的多数意见却可能认为 $A$ 好于 $B$、$B$ 好于 $C$、$C$ 又好于 $A$，转成一圈，正如孔多塞悖。在一致同意与 IIA 之下，社会排序必须在每一对上与这些两两多数意见保持一致，但这就与传递性矛盾——除非把压倒性的话语权交给某一位选民。证明的思路大致是：先说明在那些公理之下，任意两个候选项 $x$ 与 $y$ 之间的社会排序必定与某位特定选民的偏好一致（对这一对而言的"关键选民"）；再借助 IIA 论证：这个关键选民是谁，对所有候选项对都必须是同一个人，否则精心构造几份偏好档案就能推出矛盾。于是这一位关键选民实际上决定了整个社会排序，违反非独裁。因此这些公理彼此不相容。
 
-::: {.callout-warning title="Common Pitfall: Overgeneralizing Arrow's Theorem"}
-Arrow's theorem applies specifically to **social welfare functions** that produce a complete ranking from ordinal preferences over three or more alternatives. A common misconception is that "all preference aggregation is impossible." In fact, Arrow's theorem does **not** directly apply to (1) cardinal scores (e.g., 1-5 ratings), (2) pairwise comparison models that output partial orders rather than complete rankings, or (3) domains with restricted preferences (e.g., single-peaked preferences, where majority rule is well-behaved). In RLHF, we typically work with cardinal reward models or pairwise Bradley-Terry likelihoods, which sidestep Arrow's specific impossibility — but other impossibilities (Gibbard-Satterthwaite) still constrain what's achievable. The theorem tells us we must **sacrifice at least one axiom**, not that aggregation is hopeless.
+::: {.callout-warning title="常见坑：把阿罗定理推广过头"}
+阿罗定理专门针对的是**社会福祉函数**：输入是三个及以上候选项上的排序偏好，输出是一个完整排序。常见的误解是把它读成"汇总偏好根本不可能"。实际上，阿罗定理并**不**直接适用于：（1）基数分数（例如 1—5 分的评分）；（2）只输出偏序而非完整排序的两两比较模型；（3）偏好受限的定义域（例如单峰偏好——在那里多数规则表现很好）。在 RLHF 里，我们通常用的是基数奖励模型或两两的 Bradley-Terry 似然，这恰好避开了阿罗那条具体的不可能性——但别的不可能性（吉巴德—萨特斯维特）仍然限制了我们能做到什么。这一定理说的是：我们**至少必须牺牲一条公理**，而不是说汇总毫无希望。
 :::
 
-::: {.callout-important title="Ordinal vs. Cardinal: What Escapes Arrow's Theorem"}
-Arrow's theorem applies to **ordinal** aggregation: it constrains rules that take ranked preferences as input. However, when we have **cardinal** utilities---as in Bradley-Terry models, where each item has a numerical score $V_j$---utilitarian aggregation (summing or averaging utilities) is well-defined and not subject to Arrow's impossibility. The catch is **interpersonal comparability**: summing utilities across people assumes that "$V_j = 5$ for Alice" means the same thing as "$V_j = 5$ for Bob," which is a strong and often unjustified assumption. In RLHF, treating all annotators' Bradley-Terry parameters as comparable implicitly makes this assumption. When annotators have different scales or noise levels, naive averaging can systematically favor annotators whose scores have larger variance.
+::: {.callout-important title="有序还是基数：什么能躲开阿罗定理"}
+阿罗定理管的是**有序**（ordinal）汇总：它约束的是"输入为排序偏好"的规则。但如果我们有**基数**效用——像 Bradley-Terry 模型那样，每个项目都有一个数值分数 $V_j$——那么功利主义的汇总（把效用相加或求平均）是定义良好的，不受阿罗不可能性的约束。麻烦在于**效用的人际可比性**：把不同人的效用相加，就等于假定"爱丽丝的 $V_j = 5$"和"鲍勃的 $V_j = 5$"说的是同一回事，这是一个很强、而且常常站不住脚的假定。在 RLHF 里，把所有标注员的 Bradley-Terry 参数当作可比的，就已经隐含地做了这个假定。当标注员使用的尺度不同、噪声水平也不同时，简单地取平均会系统性地偏向那些分数方差更大的标注员。
 :::
 
-Arrow's Impossibility Theorem has profound implications: it formalizes the inherent trade-offs in designing any fair aggregation scheme. In practice, different voting rules relax one or more of Arrow’s conditions. For instance, Borda count violates IIA (since introducing or removing an irrelevant alternative can change the point totals), while a dictatorship violates fairness blatantly. The theorem suggests that every practical voting system must sacrifice at least one of the ideal fairness criteria. It also motivated the exploration of alternative frameworks (such as allowing interpersonal comparisons of utility or cardinal preference aggregation) to escape the impossibility by weakening assumptions.
+阿罗不可能定理的影响很深：它把"任何公平的汇总方案都存在内在取舍"这件事讲成了严格的定理。实践中，不同的投票规则各自放松了阿罗的某一条条件。例如博尔达计分法违反 IIA（引入或去掉一个无关候选项就可能改变总分），而独裁则明摆着不公平。这一定理告诉我们：任何现实中的投票制度，都至少要牺牲掉某一条理想的公平标准。它也推动了人们去寻找别的框架（比如允许效用的人际比较，或者对基数偏好做汇总），通过放宽假设来绕开这个不可能结论。
 
-Complementing Arrow’s theorem, the Gibbard–Satterthwaite theorem focuses on incentives and strategic manipulation in voting systems [@gibbard1973; @satterthwaite1975]. It considers any deterministic social choice function $f$ that chooses a single winner from the set of $m\ge 3$ alternatives. The theorem states that if $f$ is strategy-proof (incentive compatible) and onto (its range of outcomes is the entire set of alternatives), then $f$ must be dictatorial. Strategy-proofness (also called truthfulness or dominant-strategy incentive compatibility) means that no voter can ever benefit by misrepresenting their true preferences, regardless of what others do. In other words, reporting their genuine ranking is a (weakly) dominant strategy for each voter. The theorem implies that for any realistic voting rule where every alternative can possibly win, either one voter effectively decides the outcome (a dictatorship) or else the rule is susceptible to strategic manipulation by voters. The Gibbard–Satterthwaite theorem tells us that every non-dictatorial voting rule for 3 or more alternatives is manipulable: there will exist some election scenario where a voter can gain a more preferred outcome by voting insincerely (i.e. not according to their true preferences). For example, in a simple plurality vote, a voter whose true favorite is a long-shot candidate might vote for a more viable candidate to avoid a worst-case outcome (“lesser of two evils” voting). In a Borda count election, voters might strategically raise a competitor in their ranking to push down an even stronger rival. The only way to avoid all such strategic voting incentives is to have a dictatorship or limit the choice set to at most two alternatives.
+与阿罗定理互为补充的，是吉巴德—萨特斯维特定理，它关心的是投票制度中的激励与策略性操纵 [@gibbard1973; @satterthwaite1975]。定理考虑的是任一条确定性的社会选择函数 $f$：从 $m\ge 3$ 个候选项里选出一位获胜者。定理说：只要 $f$ 是策略免疫的（激励相容的）并且是满射（任何候选项都可能被它选为胜者），那么 $f$ 一定是独裁的。所谓策略免疫（也叫说真话性质，或占优策略激励相容），指的是任何选民都无法靠谎报偏好占到便宜——不管别人怎么投都一样。换句话说，如实报告自己真正的排序，对每位选民都是（弱）占优策略。这一定理的结论是：在任何"每个候选项都有可能获胜"的现实投票规则里，要么某一位选民实际上决定了结果（独裁），要么这条规则就会被选民策略性地操纵。用更直白的话说：候选项不少于三个时，凡是非独裁的投票规则都可以被操纵——总能构造出某种选举局面，让某位选民通过"不诚实地投票"（不照自己真实偏好投）得到他更想要的结果。比如在简单多数制下，真心支持冷门候选人的选民，可能为了避免最坏结果而去投一位更有希望当选的人（"两害相权取其轻"）。在博尔达计分制下，选民可能故意把某个对手往前提一名，好把更强的那位对手压下去。要避免这些策略性投票的动机，唯一的办法是实行独裁，或者把候选项限制到最多两个。
 
 The proof of Gibbard–Satterthwaite is non-trivial, but one can outline the idea: Given a non-dictatorial and onto rule $f$, one shows there exist at least three distinct outcomes that can result from some preference profiles. By carefully constructing profiles and using the onto property, one finds a situation where a single voter can change the outcome by switching their order of two candidates, demonstrating manipulability. The theorem is robust – even if we allow ties or weaker conditions, similar impossibility results hold (Gibbard’s 1978 extension handles randomized rules). The practical takeaway is that all meaningful voting protocols encourage tactical voting in some situations. Nonetheless, certain systems are considered “harder to manipulate” or more resistant due to complexity or uncertainty. For instance, while STV (ranked-choice voting) can be manipulated in theory, determining a beneficial strategic vote can be NP-hard in worst cases, which arguably provides some practical deterrence to manipulation [@bartholdi1989].
 
