@@ -2194,32 +2194,32 @@ constant $R>0$.
 
 *Proof sketch.* The counterexample constructs four functions on $\mathcal{X} = \{1,2,3,4\}$ with a carefully chosen prior. The key insight is that qEI optimizes improvement over the *current best estimate*, which in this construction is always $x = 2$ (with $f(2) = 0$). Since comparing $x = 3$ vs. $x = 4$ always yields the highest expected improvement over $f(2) = 0$, qEI perpetually selects the query $(3, 4)$---never querying the pairs that would reveal whether the true optimum lies at $x = 3$ or $x = 4$. One can show by induction that this trapping behavior persists for all $n$, yielding constant Bayesian simple regret $R = p > 0$. In contrast, qEUBO avoids this trap because it maximizes the expected utility of the *best option shown*, which naturally encourages diverse queries. See @astudillo2023qeubo Section B for the full induction argument. $\square$
 
-#### POP-BO Regret {#pop-bo-regret .unnumbered}
+#### POP-BO 的遗憾 {#pop-bo-regret .unnumbered}
 
-POP-BO achieves provable regret guarantees that depend on the choice of kernel. The cumulative regret bound involves the *maximum information gain* $\gamma_T^{ff'}$, which measures the complexity of the function class defined by the kernel.
+POP-BO 给出了可证明的遗憾保证，具体形式取决于所选的核函数。累计遗憾的上界里出现了一个量 *最大信息增益（maximum information gain）* $\gamma_T^{ff'}$，它衡量的是这个核函数所确定的函数类有多复杂。
 
 ::: theorem
-With probability at least $1-\delta$, the cumulative regret of POP-BO satisfies
+以至少 $1-\delta$ 的概率，POP-BO 的累计遗憾满足
 $$R_T=\mathcal{O}\left(\sqrt{\beta_T \gamma_T^{f f^{\prime}} T}\right),$$ {#eq-popbo-regret-bound}
-and the simple regret of the reported solution converges as
+而最终汇报解的简单遗憾按下面这个速度收敛：
 $$f\left(x^{\star}\right)-f\left(x_{t^{\star}}\right) \leq \mathcal{O}\left(\frac{\sqrt{\beta_T \gamma_T^{f f^{\prime}}}}{\sqrt{T}}\right).$$ {#eq-popbo-convergence}
 :::
 
-The kernel-specific rates reveal how the smoothness of the preference function affects convergence:
+按核函数分别给出的收敛速率，说明偏好函数的光滑程度怎样影响收敛：
 
 ::: theorem
-For POP-BO with $\epsilon=1/T$:
+对取 $\epsilon=1/T$ 的 POP-BO：
 
-1.  **Linear kernel** $k(x, y)=\langle x, y\rangle$: $R_T=\mathcal{O}\left(T^{3 / 4}(\log T)^{3 / 4}\right)$
-2.  **Squared exponential kernel**: $R_T=\mathcal{O}\left(T^{3 / 4}(\log T)^{3 / 4(d+1)}\right)$
-3.  **Matérn kernel** (smoothness $\nu$): $R_T=\mathcal{O}\left(T^{3 / 4}(\log T)^{3 / 4} T^{\frac{d}{\nu}\left(\frac{1}{4}+\frac{d+1}{4+2(d+1)^d / \nu}\right)}\right)$
+1.  **线性核** $k(x, y)=\langle x, y\rangle$：$R_T=\mathcal{O}\left(T^{3 / 4}(\log T)^{3 / 4}\right)$
+2.  **平方指数核**：$R_T=\mathcal{O}\left(T^{3 / 4}(\log T)^{3 / 4(d+1)}\right)$
+3.  **Matérn 核**（光滑度 $\nu$）：$R_T=\mathcal{O}\left(T^{3 / 4}(\log T)^{3 / 4} T^{\frac{d}{\nu}\left(\frac{1}{4}+\frac{d+1}{4+2(d+1)^d / \nu}\right)}\right)$
 :::
 
-The rates share a $T^{3/4}$ base rate, with kernel-dependent logarithmic or polynomial corrections. Smoother kernels (larger $\nu$ in Matérn, or SE which corresponds to $\nu \to \infty$) yield tighter bounds, reflecting the intuition that smoother preference functions are easier to optimize from pairwise comparisons. Compared to standard BO (which achieves $T^{1/2}$ rates), the extra $T^{1/4}$ factor is the price of learning from preference feedback rather than direct function evaluations.
+这些速率都有共同的 $T^{3/4}$ 基础项，差别只在核函数决定的对数修正或多项式修正上。核越平滑（Matérn 的 $\nu$ 越大，或对应 $\nu \to \infty$ 的平方指数核），界越紧——这和直觉一致：偏好函数越平滑，只靠两两比较就越容易优化。和标准贝叶斯优化（可达 $T^{1/2}$ 的速率）相比，多出来的那个 $T^{1/4}$ 因子，就是"从偏好反馈而不是直接函数取值来学习"所付出的代价。
 
 ::: {.callout-note title="Code: Full PBO Simulation" collapse="false"}
 
-This simulation demonstrates Preferential Bayesian Optimization finding the optimum of a latent function through pairwise comparisons.
+这个模拟演示偏好型贝叶斯优化如何只靠两两比较，找到一张隐函数的最优点。
 
 ```{pyodide-python}
 #| autorun: true
