@@ -2071,10 +2071,7 @@ than the maximum likelihood estimator, and the theorem states that
 $\mathcal{B}_g^{t+1}$ contains the ground-truth function $g$ with high
 probability.
 
-Inner level optimization in Line 4 of the algorithm can also be
-represented as a convex optimisation problem so that it can be solved,
-Eq 24, 25. The outer optimisation can be solved using grid search or Eq
-26 for medium size problems.
+算法第 4 行里的内层优化同样可以写成一个凸优化问题，因此是能解的（式 24、25）。外层优化则可以用网格搜索，或在中等规模的问题上用式 26 来解。
 
 :::: algorithm
 ::: algorithmic
@@ -2090,49 +2087,30 @@ $\mathcal{B}_g^{t+1}$.
 :::
 ::::
 
-#### qEUBO: Decision-Theoretic EUBO {#qeubo-decision-theoretic-eubo .unnumbered}
+#### qEUBO：面向决策的 EUBO {#qeubo-decision-theoretic-eubo .unnumbered}
 
-qEUBO [@astudillo2023qeubo] derives
-an acquisition function that extends duels to $q>2$ options which we
-call *queries*. Let
+qEUBO [@astudillo2023qeubo] 推出的采集函数把对决推广到 $q>2$ 个选项，我们把这样一次多选项的询问称为*查询（query）*。记
 $X=\left(\mathbf{x_1}, \ldots, \mathbf{x_q}\right) \in \mathcal{X}^q$
-denote a query containing two points or more, and let
-$g: \mathcal{X} \rightarrow \Re$ be the latent preference function. Then
-after $n$ user queries, we define the *expected utility of the best
-option* (qEUBO) as
+为一次包含两个及以上点的查询，$g: \mathcal{X} \rightarrow \Re$ 为隐偏好函数。那么在 $n$ 次询问用户之后，我们定义*最优选项的期望效用（expected utility of the best option, qEUBO）*为
 $$\mathrm{qEUBO}_n(X)=\mathbb{E}_n\left[\max \left\{g\left(x_1\right), \ldots, g\left(x_q\right)\right\}\right].$$ {#eq-qeubo}
 
-We now show that qEUBO is one-step Bayes optimal, meaning that each step
-chooses the query that maximises the expected utility received by the
-human. For a query $X \in \mathcal{X}^q$, let
+下面说明 qEUBO 是一步贝叶斯最优的：每一步它选的那次查询，都能让人拿到的期望效用最大。对一次查询 $X \in \mathcal{X}^q$，记
 $$V_n(X)=\mathbb{E}_n\left[\max _{x \in \mathbb{X}} \mathbb{E}_{n+1}[g(x)] \mid X_{n+1}=X\right] .$$ {#eq-value-function}
-Then $V_n$ defines the expected utility received if an additional query
-$X_{n+1}=X$ is performed, and maximizing $V_n$ is one-step Bayes
-optimal. Since $\max _{x \in \mathbb{X}} \mathbb{E}_n[f(x)]$ does not
-depend on $X_{n+1}$, we can also equivalently maximize
+于是 $V_n$ 表示"再多做一次查询 $X_{n+1}=X$"时人能拿到的期望效用，而最大化 $V_n$ 就是一步贝叶斯最优。由于 $\max _{x \in \mathbb{X}} \mathbb{E}_n[f(x)]$ 与 $X_{n+1}$ 无关，我们可以等价地去最大化
 $$\mathbb{E}_n\left[\max _{x \in \mathbb{X}} \mathbb{E}_{n+1}[g(x)]-\max _{x \in \mathbb{X}} \mathbb{E}_n[g(x)] \mid X_{n+1}=X\right],$$ {#eq-knowledge-gradient}
-which takes the same form as the knowledge gradient acquisition function
-[@wu2018parallelknowledgegradientmethod] in standard Bayesian
-optimization.
+它的形式与标准贝叶斯优化里的知识梯度（knowledge gradient）采集函数完全相同 [@wu2018parallelknowledgegradientmethod]。
 
-$V_n$ involves a nested stochastic optimization task, while qEUBO is a
-much simpler policy. When human responses are noise-free, we are able to
-use qEUBO as a sufficient policy due to the following theorem:
+$V_n$ 里面套着一层随机优化，qEUBO 则是一条简单得多的策略。当人的回答不带噪声时，下面这个定理说明我们可以放心只用 qEUBO：
 
 ::: theorem
 $$\underset{X \in \mathbb{X}^q}{\operatorname{argmax}} \mathrm{qEUBO}_n(X) \subseteq \underset{X \in \mathbb{X}^q}{\operatorname{argmax}} V_n(X) .$$ {#eq-qeubo-optimality}
 :::
 
-*Proof sketch.* The proof establishes two key inequalities. First, the one-step value $V_n(X)$ is bounded above by $\text{qEUBO}_n(X^+(X))$, where $X^+(X)$ contains the best post-observation recommendations---because selecting the best option from a query can only be as good as already knowing the best option in the pool. Second, $\text{qEUBO}_n(X) \leq V_n(X)$ because the user-selected option from the query may not be the global optimum. Combining these via a proof by contradiction shows that any maximizer of qEUBO is also a maximizer of the one-step Bayes-optimal value function $V_n$. See @astudillo2023qeubo for the full proof. $\square$
+*证明要点。* 证明的关键是两个不等式。第一，一步价值 $V_n(X)$ 有一个上界 $\text{qEUBO}_n(X^+(X))$，其中 $X^+(X)$ 取出的是"观测之后最优的若干推荐"——因为"从一次查询里挑最好的选项"再好也好不过"直接就知道整个选项池里最好的那个"。第二，$\text{qEUBO}_n(X) \leq V_n(X)$，因为用户在这次查询里选出的选项未必是全局最优。把两式合起来用反证法即可说明：qEUBO 的任一最大化点，同时也是一步贝叶斯最优价值函数 $V_n$ 的最大化点。完整证明见 @astudillo2023qeubo。$\square$
 
-Therefore a sufficient condition for following one-step Bayes optimality
-is by maximizing $\text{qEUBO}_n$.
+因此，最大化 $\text{qEUBO}_n$ 就足以做到一步贝叶斯最优。
 
-In experiments comparing qEUBO to other state-of-the-art
-acquisition functions, qEUBO consistently outperformed on most problems
-and was closely followed by qEI and qTS. These results also extended to
-experiments with multiple options when $q>2$. In fact, there is faster
-convergence in regret when using more options in human queries. The regret analysis is presented in detail below.
+在和其它先进采集函数的对比实验里，qEUBO 在多数问题上表现最好，qEI 与 qTS 紧随其后。这些结果在 $q>2$（一次给出多个选项）的实验里同样成立。事实上，让人一次比较更多选项时，遗憾的收敛反而更快。遗憾分析在下面详细给出。
 
 #### qEI: Batch Expected Improvement {#qei-batch-expected-improvement .unnumbered}
 
