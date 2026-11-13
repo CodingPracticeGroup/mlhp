@@ -874,69 +874,69 @@ print(f"  Bridging method: {len(bridge_selected)} notes (precision: {len(bridge_
 - 把标注员的状态（疲劳程度、专业程度）显式建模为潜变量
 - 收集关于标注可信度的元反馈
 
-## Privacy and Personalization {#sec-privacy}
+## 隐私与个性化 {#sec-privacy}
 
-Preference learning inherently involves collecting personal data. This creates tension between privacy protection and personalization quality.
+偏好学习天然要收集个人数据，于是隐私保护与个性化质量之间就有了张力。
 
-### Contextual Integrity
+### 情境完整性
 
-Helen Nissenbaum's **Contextual Integrity** framework provides a nuanced approach to privacy that goes beyond simple "consent" models.
+Nissenbaum 提出的**情境完整性（Contextual Integrity）**框架，把隐私看得比"签个同意书"更细致。
 
-::: {.callout-note title="Contextual Integrity Framework"}
-Privacy is preserved when information flows match context-specific norms. Five parameters determine appropriateness:
+::: {.callout-note title="情境完整性框架"}
+当信息的流动符合该情境下的规范时，隐私就得到了保护。判断是否恰当，要看五个参数：
 
-1. **Sender**: Who is sharing the information
-2. **Subject**: Whose information is being shared
-3. **Recipient**: Who receives the information
-4. **Data Type**: What kind of information
-5. **Transmission Principle**: What rules govern further use
+1. **发送者**：是谁在提供这些信息
+2. **主体**：这些信息是关于谁的
+3. **接收者**：谁拿到这些信息
+4. **数据类型**：是哪一类信息
+5. **传递原则**：后续还能怎么用这些信息，遵循什么规则
 
-A privacy violation occurs when information flows in ways that violate contextual norms, even if the subject "consented."
+只要信息的流动违背了情境规范，就构成隐私侵犯——即便当事人已经"同意"了。
 :::
 
-**Example: Heart Rate Data**
+**例子：心率数据**
 
-Consider a fitness tracker that collects heart rate data:
-- **Acceptable flow**: Sending to a running coach for training optimization
-- **Unacceptable flow**: Sending to an advertising network for targeted ads
-- **The difference**: The transmission principle (coaching vs. advertising) violates the user's expectations about the fitness context
+设想一个记录心率的运动手环：
+- **可以接受的流转**：发给跑步教练，用来优化训练计划
+- **不能接受的流转**：发给广告网络用来投定向广告
+- **区别在哪**：在于传递原则（是用于指导训练，还是用于打广告），它违背了用户对"运动健康"这个情境的预期
 
-### Differential Privacy Limitations
+### 差分隐私的局限
 
-Differential privacy (DP) provides formal guarantees that algorithms don't reveal individual information. However, DP has fundamental limitations for preference learning:
+差分隐私（Differential Privacy, DP）给出了形式化的保证：算法不会泄露某个个体的信息。但对偏好学习来说，它有几条根本的限制：
 
-1. **Personalization requires individual data**: By definition, DP prevents using individual data for personalization
-2. **Trade-off is inherent**: Stronger privacy guarantees mean less accurate preference models
-3. **"Persuasive" use of DP**: Some systems claim DP protection with parameters so weak they provide little actual privacy
+1. **个性化需要个体数据**：按定义，差分隐私就不允许把个体数据用于个性化
+2. **这种取舍是内在的**：隐私保证越强，偏好模型就越不准
+3. **把差分隐私当宣传语**：一些系统声称有差分隐私保护，但参数弱到几乎提供不了实际隐私
 
-Contextual integrity offers a middle ground: allow data use that matches user expectations (e.g., personalization within a service) while preventing unexpected flows (e.g., selling data to third parties).
+情境完整性提供的是中间路线：允许符合用户预期的数据用途（例如在服务内部做个性化），同时挡住意料之外的流转（例如把数据卖给第三方）。
 
-## Paternalism in AI Systems {#sec-paternalism}
+## AI 系统中的家长主义 {#sec-paternalism}
 
-When should an AI system override a user's stated preferences?
+AI 系统什么时候可以推翻用户说出来的偏好？
 
-### Paternalism vs. Nosy Preferences
+### 家长主义与"管得宽"的偏好
 
-Paternalism differs from nosy preferences:
-- **Nosy preferences**: Caring about others' choices for *your own* sake
-- **Paternalism**: Overriding others' choices for *their* sake
+家长主义与"管得宽"的偏好不同：
+- **"管得宽"的偏好**：在意别人怎么选，是为了*你自己*
+- **家长主义**：为了*对方自己好*而替他推翻选择
 
-### When is Paternalism Justified?
+### 家长式干预什么时候说得通
 
-Several conditions might justify paternalistic intervention:
+下面这几种条件，可能可以为家长式的干预做辩护：
 
-1. **Information asymmetry**: The system has information the user lacks (e.g., long-term health effects)
-2. **Cognitive limitations**: The user is impaired (fatigue, addiction, cognitive decline)
-3. **Protection of future self**: The user's current choice harms their future self (e.g., saving for retirement)
-4. **Irreversible harm**: The consequences of a choice are severe and irreversible
+1. **信息不对称**：系统掌握着用户没有的信息（例如长期的健康影响）
+2. **认知受限**：用户当时状态不佳（疲劳、成瘾、认知能力下降）
+3. **保护将来的自己**：眼下的选择会伤害未来的自己（例如养老金的储蓄）
+4. **伤害不可逆**：这个选择的后果很严重，而且收不回来
 
-### Design Principles
+### 设计原则
 
-AI systems that exercise any form of paternalism should:
+凡是带有一点家长主义色彩的 AI 系统，都应当做到：
 
-1. **Be transparent**: Users should know when and why their preferences are being overridden
-2. **Allow override**: Users should be able to insist on their original choice
-3. **Minimize interference**: The lightest intervention that achieves the goal should be used
+1. **要透明**：用户应当知道自己在什么时候、因为什么被推翻了偏好
+2. **允许用户否决**：用户应当可以坚持自己原本的选择
+3. **尽量少干预**：能达到目的的最轻的那种干预才该用
 4. **Justify interventions**: Each paternalistic choice should have a clear rationale
 5. **Update based on feedback**: Systems should learn when interventions are welcomed vs. resented
 
