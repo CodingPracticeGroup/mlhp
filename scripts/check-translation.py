@@ -26,7 +26,8 @@ def feats(t: str):
     f["cite_keys"] = sorted(
         k.rstrip(".") for k in re.findall(r"@([A-Za-z0-9_:.-]+)", t)
     )
-    f["labels"] = sorted(set(re.findall(r"\{#[^}]+\}", t)))
+    # 用多重集：文件内自己把某个标签定义两次，也要能被比出来
+    f["labels"] = sorted(re.findall(r"\{#[^}]+\}", t))
     f["ref_cmds"] = sorted(set(re.findall(r"\\(?:ref|eqref|autoref|cref)\{[^}]*\}", t)))
     f["shortcodes"] = sorted(re.findall(r"\{\{<\s*([A-Za-z0-9_.-]+)", t))
     f["cell_opts"] = sorted(re.findall(r"^#\|\s*([A-Za-z0-9_.-]+)", t, flags=re.M))

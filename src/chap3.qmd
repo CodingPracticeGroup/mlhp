@@ -813,7 +813,7 @@ V_star = f_batch(a_star, B_star, X)  # true scores
 print(f"Network: {d}→{h}→1, {h + h*d} parameters, {M} items")
 ```
 
-Set up Laplace approximation state and update functions:
+搭好拉普拉斯近似的状态与更新函数：
 
 ```{pyodide-python}
 #| autorun: true
@@ -842,7 +842,7 @@ pairs = np.array([(j, k) for j in range(M) for k in range(M) if j < k])
 print(f"Setup complete: {len(pairs)} candidate pairs")
 ```
 
-Run the active learning loop comparing D-optimal vs random selection:
+跑主动学习的循环，把 D 最优与随机选题对比：
 
 ```{pyodide-python}
 #| autorun: true
@@ -897,44 +897,44 @@ axes[1].set_title("Reliability Proxy"); axes[1].legend(); axes[1].grid(True, alp
 plt.tight_layout(); plt.show()
 ```
 
-## Active Query Selection for Gaussian Process Models {#sec-active-learning}
+## 高斯过程模型的主动选题 {#sec-active-learning}
 
-The previous sections developed Fisher information for optimal query selection in *parametric* preference models—the Rasch model (Section 1) and linear scoring functions (Section 2). However, Chapter 2 introduced Gaussian Processes (GPs) as a flexible nonparametric alternative for reward modeling, and Chapter 3 covered GP inference via Laplace approximation. Here we address the natural question: **how do we actively select queries when using GPs?**
+前面几节讲的是在*参数化*偏好模型里如何用费雪信息挑最优的问题：先是 Rasch 模型，再是线性打分函数。而第 2 章介绍过高斯过程（GP），把它当作一种灵活的非参数奖励建模方法，也讲过怎么用拉普拉斯近似做高斯过程推断。这里要回答的是那个顺理成章的问题：**改用高斯过程之后，怎么主动挑问题？**
 
-The key insight is that GP uncertainty—quantified by the posterior variance—naturally guides query selection. Unlike parametric models where Fisher information depends only on the current parameter estimate, GP uncertainty varies across the input space, being higher far from observed data and lower near it.
+关键的洞见是：高斯过程的不确定性由后验方差刻画，它本身就能告诉我们去哪里提问。和参数模型不同——那里的费雪信息只取决于当前的参数估计——高斯过程的不确定性在整个输入空间上是变化的：离已观测数据远的地方高，近的地方低。
 
-### Information-Theoretic Acquisition Function
+### 信息论式的采集函数
 
-For GP preference learning, we seek queries that maximize information gain about the reward function. Given a dataset $\mathcal{D}$ and a candidate query $Q = (x_A, x_B)$, the acquisition function measures the expected reduction in uncertainty about $r$:
+做高斯过程偏好学习时，我们想找的是关于奖励函数信息增益最大的问题。给定数据集 $\mathcal{D}$ 和一个候选问题 $Q = (x_A, x_B)$，采集函数衡量的是"问完之后，关于 $r$ 的不确定性期望能减少多少"：
 $$
 a(Q) = I(r; y \mid \mathcal{D}, Q) = H(y \mid \mathcal{D}, Q) - \mathbb{E}_{r \sim p(r \mid \mathcal{D})}[H(y \mid r, Q)]
 $$ {#eq-gp-acquisition}
 
-**Interpretation of the two terms:**
+**这两项分别是什么意思：**
 
-1. **$H(y \mid \mathcal{D}, Q)$**: Predictive entropy—how uncertain is the query outcome under our current model? High when $p(A \succ B) \approx 0.5$.
+1. **$H(y \mid \mathcal{D}, Q)$**：预测熵——按当前的模型，这个问题的结果有多难猜？当 $p(A \succ B) \approx 0.5$ 时这一项很高。
 
-2. **$\mathbb{E}_r[H(y \mid r, Q)]$**: Expected conditional entropy—how uncertain would the query be if we knew the true reward function? Low for "easy" comparisons, high for inherently noisy comparisons.
+2. **$\mathbb{E}_r[H(y \mid r, Q)]$**：期望条件熵——假如我们真的知道了真实的奖励函数，这个问题的答案还会有多不确定？"显而易见"的比较这一项很低，本身就含糊不清的比较才高。
 
-The acquisition function trades off these two terms: we want queries where the *model* is uncertain (high predictive entropy) but a *human* could provide a clear answer (low expected conditional entropy).
+采集函数要在这两项之间做权衡：我们想要的是这样一些问题——*模型*对它没把握（预测熵高），但*人*能给出明确的回答（期望条件熵低）。
 
-### Practical Computation
+### 实际怎么算
 
-Using the Laplace approximation from Chapter 3 (@sec-gp-inference), the acquisition function can be computed as:
+借助第 2 章 @sec-gp-inference 一节的拉普拉斯近似，这个采集函数可以写成：
 $$
 a(x_A, x_B) = h\left(\Phi\left(\frac{\mu_A - \mu_B}{\sqrt{2\sigma_{\text{noise}}^2 + g(x_A, x_B)}}\right)\right) - m(x_A, x_B)
 $$ {#eq-gp-acquisition-practical}
 
-where:
-- $\mu_A, \mu_B$ are the GP posterior means at $x_A, x_B$
-- $g(x_A, x_B) = \sigma_A^2 + \sigma_B^2 - 2\text{Cov}(r(x_A), r(x_B))$ captures uncertainty from both points
-- $h(p) = -p\log_2 p - (1-p)\log_2(1-p)$ is binary entropy
-- $\Phi$ is the standard normal CDF
-- $m(x_A, x_B)$ is a correction term for human noise
+其中：
+- $\mu_A, \mu_B$ 是高斯过程后验均值在 $x_A, x_B$ 处的取值
+- $g(x_A, x_B) = \sigma_A^2 + \sigma_B^2 - 2\text{Cov}(r(x_A), r(x_B))$ 把两个点上的不确定性都算进来
+- $h(p) = -p\log_2 p - (1-p)\log_2(1-p)$ 是二元熵
+- $\Phi$ 是标准正态分布的分布函数
+- $m(x_A, x_B)$ 是给人回答带噪声用的修正项
 
-**Key property:** The trivial query $Q = (x, x)$ (comparing an item to itself) is a *global minimizer*, not maximizer, of this acquisition function. This contrasts with some other methods that can get stuck on uninformative queries.
+**一个关键性质：** 那个"什么也不问"的提问 $Q = (x, x)$（拿一个物品和它自己比）在这个采集函数上取得的是*全局最小值*，而不是最大值。这一点和一些会卡在无信息问题上的方法不同。
 
-First, we define the RBF kernel and helper functions for the simulation:
+先定义 RBF 核函数和模拟要用的辅助函数：
 
 ```{pyodide-python}
 #| autorun: true
@@ -964,7 +964,7 @@ plt.grid(True, alpha=0.3)
 plt.show()
 ```
 
-Next, we implement a GP model for active preference learning. The `fit` method uses Laplace approximation (Newton's method) to find the posterior mode, and `acquisition` computes the information gain for a candidate query:
+接着实现一个用于主动偏好学习的高斯过程模型。`fit` 方法用拉普拉斯近似（牛顿法）求后验众数，`acquisition` 方法给出下一轮该选哪个输入点（下面只实现 D 最优）。
 
 ```{pyodide-python}
 #| autorun: true
@@ -1028,7 +1028,7 @@ class GPActivePreference:
 print("GPActivePreference class defined successfully.")
 ```
 
-Now we run the simulation, comparing active (information-theoretic) query selection against random selection:
+现在跑模拟，把主动选题（按信息论准则挑）与随机选题放在一起比较：
 
 ```{pyodide-python}
 #| autorun: true
@@ -1060,7 +1060,7 @@ for t in range(n_queries):
 print(f"Simulation complete: {n_queries} queries collected for each method.")
 ```
 
-Finally, we visualize the results. The left panel shows how estimation error decreases with more comparisons; the right panel shows the learned reward functions:
+最后把结果画出来。左图展示估计误差如何随比较次数增多而下降；右图展示学到的奖励函数：
 
 ```{pyodide-python}
 #| autorun: true
@@ -1093,7 +1093,7 @@ print(f"Final MSE - Active: {mse_active[-1]:.4f}, Random: {mse_random[-1]:.4f}")
 print(f"Active achieves {mse_random[-1]/mse_active[-1]:.1f}x lower error")
 ```
 
-### When to Use GP Active Learning
+### 什么时候该用高斯过程主动学习
 
 | Scenario | Recommendation |
 |----------|----------------|
