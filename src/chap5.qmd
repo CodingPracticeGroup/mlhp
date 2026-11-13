@@ -329,39 +329,39 @@ $Y$ 上所有单峰偏好的集合记作 $\text{SP}(Y)$。
 单峰性是从不可能性里脱身的一条有力出路，但它要求候选项能排在**一条线**上。有些场合这一点很自然：预算数额、温度档位、给药剂量。但当偏好本身是**多维**的，这个前提就没了——例如在大模型对齐里，标注员可能同时看好几个维度（有没有帮助、有没有害、是否简洁、语气是否正式），各自的取舍还不同，得到的就是多峰偏好。政治议题上，"左—右"一条线本来就是一种简化，遇到交叉议题就会失效。所以，在依赖单峰定义域之前，实践者应当先确认这个假设有经验证据支持，例如看看偏好数据能不能用很低失真的方式嵌入到一维上。
 :::
 
-**Example: Temperature preferences.** Consider three colleagues deciding on the office thermostat setting. The alternatives are temperatures from 65°F to 75°F. Alice prefers 68°F (her peak), with utility decreasing as temperature moves away from 68. Bob prefers 72°F. Carol prefers 70°F. All three have single-peaked preferences on the temperature spectrum.
+**例子：办公室温度的偏好。** 三位同事要决定办公室恒温器的设定，候选项是 65°F 到 75°F 之间的温度。爱丽丝的理想温度是 68°F（她的峰值），越偏离 68 她越不满意；鲍勃喜欢 72°F；卡罗尔喜欢 70°F。三个人在温度这条线上的偏好都是单峰的。
 
-### Generalized Median Voter Scheme {#sec-median-voter}
+### 广义中位投票者机制 {#sec-median-voter}
 
-On single-peaked domains, a remarkable class of voting rules emerges that satisfies strategy-proofness, Pareto efficiency, and other desirable properties.
+在单峰定义域上，会出现一类很出色的投票规则：它们同时满足策略免疫、帕累托有效等多条我们想要的性质。
 
-::: {.callout-note title="Definition: Generalized Median Voter Scheme"}
-Fix *phantom votes* $a_1, \ldots, a_{n-1} \in \mathbb{R} \cup \{\pm\infty\}$. The **generalized median voter scheme** is defined as:
+::: {.callout-note title="定义：广义中位投票者机制"}
+先固定一批**幻影票（phantom votes）** $a_1, \ldots, a_{n-1} \in \mathbb{R} \cup \{\pm\infty\}$。**广义中位投票者机制（generalized median voter scheme）** 定义如下：
 $$
 f(\succ_1, \ldots, \succ_n) = \text{median}\big(p(\succ_1), \ldots, p(\succ_n), a_1, \ldots, a_{n-1}\big)
 $$ {#eq-median-voter}
-where $p(\succ_i)$ is the peak of voter $i$'s preferences.
+其中 $p(\succ_i)$ 是选民 $i$ 的偏好峰值。
 :::
 
-The phantom votes act as "anchor points" that can shift the median in various directions. With $n-1$ phantom votes, there are $2n-1$ total values, so the median is well-defined. Different choices of phantom votes yield different voting rules:
+这些幻影票相当于"锚点"，可以把中位数往各个方向挪。有了 $n-1$ 张幻影票，一共就是 $2n-1$ 个值，于是中位数总有定义。选不同的幻影票，就得到不同的投票规则：
 
-- **Pure median rule**: Set all phantoms to $\pm\infty$ appropriately so they don't affect the median. The outcome is simply the median of the voters' peaks.
-- **Dictatorial rule**: Set all phantoms equal to voter $i$'s peak. The outcome is always voter $i$'s ideal point.
-- **Status quo rule**: Set all phantoms to the status quo point $q$. The outcome can only move toward the median of voter peaks if enough voters prefer change.
+- **纯中位数规则**：把 $\pm\infty$ 分别取作那些幻影票，让它们不影响中位数。结果就是各位选民峰值的中位数。
+- **独裁规则**：把所有幻影票都设成选民 $i$ 的峰值。结果永远是选民 $i$ 的理想点。
+- **维持现状规则**：把所有幻影票都设成现状点 $q$。只有当足够多的选民希望改变时，结果才可能朝着选民峰值的中位数移动。
 
-::: {.callout-important title="Moulin's Characterization Theorem"}
-**Theorem (Moulin, 1980)**: On the domain of single-peaked preferences $\text{SP}(Y)$, a social choice function $f$ satisfies:
+::: {.callout-important title="穆林的刻画定理"}
+**定理（Moulin，1980）**：在单峰偏好定义域 $\text{SP}(Y)$ 上，一个社会选择函数 $f$ 若满足：
 
-1. **Strategy-proofness (SP)**: No voter can benefit by misreporting their peak
-2. **Pareto efficiency (PE)**: The outcome is never unanimously dispreferred to another alternative
-3. **Anonymity and peaks-only**: The outcome depends only on the set of reported peaks
+1. **策略免疫（SP）**：任何选民谎报峰值都占不到便宜
+2. **帕累托有效（PE）**：结果不会在所有其他方案面前被一致地排斥
+3. **匿名且只依赖峰值**：结果只取决于大家报上来的那些峰值
 
-if and only if $f$ is a generalized median voter scheme.
+当且仅当 $f$ 是一个广义中位投票者机制。
 :::
 
-This is a powerful positive result: by restricting to single-peaked preferences, we escape Arrow's impossibility and can achieve both strategy-proofness and efficiency.
+这是一个很有分量的"正面"结论：把范围限定在单峰偏好上，我们就绕开了阿罗的不可能性，策略免疫与效率可以同时做到。
 
-The following code demonstrates the generalized median voter scheme and its strategy-proofness:
+下面的代码演示广义中位投票者机制，以及它的策略免疫性：
 
 ```{pyodide-python}
 #| autorun: true
