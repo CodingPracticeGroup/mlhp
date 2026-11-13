@@ -2237,36 +2237,36 @@ The AI assistant can follow two policies:
 
 ---
 
-### Exercise 6: Strategy-Proofness and Nosy Preferences (**)
+### 练习 6：策略免疫与"管得宽"的偏好（**）
 
-In the paper-reviewer matching from @sec-review-assistant, reviewers report preferences $\succ_i$ over papers $P$. The matching algorithm maximizes total utility:
+在 @sec-review-assistant 的论文—审稿人匹配里，审稿人报告自己对论文集合 $P$ 的偏好 $\succ_i$。匹配算法最大化总效用：
 $$
 \max_{\text{assignment}} \sum_{i} u_i(\text{assignment}(i))
 $$ {#eq-exercise-matching}
 
-Assume preferences are **non-nosy** (each reviewer cares only about their own assignment, not others').
+假设偏好都是**非"管得宽"的**（每位审稿人只关心自己拿到哪些任务，不管别人）。
 
-**(a)** Show this mechanism is **not strategy-proof**: Reviewers can improve their outcome by misreporting preferences. Construct an example where Reviewer 1 gets a better paper by lying about $\succ_1$.
+**(a)** 说明这套机制**不是策略免疫的**：审稿人可以通过谎报偏好让自己拿到更好的结果。请构造一个例子：审稿人 1 靠谎报 $\succ_1$ 拿到了一篇更好的论文。
 
-**(b)** Now suppose senior reviewers have **nosy preferences**: they want certain papers assigned to junior reviewers (e.g., training papers). Formalize as:
+**(b)** 现在假设资深审稿人有**"管得宽"的偏好**：他们希望某些论文（例如适合练手的论文）分给资浅审稿人。形式化写成：
 $$
 u_i(\text{assignment}) = u_i^{\text{self}}(\text{assignment}(i)) + \sum_{j \in \text{Juniors}} \beta_{ij} \cdot u_i^{\text{nosy}}(\text{assignment}(j))
 $$ {#eq-exercise-nosy-utility}
-where $\beta_{ij}$ is how much senior $i$ cares about junior $j$'s assignment.
+其中 $\beta_{ij}$ 表示资深审稿人 $i$ 有多在意资浅审稿人 $j$ 分到什么任务。
 
-Show that coordinated misreporting by seniors can **systematically harm juniors** by steering "training papers" to juniors even if juniors prefer research-relevant papers.
+请说明：资深者一致地谎报，会**系统性地损害资浅者**——把那些"练手论文"都推给资浅者，哪怕资浅者更想要和自己研究相关的论文。
 
-**(c)** Design a **mechanism** that prevents this manipulation while still allowing some nosy preferences. For example, could you use **VCG payments** (@sec-vcg) to incentivize truth-telling, or constrain the matching to ignore nosy components? Prove or disprove: Is any truthful mechanism possible when preferences are nosy?
+**(c)** 请设计一套**机制**：既能防止这种操纵，又允许一定程度的"管得宽"的偏好。例如：能不能用 **VCG 付款**（@sec-vcg）来激励大家说真话？或者约束匹配过程只认"非管得宽"的那部分？请证明或反驳：当偏好是"管得宽"的时，是否还存在说真话的机制？
 
 ---
 
-**End of Exercises**
+**练习到此结束**
 
-These exercises develop deep understanding of fairness tradeoffs and impossibilities. Work through them to internalize the chapter's key insights: fairness conflicts are mathematical necessities, not engineering failures, requiring conscious prioritization.
+这些练习是为了让你把公平的取舍与不可能性真正想透。请认真做一遍，把本章最要紧的结论内化下来：公平之间的冲突是数学上的必然，不是工程没做好，所以只能有意识地定优先级。
 
-## Discussion Questions {#sec-discussion}
+## 讨论题 {#sec-discussion}
 
-These open-ended questions promote critical thinking about fairness, values, and governance in preference learning systems. Use them for in-class discussions, essay prompts, or group projects.
+下面这些开放题，请就偏好学习系统中的公平、价值与治理做多一步的思考。可用于课堂讨论、书面作业或小组项目。
 
 1. **Inversion Problem Severity**: When is the inversion problem (@sec-inversion-problem) most severe? Consider domains where behavior strongly diverges from mental state (addiction, manipulation, fatigue, time pressure). How should preference learning systems handle cases where clicks/engagement ≠ satisfaction? Should they attempt to infer mental state, or is that itself a form of paternalism?
 
