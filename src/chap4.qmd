@@ -2012,34 +2012,27 @@ $f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=g\left(\mathbf{x}^{\
 再像式 [\[eq:bernoulli_pref\]](#eq:bernoulli_pref){reference-type="ref" reference="eq:bernoulli_pref"} 那样用伯努利分布为偏好函数建模，并假定概率服从 Bradley-Terry 模型，即
 $$\pi_f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=\sigma\left(f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)\right)=\frac{e^{g(\mathbf{x})}}{e^{g(\mathbf{x})}+e^{g\left(\mathbf{x^{\prime}}\right)}}$$ {#eq-bradley-terry}
 
-The update rule for MLE $\hat{g}$ is (equation 8,6,5) $$\begin{aligned}
+$\hat{g}$ 的更新规则见（式 8、6、5）：$$\begin{aligned}
 \hat{g}_t^{\text {MLE }}&:= \arg \underset{\tilde{g} \in \mathcal{B}^t_g}{\max}\ell_t(\tilde{g}) \\
 \ell_t(\tilde{g}) &:= \log \prod_{\tau=1}^t y_\tau \pi_{\tilde{f}}([\mathbf{x_\tau}, \mathbf{x^{\prime}_\tau}])+\left(1-y_\tau\right)\left(1-\pi_{\tilde{f}}([\mathbf{x_\tau}, \mathbf{x^{\prime}_\tau}])\right) \\
 &=\sum_{\tau=1}^t \log \left(\frac{e^{\tilde{g}(\mathbf{x_\tau})} y_\tau+e^{\tilde{g}(\mathbf{x_\tau^\prime})}\left(1-y_\tau\right)}{e^{\tilde{g}(\mathbf{x_\tau})}+e^{\tilde{g}(\mathbf{x_\tau^\prime})}}\right) \\
 &=\sum_{\tau=1}^t\left(\tilde{g}(\mathbf{x_\tau}) y_\tau+\tilde{g}(\mathbf{x_\tau^\prime})\left(1-y_\tau\right)\right)-\sum_{\tau=1}^t \log \left(e^{\tilde{g}(\mathbf{x_\tau})}+e^{\tilde{g}(\mathbf{x_\tau^\prime})}\right)
 \end{aligned}$$ {#eq-mle-update}
 
-(Eq 22 shows how to represent this as a convex optimisation problem so
-that it can be solved)
+（式 22 说明可以把它写成一个凸优化问题，从而能求解。）
 
-The update rule for the confidence set $\mathcal{B}_f^{t+1}$ is, (eq 9,
-10?)
+置信集 $\mathcal{B}_f^{t+1}$ 的更新规则是（式 9、10？）：
 
 $$\begin{aligned}
 &\forall \epsilon, \delta > 0 \\
 &\mathcal{B}_g^{t+1}:=\left\{\tilde{g} \in \mathcal{B}_g \mid \ell_t(\tilde{g}) \geq \ell_t\left(\hat{g}_t^{\mathrm{MLE}}\right)-\beta_1(\epsilon, \delta, t)\right\}
-\end{aligned}$$ {#eq-confidence-set-update} where
+\end{aligned}$$ {#eq-confidence-set-update} 其中
 $$\beta_1(\epsilon, \delta, t):=\sqrt{32 t B^2 \log \frac{\pi^2 t^2 \mathcal{N}\left(\mathcal{B}_f, \epsilon,\|\cdot\|_{\infty}\right)}{6 \delta}}+ C_L \epsilon t=\mathcal{O}\left(\sqrt{t \log \frac{t \mathcal{N}\left(\mathcal{B}_f, \epsilon,\|\cdot\|_{\infty}\right)}{\delta}}+\epsilon t\right),$$ {#eq-beta-function}
-with $C_L$ a constant independent of $\delta, t$ and $\epsilon$.
-$\epsilon$ is typically chosen to be $1 / T$, where T is the running
-horizon of the algorithm. This satisfies the theorem that,
+其中 $C_L$ 是一个与 $\delta, t$ 和 $\epsilon$ 都无关的常数。
+$\epsilon$ 通常取 $1 / T$，这里 T 是算法运行的总步数。这样取便满足了下面这条定理：
 $$\mathbb{P}\left(g \in \mathcal{B}_g^{t+1}, \forall t \geq 1\right) \geq 1-\delta .$$ {#eq-confidence-guarantee}
 
-Intuitively, the confidence set $\mathcal{B}_g^{t+1}$ includes the
-functions with the log-likelihood value that is only 'a little worse'
-than the maximum likelihood estimator, and the theorem states that
-$\mathcal{B}_g^{t+1}$ contains the ground-truth function $g$ with high
-probability.
+直观上，置信集 $\mathcal{B}_g^{t+1}$ 收进来的是那些对数似然"只比极大似然估计差一点点"的函数；而定理所说的是：$\mathcal{B}_g^{t+1}$ 以很高的概率把真实函数 $g$ 包含在内。
 
 算法第 4 行里的内层优化同样可以写成一个凸优化问题，因此是能解的（式 24、25）。外层优化则可以用网格搜索，或在中等规模的问题上用式 26 来解。
 
