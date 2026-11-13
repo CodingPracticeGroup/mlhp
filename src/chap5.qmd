@@ -1074,18 +1074,18 @@ Two important families of mutual information measures that satisfy these propert
 While the MIP framework provides elegant theoretical guarantees for truthful elicitation, practical deployment faces several challenges. First, it requires a **common prior** or sufficient data to estimate the joint distribution of reports---which may not be available in small-scale annotation tasks. Second, theoretical guarantees hold in the **multi-question** setting where mutual information can be estimated empirically; in the **single-question** setting, additional assumptions (e.g., asking agents to predict others' reports) are needed. Third, the gap between theoretical guarantees and empirical performance can be substantial: agents may not reason about dominant strategies, and the payment scheme's complexity may itself introduce noise. In annotation pipelines for RLHF, simpler quality-control mechanisms (inter-annotator agreement, gold-standard questions) are often more practical, even if theoretically less principled.
 :::
 
-## Summary
+## 本章小结
 
-- When **multiple stakeholders** have conflicting preferences, aggregation is unavoidable---and impossibility results constrain what any aggregation rule can achieve.
-- **Arrow's Impossibility Theorem** shows that no rule for three or more alternatives can simultaneously satisfy Unanimity, IIA, and Non-dictatorship. The **Gibbard-Satterthwaite Theorem** adds that non-dictatorial rules are always manipulable.
-- **Domain restrictions** provide an escape: when preferences are **single-peaked** (each voter has a unique ideal point on an ordered spectrum), the **generalized median voter scheme** is both strategy-proof and Pareto efficient (Moulin's theorem).
-- The **DPO-Borda connection** is a key bridge between this chapter and modern ML: DPO implicitly optimizes the expected Borda score when aggregating across annotators, linking social choice theory directly to language model alignment.
-- **Nosy vs. non-nosy preferences** (Sen's framework) distinguish personal choices from preferences about others' behavior. The **liberal paradox** shows that respecting individual rights can conflict with Pareto efficiency---a tension that AI systems must navigate explicitly.
-- The **inversion problem**---that observed behavior does not necessarily reflect underlying preferences---undermines revealed preference approaches and has direct implications for RLHF, where annotator fatigue, framing, and incentives distort the feedback signal.
-- **Mechanism design without money** (peer prediction, the Mutual Information Paradigm) provides tools for eliciting truthful reports when standard payment-based incentives are unavailable, as in crowdsourced annotation.
-- **Community Notes** exemplifies real-world preference aggregation: its factor model separates note quality from ideological slant, surfacing content that earns cross-partisan agreement.
+- 当**多方利益相关者**的偏好互相冲突时，汇总就无法回避——而那些不可能性结论限定了任何汇总规则能做到什么。
+- **阿罗不可能定理**说明：候选项不少于三个时，没有任何规则能同时满足一致同意、独立无关备选与非独裁。**吉巴德—萨特斯维特定理**进一步指出：凡是非独裁的规则，都可以被策略性操纵。
+- **限制定义域**是一条出路：当偏好是**单峰**的（每位选民在一条有序光谱上只有一个理想点）时，**广义中位投票者机制**既策略免疫又帕累托有效（穆林定理）。
+- **博尔达与 DPO 的联系**是本章与当代机器学习之间的一座关键桥梁：汇总多位标注员的偏好时，DPO 隐含地在优化期望博尔达分数——社会选择理论由此直接连到了语言模型的对齐上。
+- **"管得宽"与非"管得宽"的偏好**（森的框架）区分了"自己的选择"与"关于别人该怎么做的偏好"。**自由悖论**说明：尊重个人权利可能与帕累托有效相冲突——这是 AI 系统必须正面应对的张力。
+- **反演问题**——看到的行为未必反映背后的偏好——动摇了显示偏好这条路，并且对 RLHF 有直接影响：标注员的疲劳、说法与激励都会扭曲反馈信号。
+- **不用钱的机制设计**（同行预测、互信息范式）给出了在没有金钱激励可用时（比如众包标注）让人们如实报告的工具。
+- **Community Notes** 是真实世界偏好汇总的一个范例：它的因子模型把笔记质量与立场倾向分开，让那些跨立场都获得认同的内容浮现出来。
 
-## Quick Check
+## 快问快答
 
 Test your understanding before proceeding to the exercises.
 
@@ -1097,7 +1097,7 @@ Test your understanding before proceeding to the exercises.
 
 4. Give an example of a "nosy preference" in AI content moderation. Why does Sen's liberal paradox make it impossible to both respect individual rights and achieve Pareto efficiency when nosy preferences are present?
 
-## Discussion Questions
+## 讨论题
 
 1. **Arrow's theorem and cardinal utilities**: Arrow's Impossibility Theorem applies to ordinal preferences. How does allowing cardinal utilities (like summing utilities across voters) change the picture? What new problems arise when we allow interpersonal utility comparisons?
 
@@ -1129,7 +1129,7 @@ Test your understanding before proceeding to the exercises.
 
 15. **Contextual Integrity violations**: Identify three ways that current AI systems might violate contextual integrity norms. For each, propose a design change that would restore contextual integrity.
 
-## Bibliographic Notes
+## 文献说明
 
 **Social Choice Theory**: The foundational results in social choice are due to Arrow [-@arrow1951], who proved his impossibility theorem, and Gibbard [-@gibbard1973] and Satterthwaite [-@satterthwaite1975], who independently proved the manipulability theorem. Black [-@black1948rationale] introduced single-peaked preferences, and Moulin [-@moulin1980strategy] characterized strategy-proof rules on this domain. For comprehensive treatments of social choice theory, see @sen1970collective and @austen-smith_banks_2000.
 
@@ -1159,7 +1159,7 @@ If you read only five papers from this chapter's references, make them these:
 5. **@kongschoenebeck2019** — The Mutual Information Paradigm for incentive-compatible preference elicitation
 :::
 
-## Further Reading
+## 延伸阅读
 
 For readers who want to go deeper into the topics introduced in this chapter, we recommend the following:
 
@@ -1171,7 +1171,7 @@ For readers who want to go deeper into the topics introduced in this chapter, we
 - **@miller2005eliciting**, "Eliciting Informative Feedback: The Peer-Prediction Method" — The foundational work on eliciting truthful reports without verification, providing the theoretical basis for the peer prediction and MIP frameworks discussed in this chapter.
 - **@conitzer2024social**, "Social Choice for AI Policy" — Recent work on applying social choice theory to AI governance and alignment, arguing for maintaining multiple preference models rather than collapsing to a single aggregate.
 
-## Exercises
+## 练习
 
 ### Exercise 1: Condorcet Cycles (*)
 
