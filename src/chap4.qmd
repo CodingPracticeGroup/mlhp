@@ -2773,13 +2773,13 @@ print(f"Teaching avg reward: {np.mean(teach_rewards):.1f} ± {np.std(teach_rewar
 
 :::
 
-### Choice Architecture
+### 选择架构
 
-As designers of preference learning systems, we are **choice architects**: the options we present and how we present them influence human behavior. Research in behavioral economics documents several effects:
+作为偏好学习系统的设计者，我们同时也是**选择架构（choice architect）**：我们给出哪些选项、怎样给出，都会影响人的行为。行为经济学记录了好几种这样的效应：
 
-- **Order effects**: Items presented first or last receive disproportionate attention
-- **Framing effects**: How options are described changes perceived value
-- **Default effects**: Pre-selected options are chosen more often
+- **顺序效应**：最先出现或最后出现的选项，得到的注意明显不成比例地多
+- **框架效应**：同一个选项换个说法，人们感受到的价值就变了
+- **默认效应**：预先替用户选好的选项，更容易被保留下来
 
 这些效应，标准的选择模型通常都没有刻画（它们假定了独立无关备选（IIA）或类似的性质）。要把偏好学习系统部署好，就必须意识到这些偏差的存在。
 
@@ -2787,12 +2787,12 @@ As designers of preference learning systems, we are **choice architects**: the o
 从"测量"走到"决策"，让我们看清不确定性是要去管理的，而不只是把它降下去；从"被动的神谕"走到"主动的人"，则让我们看清**人本身就是会权衡的策略主体**，他的行为取决于他对这套系统的判断。CIRL 为这种合作情形提供了一个有章法的框架。
 :::
 
-::: {.callout-warning title="Assumption: Approximately Rational Humans"}
-CIRL's cooperative framework assumes the human acts **approximately optimally** given their beliefs about the robot's learning process. If the human is systematically biased---exhibiting anchoring effects, framing dependence, or status quo bias---the robot may learn incorrect preferences from the human's demonstrations. For example, a human who consistently overweights recent experiences (recency bias) will provide teaching signals that distort the learned reward function. More fundamentally, CIRL assumes the human *wants* to teach the robot, but in practice humans may be inattentive, adversarial, or simply unaware that their behavior is being interpreted as preference data. The choice architecture effects noted above compound this issue: the system's interface can systematically bias the human's responses in ways that CIRL does not account for.
+::: {.callout-warning title="假设：人近似理性"}
+CIRL 这套合作框架假定：人是**大致最优**地行动的——按他对"机器正在怎样学习"的判断来行动。如果人系统性地带有偏差（锚定效应、随表述方式改变判断、安于现状），机器就可能从人的示范里学到不正确的偏好。比如，一个总是过分看重最近经历（近因偏差）的人，他给出的教学信号就会把学到的奖励函数带偏。更根本的问题是：CIRL 假定人*愿意*教机器，可现实中人可能心不在焉、带有对抗性，甚至根本不知道自己的行为正被当作偏好数据来解读。上面提到的选择架构效应还会让问题更严重：系统的界面本身就会系统性地左右人的回答，而 CIRL 并没有把这一点考虑进去。
 :::
 
-::: {.callout-tip title="Looking Ahead: From Individual Decisions to Collective Preferences"}
-This chapter developed methods for sequential decision-making with preference feedback from a **single** user. But what happens when **multiple** users have different preferences? Chapter 5 (Aggregation) addresses this challenge using social choice theory and mechanism design. The winner concepts introduced here---Condorcet, Borda, von Neumann---will reappear in that context. In particular, a key result in Chapter 5 shows that DPO implicitly optimizes the **Borda score** when aggregating across annotators, connecting the dueling bandit framework developed here to the social choice theory of preference aggregation. Chapter 6 then asks the normative question: *whose* preferences should we optimize for, and what fairness constraints should apply?
+::: {.callout-tip title="承前启后：从个人决策到集体偏好"}
+本章解决的是**单个**用户的偏好反馈下的序贯决策问题。可如果**很多**用户偏好各不相同呢？第 5 章（聚合）会用社会选择理论与机制设计来回答这个问题。这里引入的几种"胜者"概念——孔多塞、博尔达、冯·诺依曼——会在那一章重新出现。特别是，第 5 章有一个重要结论：把众多标注者的偏好汇总起来时，DPO 实际上隐含地在优化**博尔达分数**——这就把本章的对决老虎机框架与偏好聚合的社会选择理论连到了一起。第 6 章接着问的是规范性的问题：我们该为*谁*的偏好做优化，又该加上哪些公平性约束？
 :::
 
 ## Summary
