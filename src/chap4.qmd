@@ -2017,62 +2017,29 @@ print(f"Estimated Condorcet winner: x = {X_grid[np.argmax(est_copeland)]:.2f}")
 
 :::
 
-### Acquisition Functions
+### 采集函数
 
-We describe several acquisition functions for sequential learning of the
-Condorcet winner. Our dataset
-$\mathcal{D}=\left\{\left[\mathbf{x}_i, \mathbf{x}_i^{\prime}\right], y_i\right\}_{i=1}^N$
-represents the $N$ duels that have been performed so far. We aim to
-define a sequential policy
-$\alpha\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right] ; \mathcal{D}_j, \theta\right)$
-for querying duels, where $\theta$ is a vector of model
-hyper-parameters, in order to find the minimum of the latent function
-$g$ as quickly as possible. Using Gaussian processes (GP) for
-classification with our dataset $\mathcal{D}$ allows us to perform
-inference over $f$ and $\pi_f$.
+下面介绍几种采集函数，用来逐步找出孔多塞胜者。数据集 $\mathcal{D}=\left\{\left[\mathbf{x}_i, \mathbf{x}_i^{\prime}\right], y_i\right\}_{i=1}^N$ 记录到目前为止问过的 $N$ 场对决。我们要定一条按顺序提问的策略 $\alpha\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right] ; \mathcal{D}_j, \theta\right)$，其中 $\theta$ 是模型超参数组成的向量，目标是尽快找到隐函数 $g$ 的最小值。用高斯过程在这个数据集 $\mathcal{D}$ 上做分类，就能对 $f$ 和 $\pi_f$ 做推断。
 
-#### Pure Exploration {#pure-exploration .unnumbered}
+#### 纯粹探索 {#pure-exploration .unnumbered}
 
-The output variable $y_{\star}$ of a prediction follows a Bernoulli
-distribution with probability given by the preference function $\pi_f$.
-To carry out exploration as a policy, one method is to search for the
-duel where GP is most uncertain about the probability of the outcome
-(has the highest variance of $\sigma\left(f_{\star}\right)$ ), which is
-the result of transforming out epistemic uncertainty about $f$, modeled
-by a GP, through the logistic function. The first order moment of this
-distribution coincides with the expectation of $y_{\star}$ but its
-variance is $$\begin{aligned}
+预测的输出变量 $y_{\star}$ 服从伯努利分布，其概率由偏好函数 $\pi_f$ 给出。要把"探索"做成一条策略，一种做法是去找高斯过程对结果概率最没把握的那场对决（也就是 $\sigma\left(f_{\star}\right)$ 方差最大的那场）：这份不确定性来自我们对 $f$ 的认知不确定性（由高斯过程建模）经过逻辑斯蒂函数变换后得到的结果。这个分布的一阶矩就是 $y_{\star}$ 的期望，而它的方差为
+$$\begin{aligned}
 \mathbb{V}\left[\sigma\left(f_{\star}\right)\right] & =\int\left(\sigma\left(f_{\star}\right)-\mathbb{E}\left[\sigma\left(f_{\star}\right)\right]\right)^2 p\left(f_{\star} \mid \mathcal{D},\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right) d f_{\star} \\
 & =\int \sigma\left(f_{\star}\right)^2 p\left(f_{\star} \mid \mathcal{D},\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right) d f_{\star}-\mathbb{E}\left[\sigma\left(f_{\star}\right)\right]^2
-\end{aligned}$$ {#eq-variance-sigma} which explicitly takes into account the uncertainty over
-$f$. Hence, pure exploration of duels space can be carried out by
-maximizing
+\end{aligned}$$ {#eq-variance-sigma} 它显式地把 $f$ 上的不确定性也算了进来。因此，纯粹探索可以这样实现——最大化
+
 $$\alpha_{\mathrm{PE}}\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right] \mid \mathcal{D}_j\right)=\mathbb{V}\left[\sigma\left(f_{\star}\right)\left|\left[\mathbf{x}_{\star}, \mathbf{x}_{\star}^{\prime}\right]\right| \mathcal{D}_j\right] .$$ {#eq-pure-exploration}
 
-Note that in this case, duels that have been already visited will have a
-lower chance of being visited again even in cases in which the objective
-takes similar values in both players. In practice, this acquisition
-functions requires computation of an intractable integral, that we
-approximate using Monte-Carlo.
+要注意，在这种做法下，已经问过的对决再次被选中的概率会变低，哪怕这场对决两边取值其实很接近。实际计算时，这个采集函数里有一个算不出来的积分，我们用蒙特卡洛来近似。
 
-#### Principled Optimistic Preferential Bayesian Optimization (POP-BO) {#principled-optimistic-preferential-bayesian-optimization-pop-bo .unnumbered}
+#### 有原则的乐观偏好型贝叶斯优化（Principled Optimistic Preferential Bayesian Optimization, POP-BO） {#principled-optimistic-preferential-bayesian-optimization-pop-bo .unnumbered}
 
-In a slightly modified problem setup
-[@xu2024principledpreferentialbayesianoptimization], the algorithm tries
-to solve for the MLE $\hat{g}$ and its confidence set $\mathcal{B}_g$
-where $g$ is the ground truth black-box function. Assumptions include
-that $g$ is a member of a reproducing kernel Hilbert space (RKHS)
-$\mathcal{H}_k$ for some kernel function
-$k: \mathbb{R}^d \times \mathbb{R}^d \rightarrow \mathbb{R}$, and
-$\|g\|_k \leq B$ so that
-$\mathcal{B}_g = \left\{\tilde{g} \in \mathcal{H}_k \mid\|\tilde{g}\|_k \leq B\right\}$.
-Similarly defining
-$f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=g\left(\mathbf{x}^{\prime}\right)-g(\mathbf{x})$,
-we model the preference function with a Bernoulli distribution as in
-Equation
-[\[eq:bernoulli_pref\]](#eq:bernoulli_pref){reference-type="ref"
-reference="eq:bernoulli_pref"} and also assume that probabilities follow
-the Bradley-Terry model, i.e.
+在略微改动过的问题设定下 [@xu2024principledpreferentialbayesianoptimization]，算法去求极大似然估计 $\hat{g}$ 以及它的置信集 $\mathcal{B}_g$，其中 $g$ 是真实的那个黑箱函数。这里的假定是：$g$ 属于某个核函数 $k: \mathbb{R}^d \times \mathbb{R}^d \rightarrow \mathbb{R}$ 对应的再生核希尔伯特空间（reproducing kernel Hilbert space, RKHS）$\mathcal{H}_k$，并且 $\|g\|_k \leq B$，于是
+$\mathcal{B}_g = \left\{\tilde{g} \in \mathcal{H}_k \mid\|\tilde{g}\|_k \leq B\right\}$。
+同样地定义
+$f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=g\left(\mathbf{x}^{\prime}\right)-g(\mathbf{x})$，
+再像式 [\[eq:bernoulli_pref\]](#eq:bernoulli_pref){reference-type="ref" reference="eq:bernoulli_pref"} 那样用伯努利分布为偏好函数建模，并假定概率服从 Bradley-Terry 模型，即
 $$\pi_f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=\sigma\left(f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)\right)=\frac{e^{g(\mathbf{x})}}{e^{g(\mathbf{x})}+e^{g\left(\mathbf{x^{\prime}}\right)}}$$ {#eq-bradley-terry}
 
 The update rule for MLE $\hat{g}$ is (equation 8,6,5) $$\begin{aligned}
