@@ -1008,64 +1008,64 @@ for i, strategy in enumerate(strategies):
 
 Next, we'll see how the decision stage adds another layer: when should we defer to preferences vs. override them?
 
-### Decision: Liberal vs. Illiberal Assistance {#sec-liberal-illiberal}
+### 决策：自由主义式还是非自由主义式的协助 {#sec-liberal-illiberal}
 
-**Technical Question**: Should the AI review assistant help reviewers follow their stated preferences, or should it sometimes override those preferences?
+**技术问题**：这位 AI 审稿助手是该帮审稿人把他们说出来的偏好贯彻下去，还是有时该替他们推翻这些偏好？
 
-This isn't a technical question—it's a normative question about when paternalism is justified. We draw on Amartya Sen's framework from Chapter 6 (@sec-nosy-preferences).
+这不是技术问题，而是一个规范性的问题：家长主义什么时候才算站得住。我们用 Amartya Sen 在第 5 章给出的框架（@sec-nosy-preferences）。
 
-#### Sen's Framework: Nosy vs. Non-Nosy Preferences {#sec-nosy-preferences}
+#### 森的框架："管得宽"与非"管得宽"的偏好 {#sec-nosy-preferences}
 
-From Chapter 6, recall Sen's "Impossibility of a Paretian Liberal" (@sec-nosy-preferences). Sen distinguishes between:
+回忆第 5 章：森的"帕累托自由的不可能性"（@sec-nosy-preferences）把偏好分成两类：
 
-- **Non-nosy preferences**: Preferences about your own outcomes ("I want to review ML papers")
-- **Nosy preferences**: Preferences about others' choices ("Junior reviewers should handle tedious papers")
+- **非"管得宽"的偏好**：关于自己会怎么样（"我想审机器学习方向的论文"）
+- **"管得宽"的偏好**：关于别人该怎么选（"这种枯燥的论文该交给资浅审稿人练手"）
 
-**Liberal assistance** respects non-nosy preferences—each reviewer's assistant optimizes for their own stated preferences.
+**自由主义式的协助**尊重非"管得宽"的偏好——每位审稿人的助手只按他自己说出来的偏好来优化。
 
-**Illiberal assistance** allows (or enforces) nosy preferences—the system implements community standards or overrides individual preferences to prevent harm.
+**非自由主义式的协助**则允许（甚至执行）"管得宽"的偏好——系统落实的是共同体的标准，或者为了防止伤害而推翻个人的偏好。
 
-**In peer review**:
+**放到同行评审里**：
 
-**Liberal approach**: Each reviewer's assistant learns from their past reviews, helping them be consistent with their own style. If Reviewer A writes harsh reviews, the assistant helps them write consistently harsh reviews (respecting their preferences).
+**自由主义式的做法**：每位审稿人的助手从他自己过去的审稿意见里学习，帮他把一贯的风格保持住。如果审稿人 A 写得严厉，助手就帮他把一贯的严厉写得更好（尊重他的偏好）。
 
-**Illiberal approach**: The assistant is trained on community standards (what constitutes a "good review" per AC/community norms). It nudges reviewers toward constructive feedback, even if they prefer harsh criticism.
+**非自由主义式的做法**：助手的训练标准来自共同体（在领域主席与社区规范看来，什么算"好审稿"）。它会把审稿人往"写得更建设性"上推，哪怕他本来更喜欢直言批评。
 
-#### When is Illiberal Assistance Justified? {#sec-when-illiberal}
+#### 什么时候非自由主义式的协助站得住？ {#sec-when-illiberal}
 
-Sen's framework suggests illiberal assistance may be justified when:
+按森的框架，下面几种情形里，非自由主义式的协助也许是有道理的：
 
-1. **Preferences harm third parties**: Harsh reviews harm authors. Is nudging toward constructive feedback a justified "nosy preference" about how others experience reviews?
+1. **偏好会伤害第三方**：严厉的审稿意见会伤到作者。把作者往"建设性意见"上推，算不算一条站得住的、关于"别人怎样看待审稿意见"的"管得宽"的偏好？
 
-2. **Preferences are formed under poor conditions**: Reviewer writes harsh review when tired—this is the inversion problem (@sec-inversion-problem) again. Behavior (harsh review) ≠ deliberate judgment (mental state).
+2. **偏好是在很不利的条件下形成的**：审稿人累了就写得严厉——这又是反演问题（@sec-inversion-problem）。行为（严厉的审稿）≠ 深思后的判断（心理状态）。
 
-3. **Individual preferences aggregate to collective harm**: If all reviews are harsh, authors leave the field. Tragedy of the commons—individual rationality leads to collective harm.
+3. **个人的偏好汇总起来会造成集体的伤害**：如果所有意见都很严厉，作者就会离开这个领域。这是公地悲剧——每个人的选择都是理性的，合起来却伤了自己人。
 
-**Connection to Chapter 5**: Thompson Sampling (@sec-thompson-sampling) explores based on posterior uncertainty. But should we explore over what users *want* (liberal: respect stated preferences) or what's *best* for them (illiberal: optimize for long-term well-being)? This is the same liberal/illiberal distinction.
+**承接第 4 章**：汤普森采样（@sec-thompson-sampling）按后验的不确定程度来探索。但我们该在用户*想要的*东西上探索（自由主义：尊重说出来的偏好），还是在对他们*长远更好的*东西上探索（非自由主义：以长期福祉为目标）？这正是同一个自由主义／非自由主义的区别。
 
-#### Fairness Implications {#sec-liberal-illiberal-fairness}
+#### 公平性后果 {#sec-liberal-illiberal-fairness}
 
-Both liberal and illiberal assistance have fairness problems:
+两种做法都有公平性问题：
 
-**Liberal assistance might be unfair if**:
-- Some reviewers have biased preferences (e.g., harsher on papers from certain institutions)
-- System amplifies these biases by helping reviewers be "consistently" biased
-- Authors from disadvantaged groups systematically receive worse reviews
-- **Result**: Individual autonomy respected, but group fairness violated
+**下面这些情形里，自由主义式的协助可能不公平**：
+- 有些审稿人本身就带偏见（例如对某些机构的论文更苛刻）
+- 系统帮他"保持一贯"，反而把这种偏见放大了
+- 处境不利群体的作者系统性地收到更差的审稿意见
+- **结果**：个人的自主被尊重了，群体公平却被破坏了
 
-**Illiberal assistance might be unfair if**:
-- "Community standards" reflect dominant group's norms
-- System corrects diverse reviewing styles toward homogeneity
-- Junior reviewers or reviewers from underrepresented backgrounds have their voice "corrected away"
-- **Result**: Group fairness pursued, but individual autonomy violated
+**下面这些情形里，非自由主义式的协助可能不公平**：
+- 所谓"共同体标准"反映的只是主导群体的规范
+- 系统把多样的审稿风格一律往"标准样式"上改
+- 资浅审稿人、代表性不足背景的审稿人，他们的声音被"改"没了
+- **结果**：追到了群体公平，却伤了个人自主
 
-**No easy answer**: This is the core tension in fairness. Do we respect individual autonomy (liberal, may entrench bias) or enforce equity (illiberal, may erase diversity)?
+**没有两全的答案**：这正是公平问题里的核心张力。是尊重个人自主（自由主义，可能把偏见固化下来），还是强制实现公平（非自由主义，可能把多样性抹掉）？
 
-**Connection to Chapter 5**: Arrow's theorem (@sec-aggregation) and Sen's Paretian Liberal (@sec-nosy-preferences) show impossibility results—no mechanism satisfies all desirable properties. Adding fairness constraints makes this worse. We must choose which properties to prioritize.
+**承接第 5 章**：阿罗定理（@sec-aggregation）与森的帕累托自由不可能性（@sec-nosy-preferences）给的都是不可能性结论——没有哪种机制能满足所有好的性质。再加上公平性约束，情况只会更紧。我们只能选择优先保住哪几条。
 
-#### Code Example: Liberal vs. Illiberal Assistance {#sec-code-decision}
+#### 代码示例：自由主义式与非自由主义式的协助 {#sec-code-decision}
 
-Let's simulate how liberal vs. illiberal assistance affects different reviewers over time:
+下面模拟两类协助随时间对不同审稿人产生的影响：
 
 ```{pyodide-python}
 #| echo: true
@@ -1443,7 +1443,7 @@ d(x_i, x_j) \leq \epsilon \implies d(f(x_i), f(x_j)) \leq \delta(\epsilon)
 $$ {#eq-individual-fairness}
 where $\delta$ is non-decreasing. Intuitively: if two individuals are close in relevant features, their outcomes should be close.
 
-**In peer review**: Papers with similar topics and quality should get similar-quality reviewers. If Papers A and B both study transformers on low-resource languages, they should get reviewers with comparable expertise.
+**放到同行评审里**： Papers with similar topics and quality should get similar-quality reviewers. If Papers A and B both study transformers on low-resource languages, they should get reviewers with comparable expertise.
 
 **Group fairness** (demographic parity): Protected demographic groups should have equal average outcomes.
 
@@ -1453,7 +1453,7 @@ $$
 $$ {#eq-group-fairness}
 where $G$ is the group membership variable.
 
-**In peer review**: Papers from mainstream ML subfields vs. small subfields should receive equally qualified reviewers on average.
+**放到同行评审里**： Papers from mainstream ML subfields vs. small subfields should receive equally qualified reviewers on average.
 
 #### The Fundamental Incompatibility {#sec-fairness-incompatibility}
 
@@ -1651,7 +1651,7 @@ Another fundamental tension: fair **process** vs. fair **outcomes**.
 
 **Outcome fairness** (distributive justice): Equitable results. Equal outcomes, adjusting for disadvantages.
 
-**In peer review**:
+**放到同行评审里**：
 
 **Process fairness**: All reviewers bid with equal weight. Matching algorithm treats all bids equally. No adjustment for demographics or privilege.
 
