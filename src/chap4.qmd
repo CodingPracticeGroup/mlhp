@@ -706,38 +706,38 @@ p(H_i\mid\mathcal D_t) \approx \mathcal N\big(\hat H_i, W^{-1}\big).
 $$ {#eq-gp-laplace-result}
 
 
-The resulting approximate posterior can be **projected to any new input** $V_*$ via standard GP conditioning:
+得到这个近似后验之后，用标准的高斯过程条件化就能把它**投影到任意新输入** $V_*$ 上：
 $$
 p(h(V_*) \mid \mathcal{D}_t) \approx \mathcal{N}(\mu_t(V_*), \sigma_t^2(V_*)),
 $$ {#eq-gp-predictive}
-where
+其中
 $$
 \mu_t(V_*) = k_*^\top K_t^{-1}\hat{H_i}, \quad
 \sigma_t^2(V_*) = k(V_*,V_*) - k_*^\top (K_t + W^{-1})^{-1} k_*.
 $$ {#eq-gp-predictive-mean-var}
-where the $k_*$ is the covariance between the new point and previous points.
+这里的 $k_*$ 是新点与此前各点之间的协方差。
 
-Once the posterior is approximated, **Thompson Sampling** proceeds as before:
-sample one plausible function from the posterior, then act optimally with respect to it.
+后验近似出来之后，**汤普森采样**照旧进行：
+从后验里抽出一个可能的函数，然后针对它做最优选择。
 
-Algorithmically:
+算法步骤是：
 
-1. **Approximate the posterior** $p(h_i \mid \mathcal{D}_t) \approx \mathcal{N}(\hat{H_i}, \Sigma_f)$ via Laplace.
-2. **Sample a function realization**
+1. **近似后验**：用拉普拉斯近似得到 $p(h_i \mid \mathcal{D}_t) \approx \mathcal{N}(\hat{H_i}, \Sigma_f)$。
+2. **抽一个具体的函数**
    $$
    \tilde{h}_i \sim \mathcal{GP}(m_t(\cdot), k_t(\cdot, \cdot)),
    $$ {#eq-gp-function-sample}
-   where $m_t$ and $k_t$ are derived from the approximate posterior.
-3. **Select the next item**
+   其中 $m_t$ 与 $k_t$ 由近似后验推出。
+3. **选出下一个物品**
    $$
    j^* = \arg\max_j \tilde{h}_i(V_j).
    $$ {#eq-gp-item-selection}
 
-This random sampling induces exploration: uncertain regions of the function space produce high variance in $\tilde{h}_i(V_j)$, encouraging the agent to test them. As more observations are collected, the posterior variance shrinks and the strategy converges toward greedy exploitation.
+这种随机抽样带来了探索：函数空间里没被数据覆盖的地方，$\tilde{h}_i(V_j)$ 的方差很大，于是智能体更愿意去试。观测越多，后验方差越小，策略也就越来越接近贪心利用。
 
-Below is a minimal illustration using **GP classification with Laplace approximation** and Thompson sampling. (For practical scalability, packages like `gpytorch` or `scikit-learn` can be used.)
+下面是一个最简示例：用**带拉普拉斯近似的高斯过程分类**配合汤普森采样。（真要做大规模应用，可以用 `gpytorch`、`scikit-learn` 这类现成库。）
 
-::: {.callout-note title="Code: GP Thompson Sampling"}
+::: {.callout-note title="代码：高斯过程汤普森采样"}
 
 ```{pyodide-python}
 import torch
