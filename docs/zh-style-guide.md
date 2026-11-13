@@ -96,6 +96,16 @@
 | Upper Confidence Bound (UCB) | 上置信界 | 是 |
 | multi-armed bandit | 多臂老虎机 | — |
 | dueling bandits | 对决老虎机 | 是 |
+| Interleaved Filter | 交错筛选（Interleaved Filter） | 是 |
+| Dueling Bandit Gradient Descent (DBGD) | 对决老虎机梯度下降（DBGD）；正文简称 DBGD | 是 |
+| Sparring EXP4 | Sparring EXP4（算法名保留原文；"sparring"在正文里译作"对练"） | 是 |
+| Feel-good Thompson Sampling | Feel-good 汤普森采样 | 是 |
+| feel-good exploration | Feel-good 探索 | 是 |
+| qEUBO / qEI / qTS | 保留缩写；qEUBO 全称译作"最优选项的期望效用（expected utility of the best option）" | 是 |
+| POP-BO | 有原则的乐观偏好型贝叶斯优化（POP-BO） | 是 |
+| knowledge gradient | 知识梯度 | 是 |
+| Copeland score / soft-Copeland score | 科佩兰分数 / 软科佩兰分数 | 是 |
+| maximum information gain | 最大信息增益 | 是 |
 | preferential Bayesian optimization (PBO) | 偏好型贝叶斯优化 | 是 |
 | Bayesian optimization / inference | 贝叶斯优化 / 贝叶斯推断 | 是 |
 | Laplace approximation | 拉普拉斯近似 | 是 |

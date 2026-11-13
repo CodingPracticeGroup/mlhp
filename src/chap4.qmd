@@ -1610,33 +1610,17 @@ Yue 和 Joachims 证明了：这个算法关于迭代次数 $T$ 的遗憾是次�
 
 #### Sparring EXP4 {#sparring-exp4 .unnumbered}
 
-While DBGD handles continuous action spaces, many real-world dueling problems also involve **context**---the best action depends on the situation. For example, the best search ranking for a query about "python" differs depending on whether the user is a programmer or a pet owner. Sparring EXP4 [@zoghi2015copeland] addresses this *contextual dueling bandit* setting by adapting the EXP4 algorithm (originally designed for contextual bandits with scalar rewards) to preference feedback.
+DBGD 能应付连续的行动空间，但现实中的很多对决问题还涉及**上下文**——最好的行动要看场合。比如同样是查询"python"，用户是程序员还是养猫的人，最合适的搜索结果排序就不一样。Sparring EXP4 [@zoghi2015copeland] 针对的就是这种*上下文对决老虎机*设定：它把 EXP4 算法（原本为带实数奖励的上下文老虎机设计）改造成能接受偏好反馈的形式。
 
-The key idea is to run **two instances** of the EXP4 algorithm against each other. Each instance maintains embeddings for the actions and produces a probability distribution over choices given the current context. When a context arrives, each instance samples an action, the two actions are dueled, and the winner receives a positive reward while the loser receives a negative reward proportional to the preference strength. This "sparring" approach elegantly converts pairwise preference feedback into the scalar reward signals that EXP4 requires.
+核心思路是让 **两个** EXP4 实例互相当对手。每个实例自己维护各行动的向量表示，并在给定上下文下产出一个选择上的概率分布。上下文一到，两个实例各抽一个行动，把这两个行动拿去对决；胜者得到正奖励，负者得到负奖励，其大小与偏好的强度成正比。这样"对练"就把两两偏好的反馈巧妙地转成了 EXP4 需要的实数奖励信号。
 
-#### Feel-good Thompson Sampling
+#### Feel-good 汤普森采样
 
-Feel-good Thompson Sampling [@fgts_cdb] offers an alternative approach to the contextual dueling bandit setting, connecting back to the Thompson Sampling framework developed earlier in this chapter. Like Sparring EXP4, it handles context-dependent preferences, but it uses posterior sampling rather than adversarial learning. The algorithm aims to find a Von Neumann winner by minimizing cumulative average regret:
+Feel-good 汤普森采样（Feel-good Thompson Sampling）[@fgts_cdb] 为上下文对决老虎机提供了另一条路，它也接回了本章前面讲的汤普森采样框架。和 Sparring EXP4 一样，它能处理随上下文变化的偏好，但它用的是后验采样，而不是对抗式学习。算法的目标是找到一个冯·诺依曼胜者，为此要最小化累计平均遗憾：
 $$\text{Regret}(T) := \sum_{t=1}^{T} \left[ r_{*}(x_t, a_{t}^{*}) - \frac{r_{*}(x_t, a_{t}^{1}) + r_{*}(x_t, a_{t}^{2})}{2} \right],$$ {#eq-fgts-regret}
-where $r_{*}(x_t, a_{t})$ is the true, hidden reward function of a
-context $x_t$ and action $a_t$. Thompson sampling is an iterative
-process of receiving preference over two actions, each maximizing a
-different approximation of the reward function based on past data and
-adding this new information to the data.
+其中 $r_{*}(x_t, a_{t})$ 是上下文 $x_t$ 与行动 $a_t$ 对应的、真实但看不见的奖励函数。汤普森采样是这样的一个循环：给出两个行动（它们各自最大化的是基于已有数据得到的不同奖励函数近似），收到二者之间的偏好，再把这条新信息并入数据。
 
-Finding good approximations of the reward function at time $t$ is done
-by sampling two reward function parameters $\theta_t^{j=1}$ and
-$\theta_t^{j=2}$ from a posterior distribution based on all previous
-data $p_j(\cdot \mid S_{t-1})$. This posterior distribution is
-proportional to the multiplication of the prior and the likelihood
-function, which is a Gaussian in standard Thompson sampling. In
-Feel-Good Thompson sampling, an additional term called \"Feel-good
-exploration\" encourages parameters $\theta$ with a large maximum reward
-in previous rounds. This change to the likelihood function may increase
-probabilities in uncertain areas, thus exploring those regions. All
-that's left is to select an action maximizing each reward function
-approximation and receive a preference $y_t$ on one of them to add the
-new information to the dataset[@fgts_cdb].
+在时刻 $t$ 怎么得到好的奖励函数近似？做法是从"基于全部历史数据 $p_j(\cdot \mid S_{t-1})$"的后验里，抽两组奖励函数参数 $\theta_t^{j=1}$ 和 $\theta_t^{j=2}$。这个后验正比于先验与似然函数的乘积——在标准的汤普森采样里，它是个高斯分布。而 Feel-good 汤普森采样额外加了一项叫 **Feel-good 探索**，它会偏袒那些在以往轮次里最大奖励很高的参数 $\theta$。这样改动似然函数后，不确定区域的概率会被抬高，于是就去了探索。剩下的事就很直接：分别在两份奖励函数近似下各选一个使奖励最大的行动，收到其中更被偏好的那个的反馈 $y_t$，把这条新信息加进数据集 [@fgts_cdb]。
 
 :::: algorithm
 ::: algorithmic
