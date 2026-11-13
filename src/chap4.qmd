@@ -2636,43 +2636,43 @@ The progression from bandits (single-step) to RL (sequential) to preference-base
 GRPO further simplifies the RL pipeline by replacing the value function with group-relative comparisons, connecting RL optimization back to the pairwise comparison paradigm that runs throughout this book. The key equations---Bradley-Terry preference probabilities (Chapter 1), Fisher information and score functions (Chapter 3), and the policy gradient theorem (this section)---all share the same mathematical core: the log-derivative of a parameterized probability model.
 :::
 
-## Human-Agent Cooperation and CIRL
+## 人与智能体的协作：CIRL
 
-The algorithms discussed so far---Thompson Sampling, dueling bandits, Preferential Bayesian Optimization, and the RL methods in the preceding section---all share a common assumption: the human is a **passive oracle** who responds to queries but does not actively shape the learning process. In practice, this assumption often breaks down. A user choosing between LLM responses may deliberately select the more challenging example to *teach* the system. A patient in a clinical trial may modify their behavior based on what they believe the system is learning. Humans are **active agents** whose feedback depends on their beliefs about how it will be used.
+前面讲到的算法——汤普森采样、对决老虎机、偏好型贝叶斯优化，以及上一节的强化学习方法——都有一个共同的假定：人是**被动的"神谕"**，只回答提问，并不主动参与学习过程。可实际上这个假定常常不成立。一个在大模型给出的两个回答之间做选择的用户，可能会故意挑更难的那一条例子，目的是*教*系统；临床试验里的病人，也可能根据"自己猜系统正在学什么"来改变自己的行为。人是**主动的策略主体**，他们给出的反馈取决于他们对"这套系统会怎么用"的判断。
 
-This section introduces **Cooperative Inverse Reinforcement Learning (CIRL)**, a framework that models human and agent as jointly optimizing a shared objective. Where Thompson Sampling optimizes reward under uncertainty about the *reward function*, CIRL optimizes under uncertainty about the *human's preferences*---and crucially, the human knows this and can act to reduce that uncertainty.
+本节介绍**合作逆强化学习（Cooperative Inverse Reinforcement Learning, CIRL）**：一个把人与智能体建模为共同优化同一个目标的框架。汤普森采样是在对*奖励函数*不确定时去优化奖励，CIRL 则是在对*人的偏好*不确定时去优化——而且关键区别在于：人知道机器不了解自己，因此可以主动做点什么，帮它把这份不确定降下来。
 
-### The CIRL Framework
+### CIRL 的框架
 
-In standard Inverse Reinforcement Learning (IRL), the agent learns a reward function from observing an expert's behavior, then optimizes it. The expert demonstrates; the agent imitates. CIRL extends this to a **two-player cooperative game**:
+在标准的逆强化学习（Inverse Reinforcement Learning, IRL）里，智能体先观察专家的行为、由此学出一个奖励函数，再去优化它：专家负责示范，智能体负责模仿。CIRL 把这件事推广成一场**双方合作的游戏**：
 
-- **Human H**: Knows the true reward parameters $\theta \in \Theta$
-- **Robot R**: Does not know $\theta$, but must act to maximize reward
-- **Shared payoff**: Both players receive $R(s, a_H, a_R; \theta)$—their interests are aligned
+- **人 H**：知道真实的奖励参数 $\theta \in \Theta$
+- **机器人 R**：不知道 $\theta$，但又必须采取行动去把奖励做到最大
+- **共同收益**：双方拿到的都是 $R(s, a_H, a_R; \theta)$——双方利益是一致的
 
-The key insight is that the human's optimal policy is not just demonstrating good behavior, but **teaching** the robot about $\theta$. Sometimes instructive actions (that reveal information) dominate expert demonstrations (that maximize immediate reward).
+关键洞见是：人的最优策略并不只是"表现出好的行为"，而是**在教**——把关于 $\theta$ 的信息教给机器。有些时候，能透露信息的"教导性行动"反而比"把即时奖励做到最大"的专家示范更好。
 
-::: {.callout-note title="CIRL Formal Definition"}
-A CIRL game extends the single-agent MDP (@eq-rl-objective) to a two-player cooperative setting:
+::: {.callout-note title="CIRL 的正式定义"}
+CIRL 博弈把单智能体的 MDP（@eq-rl-objective）推广成一个双方合作的情形：
 
-- State space $\mathcal{S}$
-- Action spaces $\mathcal{A}_H$ (human) and $\mathcal{A}_R$ (robot)
-- Transition function $T(s' | s, a_H, a_R)$
-- Reward function $R(s, a_H, a_R; \theta)$ parameterized by $\theta$
-- Prior $P_0(\theta)$ over reward parameters
-- Discount factor $\gamma \in (0, 1)$
+- 状态空间 $\mathcal{S}$
+- 行动空间 $\mathcal{A}_H$（人）与 $\mathcal{A}_R$（机器人）
+- 转移函数 $T(s' | s, a_H, a_R)$
+- 奖励函数 $R(s, a_H, a_R; \theta)$，由 $\theta$ 参数化
+- 关于奖励参数的先验 $P_0(\theta)$
+- 折扣因子 $\gamma \in (0, 1)$
 
-At each time $t$, both observe $(s_t, a_H^{t-1}, a_R^{t-1})$. Only H observes $\theta$. The robot maintains a belief $b_R^t(\theta)$ updated via Bayes' rule. The key difference from the standard MDP is that the reward parameter $\theta$ is observed only by the human, making this a game of **asymmetric information**.
+在每个时刻 $t$，双方都能看到 $(s_t, a_H^{t-1}, a_R^{t-1})$；只有 H 看得到 $\theta$。机器人保持一份信念 $b_R^t(\theta)$，按贝叶斯法则更新。它与标准 MDP 的关键差别就在这里：奖励参数 $\theta$ 只有人看得见，于是这成了一场**信息不对称**的博弈。
 :::
 
-### Teaching vs. Demonstrating
+### 教导，还是只做示范
 
-A central result in CIRL is that **expert demonstrations can be suboptimal** for joint value. Consider:
+CIRL 里一个核心结论是：**专家示范对双方共同的收益来说可能并不是最优的**。对比两种做法：
 
-- **Demonstration-by-expert**: Human maximizes task reward at each step
-- **Instructive teaching**: Human sometimes sacrifices immediate reward to shape robot's belief
+- **专家示范**：人在每一步都把自己任务范围内的奖励做到最大
+- **有教导意义的示范**：人有时会牺牲眼前的奖励，去改变机器对奖励参数的信念
 
-When the robot is uncertain, instructive actions that reveal $\theta$ can lead to higher cumulative reward than always acting optimally given $\theta$.
+当机器还没有把握时，那些能透露 $\theta$ 的"有教导意义的行动"，往往比每一步都按 $\theta$ 下的最优行动去做，能换来更高的累计奖励。
 
 ::: {.callout-note title="Code: Teaching vs Demonstrating Simulation" collapse="false"}
 
