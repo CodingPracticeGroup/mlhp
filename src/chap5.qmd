@@ -1087,15 +1087,15 @@ While the MIP framework provides elegant theoretical guarantees for truthful eli
 
 ## 快问快答
 
-Test your understanding before proceeding to the exercises.
+在做课末练习之前，先用这几道题检验一下自己的理解。
 
-1. Arrow's theorem requires three axioms. Which axiom does the Borda count violate, and how?
+1. 阿罗定理用到三条公理。博尔达计分法违反的是哪一条？是怎么违反的？
 
-2. Under single-peaked preferences with 5 voters whose peaks are $\{2, 4, 5, 7, 9\}$, what is the pure median outcome? Can any voter manipulate this outcome by misreporting their peak?
+2. 设 5 位选民在单峰偏好下，峰值分别是 $\{2, 4, 5, 7, 9\}$，纯中位数规则的结果是多少？有没有哪位选民能靠谎报峰值改变这个结果？
 
-3. In the Community Notes model, why does controlling for the $p_i \cdot q_j$ interaction term improve note quality estimation compared to simple averaging?
+3. 在 Community Notes 模型里，为什么控制住 $p_i \cdot q_j$ 这个交互项，对笔记质量的估计会比简单平均更好？
 
-4. Give an example of a "nosy preference" in AI content moderation. Why does Sen's liberal paradox make it impossible to both respect individual rights and achieve Pareto efficiency when nosy preferences are present?
+4. 举一个 AI 内容审核中"管得宽"的偏好的例子。为什么在有这种偏好时，森的自由悖论说明"既尊重个人权利、又达到帕累托有效"做不到？
 
 ## 讨论题
 
