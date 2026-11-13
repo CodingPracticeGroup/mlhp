@@ -223,58 +223,58 @@ AI 系统越来越能干，它们做的事也就越来越难由人来评。语�
 
 **预期成果。** 一篇报告，量化 DPO 隐含的排名与经典社会选择排名的一致程度，分析它们在什么时候、因为什么而分开，并给出所有实验的可复现代码。
 
-### Project 7: Auditing a Preference Learning Pipeline for Compounding Bias (\*\*)
+### 项目 7：审计一条偏好学习流水线中的叠加偏差（\*\*）
 
-**题目说明。** Chapter 6 demonstrates that small biases at each stage of the preference learning pipeline---elicitation, learning, aggregation, decision---can compound into large disparities (@sec-compounding-unfairness). This project operationalizes that insight by constructing a complete pipeline simulation, injecting realistic biases at each stage, and measuring how they interact.
-
-**建议方法。**
-
-- Build a simulated preference learning pipeline following the four-stage framework ($\mathcal{E} \to \mathcal{L} \to \mathcal{A} \to \mathcal{D}$) from @sec-pipeline.
-- Model two or more user groups with different base rates of participation, different noise levels, and different preference distributions.
-- At each pipeline stage, introduce a specific bias mechanism: (1) undersampling a group in elicitation (@sec-elicitation-fairness), (2) IIA misspecification for context-dependent preferences (@sec-learning-assumptions), (3) volume-weighted aggregation (@sec-aggregation-fairness), and (4) liberal vs. illiberal decision-making (@sec-liberal-illiberal).
-- Measure group-level disparities in recommendation quality at the pipeline output, and decompose total disparity into contributions from each stage.
-
-**预期成果。** A manuscript with a bias decomposition showing how much each pipeline stage contributes to overall unfairness, concrete recommendations for which stage to prioritize when mitigating bias, and a reusable simulation framework.
-
-### Project 8: Mechanism Design for Incentive-Compatible Preference Elicitation (\*\*\*)
-
-**题目说明。** When users have strategic incentives---e.g., inflating ratings to influence recommendations, or misreporting preferences in a voting system---naive preference elicitation produces biased data. This project designs and evaluates an incentive-compatible mechanism for a specific preference learning application, drawing on the mechanism design framework from Chapter 5 (@sec-mechanism-design).
+**题目说明。** 第 6 章说明：偏好学习流水线各阶段（征询、学习、汇总、决策）的小偏差，会叠加成很大的差距（@sec-compounding-unfairness）。这个项目要把这个洞见真正用起来：搭一条完整的流水线模拟，在每个阶段注入贴近现实的偏差，再测量它们怎样相互影响。
 
 **建议方法。**
 
-- Choose a concrete setting where strategic misreporting is plausible (e.g., peer review, course evaluation, or collaborative filtering).
-- Design a mechanism that incentivizes truthful reporting, building on VCG mechanisms or peer prediction from @sec-mechanism-design.
-- Prove or empirically demonstrate the mechanism's incentive compatibility properties.
-- Simulate strategic agents using a mixture of truthful and strategic types, and compare preference estimation quality under your mechanism vs. naive elicitation.
-- Analyze the mechanism's efficiency cost (the "price of incentive compatibility") relative to a setting with truthful agents.
+- 按 @sec-pipeline. 的四阶段框架（$\mathcal{E} \to \mathcal{L} \to \mathcal{A} \to \mathcal{D}$）搭一条模拟的偏好学习流水线。
+- 建模两个或更多用户群体，让它们的基础参与率、噪声水平、偏好分布各不相同。
+- 在每个阶段各引入一种具体的偏差机制：(1) 征询阶段对某个群体采样不足（@sec-elicitation-fairness）；(2) 对情境依赖的偏好误用了独立无关备选（@sec-learning-assumptions）；(3) 按数量加权的汇总（@sec-aggregation-fairness）；(4) 自由主义式与非自由主义式的决策（@sec-liberal-illiberal）。
+- 在流水线的输出端测量各组在推荐质量上的差距，并把总差距分解到各个阶段的贡献上。
 
-**预期成果。** A manuscript with a formal mechanism description, theoretical analysis of incentive properties, simulation results comparing truthful vs. strategic settings, and implementation code. If applicable, include a discussion of how the mechanism interacts with the fairness considerations from Chapter 6 (@sec-design-principles).
+**预期成果。** 一篇报告，给出一份偏差分解：说明每个阶段对总体不公平的贡献有多大；给出具体建议：要减轻偏差，该优先处理哪一个阶段；外加一个可复用的模拟框架。
 
-### Project 9: Cooperative Inverse Reinforcement Learning for Interactive Preference Learning (\*\*\*)
+### 项目 8：策略免疫的偏好征询机制设计（\*\*\*）
 
-**题目说明。** The CIRL framework from Chapter 4 models preference learning as a cooperative game between a human and an agent, where the agent's actions serve both to accomplish tasks and to elicit information about the human's reward function. This project implements a CIRL-style agent in a simplified domain and studies how cooperative interaction compares to passive preference observation.
-
-**建议方法。**
-
-- Define a gridworld or simple continuous environment where a human has a latent reward function over outcomes.
-- Implement a CIRL agent that maintains a belief over reward functions and selects actions to jointly maximize expected reward and information gain, following the framework from Chapter 4.
-- Compare against (1) a passive agent that observes demonstrations and infers preferences via inverse reinforcement learning, and (2) an active agent that can ask explicit comparison queries (@sec-active-learning).
-- Measure convergence rate to the true reward function, cumulative regret, and the human's perceived interaction quality (if using human participants) or simulated interaction cost.
-
-**预期成果。** A manuscript presenting the CIRL formulation for your domain, regret comparisons across the three approaches, an analysis of when cooperative interaction provides the most benefit (e.g., ambiguous rewards, high-dimensional preference spaces), and well-documented code.
-
-### Project 10: Pluralistic Alignment---Learning and Serving Multiple Preference Models (\*\*\*)
-
-**题目说明。** Most preference learning systems collapse diverse human preferences into a single aggregate model. Drawing on Arrow's Impossibility Theorem (@sec-aggregation), the DPO-Borda connection (@sec-borda-dpo), and the fairness framework of Chapter 6, this project explores an alternative: learning *multiple* preference models that represent distinct value systems, and allowing users or institutions to choose among them.
+**题目说明。** 当用户有策略性的动机时——比如为了让推荐更符合自己的意思而把分打高，或者在投票系统里谎报偏好——朴素的偏好征询得到的数据就是有偏的。这个项目要针对一个具体的偏好学习应用，设计并评估一个策略免疫的机制，用到第 5 章的机制设计框架（@sec-mechanism-design）。
 
 **建议方法。**
 
-- Start with a multi-annotator preference dataset and fit a mixture model to discover latent preference clusters (@sec-factor-models, @sec-bayesian).
-- Train separate DPO or reward models for each cluster and evaluate whether cluster-specific models outperform a single aggregate model on within-cluster prediction accuracy.
-- Investigate the social choice properties of the cluster-level approach: does serving cluster-specific models avoid Arrow-style impossibilities? Under what conditions does it introduce new fairness concerns (e.g., stereotype reinforcement)?
-- Design a user-facing mechanism for selecting among preference models, and evaluate whether users can meaningfully choose the model that best represents their values.
+- 选一个"策略性谎报"确实可能发生的场景（例如同行评审、课程评价，或者协同过滤）。
+- 设计一个能激励人说真话的机制，可以参考 @sec-mechanism-design. 里的 VCG 机制或同行预测。
+- 从理论上证明、或用实验说明这个机制的策略免疫性质。
+- 用"说真话的类型"与"策略型的类型"混合来模拟智能体，比较在你的机制下与朴素征询下偏好估计的质量。
+- 分析这个机制的效率代价（"策略免疫的代价"），与所有参与者都说真话的情形作对照。
 
-**预期成果。** A manuscript with (1) evidence that latent preference clusters exist in real data, (2) a comparison of pluralistic vs. aggregate alignment, (3) a discussion of the fairness trade-offs involved, and (4) code for cluster discovery, model training, and evaluation. This project connects nearly every chapter of the book and is suitable for an ambitious team.
+**预期成果。** 一篇报告，包含机制的正式描述、对其激励性质的理论分析、真实情形与策略情形对比的模拟结果，以及实现代码。如果相关，还应讨论这个机制与第 6 章的公平性考虑（@sec-design-principles）会怎样相互作用。
+
+### 项目 9：用于交互式偏好学习的协作逆强化学习（\*\*\*）
+
+**题目说明。** 第 4 章的协作逆强化学习框架，把偏好学习建模成人与智能体之间的合作博弈：智能体的行动既要完成任务，也要顺带问出关于人的奖励函数的信息。这个项目要在一个简化的领域里实现一个这样风格的智能体，研究"合作式的交互"与"被动地观察偏好"相比有什么不同。
+
+**建议方法。**
+
+- 定义一个网格世界或简单的连续环境，其中人对结果有一个潜在的奖励函数。
+- 按第 4 章的框架，实现一个协作逆强化学习的智能体：它对奖励函数维护一个信念，选择动作时同时最大化期望奖励与信息增益。
+- 与两种基线比较：(1) 只观察演示、用逆强化学习推断偏好的被动智能体；(2) 能明确提出比较问题的主动智能体（@sec-active-learning）。
+- 测量收敛到真实奖励函数的速度、累计遗憾，以及（如果用了真人）人主观感受到的交互质量，或用模拟的交互代价来代替。
+
+**预期成果。** 一篇报告，给出你选的场景下协作逆强化学习的建模、三种做法的遗憾对比，以及一份分析：在什么情况下合作式交互带来的好处最大（例如奖励含义模糊、偏好空间维度高）。代码要有完善的文档。
+
+### 项目 10：多元对齐——学习并服务多个偏好模型（\*\*\*）
+
+**题目说明。** 大多数偏好学习系统，会把各不相同的人类偏好压成一个汇总模型。这个项目以阿罗不可能定理（@sec-aggregation）、DPO 与博尔达计分法的联系（@sec-borda-dpo）以及第 6 章的公平性框架为基础，去探索另一种做法：*学多个*偏好模型，分别代表不同的价值体系，让用户或机构从中选择。
+
+**建议方法。**
+
+- 从一份多标注员的偏好数据集出发，拟合一个混合模型来发现潜在的偏好群体（@sec-factor-models、@sec-bayesian）。
+- 为每个群体分别训练 DPO 或奖励模型，评估在群体内部的预测精度上，分群体的模型是否胜过一个统一的汇总模型。
+- 考察这种"按群体分别服务"的做法在社会选择上的性质：它能不能绕开阿罗式的不可能性？在什么条件下，它反而会引入新的公平问题（例如把刻板印象固化下来）？
+- 设计一个面向用户的机制，让人能在多个偏好模型之间选择，并评估：用户是否真的能选出最代表自己价值观的那个模型。
+
+**预期成果。** 一篇报告，包含：(1) 真实数据中确实存在潜在偏好群体的证据；(2) 多元对齐与汇总对齐的对比；(3) 对其中公平性取舍的讨论；(4) 群体发现、模型训练与评估的代码。这个项目几乎串起了本书每一章，适合一支有雄心的团队。
 
 ## A Practitioner's Checklist
 
