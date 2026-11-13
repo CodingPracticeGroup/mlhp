@@ -633,53 +633,53 @@ $$ {#eq-separable}
 
 在偏好汇总中，有一处关键区分：*私人*偏好（只管自己的结果）与"管得宽"的偏好（nosy preferences，也在意别人得到什么）。
 
-### Private vs. Nosy Preferences
+### 私人偏好与"管得宽"的偏好
 
-::: {.callout-note title="Definition: Nosy Preferences"}
-A preference is **nosy** if the individual cares about outcomes affecting others, not just themselves. Examples include:
+::: {.callout-note title="定义：管得宽的偏好"}
+如果一个人不仅在意自己的结果，也在意别人的结果，这样的偏好称为**"管得宽"的（nosy）**。例如：
 
-- **Safety concerns**: Not wanting others to see bomb-building instructions
-- **Privacy violations**: Wanting to prevent disclosure of others' personal data
-- **Content moderation**: Preferring that certain content not be shown to anyone
-- **Paternalism**: Wanting to protect others from choices that might harm them
-- **Fairness**: Caring that others receive equitable treatment
-- **Psychological harm**: Preferring that AI systems not deceive users
+- **安全顾虑**：不希望别人看到"怎么造炸弹"的说明
+- **隐私**：想阻止别人的个人数据被披露出来
+- **内容审核**：希望某些内容谁都不给看
+- **家长主义**：想替别人挡掉可能伤害他们的那些选择
+- **公平**：在意别人是否受到了公正的对待
+- **心理伤害**：希望 AI 系统不要欺骗用户
 
-A preference is **private** if the individual only cares about their own allocation or experience.
+如果一个人只关心自己分到的东西或自己的体验，这样的偏好称为**私人的**。
 :::
 
-Most classical social choice theory assumes private preferences. But in AI systems, especially content moderation and alignment, nosy preferences are ubiquitous.
+经典的社会选择理论大多假定偏好是私人的。但在 AI 系统里——尤其是内容审核与对齐——"管得宽"的偏好到处都有。
 
-### Sen's Liberal Paradox
+### 森的自由悖论
 
-When preferences are nosy, even seemingly weak requirements can conflict.
+一旦存在"管得宽"的偏好，连看上去很弱的几条要求也可能互相冲突。
 
-::: {.callout-important title="Theorem: Impossibility of the Paretian Liberal (Sen, 1970)"}
-Consider a society where each individual has a "personal sphere"—a set of choices over which they should have autonomy. The following properties are inconsistent:
+::: {.callout-important title="定理：帕累托自由的不可能性（森，1970）"}
+设想这样一个社会：每个人都有一个"个人范围"——一组应当由他自己自主决定的选择。下面这几条性质彼此矛盾：
 
-1. **Minimal Liberalism**: Each individual is decisive over at least one pair of alternatives in their personal sphere.
-2. **Pareto Efficiency**: If everyone prefers $x$ to $y$, then society should choose $x$ over $y$.
-3. **Unrestricted Domain**: Any preference profile is admissible.
+1. **最小自由主义**：每个人在自己"个人范围"内至少对某一对候选项有决定权。
+2. **帕累托有效**：如果所有人都喜欢 $x$ 胜过 $y$，社会就应当选 $x$ 而不是 $y$。
+3. **定义域不受限制**：任何偏好档案都允许出现。
 :::
 
-**Classic Example: The Prude and the Book**
+**经典例子：清道夫与那本书**
 
-Consider two individuals, Prude and Lewd, and a controversial book. The alternatives are:
-- $a$: Prude reads the book
-- $b$: Lewd reads the book
-- $c$: No one reads the book
+设两个人，清道夫（Prude）与放浪者（Lewd），以及一本争议的书。可选的结果有：
+- $a$：清道夫读这本书
+- $b$：放浪者读这本书
+- $c$：谁都不读
 
-Prude's preferences: $c \succ_P a \succ_P b$ (prefers no one reads it, but would rather read it themselves than let Lewd read it—a nosy preference!)
+清道夫的偏好：$c \succ_P a \succ_P b$（他希望谁都不读；但如果非要有人读，他宁愿自己读，也不愿放浪者去读——这就是"管得宽"的偏好！）
 
-Lewd's preferences: $a \succ_L b \succ_L c$ (wants Prude to read it, then themselves, rather than no one reading it—also nosy!)
+放浪者的偏好：$a \succ_L b \succ_L c$（他希望清道夫读，其次是自己读，最不想要的是谁都不读——同样是"管得宽"！）
 
-- By Minimal Liberalism, Prude should decide between $a$ and $c$ (their personal reading choice). Prude prefers $c$.
-- By Minimal Liberalism, Lewd should decide between $b$ and $c$ (their personal reading choice). Lewd prefers $b$.
-- But both prefer $a$ to $b$! By Pareto, society should prefer $a$ to $b$.
+- 按最小自由主义，$a$ 与 $c$ 之间应当由清道夫说了算（那是他自己读不读的选择）。他更倾向 $c$。
+- 按最小自由主义，$b$ 与 $c$ 之间应当由放浪者说了算（那是他自己读不读的选择）。他更倾向 $b$。
+- 可两人都认为 $a$ 比 $b$ 好！按帕累托，社会应当把 $a$ 排在 $b$ 前面。
 
-This creates a cycle: $c$ beats $a$ (Prude's liberty), $b$ beats $c$ (Lewd's liberty), but $a$ beats $b$ (Pareto). There is no consistent social choice.
+于是出现了一个环：$c$ 胜过 $a$（清道夫的自主权），$b$ 胜过 $c$（放浪者的自主权），而 $a$ 又胜过 $b$（帕累托）。找不到一个自洽的社会选择。
 
-**Implications for AI Alignment**: The Liberal Paradox suggests that when different stakeholders have nosy preferences about AI behavior, there may be no way to respect both individual autonomy and collective efficiency. Content moderation decisions often involve exactly this tension—one user's preference for free expression conflicts with another's preference for a safe environment.
+**对 AI 对齐的意义**：自由悖论说明，当不同的利益相关方对 AI 的行为各有"管得宽"的偏好时，可能既尊重了每个人的自主、又保住集体的有效，二者不可兼得。内容审核的决定常常正卡在这对矛盾上——一位用户希望言论自由，另一位用户希望环境安全，二者直接冲突。
 
 ## Case Study: Community Notes {#sec-community-notes}
 
