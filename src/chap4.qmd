@@ -1800,47 +1800,29 @@ plt.show()
 print(f"Final regret — TS: {regret_ts[-1]:.1f}, ε-Greedy: {regret_eg[-1]:.1f}")
 ```
 
-#### Case Study 2: Clinical Trial Dosing
+#### 案例二：临床试验中的剂量选择
 
-In personalized medicine, the dueling bandit framework addresses a critical challenge: how to assign drug dosages when the optimal dose depends on individual patient characteristics and can only be evaluated through patient preferences or outcomes.
+在个体化医疗里，对决老虎机框架面对的是一个关键难题：最优剂量取决于病人各自的特征，又只能通过病人自己的偏好或治疗结果来判断，这种情况下该怎么给药？
 
-Consider Warfarin dosing [@bastani2020online], where the standard practice is to start with a fixed dose and adjust based on symptoms. This is suboptimal because patients vary significantly in their metabolism. The contextual bandit formulation models this as:
+以华法林（Warfarin）的用药剂量为例 [@bastani2020online]：常规做法是先给一个固定剂量，再根据症状调整。这并不好，因为病人之间的代谢差异很大。按上下文老虎机的写法，可以这样建模：
 
-- **Context**: Patient features $x_t$ (age, weight, genetic markers, medication history)
-- **Actions**: Dosage levels $a_t \in \{$low, medium, high$\}$
-- **Reward**: Whether the patient's INR (blood clotting measure) falls in the therapeutic range
+- **上下文**：病人的特征 $x_t$（年龄、体重、基因标记、用药史）
+- **行动**：剂量档位 $a_t \in \{$低、中、高$\}$
+- **奖励**：病人的 INR（衡量血液凝结能力的指标）是否落在治疗区间内
 
-Using the linear Thompson Sampling framework from earlier in this chapter, we model the reward as $r(x_t, a_t) = x_t^\top \theta_{a_t}$, where $\theta_{a_t}$ captures the relationship between patient features and outcomes for each dosage level. The key insight is that while each patient's outcome reveals information about only one dosage level (we cannot simultaneously try all doses), the *contextual* structure allows information to transfer across similar patients.
+套用本章前面讲过的线性汤普森采样框架，可以把奖励写成 $r(x_t, a_t) = x_t^\top \theta_{a_t}$，其中 $\theta_{a_t}$ 刻画的是在某个剂量档位上，病人特征与结果之间的关系。关键洞见是：虽然每位病人的结果只透露了某一个剂量档位的信息（不可能同时给同一个人试所有剂量），但*上下文*这层结构让信息能在相似的病人之间转移。
 
-This application highlights a tension central to this book: the system must balance **exploration** (trying dosages it is uncertain about to learn their effects) against **exploitation** (prescribing the dosage believed to be best for the current patient). In clinical settings, the cost of exploration is high---a suboptimal dose can cause serious harm---making efficient algorithms like Thompson Sampling especially valuable, since they concentrate exploration where uncertainty is highest rather than exploring uniformly.
+这个例子恰好点出了贯穿全书的一处张力：系统必须在**探索**（试那些还没把握的剂量，去了解它们的效果）和**利用**（给眼前这位病人开他认为最好的剂量）之间做平衡。在临床上，探索的代价很高——一个不合适的剂量可能造成严重伤害——这正让汤普森采样这类高效算法格外有价值：它会把探索集中在最不确定的地方，而不是到处平均用力。
 
-#### Broader Applications
+#### 更广泛的应用
 
-Beyond these case studies, bandit methods with preference feedback have been applied to recommendation systems [@zhou2017large; @bouneffouf2012a], where the cold-start problem for new users is naturally handled by Thompson Sampling's uncertainty-driven exploration; to dialogue systems [@liu2018customized], where response selection is modeled as a contextual bandit; and to search engine optimization [@IR], where DBGD tunes ranking parameters from user click preferences. For a comprehensive survey, see @bouneffouf2020survey.
+除了这两个案例，带偏好反馈的老虎机方法还被用在推荐系统上 [@zhou2017large; @bouneffouf2012a]——新用户冷启动的问题，正好可以靠汤普森采样"由不确定性驱动的探索"来自然处理；用在对话系统上 [@liu2018customized]，把回复选择建成上下文老虎机；也用在做搜索引擎优化 [@IR]，用 DBGD 根据用户的点击偏好来调排序参数。想做系统的了解，可以看综述 @bouneffouf2020survey。
 
-## Preferential Bayesian Optimization
+## 偏好型贝叶斯优化
 
-The traditional Bayesian optimization (BO) problem is described as
-follows. There is a black-box objective function
-$g: \mathcal{X} \rightarrow \Re$ defined on a bounded subset
-$\mathcal{X} \subseteq \Re^q$ such that direct queries to the function
-are expensive or not possible. However, we would like to solve the
-global optimization problem of finding
-$\mathbf{x}_{\min }=\arg \min _{\mathbf{x} \in \mathcal{X}} g(\mathbf{x})$.
-This is highly analogous to modeling human preferences, since it is the
-case that direct access to a human's latent preference function is not
-possible but we would still like to find its optimum, such as in A/B
-tests or recommender systems.
+传统的贝叶斯优化（Bayesian optimization, BO）问题是这样描述的：有一个黑箱目标函数 $g: \mathcal{X} \rightarrow \Re$，定义在有界的子集 $\mathcal{X} \subseteq \Re^q$ 上，直接去查询这个函数的取值要么很贵，要么根本做不到。而我们想解决的全局优化问题，是求出 $\mathbf{x}_{\min }=\arg \min _{\mathbf{x} \in \mathcal{X}} g(\mathbf{x})$。这和"为人类偏好建模"高度相似：人心里那张偏好函数同样没法直接读到，但我们还是想找到它的最大值，A/B 测试、推荐系统里都会遇到这样的事。
 
-We approach this problem for human preferences with *Preferential
-Bayesian Optimization* (PBO), as the key difference is that we are able
-to query the preference function through pairwise comparisons of data
-points, i.e. *duels*. This is a form of indirect observation of the
-objective function, which models real-world scenarios closely: we
-commonly need to to optimize a function via data about preferences. With
-humans, it has been demonstrated that we are better at evaluating
-differences rather than absolute magnitudes [@kahneman_tversky_1979] and
-therefore PBO models can be applied in various contexts.
+针对人类偏好的这个问题，我们采用*偏好型贝叶斯优化（Preferential Bayesian Optimization, PBO）*。它的关键不同在于：我们可以通过数据点之间的两两比较（也就是*对决*）来询问偏好函数。这是对目标函数的一种间接观测，反而更贴近现实：我们常常只能靠偏好方面的数据来优化某个函数。对人来说，这一点已经被反复证实——人更擅长判断"差别"而不是"绝对大小"（@kahneman_tversky_1979），所以偏好型贝叶斯优化的模型能用在很多场景里。
 
 ::: {.callout-important title="When Is Pairwise Feedback the Right Choice?"}
 PBO assumes the oracle can only provide **pairwise comparisons**, not scalar ratings. This is well-justified when absolute evaluations are cognitively difficult or poorly calibrated (e.g., "How good is this robot trajectory on a scale of 1-10?"), but in some domains scalar feedback is readily available and strictly more informative---each scalar observation constrains the reward function more than a binary comparison. When both modalities are feasible, standard Bayesian optimization with scalar feedback typically requires fewer queries to find the optimum. PBO is most valuable when: (1) comparisons are genuinely easier for humans than absolute ratings, (2) the rating scale is arbitrary or poorly anchored across evaluators, or (3) the goal is to find the *best* option rather than estimate the full reward function.
