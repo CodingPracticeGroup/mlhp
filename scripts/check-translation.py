@@ -56,11 +56,14 @@ def math_spans(t: str):
         parts = line.split("$")
         for i in range(1, len(parts), 2):
             span = parts[i]
-            if span and "\n" not in span:
-                # 比较前去掉首尾空白和尾随标点：原文常有 `$...,$` 这种把逗号写进公式的写法
-                span = span.strip().rstrip(",.;:，。；：")
-                # 公式内部的空白差异不影响含义，比较时一并去掉
-                out.append("".join(span.split()))
+            if "\n" in span:
+                continue
+            # 比较前去掉首尾空白和尾随标点：原文常有 `$...,$` 这种把逗号写进公式的写法
+            span = span.strip().rstrip(",.;:，。；：")
+            # 公式内部的空白差异不影响含义，比较时一并去掉
+            span = "".join(span.split())
+            if span:
+                out.append(span)
     return out
 
 

@@ -197,7 +197,7 @@
 10. `src/chap1.qmd`：Metropolis-Hastings 那段原文有一句语法不完整的句子（`the distribution is a proposal $P$ for $x_{t+1}$ is made via sampling from ...`，其中 $P$ 在下文没有出现，公式里用的是 $\tilde Q$）。译文按上下文与公式译为"从概率核 $Q(\bullet | x_t)$ 采样得到提议分布 $\tilde Q(\bullet | x_t)$"，未保留悬空的 $P$（$x_{t+1}$ 与 $\tilde Q$ 均保留）。
 11. `src/chap1.qmd`：一处把 `[@breiman2001statistical; @rudin2022interpretable]` 写成两条并排的 `@` 引用，渲染结果相同。
 
-12. 原稿有少量排版疏漏，译文按正常排版写出：(a) 个别变量漏写数学定界符（例如 `src/chap2.qmd` 的 "one or more coordinates of (V)"），译文补成 `$V$`；(b) `src/chap3.qmd` 中 "maximizes expected \textbf{incremental} information" 用的是原始 LaTeX 命令，实测渲染结果是页面上直接显示 "\textbf{incremental}" 这几个字符（见 `_book/src/chap3.html`），译文改成 Markdown 粗体"**增量**"。这类改动会在校验里显示为公式片段的增删，只改排版不改含义。
+12. 原稿有少量排版疏漏，译文按正常排版写出：(a) 个别变量漏写数学定界符，译文按上下文补上：`src/chap2.qmd` 的 "one or more coordinates of (V)" 补成 `$V$`；`src/chap3.qmd` 的 "expected Fisher information for (U)" 补成 `$U$`、"after observing ((x,y))" 补成 `$(x,y)$`。补上的符号会在校验里显示为 `+ 新增`；(b) `src/chap3.qmd` 中 "maximizes expected \textbf{incremental} information" 用的是原始 LaTeX 命令，实测渲染结果是页面上直接显示 "\textbf{incremental}" 这几个字符（见 `_book/src/chap3.html`），译文改成 Markdown 粗体"**增量**"。这类改动会在校验里显示为公式片段的增删，只改排版不改含义。
 
 13. `src/chap2.qmd` 交叉验证一节有一句正文直接印出了代码里的格式化占位符（`{cv_scores.mean():.4f} ± {cv_scores.std():.4f}`），没有代入数值。这是 upstream 的笔误。本分支不擅自填入数字（那是代码运行结果，不是原文内容），只在该句后补了一句说明，指出按原样保留。
 

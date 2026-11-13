@@ -164,7 +164,7 @@ print(f"User abilities range: [{U_true.min():.2f}, {U_true.max():.2f}]")
 print(f"Item difficulties range: [{V.min():.2f}, {V.max():.2f}]")
 ```
 
-Next, we define the Bayesian update rule and the two item selection policies—Fisher-active (maximizing information) and random:
+接下来定义贝叶斯更新规则，以及两种选题策略：一种是**按费雪信息主动选题**（每次都挑信息量最大的），另一种是**随机选题**。
 
 ```{pyodide-python}
 #| autorun: true
@@ -197,7 +197,7 @@ def choose_item_random(state, V, asked_mask):
 print("Update and selection functions defined.")
 ```
 
-Now we run the simulation, comparing both policies across all users:
+现在跑这个模拟，把两种策略在所有用户上的表现比一比：
 
 ```{pyodide-python}
 #| autorun: true
@@ -228,7 +228,7 @@ mse_rnd, rel_rnd = run_policy(choose_item_random, V, T)
 print("Simulation complete!")
 ```
 
-Finally, we visualize the results comparing Fisher-active vs random item selection:
+最后把两种策略的结果画出来对比——按费雪信息主动选题 vs 随机选题：
 
 ```{pyodide-python}
 #| autorun: true
@@ -319,7 +319,7 @@ def new_user_state():
 print(f"Factor model: {N} users, {M} items, K={K} dimensions")
 ```
 
-Define the Bayesian update and D-optimal selection:
+定义贝叶斯更新与 D 最优选题：
 
 ```{pyodide-python}
 #| autorun: true
@@ -349,7 +349,7 @@ def choose_random(state, asked_mask, V, Z):
 print("Update and selection functions defined.")
 ```
 
-Run simulation comparing D-optimal vs random selection:
+跑模拟，把 D 最优选题和随机选题比一比：
 
 ```{pyodide-python}
 #| autorun: true
@@ -394,50 +394,50 @@ axes[1].set_title("Reliability"); axes[1].legend(); axes[1].grid(True, alpha=0.3
 plt.tight_layout(); plt.show()
 ```
 
-### Pairwise Preferences {#sec-pairwise-active}
+### 两两偏好 {#sec-pairwise-active}
 
-We next discuss the measurement problem with pairwise data. Recall from @sec-bradley-terry that the Bradley-Terry model specifies the probability that user $i$ prefers item $j$ over item $k$ as $p_{i}(j \succ k)=\sigma (U^\top(V_j-V_k) + Z_j-Z_k)$ with feature $x_{jk}= V_j - V_k \in \mathbb R^K$ and offset $b_{jk}=Z_j-Z_k$.
+接着来看两两比较数据下的测量问题。回想 @sec-bradley-terry：Bradley-Terry 模型规定用户 $i$ 认为物品 $j$ 好于物品 $k$ 的概率为 $p_{i}(j \succ k)=\sigma (U^\top(V_j-V_k) + Z_j-Z_k)$，其中特征为 $x_{jk}= V_j - V_k \in \mathbb R^K$，偏移为 $b_{jk}=Z_j-Z_k$。
 
-In metric elicitation, each oracle query asks: "Which classifier is better, $h_\theta$ or $h_{\theta'}$?" The oracle's answer is deterministic: $\Omega(C_\theta, C_{\theta'}) = \mathbf{1}[\mathbf{m}^\top (V_\theta - V_{\theta'}) > 0]$, which is exactly a pairwise comparison with feature difference $x = V_\theta - V_{\theta'}$. The deterministic oracle corresponds to the $\sigma \to \text{step function}$ limit of Bradley-Terry.
+在度量征询里，每次问的是："这两个分类器 $h_\theta$ 和 $h_{\theta'}$，哪个更好？" 回答是确定的：$\Omega(C_\theta, C_{\theta'}) = \mathbf{1}[\mathbf{m}^\top (V_\theta - V_{\theta'}) > 0]$，这恰好就是特征差为 $x = V_\theta - V_{\theta'}$ 的一次两两比较。把 $\sigma \to \text{step function}$（阶跃函数）取到极限，得到的正是这种"确定的回答"。
 
-For a single observation $y \in \{0,1\}$ of $j \succ k$ the per-pair log-likelihood is
+只观测到一次 $j \succ k$（记作 $y \in \{0,1\}$）时，这一对的配对数对数似然是
 $$\ell(U; y, i, j, k)= y \log p + (1-y) \log (1-p_i).$$ {#eq-pairwise-loglik}
 
-Score and expected Fisher information for (U):
+关于 $U$ 的得分与期望费雪信息：
 $$\nabla_U \ell=(y-p),x_{jk}, \qquad \mathcal I_{jk}(U)=\mathbb E[-\nabla^2_U \ell] = w x_{jk} x_{jk}^\top,$$ {#eq-pairwise-score-fisher}
-where $w = p(1-p)$. For a sequence of queried pairs ${(j_t,k_t)}$ the cumulative information is $\mathcal I(U)=\sum_t w_t,x_t x_t^\top.$ With a Gaussian prior $U \sim \mathcal N(0, \Sigma_0)$ and a Laplace approximation, the posterior precision updates additively:
+其中 $w = p(1-p)$。依次询问一列配对 ${(j_t,k_t)}$，累积信息量为 $\mathcal I(U)=\sum_t w_t,x_t x_t^\top.$。设高斯先验 $U \sim \mathcal N(0, \Sigma_0)$ 并做拉普拉斯近似，后验精度矩阵就是逐条相加：
 $$
 \Lambda_{t}=\Sigma_t^{-1}=\Sigma_{0}^{-1}+\sum_{s\le t} w_s,x_s x_s^\top.
 $$ {#eq-pairwise-precision-update}
-A single Newton step for the posterior mean after observing ((x,y)) is
+观测到一对 $(x,y)$ 之后，对后验均值做一步牛顿迭代：
 $$
 \hat U \leftarrow \hat U + \Sigma_{t}^{\ }(y-p),x,\qquad p=\sigma(\hat U^\top x+b),\quad
 \Sigma_t = \left(\Lambda_{t-1}+w,xx^\top\right)^{-1}.
 $$ {#eq-pairwise-newton-step}
-This is the logistic-regression one-step IRLS update specialized to one new example. We evaluate candidates at the current $(\hat U,\Sigma)$. Write $x$ for $x_{jk}$ and $w=\sigma(\hat U^\top x+b)\big(1-\sigma(\hat U^\top x+b)\big)$. Let $\Lambda=\Sigma^{-1}$. Using the Sherman–Morrison formula, we obtain closed forms for all three design criteria:
+这就是逻辑回归的一步 IRLS 更新用到"只新增一条样本"的情形。我们在当前的 $(\hat U,\Sigma)$ 处评估各个候选：把 $x_{jk}$ 简记为 $x$，记 $w=\sigma(\hat U^\top x+b)\big(1-\sigma(\hat U^\top x+b)\big)$，并令 $\Lambda=\Sigma^{-1}$。借助 Sherman-Morrison 公式，三个设计准则都能写成闭式：
 
-::: {.callout-note title="Proposition: D-Optimal Acquisition via Sherman-Morrison"}
+::: {.callout-note title="命题：用 Sherman-Morrison 公式写出 D 最优采集函数"}
 ::: {#prp-sherman-morrison}
-For a current precision matrix $\Lambda = \Sigma^{-1}$ and a candidate pair $(j,k)$ with feature difference $x = V_j - V_k$ and variance weight $w = p(1-p)$, the D-optimal acquisition function has closed form:
+设当前的精度矩阵为 $\Lambda = \Sigma^{-1}$，候选的一对物品 $(j,k)$ 的特征差为 $x = V_j - V_k$、方差权重为 $w = p(1-p)$，那么 D 最优的采集函数有闭式解：
 $$
 \Delta_D(j,k) = \log\det(\Lambda + w xx^\top) - \log\det(\Lambda) = \log(1 + w x^\top \Sigma x)
 $$
-This follows from the matrix determinant lemma: $\det(A + uv^\top) = (1 + v^\top A^{-1} u)\det(A)$.
+这一步用的是矩阵行列式引理：$\det(A + uv^\top) = (1 + v^\top A^{-1} u)\det(A)$。
 :::
 :::
 
 选出使 $\log(1 + w x^\top\Sigma x)$ 最大的那一对。这一步只需要一次"向量—矩阵—向量"乘法，所以在线挑选时开销很小。
 
 ::: {.callout-warning title="短视与非短视的选题策略"}
-The D-optimal (and A/E-optimal) criteria above are **greedy**: they select each query to maximize the *immediate* information gain, without considering how the current query affects future query opportunities. The optimal policy would look ahead over a budget of $T$ queries and select the sequence that maximizes total information. In practice, the greedy approach works well when queries are roughly exchangeable, but it can perform poorly in **batch selection** settings (selecting multiple queries simultaneously) because it ignores redundancy---two individually informative queries may provide overlapping information. Batch extensions typically add diversity mechanisms, such as penalizing queries whose feature vectors $V_j - V_k$ are correlated with already-selected pairs.
+上面这些 D 最优（以及 A/E 最优）准则都是**贪心**的：每次只让*眼前这一次*提问的信息增益最大，并不考虑当前这一问会怎样影响后面的提问机会。真正最优的策略应当往前多看 $T$ 次提问，挑出总信息量最大的那一串问题。实践中，只要各次提问大致可以互换，贪心就够用了；但在**批量选题**（一次同时挑好几问）的场合它可能表现很差，因为它忽略了重复——两问单看都很有信息量，合起来却可能提供同样的信息。批量选题的扩展做法一般是加上"保证多样性"的机制，比如给那些特征向量 $V_j - V_k$ 与已选问题高度相关的问题扣分。
 :::
 
-* A-optimal (trace drop of covariance): $\Delta_A(j,k);=;\mathrm{tr}(\Sigma)-\mathrm{tr}\big((\Lambda+w,xx^\top)^{-1}\big)
-  = \frac{w,x^\top\Sigma^2 x}{1+w,x^\top\Sigma x}.$
+* A 最优（让协方差的迹下降）：$\Delta_A(j,k);=;\mathrm{tr}(\Sigma)-\mathrm{tr}\big((\Lambda+w,xx^\top)^{-1}\big)
+  = \frac{w,x^\top\Sigma^2 x}{1+w,x^\top\Sigma x}$。
 
-* E-optimal (raise the worst-direction information): Exact update of $\lambda_{\min}(\mathcal I)$ needs an eigen update. A practical proxy is to maximize $\Delta_E^{\text{proxy}}(j,k)= w,x^\top\Sigma x,$ which targets directions where current uncertainty $x^\top\Sigma x$ is large.
+* E 最优（补上最坏方向上的信息）：要精确更新 $\lambda_{\min}(\mathcal I)$ 就得做一次特征值更新。实践中常用一个替代量：最大化 $\Delta_E^{\text{proxy}}(j,k)= w,x^\top\Sigma x$，它盯的是当前不确定性 $x^\top\Sigma x$ 大的那些方向。
 
-End-to-end toy pipeline (rank 2, known items, active D-opt vs random). First, define helper functions for D-optimal gain and Bayesian updates:
+下面是完整的玩具流程（秩为 2、物品参数已知，比较主动 D 最优与随机选题）。先定义两个辅助函数：算 D 最优增益、做贝叶斯更新。
 
 ```{pyodide-python}
 #| autorun: true
