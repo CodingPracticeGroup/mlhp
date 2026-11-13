@@ -2168,64 +2168,64 @@ $$ {#eq-fairness-constrained-optimization}
 
 ---
 
-### Exercise 3: Compounding Bias Dynamics (**)
+### 练习 3：叠加偏差的动态（**）
 
-Model a feedback loop in the review assistant system with discrete time steps $t = 0, 1, 2, \ldots$:
+在审稿助手的系统里，把反馈回路按离散时间步 $t = 0, 1, 2, \ldots$ 建模：
 
-**Stage 1 (Elicitation)**: Queries at time $t+1$ proportional to current assistant quality:
+**阶段 1（征询）**：时刻 $t+1$ 的询问数量与当前的助手质量成正比：
 $$
 q_{t+1}^{(g)} = q_0^{(g)} \cdot \left(\frac{a_t^{(g)}}{a_0^{(g)}}\right)^\alpha
 $$ {#eq-exercise-elicitation}
-where $q_t^{(g)}$ = queries to group $g$ at time $t$, $a_t^{(g)}$ = assistant quality for group $g$, $\alpha > 0$ controls feedback strength.
+这里 $q_t^{(g)}$ 表示时刻 $t$ 向群体 $g$ 发出的询问数量，$a_t^{(g)}$ 表示助手对群体 $g$ 的质量，$\alpha > 0$ 控制反馈的强度。
 
-**Stages 2-3 (Learning + Aggregation)**: Quality improves with queries:
+**阶段 2–3（学习 + 汇总）**：质量随询问数量提升：
 $$
 a_{t+1}^{(g)} = a_{\max} \cdot \left(1 - \exp\left(-\lambda q_{t+1}^{(g)}\right)\right)
 $$ {#eq-exercise-learning}
-where $\lambda > 0$ and $a_{\max}$ is maximum achievable quality.
+其中 $\lambda > 0$，$a_{\max}$ 是能达到的最高质量。
 
-**Initial conditions**: $a_0^{(\text{senior})} = 1.0$, $a_0^{(\text{junior})} = 0.9$, $q_0^{(\text{senior})} = q_0^{(\text{junior})} = 100$.
+**初始条件**：$a_0^{(\text{senior})} = 1.0$，$a_0^{(\text{junior})} = 0.9$，$q_0^{(\text{senior})} = q_0^{(\text{junior})} = 100$。
 
-**(a)** Simulate this system for $T = 10$ rounds with $\alpha = 1.2$, $\lambda = 0.01$, $a_{\max} = 1.0$. Plot $a_t^{(\text{senior})}$ and $a_t^{(\text{junior})}$ over time. Does the gap grow or shrink?
+**(a)** 取 $\alpha = 1.2$、$\lambda = 0.01$、$a_{\max} = 1.0$，模拟 $T = 10$ 轮，画出 $a_t^{(\text{senior})}$ 与 $a_t^{(\text{junior})}$ 随时间的曲线。两者的差距在扩大吗？
 
-**(b)** Derive conditions on $\alpha$ and $\lambda$ under which the quality gap $a_t^{(\text{senior})} - a_t^{(\text{junior})}$ grows **exponentially** vs. converges to a **stable disparity**.
+**(b)** 推出关于 $\alpha$ 与 $\lambda$ 的条件：在什么条件下质量差距 $a_t^{(\text{senior})} - a_t^{(\text{junior})}$ 会**指数式**扩大，什么条件下会收敛。
 
-**(c)** Propose an intervention to prevent gap widening. For example, enforce minimum queries per group: $q_{t+1}^{(g)} \geq q_{\min}$. Show mathematically how this caps disparity growth.
+**(c)** 提出一个阻止差距扩大的干预。例如规定每组的询问数量不得低于某个值：$q_{t+1}^{(g)} \geq q_{\min}$。用数学说明它为什么能阻止差距扩大。
 
 ---
 
-### Exercise 4: Fairness in DPO (***)
+### 练习 4：DPO 中的公平（***）
 
-Recall from Chapter 3 that DPO optimizes:
+回忆第 2 章：DPO 优化的是：
 $$
 \mathcal{L}_{\text{DPO}} = -\mathbb{E}_{(x, y_w, y_l) \sim \mathcal{D}}\left[\log \sigma\left(\beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}\right)\right]
 $$ {#eq-exercise-dpo}
 
-Suppose dataset $\mathcal{D}$ has $n_A$ samples from Group A and $n_B$ samples from Group B, where $n_A > n_B$ (unequal participation).
+假设数据集 $\mathcal{D}$ 中来自群体 A 的样本有 $n_A$ 条、来自群体 B 的有 $n_B$ 条，且 $n_A > n_B$（参与程度不均）。
 
-**(a)** Show that the gradient $\nabla_\theta \mathcal{L}_{\text{DPO}}$ **implicitly weights** Group A's preferences by $\frac{n_A}{n_A + n_B}$ and Group B's by $\frac{n_B}{n_A + n_B}$. (Hint: Expand the expectation over the empirical distribution.)
+**(a)** 证明梯度 $\nabla_\theta \mathcal{L}_{\text{DPO}}$ **隐式地**按 $\frac{n_A}{n_A + n_B}$ 给群体 A 的偏好加权、按 $\frac{n_B}{n_A + n_B}$ 给群体 B 加权。
 
-**(b)** Derive a **fair-DPO objective** that gives equal weight to both groups regardless of sample size:
+**(b)** 推出一个**公平版 DPO 目标**，让两组不管样本多少都拿到相同的权重：
 $$
 \mathcal{L}_{\text{fair-DPO}} = -\frac{1}{2}\left[\mathbb{E}_{A} [\cdots] + \mathbb{E}_{B} [\cdots]\right]
 $$ {#eq-exercise-fair-dpo}
-Show how this requires **reweighting samples** by $w_A = \frac{1}{n_A}$, $w_B = \frac{1}{n_B}$.
+说明这等价于**按样本重加权**：$w_A = \frac{1}{n_A}$、$w_B = \frac{1}{n_B}$。
 
-**(c)** Suppose Group A has better inter-annotator agreement (lower label noise: $\sigma_A^2 < \sigma_B^2$). Analyze the **bias-variance tradeoff**: Does equal-weighting improve fairness at the cost of higher variance in learned policy? Derive the MSE for each group under standard DPO vs. fair-DPO.
+**(c)** 假设群体 A 的标注员之间一致性更高（标签噪声更小：$\sigma_A^2 < \sigma_B^2$）。请分析这里的**偏差—方差取舍**：给噪声更大的群体同样的权重，会不会让学到的模型更差？
 
 ---
 
-### Exercise 5: Liberal vs. Illiberal Assistance (**)
+### 练习 5：自由主义式与非自由主义式的协助（**）
 
-Model two reviewer types with preferences over review tone (harsh vs. constructive):
+建模两类审稿人，他们对审稿语气（刻薄与建设性）各有偏好：
 
-**Type 1 (Biased reviewers)**: Prefer harsh tone. Utility function $u_1(\text{tone}) = -|\text{tone} - (-0.8)|$.
+**类型 1（偏严苛的审稿人）**：偏好刻薄的语气。效用函数 $u_1(\text{tone}) = -|\text{tone} - (-0.8)|$。
 
-**Type 2 (Constructive reviewers)**: Prefer constructive tone. Utility function $u_2(\text{tone}) = -|\text{tone} - 0.6|$.
+**类型 2（偏建设性的审稿人）**：偏好建设性的语气。效用函数 $u_2(\text{tone}) = -|\text{tone} - 0.6|$。
 
-The AI assistant can follow two policies:
+这位 AI 助手可以采取两种策略：
 
-**Liberal assistance**: Maximize each reviewer's stated utility. Suggests tone matching their preference.
+**自由主义式的协助**：把每位审稿人自己说出来的效用最大化，建议的语气与他的偏好一致。
 
 **非自由主义式的协助**：把他往共同体标准 $\text{tone}_{\text{standard}} = 0.3$ 上推。建议的语气为 $\text{tone}_t = (1-\gamma) \cdot \text{preference}_i + \gamma \cdot \text{tone}_{\text{standard}}$，其中 $\gamma \in [0, 1]$ 是推的力度。
 
@@ -2304,19 +2304,19 @@ $$ {#eq-exercise-nosy-utility}
 
 **不公平的叠加与反馈回路**：小偏差怎样通过反馈自我放大，@liu2018delayed 针对分类中的延迟影响做了形式化，@hashimoto2018fairness 则从分布鲁棒的角度处理。@ensign2018runaway 分析了预测性警务中的反馈回路。就偏好学习而言，@chen2024compounding 说明 RLHF 的反馈回路会随着一轮轮微调放大标注员的偏见。这一普遍现象有时被称为"算法单一文化"（@kleinberg2021algorithmic）。
 
-**Participatory Design and Involving Stakeholders**: @schuler1993participatory is the classic introduction to participatory design in HCI. Modern applications to AI fairness include @sloane2020participation on power dynamics in participatory ML and @rakova2021responsible on stakeholder engagement for algorithmic accountability. @green2019principles provide principles for participatory algorithm design focused on affected communities.
+**参与式设计与利益相关者的参与**：@schuler1993participatory 是人机交互中参与式设计的经典入门。把它用于 AI 公平的近期工作包括 @sloane2020participation（参与式机器学习中权力的分配）与 @rakova2021responsible（为算法问责而做的利益相关者参与）。@green2019principles 给出的是一套面向受影响群体的参与式算法设计原则。
 
-**Strategy-Proofness and Mechanism Design**: The connection between preference elicitation and mechanism design comes from @mas1995microeconomic and @nisan2007algorithmic. Sen's work on nosy preferences' implications for strategy-proofness is formalized in @sen1983liberty. @pattanaik1978strategy extend this to social welfare functions. The application to peer review matching is studied by @kobren2019paper and @stelmakh2021peerreview.
+**策略免疫与机制设计**：偏好征询与机制设计之间的联系，来自 @mas1995microeconomic 与 @nisan2007algorithmic. 森关于"管得宽"的偏好对策略免疫意味着什么，在 @sen1983liberty. 中被形式化；@pattanaik1978strategy 把它推广到社会福利函数。用于论文—审稿人匹配的分析见 @kobren2019paper 与 @stelmakh2021peerreview.
 
-**Discrete Choice and IIA**: The independence of irrelevant alternatives (IIA) assumption and its violations were studied extensively in economics. @mcfadden1974conditional introduced the conditional logit model based on IIA and received the Nobel Prize for this work. @mcfadden2000disaggregate shows when IIA fails (the "red bus / blue bus problem"). @train2009discrete provides a comprehensive treatment of discrete choice models relaxing IIA (nested logit, mixed logit). The connection to preference learning was made by @maystre2015fast for Plackett-Luce models.
+**离散选择与独立无关备选**：独立无关备选这一假定及其违反，在经济学中被大量研究。@mcfadden1974conditional 提出了基于独立无关备选的条件 logit 模型，这项工作也为他带来诺贝尔经济学奖。@mcfadden2000disaggregate 说明了它什么时候会失效（即"红巴士／蓝巴士问题"）。@train2009discrete 系统讲解了放宽这一假定的离散选择模型（嵌套 logit、混合 logit）。把它与偏好学习接上的是 @maystre2015fast，针对 Plackett-Luce 模型。
 
-**Red Bus/Blue Bus Problem**: @debreu1960review first formalized the red bus/blue bus problem: adding a duplicate alternative (blue bus identical to red bus) shouldn't change the ratio of probabilities between red bus and train, but IIA implies it does. This motivated development of nested logit models (@mcfadden1978modelling) that allow correlation within nests (buses) while maintaining IIA across nests.
+**红巴士／蓝巴士问题**：@debreu1960review 最早把红巴士／蓝巴士问题形式化：加入一个与原有选项完全相同的替代品（和红色巴士一模一样的蓝色巴士），本不该改变"红色巴士对火车"之间的选择比例，但独立无关备选的结论恰恰是它会改变。由此发展出嵌套 logit 模型（@mcfadden1978modelling），允许同一层（巴士）内部相关，而层与层之间仍满足独立无关备选。
 
-**DPO and Volume Weighting**: Direct Preference Optimization (@rafailov2023direct) simplified RLHF by eliminating the reward model. @rafailov2024scaling analyze scaling properties and show the reference policy implicitly weights preferences by volume. @kirk2024understanding study how DPO's weighting affects fairness across demographic groups. @zhao2024fair propose fairness-constrained variants of DPO.
+**DPO 与按数量加权**：直接偏好优化（@rafailov2023direct）省掉了奖励模型，简化了 RLHF。@rafailov2024scaling 分析了它的规模化性质，并说明参考策略实际上隐式地按数据量给偏好加权。@kirk2024understanding 研究这种加权怎样影响不同人口群体之间的公平。@zhao2024fair 提出了带公平性约束的 DPO 变体。
 
-**AI Review Assistants and Peer Review Fairness**: The paper-reviewer matching problem and its fairness implications are studied by @kobren2019paper (maximizing paper-reviewer compatibility) and @stelmakh2021peerreview (fairness constraints in assignment). @shah2022design analyze bias in peer review systems. AI-assisted peer review is explored by @liang2023paper, though fairness issues remain underexplored.
+**AI 审稿助手与同行评审的公平**：论文—审稿人匹配问题及其公平性含义见 @kobren2019paper（最大化论文与审稿人的匹配度）与 @stelmakh2021peerreview（在分配中加公平性约束）。@shah2022design 分析了同行评审系统中的偏差。AI 辅助的同行评审见 @liang2023paper，不过其中的公平问题还没有被充分研究。
 
-**Historical Context**: The questions in this chapter are not new. @arrow1950difficulty showed aggregation impossibilities in 1950. @thurstone1927law introduced random utility models in 1927. @luce1959individual axiomatized IIA in 1959. What's new is the **application to machine learning from human preferences at scale**—where small biases compound through automated feedback loops affecting millions of users. Classical fairness concerns now manifest in algorithmic systems with unprecedented speed and scope.
+**历史背景**：本章讨论的问题并不新。@arrow1950difficulty 早在 1950 年就给出了汇总的不可能性结果。@thurstone1927law 在 1927 年提出了随机效用模型。@luce1959individual 在 1959 年给独立无关备选作了公理化。新的是**把它用到大规模的人类偏好机器学习上**——在这里，小偏差会通过自动化的反馈回路不断放大，影响数以百万计的用户。那些经典的公平问题，如今在算法系统里以空前的速度和范围重现。
 
 ## 延伸阅读
 
