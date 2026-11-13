@@ -39,54 +39,54 @@ filters:
 
 学完本章，你应当能够：
 
-- **Identify** how technical design choices at each stage of the preference learning pipeline (elicitation, learning, aggregation, decision) embed value judgments about whose preferences matter and how they should be weighted.
-- **Explain** the inversion problem—why behavior ≠ mental state—and how optimizing for revealed preferences (clicks, bids, engagement) can systematically disadvantage groups whose behavior diverges from preferences due to context (fatigue, time constraints, cultural norms).
-- **Distinguish** between individual fairness (similar entities treated similarly) and group fairness (protected groups have equal outcomes), recognizing their fundamental incompatibility as demonstrated by Dwork et al.
-- **Apply** Sen's framework of nosy vs. non-nosy preferences to determine when liberal assistance (respecting stated preferences) is insufficient and illiberal assistance (overriding preferences) is justified.
-- **Analyze** how unfairness compounds across the elicitation → learning → aggregation → decision pipeline through feedback loops, showing how small biases at each stage multiply over time.
-- **Evaluate** governance mechanisms (designer discretion, user control, participatory design, regulatory oversight, professional standards) for deciding whose preferences should be weighted and how.
-- **Design** preference learning systems that make value tradeoffs explicit, document who benefits and who is harmed, and include fairness constraints at each pipeline stage.
-- **Implement** stratified sampling, subgroup performance monitoring, and fairness-constrained optimization to detect and mitigate compounding unfairness.
-- **Audit** systems for red flags: feedback loops where average performance improves but subgroup performance worsens, optimization-fairness divergence, invisibility of harm, post-hoc rationalization, ignoring context, and revealed preference fallacies.
-- **Connect** abstract fairness concepts to concrete technical decisions in Bradley-Terry models (Chapter 2), DPO weighting (Chapter 3), active learning via Fisher information (Chapter 4), exploration strategies (Chapter 5), and aggregation rules (Chapter 6).
+- **识别**出偏好学习流水线（征询、学习、汇总、决策）每一阶段的技术设计选择里，藏着哪些关于"该听谁的偏好、各听多少"的价值判断。
+- **讲清**反演问题——为什么说"行为 ≠ 心理状态"——以及按显示偏好（点击、出价、使用时长）来优化，为什么会让那些"因为所处情境（疲劳、时间紧张、文化规范）而行为与偏好不一致"的群体长期处于不利地位。
+- **区分**个体公平（相似的个体被相似地对待）与群体公平（受保护的群体在结果上平等），并理解 Dwork 等人证明的结论：这两者存在根本性的不相容。
+- **运用**森关于"管得宽"与非"管得宽"偏好的框架，判断什么时候"自由主义式的协助"（尊重用户说出来的偏好）不够用、什么时候"非自由主义式的协助"（替用户推翻他的偏好）才说得过去。
+- **分析**不公平怎样沿着"征询 → 学习 → 汇总 → 决策"这条流水线，通过反馈回路层层叠加，说明每一阶段的小偏差如何随时间被放大。
+- **评估**几种治理机制（由设计者自行决定、交给用户控制、参与式设计、监管、职业规范），看它们各自适合用来决定"该给谁的偏好加权、加多少"。
+- **设计**出这样的偏好学习系统：把价值取舍摆到明面上，记录谁受益、谁受损，并在流水线的每一阶段都加入公平性约束。
+- **实现**分层抽样、分组表现监控，以及带公平性约束的优化，用来发现并缓解不断叠加的不公平。
+- **审查**系统中的危险信号：平均表现变好但某个分组的表现变差的反馈回路、优化目标与公平之间的背离、造成的伤害看不见、事后合理化、无视情境，以及显示偏好谬误。
+- **联系**起来看：把抽象的公平概念对到具体的技术决定上——Bradley-Terry 模型（第 1 章）、DPO 的加权（第 2 章）、基于 Fisher 信息的主动学习（第 3 章）、探索策略（第 4 章）、汇总规则（第 5 章）。
 
 :::
 
-::: {.callout-tip title="Suggested Lecture Plan" collapse="true"}
-This chapter can be covered in two 50-minute lectures plus a discussion/activity session:
+::: {.callout-tip title="建议课时安排" collapse="true"}
+本章内容可以用两次 50 分钟的讲授加上一次讨论／活动课讲完：
 
-**Lecture 1** (Sections 7.1--7.2): The Pipeline and Design Choices
+**第 1 次课**（第 6.1–6.2 节）：流水线与其中的设计选择
 
-- Introduction: Whose preferences matter? The central question (10 min)
-- The 4-stage pipeline framework with AI Review Assistant running example (10 min)
-- Elicitation: Who gets queried? The inversion problem (10 min)
-- Learning: What structures are valid? IIA violations and context-dependence (10 min)
-- Aggregation and decision: Weighing preferences, liberal vs. illiberal assistance (10 min)
+- 引入：谁的偏好重要？这个问题本身（10 分钟）
+- 四阶段流水线的框架，用"AI 审稿助手"这个贯穿全章的例子来讲（10 分钟）
+- 征询：该问谁？反演问题（10 分钟）
+- 学习：什么样的偏好结构算合理？违反独立无关备选（IIA）的情形与情境依赖（10 分钟）
+- 汇总与决策：给偏好加权，自由主义式与非自由主义式的协助（10 分钟）
 
-**Lecture 2** (Sections 7.3--7.6): Fairness and Design Principles
+**第 2 次课**（第 6.3–6.6 节）：公平与设计原则
 
-- Individual vs. group fairness: formal definitions, conflicts, examples (15 min)
-- Process vs. outcome fairness: tensions and connections to Sen's liberalism (10 min)
-- How unfairness compounds: feedback loops and end-to-end analysis (10 min)
-- Eight design principles for practitioners (10 min)
-- Red flags, governance mechanisms (5 min)
+- 个体公平与群体公平：形式定义、冲突之处、例子（15 分钟）
+- 过程公平与结果公平：两者的张力，以及它们与森的自由主义思路的联系（10 分钟）
+- 不公平怎样叠加：反馈回路端到端的分析（10 分钟）
+- 给实践者的八条设计原则（10 分钟）
+- 危险信号与治理机制（5 分钟）
 
-**Discussion/Activity Session**: Case Study Analysis (50 min)
+**讨论／活动课**：案例分析（50 分钟）
 
-- Paper-reviewer matching design exercise: make choices at each pipeline stage (30 min)
-- Discussion of case studies: LaMPost, Multi-Value, DaDa (20 min)
+- 论文—审稿人匹配的设计练习：在流水线的每个阶段各做一次选择（30 分钟）
+- 讨论几个案例：LaMPost、Multi-Value、DaDa（20 分钟）
 
 :::
 
-## Chapter Overview
+## 本章内容安排
 
-Chapters 2--6 provided powerful technical methods for learning from human preferences:
+前面几章给出了从人类偏好中学习的强大技术方法：
 
-- **Chapter 2** showed how to model preferences through Bradley-Terry, Rasch, and factor models, assuming preferences exist and can be represented mathematically.
-- **Chapter 3** developed estimation methods (MLE, Bayesian inference, online learning), assuming we have preference data to train on.
-- **Chapter 4** introduced active elicitation via Fisher information and optimal design, assuming we know which comparisons to request.
-- **Chapter 5** addressed sequential decisions under preference uncertainty, assuming we know what outcomes to pursue.
-- **Chapter 6** covered aggregation mechanisms, providing technical tools but not normative guidance on whose preferences to aggregate.
+- **第 1 章**讲了怎么用 Bradley-Terry、Rasch 与因子模型来给偏好建模，前提是假设偏好确实存在、并且能用数学表示出来。
+- **第 2 章**给出了估计方法（最大似然、贝叶斯推断、在线学习），前提是假设我们已经有偏好数据可以训练。
+- **第 3 章**介绍了基于 Fisher 信息与最优实验设计的主动征询，前提是假设我们知道该请求哪些比较。
+- **第 4 章**处理偏好不确定下的序贯决策，前提是假设我们知道要追求什么样的结果。
+- **第 5 章**讲了汇总机制，提供了技术工具，但没有回答规范性的问题：该汇总谁的偏好。
 
 This chapter provides the missing normative framework: **whose preferences should we learn from, and how should we weigh them?**
 
