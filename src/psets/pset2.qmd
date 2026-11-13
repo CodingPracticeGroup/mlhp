@@ -3,49 +3,30 @@ title: "习题 2：估计与不确定性量化"
 lang: zh
 ---
 
-## Exercises
-### Question 1: Uncertainty Quantification in Preference Learning (40 points) {#sec-question-1-uncertainty-quantification-in-preference-learning-40-points .unnumbered}
+## 习题
+### 第 1 题：偏好学习中的不确定性量化（40 分） {#sec-question-1-uncertainty-quantification-in-preference-learning-40-points .unnumbered}
 
-In this question, we will explore Bayesian approaches to logistic
-regression in the context of preference learning using the Bradley-Terry
-model. We will compare different models and inference methods, including
-parametric linear models estimated using Metropolis-Hastings, parametric
-neural network models estimated using Hamiltonian Monte Carlo, and
-non-parametric models with Gaussian Processes. Finally, we will assess
-the uncertainty quantification in these models using the Expected
-Calibration Error (ECE).
+本题要在用 Bradley-Terry 模型做偏好学习的背景下，探索贝叶斯方法对逻辑回归的处理。我们会比较不同的模型与推断方法，包括用 Metropolis-Hastings 估计的参数化线性模型、用哈密顿蒙特卡洛估计的参数化神经网络模型，以及使用高斯过程的非参数模型。最后，用期望标定误差（Expected Calibration Error, ECE）来评估这些模型的不确定性量化做得如何。
 
 设我们有一份两两偏好的数据集 $\mathcal{D} = \{(x_i, y_i)\}_{i=1}^N$，其中 $x_i \in \mathbb{R}^d$ 表示两个项目的特征之差（也就是说，$x_i = e^{(i)}_1 - e^{(i)}_2$，这里的 $e^{(i)}_1$ 与 $e^{(i)}_2$ 是两个嵌入），而 $y_i \in \{0, 1\}$ 表示偏好（在第 $i$ 对中，若项目 1 比项目 2 更被偏好，则 $y_i = 1$）。
 
-The likelihood of observing $y_i$ given $x_i$ and model parameters
-$\theta$ is given by the logistic function:
+在给定 $x_i$ 与模型参数 $\theta$ 时，观察到 $y_i$ 的似然由 logistic 函数给出：
 
 $$P(y_i = 1 | x_i, \theta) = \sigma(x_i^\top \theta) = \frac{1}{1 + e^{-x_i^\top \theta}}.$$
 
-We will adopt a Bayesian approach by placing priors on the model
-parameters and using Markov Chain Monte Carlo (MCMC) methods to estimate
-the posterior distributions.
+我们采用贝叶斯的做法：给模型参数设先验，再用马尔可夫链蒙特卡洛（MCMC）方法来估计后验分布。
 
-(a) **Uncertainty Quantification and Expected Calibration Error (11
-    points)**
+(a) **不确定性量化与期望标定误差（11 分）**
 
-    (i) **(Written, 2 point)**. Spend some time reading
-        <https://tinyurl.com/m77mk9c>. Explain what the Expected
-        Calibration Error (ECE) measures and why it is important for
-        assessing uncertainty quantification in probabilistic models.
+(i) **（笔答，2 分）**。先花点时间读一下 <https://tinyurl.com/m77mk9c>。说明期望标定误差（ECE）衡量的是什么，以及它为什么是评估概率模型不确定性量化质量的重要指标。
 
-    (ii) **(Coding, 6 points)**. In `uncertainty_quantification/ece.py`,
-         implement the ECE using the formula
+(ii) **（编程，6 分）**。在 `uncertainty_quantification/ece.py` 中，按下面的公式实现 ECE：
          $$\text{ECE} = \sum_{k=1}^K \frac{n_k}{N} \left| \text{acc}(B_k) - \text{conf}(B_k) \right|,$$
 其中 $n_k$ 是分箱 $B_k$ 中的样本数，$N$ 是样本总数，$\text{acc}(B_k)$ 是分箱 $B_k$ 内的准确率，$\text{conf}(B_k)$ 是分箱 $B_k$ 内的平均置信度。
 
-    (iii) **(Written, 3 point)**. After doing parts (b), (c), and (d),
-          compare the ECE scores and reliability diagrams of the 3
-          models. Which model(s) provide the best uncertainty
-          quantification? Discuss possible reasons for the observed
-          differences.
+(iii) **（笔答，3 分）**。做完 (b)、(c)、(d) 之后，比较这三个模型的 ECE 分数与可靠性图（reliability diagram）。哪个（些）模型的不确定性量化最好？讨论造成这些差异的可能原因。
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q1-1}
 import numpy as np
 import matplotlib.pyplot as plt
@@ -175,16 +156,11 @@ if __name__ == "__main__":
         expression for the posterior distribution
         $P(\theta | \mathcal{D})$ up to a normalization constant.
 
-    (ii) **(Coding, 6 points)**. Implement the Metropolis-Hastings
-         algorithm to sample from the posterior distribution of $\theta$
-         in `uncertainty_quantification/metropolis.py`.
+(ii) **（编程，6 分）**。在 `uncertainty_quantification/metropolis.py` 中实现 Metropolis-Hastings 算法，从 $\theta$ 的后验分布中采样。
 
-    (iii) **(Written, 2 points)**. Discuss how you chose the proposal
-          variance $\tau^2$ and the number of iterations $T$ and
-          $T_{\text{burn-in}}$. How did these choices affect the
-          convergence and mixing of your MCMC chain?
+(iii) **（笔答，2 分）**。说说你是怎么选建议分布的方差 $\tau^2$、迭代次数 $T$ 以及 $T_{\text{burn-in}}$ 的。这些选择怎样影响了 MCMC 链的收敛与混合？
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q1-2}
 import torch
 import matplotlib.pyplot as plt
@@ -315,7 +291,7 @@ expected_calibration_error(torch.sigmoid(x_test @ averaged_weights).numpy(), y_t
           the HMC and Metropolis-Hastings models and provide the
           accuracy numbers.
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q1-3}
 # Use a GPU when running this file! JAX should automatically default to GPU.
 import jax.numpy as np
@@ -447,7 +423,7 @@ if __name__ == "__main__":
           the advantages and disadvantages of using a GP in this
           setting?
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q1-4}
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessClassifier
@@ -578,7 +554,7 @@ information gained about $\theta$ through preference queries.
          acquisition function. Interpret your plot and use it to compare
          the two methods.
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q2-1}
 import torch
 import torch.nn.functional as F
@@ -858,7 +834,7 @@ model.train(num_iterations=100, subset_size=50)
     Play around with the oracle's theta and run `start_search` to see
     how close you can approximate it!
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q3-1}
 import torch
 import matplotlib.pyplot as plt
@@ -1086,7 +1062,7 @@ analyze D-optimal designs for this model.
          What difference do you observe between greedy and random
          sampling? What is the win rate of greedy?
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q4-1}
 import numpy as np
 import matplotlib.pyplot as plt
@@ -1328,7 +1304,7 @@ slice sampling for posterior inference.
          `evaluate_elicited_metric` taking into the plot you saw in part
          (iii).
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q5-1}
 import numpy as np
 import matplotlib.pyplot as plt
