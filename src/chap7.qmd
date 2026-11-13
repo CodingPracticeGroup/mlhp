@@ -276,55 +276,55 @@ AI 系统越来越能干，它们做的事也就越来越难由人来评。语�
 
 **预期成果。** 一篇报告，包含：(1) 真实数据中确实存在潜在偏好群体的证据；(2) 多元对齐与汇总对齐的对比；(3) 对其中公平性取舍的讨论；(4) 群体发现、模型训练与评估的代码。这个项目几乎串起了本书每一章，适合一支有雄心的团队。
 
-## A Practitioner's Checklist
+## 给实践者的一份清单
 
-For readers building preference learning systems in practice, we distill the book's lessons into a checklist of questions to address at each stage of system development.
+如果你要在实际中造偏好学习系统，这里把全书的要点归成一份清单：在系统开发的每个阶段，都该回答这些问题。
 
-**Data Collection (Chapters 1, 3)**
+**数据采集（第 1、3 章）**
 
-- What type of preference data will you collect? Pairwise comparisons, rankings, ratings, or natural language? Each carries different assumptions and failure modes.
-- Who are your annotators, and how are they incentivized? Piece-rate compensation can introduce the fatigue and speed-accuracy tradeoffs that create the inversion problem (Chapter 5, @sec-inversion).
-- Are you using active query selection? If human feedback is expensive, the Fisher information framework (Chapter 3) can substantially reduce the number of comparisons needed.
-- Have you considered position bias, framing effects, and other presentation artifacts that violate IIA?
+- 你要收集哪一类偏好数据？两两比较、排序、打分，还是自然语言？每一类对应的假设和会出问题的方式都不一样。
+- 你的标注员是谁，你给他们什么样的激励？按件计酬会带来疲劳和"快与准的取舍"，而这正是反演问题的来源（第 5 章，@sec-inversion）。
+- 你有没有用主动选题？如果人类的反馈很贵，第 3 章的 Fisher 信息框架能显著减少需要的比较数量。
+- 你想过位置偏差、措辞效应以及其他会违反独立无关备选的呈现方式问题吗？
 
-**Modeling (Chapters 1, 2)**
+**建模（第 1、2 章）**
 
-- Is Bradley-Terry appropriate for your setting, or do you need richer models? If your population is heterogeneous, consider mixture models or factor models from Chapter 1.
-- Are you quantifying uncertainty? Point estimates (MLE) are fast but miss the posterior information needed for downstream decision-making. The Laplace approximation provides a practical middle ground.
-- How are you evaluating your model? Use multiple metrics—AUC for ranking, calibration error for probabilistic predictions, and subgroup analysis for fairness (Chapter 6).
-- Is your model regularized appropriately? Too little regularization overfits to noisy preferences; too much shrinks all utilities toward zero.
+- Bradley-Terry 适不适合你的场景，还是需要用更丰富的模型？如果你的人群本身差异很大，可以考虑第 1 章的混合模型或因子模型。
+- 你有没有把不确定性量化出来？点估计（最大似然）很快，但丢掉了后面做决策要用的后验信息。拉普拉斯近似是一个务实的折中。
+- 你怎么评估自己的模型？要用多个指标——排序看 AUC，概率预测看标定误差，公平性看分组分析（第 6 章）。
+- 正则化的程度合适吗？正则化不够，会过拟合到带噪声的偏好上；过头，又会把所有效用都压向 0。
 
-**Decision-Making (Chapter 4)**
+**决策（第 4 章）**
 
-- Are you in a measurement setting (reduce uncertainty) or a reward maximization setting (manage uncertainty)? The choice determines whether elicitation (Chapter 3) or bandit/optimization methods (Chapter 4) are appropriate.
-- If optimizing sequentially, how are you balancing exploration and exploitation? Thompson Sampling provides a principled default.
-- What is your winner concept? Condorcet, Borda, and von Neumann winners can diverge—the choice encodes assumptions about what "best" means.
+- 你是在"测量"的场景里（目标是降低不确定性），还是在"最大化奖励"的场景里（目标是管理不确定性）？这决定了你该用征询（第 3 章）还是老虎机／优化的方法（第 4 章）。
+- 如果是序贯地优化，你怎么平衡探索与利用？汤普森采样是一个有原理的默认选择。
+- 你用的"胜者"概念是什么？孔多塞胜者、博尔达胜者、冯·诺依曼胜者可能各不相同——选哪一种，就等于对"最好"意味着什么做了假设。
 
-**Aggregation and Fairness (Chapters 5, 6)**
+**汇总与公平（第 5、6 章）**
 
-- Whose preferences are included, and whose are excluded? Convenience sampling overrepresents easily-reached populations.
-- How are you aggregating across annotators? Majority vote selects the Borda winner (Chapter 5, @sec-borda-dpo)—is that what you want?
-- Have you audited for compounding unfairness? Small biases at each pipeline stage can multiply through feedback loops (Chapter 6).
-- Are your value tradeoffs explicit and documented? If not, they are implicit and unaccountable.
+- 你把谁的偏好纳进来了，又把谁的排除在外？图省事的抽样，会让容易被触达的人群被高估。
+- 多个标注员之间你怎么汇总？多数票选出来的是博尔达胜者（第 5 章，@sec-borda-dpo）——这正是你想要的吗？
+- 你有没有审计过不公平的叠加？流水线各阶段的小偏差，会通过反馈回路相互乘起来（第 6 章）。
+- 你的价值取舍是明说的、有记录的吗？如果没有，那它就是隐含的、也没人负责。
 
-**Deployment and Monitoring**
+**部署与监控**
 
-- Are you monitoring subgroup performance over time, not just aggregate metrics?
-- Do you have a plan for preference drift? User preferences and societal norms change; static models decay.
-- Is there a mechanism for users to contest or correct the system's preference model?
-- Have you considered the system's role as a choice architect—how the options you present shape the preferences you observe?
+- 你是不是按时间监控各子群的表现，而不只看总体指标？
+- 偏好会漂移，你有应对方案吗？用户的偏好和社会的规范都会变，静态的模型会失效。
+- 有没有渠道让用户质疑或纠正系统的偏好模型？
+- 你想过系统本身也是"选择的设计者"吗？你给出哪些选项，会反过来塑造你观察到的偏好。
 
-## Scope and Limitations
+## 范围与局限
 
-This book has deliberately focused on the mathematical and algorithmic foundations of preference learning, and several important topics lie outside its scope.
+本书有意把重点放在偏好学习的数学与算法基础上，因此有几个重要主题没有写进来。
 
-**Cognitive science of preference formation.** We model preferences as given—either as fixed utilities or as draws from a distribution—without deeply examining how humans form preferences in the first place. The rich literature on bounded rationality, heuristics and biases, and constructed preferences suggests that human choice is more complex than any random utility model captures. Readers interested in these foundations should consult the work of Kahneman, Tversky, Slovic, and their successors.
+**偏好形成的认知科学。** 我们把偏好当作给定的——要么是固定的效用，要么是从某个分布里抽出来的——而没有深入追问人在一开始是怎么形成偏好的。关于有限理性、启发式与偏差、被建构出来的偏好，已有大量文献说明：人的选择比任何随机效用模型所能刻画的都更复杂。对这部分基础感兴趣的读者，可以去读 Kahneman、Tversky、Slovic 以及后继者的工作。
 
-**Large-scale systems engineering.** The algorithms in this book are presented at a scale suitable for understanding and experimentation. Production preference learning systems at major technology companies handle billions of data points, thousands of annotators, and models with billions of parameters. The engineering challenges of distributed training, data pipeline management, annotation quality control, and real-time serving are substantial but largely orthogonal to the algorithmic questions we address.
+**大规模系统工程。** 本书介绍算法时，用的是便于理解和做实验的规模。而大型科技公司生产环境里的偏好学习系统，要处理数十亿条数据、上千名标注员、数十亿参数的模型。分布式训练、数据流水线管理、标注质量控制、实时服务这些工程问题分量很重，但和我们讨论的算法问题基本是两个方向。
 
-**Legal and regulatory frameworks.** The deployment of preference learning systems increasingly intersects with privacy regulation (GDPR's right to explanation, data minimization), anti-discrimination law, and sector-specific oversight (healthcare, finance, education). These legal dimensions shape what data can be collected, how it can be used, and what accountability mechanisms must be in place. We have touched on related ethical considerations in Chapter 6, but a thorough treatment of the regulatory landscape is beyond our scope.
+**法律与监管框架。** 偏好学习系统的部署，越来越与隐私法规（GDPR 的解释权、数据最小化）、反歧视法律，以及分行业的监管（医疗、金融、教育）交织在一起。这些法律层面决定了：哪些数据可以收集、可以怎么用，以及必须建立哪些问责机制。第 6 章我们谈过相关的伦理考量，但对监管格局的完整讨论超出了本书的范围。
 
-**Multi-modal and embodied preferences.** This book focuses primarily on preferences over discrete items or text responses. Preferences in robotics (over trajectories), in design (over visual layouts), and in multi-modal settings (over combinations of text, images, and audio) raise additional challenges that we have only briefly touched upon.
+**多模态与具身的偏好。** 本书主要讨论对离散项目或文本回答的偏好。而机器人领域的偏好（对轨迹）、设计领域的偏好（对视觉版式），以及多模态场景下的偏好（对文本、图像、声音的组合）会带来更多挑战，我们只是略有涉及。
 
 ## Final Thought
 
