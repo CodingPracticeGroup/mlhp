@@ -782,20 +782,20 @@ print(f"  Disparity: {abs(low_acc_ctx - high_acc_ctx):.3f}")
 
 **结果解读**：
 
-1. **Standard Bradley-Terry**: Assumes preferences are context-free. Works well for low-load reviewers (seniors) whose preferences are relatively stable. Works poorly for high-load reviewers (juniors) whose preferences shift with fatigue. **Individual unfairness**: similar reviewers treated differently.
+1. **标准的 Bradley-Terry**：假定偏好与情境无关。对任务量轻的审稿人（资深者）很准——他们的偏好比较稳定。对任务量重的审稿人（资浅者）就不准——他们的偏好随疲劳一起变化。**个体不公平**：相似的审稿人被差别对待。
 
-2. **Contextual Bradley-Terry**: Explicitly models how load affects preferences. Performance is balanced across both groups—the model correctly captures that high-load reviewers become more selective.
+2. **带情境的 Bradley-Terry**：把任务量怎样影响偏好显式建进模型。两组的表现就均衡了——模型正确地抓住了"任务重的审稿人会变得更挑剔"这一点。
 
-**Key Insight**: The IIA assumption (standard BT) is not neutral—it privileges groups whose preferences happen to be context-free and systematically misfits groups with context-dependent preferences.
+**关键洞见**：独立无关备选这一假定（标准 Bradley-Terry）并不是中立的——它偏袒那些偏好恰好与情境无关的群体，而对偏好随情境变化的群体系统性拟合不准。
 
-**Design Principle**: When modeling preferences, test whether IIA violations correlate with demographic groups. If they do, use richer models (contextual BT, mixed logit, nested logit) to avoid individual unfairness—even if they're more complex.
+**设计原则**：给偏好建模时，要检验独立无关备选的违反是否与人口特征相关。如果相关，就该换更丰富的模型（带情境的 Bradley-Terry、混合 logit、嵌套 logit），以免出现个体不公平——哪怕模型更复杂。
 
-**Connection to Real Systems**:
-- **RLHF for LLMs**: User preferences may depend on context (time of day, previous queries, mood). Standard preference models assume context-free utilities.
-- **Recommender systems**: User preferences shift with context (weekend vs. weekday, home vs. commute). Contextual bandits address this.
-- **Healthcare decision support**: Patient preferences depend on current health state, not just intrinsic item utilities.
+**与现实系统的对应**：
+- **大模型的 RLHF**：用户的偏好可能随情境变化（一天中的时段、之前问过什么、心情）。而标准的偏好模型假定效用与情境无关。
+- **推荐系统**：用户的偏好会随情境变化（周末与工作日、在家与通勤途中）。带情境的老虎机正是处理这个问题的。
+- **医疗决策支持**：患者的偏好取决于当前的健康状况，而不只是项目本身的效用。
 
-Next, we'll see how the aggregation stage further compounds bias by weighting preferences based on volume.
+接下来会看到，汇总阶段又进一步加重了偏差：它按数量给偏好加权。
 
 ### 汇总：该给偏好分多少权重？ {#sec-aggregation-fairness}
 
@@ -1001,7 +1001,7 @@ for i, strategy in enumerate(strategies):
 
 **Design Principle**: When aggregating preferences, examine participation patterns. If participation correlates with privilege, use equal or stratified weighting to ensure fairness—don't default to volume-weighting without justification.
 
-**Connection to Real Systems**:
+**与现实系统的对应**：
 - **RLHF for LLMs**: High-volume annotators dominate $\pi_{\text{ref}}$. If annotator demographics are skewed, the model learns skewed preferences.
 - **Recommender systems**: Power users dominate collaborative filtering. Their preferences are overweighted in recommendations for everyone.
 - **Voting systems**: Turnout differs by demographics. Volume-weighted aggregation (like electoral systems without turnout adjustment) underweights low-turnout groups.
@@ -1206,7 +1206,7 @@ print(f"  → Converges to community standard, reduces diversity")
 - Diversity of perspectives is valuable (creative work, academic review)
 - Users have established expertise (senior researchers less needing intervention)
 
-**Connection to Real Systems**:
+**与现实系统的对应**：
 - **Content moderation**: Liberal = "free speech" (respect stated preferences). Illiberal = community standards (remove harmful content even if users prefer it).
 - **Health apps**: Liberal = track what user reports. Illiberal = nudge toward healthier behaviors (paternalistic).
 - **LLM alignment**: Should the model always satisfy user requests (liberal) or refuse harmful requests (illiberal)?
@@ -1385,7 +1385,7 @@ print("Mechanism: Better assistance → more usage → more queries → even bet
 3. **Monitor per-group metrics over time**: If average performance improves but subgroup performance worsens, you have compounding bias
 4. **Intervene early**: Small biases are easier to correct than large ones. Don't wait for disparities to explode
 
-**Connection to Real Systems**:
+**与现实系统的对应**：
 - **RLHF for LLMs**: If early training data is demographically imbalanced, the model learns certain users better → they provide more feedback → model improves for them → gap widens.
 - **Recommender systems**: "Rich get richer" dynamics—popular items get recommended more → viewed more → become more popular.
 - **Search engines**: High-ranked results get more clicks → clicks are used as relevance signal → high-ranked results rank even higher.
