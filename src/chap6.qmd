@@ -797,64 +797,64 @@ print(f"  Disparity: {abs(low_acc_ctx - high_acc_ctx):.3f}")
 
 Next, we'll see how the aggregation stage further compounds bias by weighting preferences based on volume.
 
-### Aggregation: How Should We Weigh Preferences? {#sec-aggregation-fairness}
+### 汇总：该给偏好分多少权重？ {#sec-aggregation-fairness}
 
-**Technical Question**: If we're building a shared review assistant (not personalized per reviewer), how do we aggregate preferences from multiple reviewers?
+**技术问题**：如果我们要做的是所有审稿人共用的助手（不是每人一个专属模型），那该怎么汇总多位审稿人的偏好？
 
-From Chapter 3 (@eq-dpo), recall that DPO (Direct Preference Optimization) for language models maximizes:
+回忆第 2 章（@eq-dpo）：面向语言模型的直接偏好优化（Direct Preference Optimization, DPO）最大化的是：
 $$
 \mathcal{L}_{\text{DPO}} = -\mathbb{E}_{(x, y_w, y_l) \sim \mathcal{D}}\left[\log \sigma\left(\beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}\right)\right]
 $$ {#eq-dpo-aggregation}
-where $\pi_{\text{ref}}$ is a reference policy trained on existing data.
+其中 $\pi_{\text{ref}}$ 是在已有数据上训练出来的参考策略。
 
-The key question: **Who contributes to $\pi_{\text{ref}}$?**
+关键问题是：**谁来构成了 $\pi_{\text{ref}}$？**
 
-If we train the reference policy on all past reviews, then reviewers who write **more reviews get more weight**. The reference policy implicitly performs volume-weighted aggregation.
+如果参考策略是在所有过往审稿意见上训练的，那么写得**多**的审稿人就拿走**更多**权重。这条参考策略其实做的是一种按数量加权的汇总。
 
-#### Who Dominates the Reference Policy? {#sec-status-quo-bias}
+#### 谁在参考策略里占主导？ {#sec-status-quo-bias}
 
-In peer review, high-volume reviewers tend to be:
+在同行评审里，审稿量大的通常是：
 
-- **Senior researchers**: Invited to review more, higher accept rates for review invitations, more established in the community
-- **Researchers at top institutions**: Editors preferentially invite reviewers from prestigious institutions
-- **Native English speakers**: Writing reviews is faster, lower burden per review
+- **资深研究者**：被邀审稿更多、接受邀请的比例更高、在学术圈里更有地位
+- **顶尖院校的研究者**：领域主席更愿意从名气大的机构里请审稿人
+- **英语母语者**：写审稿意见更快，每份的负担更轻
 
-These are also the groups that already have advantages. By weighting the reference policy by volume, we encode **status quo bias**—the system learns to reproduce existing patterns, including existing inequities.
+而这些恰好是本来就占优势的群体。把参考策略按数量加权，等于把**现状偏差**写了进去——系统学会的是复现现成的模式，包括其中的不平等。
 
-**Value Embedded**: Past data reflects "true" preferences worth replicating. But past data also reflects historical inequalities in who participates, who has time, and who gets invited.
+**里面含的价值**：仿佛过去的数据代表值得复现的"真实"偏好。可过去的数据同样反映了历史形成的不平等：谁有时间参与、谁被邀请。
 
-#### Fairness Implications {#sec-aggregation-bias}
+#### 公平性后果 {#sec-aggregation-bias}
 
-If the shared AI review assistant is trained via volume-weighted aggregation (DPO's $\pi_{\text{ref}}$), then:
+如果这位共用的 AI 审稿助手是按数量加权的方式训练出来的（也就是 DPO 的 $\pi_{\text{ref}}$ 那样），那么：
 
-1. The system learns **"good review" = reviews by senior/privileged researchers**
-2. When assisting other reviewers, it nudges them toward this style
-3. Diverse perspectives are downweighted or erased (e.g., reviews emphasizing different values, writing styles from non-Western academic cultures)
-4. **Result**: Homogenization—reviews become more similar, reflecting the dominant culture
+1. 系统学到的**"好审稿"＝资深、条件优越的研究者写的那种审稿**
+2. 在给其他审稿人搭手时，会把他们往这种风格上推
+3. 不同的视角被压低甚至抹掉（例如那些强调不同价值的审稿意见、非西方学术传统里的写法）
+4. **结果**：趋同——审稿意见越来越像，反映的都是同一种主导文化
 
-**This is group unfairness**: Underrepresented groups' preferences are systematically underweighted in aggregation.
+**这就是群体不公平**：在汇总中，代表性不足的群体的偏好被系统地压低了权重。
 
-**Connection to Chapter 6**: Borda count (@sec-borda) weights all voters equally. But if voting (participation) is unequal, then Borda becomes volume-weighted, privileging high-participation groups. The "Community Notes" system on X (Twitter) has this exact issue—volunteer raters are not representative, so "bridging" rewards notes appealing across rater factors, but what if some viewpoints are excluded from the factor space entirely?
+**承接第 5 章**：博尔达计分法（@sec-borda）对每位投票人一视同仁。可如果投票（参与）本身就不均等，博尔达法实际上就变成了按参与量加权，偏向那些参与度高的群体。X（Twitter）上的 Community Notes 就有这个问题：自愿来打分的人并不具有代表性，于是"跨立场"是在奖励那些能被各类打分者共同接受的笔记——可要是某些观点压根不在因子空间里呢？
 
-**Connection to Chapter 3**: The reference policy $\pi_{\text{ref}}$ in DPO (@eq-dpo) is trained on historical data $\mathcal{D}$. If $\mathcal{D}$ has $n_A$ samples from Group A and $n_B$ from Group B, the gradient implicitly weights Group A by $n_A / (n_A + n_B)$. High-volume groups dominate.
+**承接第 2 章**：DPO 里的参考策略 $\pi_{\text{ref}}$（@eq-dpo）是在历史数据 $\mathcal{D}$ 上训练的。若 $\mathcal{D}$ 里来自群体 A 的样本有 $n_A$ 条、来自群体 B 的有 $n_B$ 条，梯度实际上就按 $n_A / (n_A + n_B)$ 给群体 A 加权。参与量大的群体占了主导。
 
-#### Alternative: Equal-Weight Aggregation {#sec-equal-weight}
+#### 另一种做法：等权重汇总 {#sec-equal-weight}
 
-Instead of volume-weighted aggregation, we could use **equal-weight aggregation**:
+与其按数量加权，不如用**等权重汇总**：
 
-- Compute per-reviewer reference policies: $\pi_{\text{ref}}^{(i)}$ for each reviewer $i$
-- Aggregate with equal weights: $\pi_{\text{ref}} = \frac{1}{N} \sum_{i=1}^N \pi_{\text{ref}}^{(i)}$
-- Or: stratify by group and ensure proportional representation
+- 先为每位审稿人 $i$ 各算一条参考策略：$\pi_{\text{ref}}^{(i)}$
+- 再以相等的权重合并：$\pi_{\text{ref}} = \frac{1}{N} \sum_{i=1}^N \pi_{\text{ref}}^{(i)}$
+- 或者：按群体分层，保证各组按人口比例被代表
 
-This ensures **all reviewers contribute equally**, regardless of review volume.
+这样能保证**每位审稿人的贡献相同**，与审稿量无关。
 
-**The Tradeoff**: Equal-weight aggregation may have higher variance (low-volume reviewers contribute as much as high-volume reviewers, despite less data). Volume-weighting has lower variance but systematic bias toward high-participation groups.
+**这里的取舍**：等权重汇总的方差可能更大（审稿量少的人和审稿量多的人贡献一样，可前者数据本就少）。按数量加权方差小，但对参与度高的群体有系统性偏向。
 
-Should we optimize for statistical efficiency (volume-weighting) or fairness (equal-weighting)? This is a value choice.
+我们该优化统计效率（按数量加权），还是优化公平（等权重）？这是一个价值选择。
 
-#### Code Example: Weighted vs. Unweighted Aggregation {#sec-code-aggregation}
+#### 代码示例：加权与不加权的汇总 {#sec-code-aggregation}
 
-Let's simulate a population with unequal participation and see how aggregation affects outcomes:
+下面模拟一个参与度不均的群体，看看汇总方式怎样影响结果：
 
 ```{pyodide-python}
 #| echo: true
