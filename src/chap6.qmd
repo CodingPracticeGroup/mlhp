@@ -1437,49 +1437,49 @@ All these systems have the same mathematical structure: **positive feedback loop
 
 **个体公平**（Dwork 等人，2012）：相似的个体应当被相似地对待。
 
-**Formal definition**: For distance metric $d$ on individuals and outcomes, a decision function $f$ is individually fair if:
+**形式定义**：在个体与结果上都给定距离度量 $d$，若决策函数 $f$ 满足：
 $$
 d(x_i, x_j) \leq \epsilon \implies d(f(x_i), f(x_j)) \leq \delta(\epsilon)
 $$ {#eq-individual-fairness}
-where $\delta$ is non-decreasing. Intuitively: if two individuals are close in relevant features, their outcomes should be close.
+其中 $\delta$ 非降，就称它满足个体公平。直观地说：两个个体在相关特征上很接近，他们得到的结果也应当接近。
 
-**放到同行评审里**： Papers with similar topics and quality should get similar-quality reviewers. If Papers A and B both study transformers on low-resource languages, they should get reviewers with comparable expertise.
+**放到同行评审里**：主题与质量相近的论文，应当配得上质量相近的审稿人。如果论文 A 和论文 B 都在做低资源语言上的 transformer，那它们就该拿到专业程度可比的审稿人。
 
-**Group fairness** (demographic parity): Protected demographic groups should have equal average outcomes.
+**群体公平**（人口均等，demographic parity）：受保护的人口群体在平均结果上应当相等。
 
-**Formal definition**: For groups $g_1, g_2 \in \mathcal{G}$, a decision function $f$ satisfies group fairness if:
+**形式定义**：对群体 $g_1, g_2 \in \mathcal{G}$，若决策函数 $f$ 满足：
 $$
 \mathbb{E}[f(x) \mid G = g_1] = \mathbb{E}[f(x) \mid G = g_2]
 $$ {#eq-group-fairness}
-where $G$ is the group membership variable.
+其中 $G$ 是群体归属变量，就称它满足群体公平。
 
-**放到同行评审里**： Papers from mainstream ML subfields vs. small subfields should receive equally qualified reviewers on average.
+**放到同行评审里**：来自主流 ML 子领域的论文与来自小众子领域的论文，平均而言应当配上水平相当的审稿人。
 
-#### The Fundamental Incompatibility {#sec-fairness-incompatibility}
+#### 根本上的不相容 {#sec-fairness-incompatibility}
 
-**Dwork et al. (2012)** proved these criteria are often **mutually incompatible**—no decision function satisfies both.
+**Dwork 等人（2012）**证明了：这两条标准常常**互相冲突**——没有哪个决策函数能同时满足。
 
-**Intuition**: Suppose we have two groups with different distributions over features $x$:
-- Group A: Papers mostly in mainstream topics (many expert reviewers available)
-- Group B: Papers in small subfields (few expert reviewers available)
+**直观理解**：假设有两个群体，它们在特征 $x$ 上的分布不同：
+- 群体 A：论文多是主流主题（能找到的专业审稿人很多）
+- 群体 B：论文在小众子领域（能找到的专业审稿人很少）
 
-**Individual fairness** says: Papers with similar topics get similar reviewers. Since Group B papers are in small subfields, they get less-expert reviewers (few experts exist).
+**个体公平**说：主题相近的论文要配相近的审稿人。群体 B 的论文在小众子领域，那就只能配专业程度低一些的审稿人（专家本来就没几个）。
 
-**Group fairness** says: On average, Group B papers should get equally expert reviewers as Group A papers.
+**群体公平**说：平均来看，群体 B 的论文应当配上和群体 A 一样专业的审稿人。
 
-**These conflict**: To satisfy group fairness, we'd need to assign Group B papers to reviewers *less matched by topic* (drawing from the broader pool). But this violates individual fairness (similar topics → different review quality based on which group the paper belongs to).
+**两者冲突**：要满足群体公平，就得把群体 B 的论文分给*主题匹配度更低*的审稿人（从更大的池子里调）。可这就违反了个体公平（主题相近的论文，因为属于不同群体，得到的审稿质量就不一样了）。
 
-::: {.callout-warning title="Intersectionality Multiplies Fairness Challenges"}
-The group fairness framework above treats groups as monolithic categories (Group A vs. Group B). In reality, individuals belong to **multiple overlapping groups** simultaneously---a junior researcher working on a small subfield from an under-resourced institution faces compounding disadvantages that analyzing any single group membership would miss. Intersectional fairness requires monitoring outcomes for all combinations of protected attributes, but this quickly creates a **sample size problem**: with $k$ binary attributes, there are $2^k$ subgroups, many of which may have too few members for reliable statistical analysis. Practical approaches include hierarchical models that share information across subgroups, or focusing on subgroups identified by preliminary analysis as having the largest outcome disparities.
+::: {.callout-warning title="交叉性会让公平问题成倍增加"}
+上面的群体公平框架把群体当成不可再分的整块（群体 A 对群体 B）。可现实中，一个人同时属于**多个互相重叠的群体**——一位来自资源较少机构、做小众子领域的资浅研究者，面对的是多重叠加的不利，只看其中任何一重身份都会漏掉。交叉性的公平要求我们对受保护属性的所有组合都监控结果，但这样很快就撞上**样本量的问题**：有 $k$ 个二元属性，就有 $2^k$ 个子群，其中很多人数太少，做不出可靠的统计分析。可行的做法包括：用跨子群共享信息的层次模型，或者先做初步分析，只盯着结果差距最大的那些子群。
 :::
 
-**Connection to Earlier Sections**:
-- Elicitation (@sec-elicitation-fairness): Stratified sampling ensures group fairness (equal queries per group) but may violate individual fairness (equally productive reviewers get different query rates based on group).
-- Aggregation (@sec-aggregation-fairness): Equal-weight aggregation promotes group fairness but may violate individual fairness (reviewers with equal participation get different weights based on group size).
+**与前面各节的联系**：
+- 征询（@sec-elicitation-fairness）：分层抽样保证了群体公平（每组询问数相同），但可能违反个体公平（产出相同的两位审稿人，因为所属群体不同，被问的频率就不一样）。
+- 汇总（@sec-aggregation-fairness）：等权重汇总有利于群体公平，但可能违反个体公平（参与程度相同的两位审稿人，因为所在群体规模不同，拿到的权重就不一样）。
 
-#### Code Example: Individual vs. Group Fairness Tradeoff {#sec-code-fairness-tradeoff}
+#### 代码示例：个体公平与群体公平的取舍 {#sec-code-fairness-tradeoff}
 
-Let's simulate paper-reviewer matching with constraints for individual vs. group fairness:
+下面模拟论文—审稿人匹配，分别按个体公平与群体公平加约束：
 
 ```{pyodide-python}
 #| echo: true
