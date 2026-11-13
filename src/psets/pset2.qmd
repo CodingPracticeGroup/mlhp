@@ -15,12 +15,7 @@ non-parametric models with Gaussian Processes. Finally, we will assess
 the uncertainty quantification in these models using the Expected
 Calibration Error (ECE).
 
-Assume we have a dataset of pairwise preferences
-$\mathcal{D} = \{(x_i, y_i)\}_{i=1}^N$, where $x_i \in \mathbb{R}^d$
-represents the feature difference between two items (i.e.,
-$x_i = e^{(i)}_1 - e^{(i)}_2$ for embeddings $e^{(i)}_1$ and
-$e^{(i)}_2$), and $y_i \in \{0, 1\}$ indicates the preference ($y_i = 1$
-if item 1 is preferred over item 2 in the $i$-th pair).
+设我们有一份两两偏好的数据集 $\mathcal{D} = \{(x_i, y_i)\}_{i=1}^N$，其中 $x_i \in \mathbb{R}^d$ 表示两个项目的特征之差（也就是说，$x_i = e^{(i)}_1 - e^{(i)}_2$，这里的 $e^{(i)}_1$ 与 $e^{(i)}_2$ 是两个嵌入），而 $y_i \in \{0, 1\}$ 表示偏好（在第 $i$ 对中，若项目 1 比项目 2 更被偏好，则 $y_i = 1$）。
 
 The likelihood of observing $y_i$ given $x_i$ and model parameters
 $\theta$ is given by the logistic function:
@@ -42,10 +37,7 @@ the posterior distributions.
     (ii) **(Coding, 6 points)**. In `uncertainty_quantification/ece.py`,
          implement the ECE using the formula
          $$\text{ECE} = \sum_{k=1}^K \frac{n_k}{N} \left| \text{acc}(B_k) - \text{conf}(B_k) \right|,$$
-         where $n_k$ is the number of samples in bin $B_k$, $N$ is the
-         total number of samples, $\text{acc}(B_k)$ is the accuracy in
-         bin $B_k$, and $\text{conf}(B_k)$ is the average confidence in
-         bin $B_k$.
+其中 $n_k$ 是分箱 $B_k$ 中的样本数，$N$ 是样本总数，$\text{acc}(B_k)$ 是分箱 $B_k$ 内的准确率，$\text{conf}(B_k)$ 是分箱 $B_k$ 内的平均置信度。
 
     (iii) **(Written, 3 point)**. After doing parts (b), (c), and (d),
           compare the ECE scores and reliability diagrams of the 3
