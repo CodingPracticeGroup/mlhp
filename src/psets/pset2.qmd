@@ -460,39 +460,23 @@ $$P(x_1 \succ x_2 | \theta) = \sigma(\theta^\top (x_1 - x_2)),$$
         and break down the expectation over the possible outcomes of the
         query.
 
-    (ii) **Simplifying the KL Divergence (Written, 4 points).** Assuming
-         the prior and posterior distributions over $\theta$ are
-         Gaussian (i.e., $P(\theta) \sim \mathcal{N}(\mu, \Sigma)$ and
-         $P(\theta | \mathcal{D}) \sim \mathcal{N}(\mu', \Sigma')$),
-         show that the KL divergence between the Gaussian posterior and
-         prior simplifies to: $$\begin{aligned}
-        D_{\text{KL}}\left( \mathcal{N}(\mu', \Sigma') \parallel \mathcal{N}(\mu, \Sigma) \right) &= \frac{1}{2} \left( \text{tr}(\Sigma^{-1} \Sigma') + (\mu' - \mu)^\top \Sigma^{-1} (\mu' - \mu)\right.\\
+(ii) **化简 KL 散度（笔答，4 分）。** 假设关于 $\theta$ 的先验与后验都是高斯的（即 $P(\theta) \sim \mathcal{N}(\mu, \Sigma)$ 且 $P(\theta | \mathcal{D}) \sim \mathcal{N}(\mu', \Sigma')$），证明高斯后验对高斯先验的 KL 散度可化简为：
+        $$\begin{aligned}
         &\left.- d + \log\left( \frac{\det(\Sigma)}{\det(\Sigma')} \right) \right).
         \end{aligned}$$
 
-    (iii) **Approximate Information Gain for a Linear Model (Written, 4
-          points).** In the case of a linear model with Gaussian priors
-          on $\theta$, assume that the posterior distribution
-          $P(\theta | \mathcal{D}) \sim \mathcal{N}(\mu, \Sigma)$ is
-          updated using Bayes' rule after each observation. The
-          likelihood of observing a preference $y$ is logistic, which
-          does not conjugate with the Gaussian prior. However, for the
-          purposes of this question, assume that after each query, the
-          posterior mean $\mu'$ and covariance $\Sigma'$ can be updated
-          using an approximation method such as Laplace's approximation.
+(iii) **线性模型的近似信息增益（笔答，4 分）。** 在线性模型、且对 $\theta$ 取高斯先验的情形下，假设后验分布 $P(\theta | \mathcal{D}) \sim \mathcal{N}(\mu, \Sigma)$ 在每次观察后按贝叶斯法则更新。观察到偏好 $y$ 的似然是 logistic 的，与高斯先验并不共轭；但本题假设：每次提问后，后验均值 $\mu'$ 与协方差 $\Sigma'$ 可用某种近似方法（例如拉普拉斯近似）更新。
 
 在这些假设下，请对一次具体的提问 $(x_1, x_2)$ 以闭式算出期望信息增益。你可以把它写成观察到偏好结果之后更新得到的均值 $\mu'$ 与协方差 $\Sigma'$ 的函数。
 
-    (iv) **Laplace Approximation for Posterior (Written, 4 points).**
-         The Laplace approximation for the posterior is given by $$\begin{aligned}
+(iv) **后验的拉普拉斯近似（笔答，4 分）。** 后验的拉普拉斯近似为：
+    $$\begin{aligned}
     \mu'=\arg \min_\theta -\log P(\theta | \mathcal{D})\\
     \Sigma'^{-1}=\nabla_\theta\nabla_\theta -\log P(\theta|\mathcal{D})|_{\theta=\mu'}
 \end{aligned}$$ 
-         In our scenario with the Bradley-Terry model
-         for likelihood, simplify $-\log P(\theta | \mathcal{D})$ and
-         its Hessian ignoring the normalization constant.
+在我们这个以 Bradley-Terry 模型作为似然的场景中，请忽略归一化常数，把 $-\log P(\theta | \mathcal{D})$ 以及它的 Hessian 化简。
 
-(b) **Active Learning Algorithm (25 points)** In this section, you will
+(b) **主动学习算法（25 分）** 本节要实现一个主动学习算法，用期望信息增益准则挑出最有信息量的提问。
     implement an active learning algorithm for selecting the most
     informative queries using the expected information gain criterion.
 
