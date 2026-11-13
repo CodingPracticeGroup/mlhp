@@ -474,18 +474,15 @@ $$P(x_1 \succ x_2 | \theta) = \sigma(\theta^\top (x_1 - x_2)),$$
 
 (b) **主动学习算法（25 分）** 本节要实现一个主动学习算法，用期望信息增益准则挑出最有信息量的提问。
 
-    (i) **(Coding, 4 points).** Implement `kl_divergence_gaussians` in
-        `active_learning/main.py`.
+    (i) **（编程，4 分）** 在 `active_learning/main.py` 中实现 `kl_divergence_gaussians`。
 
-    (ii) **(Coding, 4 points).** Following your derived Laplace
-         按照你推出的拉普拉斯近似，实现 `negative_log_posterior`。
+    (ii) **（编程，4 分）** 按照你推出的拉普拉斯近似，实现 `negative_log_posterior`。
 
-    (iii) **(Coding, 4 points).** Implement `compute_hessian` that is
-          用它得到协方差矩阵的逆。
+    (iii) **（编程，4 分）** 实现 `compute_hessian`，用它得到协方差矩阵的逆。
 
-    (iv) **(Coding, 3 points).** Implement `expected_information_gain`.
+    (iv) **（编程，3 分）** 实现 `expected_information_gain`。
 
-    (v) **(Coding, 4 points).** Finally, implement `active_learning`.
+    (v) **（编程，4 分）** 最后，实现 `active_learning`。
 
     (vi) **（编程 + 笔答，6 分）**。画出主动学习每一轮中协方差矩阵的 $L^2$ 范数；
          另外，在同一张图上实现并画出一个随机基线的协方差矩阵 $L^2$ 范数：
@@ -934,19 +931,13 @@ def start_search():
 
 ### Question 4: D-optimal Design with Logistic Model (30 points) {#sec-question-4-d-optimal-design-with-logistic-model-30-points .unnumbered}
 
-In this question, we explore D-optimal designs in the context of the
-Bradley-Terry model. The Bradley-Terry model is a logistic regression
-model used for paired comparison data. Given two items $x_1$ and $x_2$,
-the probability that item $x_1$ is preferred over $x_2$ is modeled as:
+本题在 Bradley-Terry 模型的背景下讨论 D-最优设计。Bradley-Terry 模型是用于成对比较数据的逻辑回归模型。
+给定两个项目 $x_1$ 与 $x_2$，"项目 $x_1$ 比 $x_2$ 更被偏好"的概率建模为：
 
 $$P(x_1 \succ x_2 | \theta) = \frac{e^{\theta^\top x_1}}{e^{\theta^\top x_1} + e^{\theta^\top x_2}} = \frac{1}{1 + e^{\theta^\top (x_2 - x_1)}}$$
 
-where $\theta \in \mathbb{R}^d$ represents the unknown model parameters,
-and $x_1, x_2 \in \mathbb{R}^d$ are the feature vectors associated with
-the two items. D-optimal design aims to maximize the determinant of the
-Fisher information matrix, thus minimizing the volume of the confidence
-ellipsoid for the estimated parameters. In this exercise, you will
-analyze D-optimal designs for this model.
+其中 $\theta \in \mathbb{R}^d$ 是未知的模型参数，$x_1, x_2 \in \mathbb{R}^d$ 是两个项目对应的特征向量。
+D-最优设计要最大化 Fisher 信息矩阵的行列式，从而使所估参数的置信椭球体积最小。这道题要求你分析该模型的 D-最优设计。
 
 (a) **Bradley-Terry 模型的 Fisher 信息矩阵（12 分）**
     (i) **（笔答，6 分）**。请推出 Bradley-Terry 模型在设计点 $(x_1, x_2)$ 处的 Fisher 信息矩阵，并证明它等于：
@@ -967,13 +958,8 @@ analyze D-optimal designs for this model.
         $(x_{i1}, x_{i2})$。请实现 `greedy_fisher`。注意：代码里的设定是"已经有了所有项目两两之差构成的数据集"，
         而不是直接选出项目对。
 
-    (ii) **(Written + Coding, 7 points).** Notice that
-         `posterior_inv_cov` uses a Laplace approximation for the
-         posterior centered around the ground truth weights after
-         labeling the chosen points. However, it turns out this
-         approximation doesn't actually depend on the labels when taking
-         the Hessian. Please run the file `d_optimal/main.py` and attach
-         a plot of the norm of the covariance matrix of the posterior.
+    (ii) **（笔答 + 编程，7 分）** 注意：`posterior_inv_cov` 在标注完所选点后，
+         用拉普拉斯近似得到以真实权重为中心的后验。但你会发现，求 Hessian 时这个近似其实不依赖标签。
          What difference do you observe between greedy and random
     (ii) **（笔答 + 编程，7 分）** 注意：`posterior_inv_cov` 在标注完所选点后，
          用拉普拉斯近似得到以真实权重为中心的后验。但你会发现，求 Hessian 时这个近似其实不依赖标签。
@@ -1153,12 +1139,8 @@ plt.show()
          $$\Pr(C_1 \succ C_2) = \sigma(\phi(\text{FP}_1, \text{FN}_1) - \phi(\text{FP}_2, \text{FN}_2))$$
          这里我们把 $\phi$ 看作奖励函数。这样的似然会怎样影响 GP 中的后验推断？它在哪些地方引入了额外的复杂度？
 
-    (iii) **(Written + Coding, 6 points).** Given a set of observed
-          pairwise comparisons, derive the posterior distribution over
-          the latent function values $\phi$ given a set of confusion
-          matrices preferences using Bayes' rule. Express the posterior
-          distribution in terms of the GP prior and the pairwise
-          likelihood function. You do not need to include the
+    (iii) **（笔答 + 编程，6 分）** 给定一批观察到的两两比较，用贝叶斯法则在这些混淆矩阵上
+          推出潜在函数值 $\phi$ 的后验分布。请把后验写成 GP 先验与两两比较似然的函数。
           normalization constant. Implement the likelihood function in
           `loglik_from_preferences`.
 
