@@ -743,34 +743,24 @@ model.train(num_iterations=100, subset_size=50)
 ```
 :::
 
-### Question 3: Linear Performance Metric Elicitation (30 points) {#sec-question-3-linear-performance-metric-elicitation-30-points .unnumbered}
+### 第 3 题：线性性能指标的引出（30 分） {#sec-question-3-linear-performance-metric-elicitation-30-points .unnumbered}
 
-1.  **(Written, 10 points).** For background on the problem setting,
-    read <https://tinyurl.com/3b92sufm>. Suppose we have a linear
-    performance metric given by $$p(C) = 1-\alpha (FP)-\beta (FN)$$
-    where $C$ is a confusion matrix and $FP, FN$ denote false positive
-    and false negative rates. We wish to find the optimal classifier
-    w.r.t. $p$. That is, $$\phi^* = \arg \max_{\phi\in\Phi} p(C(\phi))$$
-    where $\Phi$ is the space of all probabilistic binary classifiers
-    from $X\to [0, 1]$. Note that these classifiers return probabilities
-    corresponding to the label $1$. Show that $\phi^*$ is in fact
-    deterministic and given by $$\phi(x)=\begin{cases}
+1.  **（笔答，10 分）** 关于本题的问题设定，先读一下 <https://tinyurl.com/3b92sufm>。设有一个线性性能指标
+    $$p(C) = 1-\alpha (FP)-\beta (FN)$$
+    其中 $C$ 是混淆矩阵，$FP, FN$ 分别是假正率与假负率。我们想找出关于 $p$ 最优的分类器，也就是
+    $$\phi^* = \arg \max_{\phi\in\Phi} p(C(\phi))$$
+    这里 $\Phi$ 是所有从 $X\to [0, 1]$ 的概率型二分类器的集合。注意：这些分类器返回的是标签 $1$ 对应的概率。
+    请证明 $\phi^*$ 其实是确定性的，并且形如
+    $$\phi(x)=\begin{cases}
         1 & \text{if } p(y|x) > f(\alpha,\beta) \\
         0 & \text{otherwise}.
-    \end{cases}$$ for a threshold function $f$ that you must find.
-    (Hint: For a classifier $\phi$, $FP=P(\phi=1, y=0)$ and
-    $FN=P(\phi=0, y=1)$. Marginalize these joint probabilities over $x$
-    and simplify.)
+    \end{cases}$$
+    其中的阈值函数 $f$ 需要你自己求出来。（提示：对分类器 $\phi$，有 $FP=P(\phi=1, y=0)$、
+    $FN=P(\phi=0, y=1)$。把这些联合概率对 $x$ 边际化，再化简。）
 
-2.  **(Written + Coding, 5 points).** Implement `classifier_metrics` in
-    `lpme/main.py`. After doing so, run `plot_confusion_region` and
-    attach the plot. What do you notice about the region of possible
-    confusion matrices?
+2.  **（笔答 + 编程，5 分）** 在 `lpme/main.py` 中实现 `classifier_metrics`。做完后运行 `plot_confusion_region` 并附上生成的图。关于"可能的混淆矩阵构成的区域"，你注意到了什么？
 
-3.  **(Coding, 15 points).** Implement `search_theta` in order to elicit
-    the metric used by the oracle (which is parametrized by $\theta$).
-    Play around with the oracle's theta and run `start_search` to see
-    how close you can approximate it!
+3.  **（编程，15 分）** 实现 `search_theta`，把裁判（oracle）实际在用的指标（由 $\theta$ 参数化）引出来。多换几个裁判的 theta 试试，运行 `start_search`，看你能把它逼近到什么程度！
 
 ::: {.callout-note title="代码"}
 ```{python ex2-q3-1}
