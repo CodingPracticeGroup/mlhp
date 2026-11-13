@@ -2919,18 +2919,18 @@ This chapter developed methods for sequential decision-making with preference fe
 
 14. **（选做）降低方差：GRPO 与 REINFORCE 的对照**：GRPO 用的是组内相对基线，经典 REINFORCE 用的是学出来的价值函数基线。请比较两者在计算量和统计性质上的取舍。组大小 $G$ 怎样影响偏差—方差的权衡？
 
-## Further Reading
+## 延伸阅读
 
-For readers who want to go deeper into the topics introduced in this chapter, we recommend the following:
+想在本章开头介绍的这些主题上再往深里走，可以读下面这些材料：
 
-- **@russo2018tutorial**, "A Tutorial on Thompson Sampling" — A modern tutorial covering the theory, applications, and extensions of Thompson Sampling, including connections to information-directed sampling and contextual bandits.
-- **@bengs2021preference**, "Preference-Based Online Learning with Dueling Bandits: A Survey" — A comprehensive survey of dueling bandit algorithms and their regret bounds, covering Condorcet, Borda, and von Neumann winner concepts and the algorithms designed for each.
-- **@lattimore2020bandit**, *Bandit Algorithms* — The definitive modern textbook on bandit theory, providing rigorous treatments of regret bounds, exploration strategies, and the information-theoretic limits of sequential decision-making.
-- **@shahriari2016taking**, "Taking the Human Out of the Loop: A Review of Bayesian Optimization" — A survey connecting Bayesian optimization to preference learning, covering acquisition functions, GP surrogate models, and applications to hyperparameter tuning and experimental design.
-- **@hadfield2016cooperative**, "Cooperative Inverse Reinforcement Learning" — The foundational CIRL paper, formalizing the cooperative game between a human and a robot that learns the human's reward function through interaction.
-- **@suttonrl**, *Reinforcement Learning: An Introduction* — The standard RL textbook, essential for readers who want to understand the MDP foundations and policy gradient methods discussed in the optional RL section of this chapter.
-- **@thaler2008nudge**, *Nudge: Improving Decisions About Health, Wealth, and Happiness* — The foundational work on choice architecture, documenting how presentation order, framing, and defaults influence human choices in ways that standard preference models do not capture.
-- **@kahneman_tversky_1979**, "Prospect Theory: An Analysis of Decision Under Risk" — The seminal paper on how humans systematically deviate from expected utility maximization, providing the behavioral foundations for why pairwise comparisons (PBO) are often more reliable than absolute ratings.
+- **@russo2018tutorial**, "A Tutorial on Thompson Sampling" —— 汤普森采样的现代教程，理论、应用与推广都有涉及，也包括与信息导向采样（information-directed sampling）和上下文老虎机的联系。
+- **@bengs2021preference**, "Preference-Based Online Learning with Dueling Bandits: A Survey" —— 对决老虎机算法及其遗憾界的系统综述，覆盖孔多塞、博尔达、冯·诺依曼三类胜者概念以及分别为它们设计的算法。
+- **@lattimore2020bandit**, *Bandit Algorithms* —— 老虎机理论的标准现代教材，对遗憾界、探索策略，以及序贯决策在信息论上的极限都有严格的处理。
+- **@shahriari2016taking**, "Taking the Human Out of the Loop: A Review of Bayesian Optimization" —— 把贝叶斯优化与偏好学习串起来的综述，讲采集函数、高斯过程代理模型，以及超参调优和实验设计中的应用。
+- **@hadfield2016cooperative**, "Cooperative Inverse Reinforcement Learning" —— CIRL 的开创性论文，把"人与一台要通过学习来了解人的奖励函数的机器"之间的交互形式化成一场合作博弈。
+- **@suttonrl**, *Reinforcement Learning: An Introduction* —— 强化学习的标准教材。想弄懂本章选学部分用到的 MDP 基础和策略梯度方法，这本是必读。
+- **@thaler2008nudge**, *Nudge: Improving Decisions About Health, Wealth, and Happiness* —— "选择架构"的奠基之作，记录了呈现顺序、框架效应与默认选项怎样影响人的选择——而这些是标准偏好模型没有刻画的内容。
+- **@kahneman_tversky_1979**, "Prospect Theory: An Analysis of Decision Under Risk" —— 前景理论的经典论文，说明人在系统性地偏离期望效用最大化；这正是"两两比较（偏好型贝叶斯优化）往往比打绝对分更可靠"的行为学依据。
 
 ## Exercises
 
