@@ -1968,7 +1968,7 @@ Mitigation: [e.g., Minimum sampling quotas for underrepresented groups]
 - 把选定结果写进价值观说明（原则 1）。
 - 对没有被优先考虑的那条标准，也要测量它被违反的程度并报告出来（这是透明度的要求）。
 
-**对应的问题**：把 @sec-individual-group-fairness 与 @sec-process-outcome-fairness 里的取舍写成可操作的规则。
+**对应的问题**：把 @sec-individual-group-fairness 与 @sec-process-outcome-fairness. 里的取舍写成可操作的规则。
 
 ---
 
@@ -2290,19 +2290,19 @@ $$ {#eq-exercise-nosy-utility}
 
 ---
 
-## Bibliographic Notes {#sec-bibliography}
+## 文献说明 {#sec-bibliography}
 
-This chapter draws on diverse literatures in fairness, social choice theory, human-computer interaction, and preference learning. Below we trace the intellectual history and point to key references.
+本章用到的文献横跨公平性、社会选择理论、人机交互与偏好学习几个方向。下面交代其中思想的来路，并指出关键的参考文献。
 
-**Fairness in Machine Learning**: The modern fairness in ML literature began with @hardt2016equality on equalized odds and @dwork2012fairness on individual fairness. @barocas2019fairness provide a comprehensive textbook covering group fairness, individual fairness, and impossibility results. @friedler2021possibility formalize when different fairness criteria are compatible vs. impossible to satisfy simultaneously—the mathematical foundations for @sec-fairness-incompatibility. For fairness in preference learning and RLHF specifically, see @kirk2023personalisation on diverse perspectives in LLM alignment and @ganguli2023capacity on capacity for fairness vs. harmlessness tradeoffs.
+**机器学习中的公平性**：机器学习公平性这一现代方向，起点是 @hardt2016equality（均等化优势）与 @dwork2012fairness（个体公平）。@barocas2019fairness 是一本覆盖面很全的教材，群体公平、个体公平与不可能性结果都讲了。@friedler2021possibility 把"哪些公平标准可以相容、哪些不可能同时满足"作了形式化——这正是 @sec-fairness-incompatibility. 的数学基础。至于偏好学习与 RLHF 中的公平，具体可看 @kirk2023personalisation（大模型对齐中的多元视角）与 @ganguli2023capacity（在"公平"与"无害"之间做权衡的能力）。
 
-**Sen's Social Choice Theory**: Amartya Sen's work provides the normative foundations for this chapter. @sen1970impossibility introduced the "Impossibility of a Paretian Liberal," showing that individual liberty (respecting non-nosy preferences) and Pareto efficiency are incompatible—the liberal/illiberal tension in @sec-liberal-illiberal. @sen1977rational introduced the distinction between revealed preferences and mental states, anticipating the inversion problem (@sec-inversion-problem). @sen2017collective (extended edition) synthesizes Sen's social choice work. The connection to preference learning was formalized by @sah2024whose.
+**森的社会选择理论**：本章的规范性基础来自 Amartya Sen 的工作。@sen1970impossibility 提出了"帕累托自由的不可能性"，说明个人自由（尊重非"管得宽"的偏好）与帕累托有效不相容——这就是 @sec-liberal-illiberal. 里那组张力。@sen1977rational 区分了显示偏好与心理状态，实际上预先提出了反演问题（@sec-inversion-problem）。@sen2017collective（增订版）汇总了森在社会选择方面的工作。把它与偏好学习之间的联系作了形式化的是 @sah2024whose.
 
-**Inversion Problem and Revealed Preferences**: The gap between behavior and mental state has been studied in behavioral economics and HCI. @ariely2008predictably documents systematic deviations between stated and revealed preferences under poor conditions (fatigue, cognitive load, framing). @kleinberg2017human argue that algorithms should infer *mental state* not just optimize for behavior, formalizing the inversion problem. @mullainathan2022machine show how machine learning on biased behavior data amplifies existing inequalities.
+**反演问题与显示偏好**：行为与心理状态之间的鸿沟，在行为经济学与人机交互中早有研究。@ariely2008predictably 记录了在不利条件下（疲劳、认知负荷、框架效应）说出来的偏好与表现出来的偏好之间系统性的偏离。@kleinberg2017human 主张算法该去推断*心理状态*，而不是只对着行为做优化，并把反演问题形式化了。@mullainathan2022machine 说明：拿有偏的行为数据做机器学习，会放大已有的不平等。
 
-**Contextual Integrity and Privacy**: @nissenbaum2009privacy introduced *contextual integrity*—the idea that privacy violations occur when information flows inappropriately for the context, not when information is collected per se. This connects to the inversion problem: behavior in one context (fatigue, time pressure) may not reflect preferences in another context (well-rested, deliberative). @tschantz2020contextual extend contextual integrity to algorithmic fairness.
+**情境完整性与隐私**：@nissenbaum2009privacy 提出了*情境完整性*——隐私被侵犯，不是因为收集了信息本身，而是因为信息的流动不符合当时的情境。这与反演问题是相通的：在一个情境下的行为（疲劳、时间紧）未必反映另一个情境下（休息充分、可以深思）的偏好。@tschantz2020contextual 把情境完整性推广到算法公平。
 
-**Compounding Unfairness and Feedback Loops**: The dynamics of how small biases amplify through feedback were formalized by @liu2018delayed for delayed impact in classification and @hashimoto2018fairness for distributional robustness. @ensign2018runaway analyzed feedback loops in predictive policing. For preference learning specifically, @chen2024compounding show how RLHF feedback loops can amplify annotator biases over successive fine-tuning rounds. The general phenomenon is sometimes called "algorithmic monoculture" (@kleinberg2021algorithmic).
+**不公平的叠加与反馈回路**：小偏差怎样通过反馈自我放大，@liu2018delayed 针对分类中的延迟影响做了形式化，@hashimoto2018fairness 则从分布鲁棒的角度处理。@ensign2018runaway 分析了预测性警务中的反馈回路。就偏好学习而言，@chen2024compounding 说明 RLHF 的反馈回路会随着一轮轮微调放大标注员的偏见。这一普遍现象有时被称为"算法单一文化"（@kleinberg2021algorithmic）。
 
 **Participatory Design and Involving Stakeholders**: @schuler1993participatory is the classic introduction to participatory design in HCI. Modern applications to AI fairness include @sloane2020participation on power dynamics in participatory ML and @rakova2021responsible on stakeholder engagement for algorithmic accountability. @green2019principles provide principles for participatory algorithm design focused on affected communities.
 
@@ -2318,16 +2318,16 @@ This chapter draws on diverse literatures in fairness, social choice theory, hum
 
 **Historical Context**: The questions in this chapter are not new. @arrow1950difficulty showed aggregation impossibilities in 1950. @thurstone1927law introduced random utility models in 1927. @luce1959individual axiomatized IIA in 1959. What's new is the **application to machine learning from human preferences at scale**—where small biases compound through automated feedback loops affecting millions of users. Classical fairness concerns now manifest in algorithmic systems with unprecedented speed and scope.
 
-## Further Reading
+## 延伸阅读
 
-For readers who want to go deeper into the topics introduced in this chapter, we recommend the following:
+想在本章介绍的主题上继续深入，可以读下面这些：
 
-- **@barocas2019fairness**, *Fairness and Machine Learning: Limitations and Opportunities* — The comprehensive textbook on fairness in ML, covering group fairness definitions, individual fairness, impossibility results, and the sociotechnical context of algorithmic decision-making.
-- **@sen2017collective**, *Collective Choice and Social Welfare* (expanded edition) — Sen's definitive treatment of social choice theory, the liberal paradox, and the distinction between revealed preferences and welfare, providing the normative foundations for this chapter.
-- **@dwork2012fairness**, "Fairness Through Awareness" — The foundational paper on individual fairness, formalizing the Lipschitz condition that similar individuals should receive similar outcomes and introducing the metric learning challenge for fairness.
-- **@furnkranz2010preference**, *Preference Learning* — A textbook covering preference learning from a machine learning perspective, including label ranking, instance ranking, and object ranking, complementing this book's focus on human preference data.
-- **@casper2023open**, "Open Problems and Fundamental Limitations of Reinforcement Learning from Human Feedback" — A systematic survey of RLHF failure modes, including reward hacking, distributional shift, and the challenges of aligning AI systems with diverse human values.
-- **@kleinberg2017human**, "Human Decisions and Machine Predictions" — Formalizes the gap between behavior and mental state (the inversion problem) in the context of judicial bail decisions, showing how observed choices can systematically diverge from underlying preferences.
-- **@hashimoto2018fairness**, "Fairness Without Demographics in Repeated Loss Minimization" — Introduces distributionally robust optimization for fairness, showing how to protect minority groups without requiring explicit demographic labels, relevant to the compounding unfairness analysis in this chapter.
+- **@barocas2019fairness**, *Fairness and Machine Learning: Limitations and Opportunities* —— 机器学习公平性的系统教材，涵盖群体公平的各种定义、个体公平、不可能性结果，以及算法决策所处的社会技术背景。
+- **@sen2017collective**, *Collective Choice and Social Welfare*（增订版）—— 森对社会选择理论的权威论述，包括自由悖论，以及显示偏好与福祉之间的区分，是本章规范性基础的来源。
+- **@dwork2012fairness**, "Fairness Through Awareness" —— 个体公平的奠基论文：把"相似的人应得到相似的结果"形式化为 Lipschitz 条件，并提出了随之而来的度量学习难题。
+- **@furnkranz2010preference**, *Preference Learning* —— 从机器学习角度讲偏好学习的教材，包括标签排序、样本排序与对象排序，可与本书聚焦的人类偏好数据互为补充。
+- **@casper2023open**, "Open Problems and Fundamental Limitations of Reinforcement Learning from Human Feedback" —— 对 RLHF 失败模式的系统综述，包括奖励投机、分布偏移，以及让 AI 系统与多元的人类价值对齐的困难。
+- **@kleinberg2017human**, "Human Decisions and Machine Predictions" —— 在保释决定的场景里把"行为与心理状态之间的鸿沟"（即反演问题）作了形式化，说明观察到的选择为什么会系统地偏离背后的偏好。
+- **@hashimoto2018fairness**, "Fairness Without Demographics in Repeated Loss Minimization" —— 把分布鲁棒优化用于公平：不需要明确的群体标签也能保护少数群体，与本章"不公平会叠加"的分析直接相关。
 
-This chapter synthesizes insights across these literatures to provide integrated guidance for building fairer preference learning systems.
+本章把这些方向的洞见合在一起，为建造更公平的偏好学习系统提供一份整体的指引。
