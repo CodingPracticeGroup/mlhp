@@ -88,25 +88,25 @@ execute:
 
 ### Scalable Oversight
 
-As AI systems become more capable, the tasks they perform become harder for humans to evaluate. A language model writing code may produce solutions that work but are subtly flawed in ways a non-expert cannot detect. A scientific assistant might propose experiments whose validity requires deep domain expertise to assess.
+AI 系统越来越能干，它们做的事也就越来越难由人来评。语言模型写的代码可能能跑，但有一些不专业的人看不出来的细微毛病；一个科研助手提出的实验方案，它靠不靠谱要靠很深的专业知识才能判断。
 
-*Scalable oversight* addresses this challenge through techniques like:
+*可扩展的监查*正是为这类难题准备的一组技术，包括：
 
-- **Recursive reward modeling**: Decomposing complex evaluation tasks into simpler subtasks that humans can reliably judge. The key insight is that while evaluating a complete solution may be hard, verifying individual steps is often feasible. This connects to the preference elicitation framework of Chapter 3: by decomposing evaluation, we can apply Fisher information analysis to each subtask and select the most informative verification queries.
-- **AI-assisted evaluation**: Using AI systems to help humans provide more accurate feedback, while remaining vigilant about circular dependencies. RLAIF (reinforcement learning from AI feedback) replaces human annotators with AI evaluators, raising questions about whether the preference signal is genuinely informative or merely reflects the evaluator model's own biases.
-- **Debate and amplification**: Adversarial procedures where AI systems critique each other's outputs, surfacing flaws that a single evaluator might miss. This can be formalized as a zero-sum game, connecting to the von Neumann winner concept from Chapter 4's dueling bandits framework.
+- **递归式奖励建模**：把复杂的评审任务拆成人能可靠判断的小任务。关键的思路是：评价一整个方案也许很难，但验证其中一个个步骤往往做得到。这与第 3 章的偏好征询框架是相通的——把评审拆开之后，就能对每个子任务做 Fisher 信息分析，挑出最有信息量的那些验证性问题。
+- **AI 辅助的评估**：让 AI 系统帮人给出更准确的反馈，同时警惕自相关的循环。RLAIF（从 AI 反馈中学习）用 AI 评估员取代人类标注员，这就带来一个问题：这样的偏好信号到底有多少信息量，还是只是在重复评估模型自己的偏见。
+- **辩论与放大**：让 AI 系统互相批评对方的输出，把单个评估者容易漏掉的问题暴露出来。它可以被形式化成一场零和博弈，这正好接到第 4 章对决老虎机框架里的冯·诺依曼胜者概念。
 
-The CIRL framework from Chapter 4 models the cooperative structure of oversight, where the human's ability to evaluate depends on how the agent presents its outputs. But scaling these ideas to superhuman AI systems—where the agent's capabilities exceed the evaluator's—remains one of the most important open frontiers in AI safety.
+第 4 章的协作逆强化学习框架，把监查中的合作关系建了出来：人能否评价，取决于智能体怎么呈现自己的输出。但把这些想法推广到能力超过评价者的超强 AI 系统上，仍是 AI 安全中最要紧的开放前沿之一。
 
-### Temporal Dynamics and Preference Change
+### 时间动态与偏好的变化
 
-This book has largely treated preferences as static: a user has fixed utilities $V_j$ that we aim to estimate. In reality, preferences evolve over time. A user's taste in music changes as they discover new genres; a society's norms around acceptable content shift across decades; an annotator's judgment drifts as they gain experience with the task.
+本书基本把偏好当成静态的：用户有一组固定的效用 $V_j$，我们想办法把它们估出来。可现实里偏好是随时间变的。一个人的音乐口味会随着他接触新曲风而变化；一个社会对"什么内容可以接受"的标准，会在几十年里位移；标注员的判断，也会随着他对任务越来越熟而漂移。
 
-Modeling temporal preference dynamics introduces several challenges:
+给随时间变化的偏好建模，会遇到几个难题：
 
-- **Distinguishing drift from noise**: Is a changed preference a genuine evolution (the user's taste matured) or a noisy observation (the user was tired that day)? The Bayesian framework from Chapter 2 can be extended with time-varying priors—for example, a random walk on utilities—but choosing the right rate of change requires domain knowledge.
-- **Non-stationarity in online learning**: The Elo rating system (Chapter 2, @sec-online) implicitly handles non-stationarity through its constant step size $K$, which weights recent observations more heavily. But the optimal $K$ depends on the rate of change, creating a tradeoff between responsiveness and stability.
-- **Retroactive fairness**: If a system learns preferences from historical data that reflects outdated norms, deploying those preferences perpetuates past values. Chapter 6's pipeline framework ($\mathcal{E} \to \mathcal{L} \to \mathcal{A} \to \mathcal{D}$) provides a lens for auditing where temporal biases enter.
+- **区分漂移与噪声**：一个变了的选择，是真实的观念演化（品味成熟了），还是一次噪声观测（那天他累了）？第 2 章的贝叶斯框架可以加上随时间变化的先验——比如让效用做一次随机游走——但变化速率取多少合适，需要领域知识。
+- **在线学习中的非平稳性**：Elo 等级分系统（第 2 章，@sec-online）其实通过固定的步长 $K$ 隐式地处理了非平稳——近期的观测权重更大。但最优的 $K$ 取决于变化的速率，这之间有个取舍：跟得上变化，还是保持稳定。
+- **追溯性的公平**：如果系统是从反映旧规范的历史数据里学偏好，那么把这些偏好部署出去，就等于是把过去的价值观延续下去。第 6 章的流水线框架（$\mathcal{E} \to \mathcal{L} \to \mathcal{A} \to \mathcal{D}$）正好提供了一个视角，用来看时间性的偏差是从哪一步进来的。
 
 ### Heterogeneity and Personalization
 
