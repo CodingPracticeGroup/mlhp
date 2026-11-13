@@ -326,16 +326,16 @@ AI 系统越来越能干，它们做的事也就越来越难由人来评。语�
 
 **多模态与具身的偏好。** 本书主要讨论对离散项目或文本回答的偏好。而机器人领域的偏好（对轨迹）、设计领域的偏好（对视觉版式），以及多模态场景下的偏好（对文本、图像、声音的组合）会带来更多挑战，我们只是略有涉及。
 
-## Final Thought
+## 最后的话
 
-At its core, this book has been about a simple idea: rather than specifying objectives by hand, we can learn them from human feedback. This idea is powerful because it promises AI systems that serve human values rather than proxy metrics—systems that improve as we better understand what we want.
+说到底，本书讲的其实是一个朴素的念头：目标不必由人手工写定，我们可以从人类的反馈里把它学出来。这个念头之所以有力，在于它许诺了这样一种 AI 系统——它服务于人的价值，而不是服务于替代指标；随着我们更清楚自己想要什么，它就变得更好。
 
-But the idea is also subtle. Human preferences are noisy, inconsistent, context-dependent, and heterogeneous. They can be manipulated, and they evolve over time. Learning from preferences does not automatically solve the alignment problem; it transforms it into questions about whose preferences to learn from, how to aggregate them, and when to defer to them versus override them.
+但这个念头也很微妙。人类的偏好带着噪声、前后不一致、依赖情境，人与人之间又各不相同；它们会被引导，也会随时间改变。从偏好中学习，并不自动解决对齐问题；它把对齐问题变成了另一组问题：该向谁的偏好学习、怎么把它们汇总起来、什么时候该听从、什么时候该替人做主。
 
-The technical methods in this book—Bradley-Terry models, Bayesian inference, Fisher information, Thompson Sampling, preferential Bayesian optimization, the DPO-Borda connection, CIRL, mechanism design—are tools, and they are more deeply connected than a chapter-by-chapter reading might suggest. The Elo system is stochastic gradient descent on Bradley-Terry; DPO finds the Borda winner; Fisher information drives both active elicitation and fairness auditing; CIRL reframes passive data collection as cooperative interaction. These connections form a coherent framework, not merely a collection of techniques. But like all tools, their value depends on how they are used. The same algorithms that personalize recommendations to delight users can personalize manipulation to exploit them.
+本书里的技术方法——Bradley-Terry 模型、贝叶斯推断、Fisher 信息、汤普森采样、偏好式贝叶斯优化、DPO 与博尔达计分法的联系、协作逆强化学习、机制设计——都是工具；而它们之间的联系，比按章来读时看到的要深得多。Elo 等级分就是在 Bradley-Terry 上做随机梯度下降；DPO 找的是博尔达胜者；Fisher 信息既驱动主动征询，也驱动公平性审计；协作逆强化学习则把被动的数据收集改写成了合作式的交互。这些联系构成的是一个自洽的框架，不只是一堆技术。但工具和人用的一切工具一样，价值取决于怎么用。同样的算法，可以用来做因人而异的推荐让人高兴，也可以用来做因人而异的"诱导"来利用人。
 
-We hope this book has equipped you not only with technical skills but also with the conceptual frameworks to use them wisely. The field of machine learning from human preferences is young and evolving rapidly. The researchers and practitioners who engage with it today will shape how AI systems learn from and serve humanity in the decades to come.
+我们希望本书带给你的，不只是技术能力，还有能明智地使用这些技术的概念框架。从人类偏好中学习机器学习，是一门年轻的学科，变化很快。今天参与进来的人和团队，将决定未来几十年里 AI 系统怎样向人类学习、怎样服务人类。
 
-We invite you to contribute—to develop new methods, to apply existing ones thoughtfully, to critique approaches that fall short, and to engage with the broader societal implications of this work. The challenge of building AI systems that truly align with human values is too important to be left to any single discipline or community. It requires the collective effort of computer scientists, economists, psychologists, philosophers, policymakers, and the public.
+我们也邀请你加入进来——去发展新的方法，去审慎地应用已有的方法，去批评那些做得不够好的做法，去认真对待这项工作对整个社会的影响。要让 AI 系统真正与人类的价值观对齐，这个挑战太大、太重要，不能交给某一个学科或某一个群体。它需要计算机科学家、经济学家、心理学家、哲学家、政策制定者和公众一起出力。
 
-The journey from this book's mathematical foundations to AI systems that reliably serve human flourishing is long. But every improvement in how we learn from human preferences brings us closer to that goal. We hope you will join us on this path.
+从本书的数学基础，走到能稳定服务于人类福祉的 AI 系统，路还很长。但在"怎样从人类偏好中学习"这件事上每前进一步，我们就离那个目标更近一步。希望在这条路上，能与你同行。
