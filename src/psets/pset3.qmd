@@ -3,7 +3,7 @@ title: "习题 3：主动征询与序贯决策"
 lang: zh
 ---
 
-## Exercises
+## 习题
 ### Question 1: Preferential Bayesian Optimization (30 points) {#sec-question-1-preferential-bayesian-optimization-30-points .unnumbered}
 
 **偏好式贝叶斯优化（Preferential Bayesian Optimization, PBO）** 是贝叶斯优化（BO）的一个变体，用来处理"反馈是备选项之间的偏好、而不是明确的数值评分"的场景。

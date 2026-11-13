@@ -51,7 +51,11 @@ jobs:
       # 习题集是嵌套项目（src/psets/_quarto.yml），主项目不会渲染它们，需单独渲染到 _book/src/psets/
       - name: 渲染习题集
         working-directory: src/psets
-        run: quarto render pset1.qmd pset2.qmd pset3.qmd
+        # 逐个渲染：一次渲染多个文档时，输出文件会互相覆盖（pset2.html 被 pset3 覆盖）
+        run: |
+          for f in pset1 pset2 pset3; do
+            quarto render "$f.qmd"
+          done
 
       - uses: actions/upload-pages-artifact@v3
         with:
