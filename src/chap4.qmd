@@ -2469,31 +2469,31 @@ $$ {#eq-policy-gradient-theorem}
 where $G_t = \sum_{t'=t}^{T} \gamma^{t'-t} R(s_{t'}, a_{t'})$ is the **return** (cumulative discounted reward) from time step $t$ onward.
 :::
 
-*Proof sketch.* Write $J(\theta) = \mathbb{E}_{\tau \sim p(\cdot|\theta)}[R(\tau)]$ where $R(\tau) = \sum_t \gamma^t R(s_t, a_t)$. Apply the score function trick to the trajectory distribution: $\nabla_\theta J = \mathbb{E}_\tau[R(\tau) \nabla_\theta \log p(\tau|\theta)]$. Substitute @eq-log-trajectory-grad. Finally, note that actions at time $t$ cannot influence rewards at earlier times, so we can replace $R(\tau)$ with the future return $G_t$ for each term in the sum. $\square$
+*证明要点。* 把 $J(\theta) = \mathbb{E}_{\tau \sim p(\cdot|\theta)}[R(\tau)]$ 写开，其中 $R(\tau) = \sum_t \gamma^t R(s_t, a_t)$。
 
-### REINFORCE and Variance Reduction
+### REINFORCE 与降方差
 
-The policy gradient theorem immediately yields the simplest policy gradient algorithm.
+有了策略梯度定理，最直接的做法就出来了，也就是最简单的策略梯度算法。
 
-::: {.callout-note title="Algorithm: REINFORCE [@williams1992simple]"}
-**Input:** Parameterized policy $\pi_\theta$, learning rate $\alpha$
+::: {.callout-note title="算法：REINFORCE [@williams1992simple]"}
+**输入：** 参数化策略 $\pi_\theta$，学习率 $\alpha$
 
-**Repeat:**
+**重复：**
 
-1. Sample trajectory $\tau = (s_0, a_0, \ldots, s_T, a_T) \sim \pi_\theta$
-2. For each time step $t = 0, \ldots, T$:
-     - Compute return $G_t = \sum_{t'=t}^{T} \gamma^{t'-t} R(s_{t'}, a_{t'})$
-3. Update: $\theta \leftarrow \theta + \alpha \sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t \mid s_t) \cdot G_t$
+1. 采一条轨迹 $\tau = (s_0, a_0, \ldots, s_T, a_T) \sim \pi_\theta$
+2. 对每个时刻 $t = 0, \ldots, T$：
+     - 算回报 $G_t = \sum_{t'=t}^{T} \gamma^{t'-t} R(s_{t'}, a_{t'})$
+3. 更新：$\theta \leftarrow \theta + \alpha \sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t \mid s_t) \cdot G_t$
 :::
 
-REINFORCE is an unbiased estimator of the policy gradient, but it suffers from **high variance**: a single trajectory can produce wildly different gradient estimates depending on the stochastic outcomes. This motivates **variance reduction** through baselines.
+REINFORCE 是策略梯度的无偏估计，但它有个毛病：**方差很大**。同一条轨迹，遇到不同的随机结果，估出来的梯度可能差得非常远。这就引出了用基线来**降方差**。
 
-**Baseline subtraction.** We can subtract any function $b(s_t)$ that depends only on the state (not the action) from the return without introducing bias:
+**减去基线（baseline subtraction）。** 可以从回报里减去任何一个只依赖状态（不依赖行动）的函数 $b(s_t)$，而不会引入偏差：
 $$
 \nabla_\theta J(\theta) = \mathbb{E}_{\tau}\left[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t \mid s_t) \, (G_t - b(s_t))\right]
 $$ {#eq-reinforce-baseline}
 
-**Why is this unbiased?** For any state-dependent baseline $b(s)$:
+**为什么这样做没有偏？** 对任何只依赖状态的基线 $b(s)$：
 $$
 \mathbb{E}_{a \sim \pi_\theta(\cdot|s)}\left[\nabla_\theta \log \pi_\theta(a \mid s) \cdot b(s)\right] = b(s) \cdot \nabla_\theta \sum_{a} \pi_\theta(a \mid s) = b(s) \cdot \nabla_\theta \, 1 = 0
 $$ {#eq-baseline-unbiased}
