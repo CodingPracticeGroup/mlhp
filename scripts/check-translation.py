@@ -36,6 +36,7 @@ def feats(t: str):
     f["code_blocks"] = re.findall(r"^```(?:\{[^}]*\})?\n(.*?)^```", t, flags=re.S | re.M)
     f["_items"] = {
         "display_math": re.findall(r"\$\$(?:.*?)\$\$", t, flags=re.S),
+        "heading_spacing": heading_spacing_problems(t),
         "inline_math": math_spans(t),
     }
     return f
@@ -61,6 +62,23 @@ def math_spans(t: str):
                 # 公式内部的空白差异不影响含义，比较时一并去掉
                 out.append("".join(span.split()))
     return out
+
+
+def heading_spacing_problems(t: str):
+    """标题前必须留空行；否则 Pandoc 会把它当成上一段的续行，标题的编号和标签都会失效。"""
+    lines = t.split("\n")
+    bad, fence = [], False
+    for i, line in enumerate(lines):
+        if line.lstrip().startswith("```"):
+            fence = not fence
+            continue
+        if fence:
+            continue
+        if re.match(r"^#{1,6} ", line) and i:
+            prev = lines[i - 1]
+            if prev.strip() and not re.match(r"^(#{1,6} |::: |\s*$)", prev):
+                bad.append(i + 1)
+    return bad
 
 
 def item_diff(key, base, new):

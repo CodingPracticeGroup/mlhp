@@ -350,7 +350,7 @@ print(f"After center and whiten: Corr {corr:.4f}, MSE: {mse:.6f}")
 
 ## 贝叶斯推断 {#sec-bayesian}
 
-贝叶斯方法是最大似然之外一条很自然的参数估计路线。我们不再只求一个点估计，而是给参数设一个先验分布，再用观测比较给出的似然去更新它。这样得到的后验分布既给出中心估计，也给出围绕它的 uncertainty（不确定性）。下面先讲用 MCMC 处理参数模型，再延伸到用拉普拉斯近似处理非参数的高斯过程模型。
+贝叶斯方法是最大似然之外一条很自然的参数估计路线。我们不再只求一个点估计，而是给参数设一个先验分布，再用观测比较给出的似然去更新它。这样得到的后验分布既给出中心估计，也给出围绕它的不确定性。下面先讲用 MCMC 处理参数模型，再延伸到用拉普拉斯近似处理非参数的高斯过程模型。
 
 ### 参数模型
 
@@ -590,9 +590,9 @@ print(f"Learned from {n_comparisons} pairwise comparisons")
 print(f"Posterior uncertainty varies: min std = {std_pred.min():.3f}, max std = {std_pred.max():.3f}")
 ```
 
-#### 与 Fisher 信息的联系 {#sec-fisher-information}
+#### 与 费雪信息的联系 {#sec-fisher-information}
 
-拉普拉斯近似与我们为线性模型建立的 Fisher 信息框架之间，有一个很自然的联系：负对数似然在众数处的 Hessian 就是*观测 Fisher 信息*：
+拉普拉斯近似与我们为线性模型建立的 费雪信息框架之间，有一个很自然的联系：负对数似然在众数处的 Hessian 就是*观测 费雪信息*：
 $$
 I_{\text{obs}} = W = \text{diag}(p_1(1-p_1), \ldots, p_n(1-p_n))
 $$ {#eq-fisher-information}

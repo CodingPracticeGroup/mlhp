@@ -41,11 +41,11 @@ filters:
 读完本章，你应当能够：
 
 - **说明**用户偏好征询中的测量问题，并把它与第 2 章的学习问题区分开。
-- **推导**Rasch/Bradley-Terry 模型的 Fisher 信息，并解释为什么 $p \approx 0.5$ 的物品最有信息量。
+- **推导**Rasch/Bradley-Terry 模型的 费雪信息，并解释为什么 $p \approx 0.5$ 的物品最有信息量。
 - **比较**用于挑选有价值提问的 A 最优、D 最优、E 最优三种设计准则。
 - **应用**拉普拉斯近似，实时更新对用户偏好的后验信念。
 - **实现**在样本效率上超过随机抽样的主动选题策略。
-- **推广**：通过局部线性化，把 Fisher 信息分析用到非线性打分函数上。
+- **推广**：通过局部线性化，把 费雪信息分析用到非线性打分函数上。
 - **应用**信息论的采集函数，为高斯过程偏好模型主动挑选要问的比较（GP 的基础见第 2 章与第 3 章）。
 - **解释**D 最优设计如何应用于语言模型对齐中的直接偏好优化（DPO），并导出 ADPO 算法。
 - **分析**机器人场景下的主动偏好学习，包括轨迹比较与奖励函数推断。
@@ -57,11 +57,11 @@ filters:
 
 这就是偏好征询中的**测量问题**。学习问题假定数据已经有了；测量问题则主动设计试验，让每一次提问带来的信息最多。设想用 RLHF 训练一个大语言模型：收集 10 万条人类偏好标注既花钱又花时间。如果只问 2 万条精心挑选的比较就能达到同样的对齐效果，标注成本就省下了 80%。
 
-核心认识是：**并不是所有比较都一样有用**。问人"'Hello!' 和 'Hi there!' 哪个好'几乎问不出模型的优劣；而对一个复杂提示下两个实质不同的回答作比较，信号就强得多。*Fisher 信息*与*最优试验设计*这套数学工具，正好把这个直觉形式化。
+核心认识是：**并不是所有比较都一样有用**。问人"'Hello!' 和 'Hi there!' 哪个好'几乎问不出模型的优劣；而对一个复杂提示下两个实质不同的回答作比较，信号就强得多。*费雪信息*与*最优试验设计*这套数学工具，正好把这个直觉形式化。
 
 **本章结构。** 我们从简单情形一步步走到复杂情形：
 
-1. **标量偏好**（@sec-measurement）：Rasch 模型与 Fisher 信息
+1. **标量偏好**（@sec-measurement）：Rasch 模型与 费雪信息
 2. **多维偏好**（@sec-factor-models-active）：因子模型与最优设计准则（A/D/E 最优）
 3. **偏好函数**（@sec-preference-function）：线性与非线性的打分函数
 4. **非参数模型**（@sec-active-learning）：基于高斯过程的主动学习，用信息论的采集函数
@@ -72,39 +72,40 @@ filters:
 
 | 概念 | 第 1-2 章 | 本章 |
 |---------|------------|--------------|
-| Bradley-Terry 模型 | 似然、最大似然估计（@sec-bradley-terry） | Fisher 信息、挑选要问的比较 |
+| Bradley-Terry 模型 | 似然、最大似然估计（@sec-bradley-terry） | 费雪信息、挑选要问的比较 |
 | 因子模型 $U^\top V$ | 参数估计（@sec-latent-variable） | 用 D 最优选比较对 |
 | 高斯过程偏好模型 | 拉普拉斯推断（@sec-gp-inference） | 信息增益采集函数 |
 | DPO 损失 | 目标函数（@sec-llm-example） | ADPO 主动挑选 |
 
 **历史脉络。** 主动式偏好学习在好几个领域都有源头：
 
-- **心理测量学（1960 年代）**：计算机化自适应测验用 Fisher 信息挑选与学生水平相匹配的题目
+- **心理测量学（1960 年代）**：计算机化自适应测验用 费雪信息挑选与学生水平相匹配的题目
 - **最优试验设计（1970 年代）**：Fedorov 与 Kiefer 为线性模型建立了 A/D/E 最优性理论
 - **贝叶斯试验设计（1990 年代）**：Chaloner 与 Verdinelli 把信息论方法统一起来
 - **RLHF / 主动 DPO（2020 年代）**：把这些想法用到大规模的语言模型对齐上
 
 > "最优设计的目的，是用最小的代价达到所要求的精度。"—— V. V. Fedorov（1972）
+
 ## 用户偏好向量的测量 {#sec-measurement}
 
-如果各物品的吸引力 $V_j$ 已知或早已标定好，那么只要在线挑那些有信息量的物品，就能很快学出一位新用户 $U$ 的胃口。只问太简单的或只问太难的，回答几乎总是确定的，学不到东西。用来量化"有没有信息量"的关键工具就是 Fisher 信息。
+如果各物品的吸引力 $V_j$ 已知或早已标定好，那么只要在线挑那些有信息量的物品，就能很快学出一位新用户 $U$ 的胃口。只问太简单的或只问太难的，回答几乎总是确定的，学不到东西。用来量化"有没有信息量"的关键工具就是 费雪信息。
 
-::: {.callout-note title="定义：Fisher 信息"}
+::: {.callout-note title="定义：费雪信息"}
 ::: {#def-fisher-info}
-对参数模型 $p(Y \mid \theta)$，关于参数 $\theta$ 的**Fisher 信息（Fisher Information）**定义为：
+对参数模型 $p(Y \mid \theta)$，关于参数 $\theta$ 的**费雪信息（Fisher Information）**定义为：
 $$
 \mathcal{I}(\theta) = \mathbb{E}\left[-\frac{\partial^2}{\partial \theta^2} \log p(Y \mid \theta)\right] = \mathbb{E}\left[\left(\frac{\partial}{\partial \theta} \log p(Y \mid \theta)\right)^2\right]
 $$
-Fisher 信息衡量的是：一条观测量能透露多少关于 $\theta$ 的信息。Fisher 信息越大，每条观测能达到的估计精度就越高。Cramér-Rao 下界指出：任何无偏估计的方差都不小于 $\mathcal{I}(\theta)^{-1}$。
+费雪信息衡量的是：一条观测量能透露多少关于 $\theta$ 的信息。费雪信息越大，每条观测能达到的估计精度就越高。Cramér-Rao 下界指出：任何无偏估计的方差都不小于 $\mathcal{I}(\theta)^{-1}$。
 :::
 :::
 
-Rasch 模型把这个说法变得确切。回想 @sec-latent-variable：对某个候选物品 $j$，伯努利成功概率是 $p_j(U) = \sigma(U + V_j)$。单条回答关于 $U$ 的 Fisher 信息是
+Rasch 模型把这个说法变得确切。回想 @sec-latent-variable：对某个候选物品 $j$，伯努利成功概率是 $p_j(U) = \sigma(U + V_j)$。单条回答关于 $U$ 的 费雪信息是
 $$\mathcal I_j(U) = \mathbb{E} \left[-\frac{\partial^2}{\partial U^2}\log p(Y \mid U, V_j)\right] = p_j(U) (1 - p_j(U)).$$ {#eq-rasch-fisher-info}
 
 ::: {.callout-note title="命题：题目的最优难度"}
 ::: {#prp-fisher-max}
-对满足 $p_j(U) = \sigma(U + V_j)$ 的 Rasch 模型，Fisher 信息 $\mathcal{I}_j(U) = p_j(1-p_j)$ **在 $p_j(U) = 0.5$ 时最大**，也就是题目难度 $-V_j$ 恰好等于用户能力 $U$ 的时候。
+对满足 $p_j(U) = \sigma(U + V_j)$ 的 Rasch 模型，费雪信息 $\mathcal{I}_j(U) = p_j(1-p_j)$ **在 $p_j(U) = 0.5$ 时最大**，也就是题目难度 $-V_j$ 恰好等于用户能力 $U$ 的时候。
 :::
 :::
 
@@ -112,7 +113,7 @@ $$\mathcal I_j(U) = \mathbb{E} \left[-\frac{\partial^2}{\partial U^2}\log p(Y \m
 函数 $f(p) = p(1-p)$ 是一条开口向下的抛物线，根在 $p=0$ 与 $p=1$。求导：$f'(p) = 1 - 2p = 0 \Rightarrow p = 0.5$。此处 $f(0.5) = 0.25$，就是最大值。而 $p_j(U) = \sigma(U + V_j) = 0.5$ 当且仅当 $U + V_j = 0$，所以最优物品满足 $V_j = -U$。
 :::
 
-::: {.callout-caution title="完整算例：用 Fisher 信息挑物品" collapse="false"}
+::: {.callout-caution title="完整算例：用 费雪信息挑物品" collapse="false"}
 已知某用户能力的估计是 $\hat{U} = 1.0$。手上有三个候选物品，吸引力分别为 $V_1 = -2.0$（难）、$V_2 = -1.0$（匹配）、$V_3 = 1.0$（简单）。下一个该问哪个？
 
 **第 1 步。** 算出预测的成功概率：
@@ -120,7 +121,7 @@ $$p_1 = \sigma(1.0 + (-2.0)) = \sigma(-1.0) \approx 0.269$$
 $$p_2 = \sigma(1.0 + (-1.0)) = \sigma(0.0) = 0.500$$
 $$p_3 = \sigma(1.0 + 1.0) = \sigma(2.0) \approx 0.881$$
 
-**第 2 步。** 算出每个物品的 Fisher 信息：
+**第 2 步。** 算出每个物品的 费雪信息：
 $$\mathcal{I}_1 = p_1(1-p_1) = 0.269 \times 0.731 \approx 0.197$$
 $$\mathcal{I}_2 = p_2(1-p_2) = 0.500 \times 0.500 = 0.250$$
 $$\mathcal{I}_3 = p_3(1-p_3) = 0.881 \times 0.119 \approx 0.105$$
@@ -136,7 +137,7 @@ $$S(U) = \sum_{j\in\mathcal J} (y_j - p_j(U)), \qquad \mathcal I(U) = \sum_{j\in
 $$
 \text{Rel} \approx 1 - \frac{1}{N}\sum_{i=1}^N \frac{\widehat{\mathrm{Var}}(U_i)}{\sigma_U^2}.
 $$ {#eq-reliability}
-下面的代码模拟很多用户和一个已经标定好的题库，把"按 Fisher 信息选题"的策略与随机策略作对比，并统计提问 $t$ 次之后的信度。
+下面的代码模拟很多用户和一个已经标定好的题库，把"按 费雪信息选题"的策略与随机策略作对比，并统计提问 $t$ 次之后的信度。
 
 首先搭好模拟环境：$N$ 个用户、$M$ 个已经标定好的物品，并定义几个做贝叶斯更新的辅助函数。
 
@@ -250,54 +251,54 @@ print(f"Final MSE  | Random: {mse_rnd[-1]:.4f} | Fisher: {mse_act[-1]:.4f}")
 print(f"Final Rel. | Random: {rel_rnd[-1]:.3f}  | Fisher: {rel_act[-1]:.3f}")
 ```
 
-::: {.callout-important title="Key Takeaway: Active Beats Random"}
-Fisher-active item selection achieves higher reliability with fewer queries than random selection. The gain comes from targeting items near $p=0.5$, where each response is maximally informative. This principle---**measure where uncertainty is highest**---underlies all active learning methods in this chapter.
+::: {.callout-important title="本章要点：主动选题胜过随机"}
+按 费雪信息主动选题，用更少的提问就能达到更高的信度。好处来自盯着 $p=0.5$ 附近的物品问——那里每条回答的信息量最大。**在不确定性最高的地方去测量**这条原则，正是本章所有主动学习方法共同的内核。
 :::
 
-::: {.callout-warning title="Assumption: Known Item Parameters"}
-The Fisher information framework above assumes item parameters ($V_j$, $Z_j$) are **known or pre-calibrated** before elicitation begins. In practice, item parameters must often be estimated jointly with user preferences---this is the **cold-start problem** in recommender systems. When item parameters are uncertain, errors in item calibration propagate into suboptimal query selection: the system may ask about items it *thinks* are informative but are not. Joint estimation of user and item parameters requires different approaches, such as alternating optimization or fully Bayesian models that maintain uncertainty over both.
+::: {.callout-warning title="假设：物品参数已知"}
+上面的 费雪信息框架假定物品参数（$V_j$、$Z_j$）在开始征询之前就已**已知或已经标定好**。可现实中，物品参数往往要和用户偏好一起估计——这就是推荐系统里的**冷启动问题**。物品参数不确定时，标定误差会传导到选题决策上：系统可能去问那些它*以为*很有信息量、实际上并不一定的物品。要把用户参数和物品参数一起估计，需要另外的办法，比如交替优化，或者对两者都保持不确定性的全贝叶斯模型。
 :::
 
-### Factor Models: Multi-Dimensional Preferences {#sec-factor-models-active}
+### 因子模型：多维偏好 {#sec-factor-models-active}
 
-In practice, a single "ability" parameter may not capture the diversity of user preferences. Factor models generalize Rasch by giving each user a $K$-dimensional embedding $U_i \in \mathbb R^K$ and each item a $K$-dimensional embedding $V_j \in \mathbb R^K$, plus optional bias $Z_j$. The linear predictor is $H_{ij} = U_i^\top V_j + Z_j$ where $p(Y_{ij}=1 \mid U_i, V_j, Z_j) = \sigma(H_{ij}).$
+实际上，只靠一个"能力"参数未必能概括用户偏好的多样性。因子模型把 Rasch 模型推广开：给每位用户一个 $K$ 维向量表示 $U_i \in \mathbb R^K$，给每个物品一个 $K$ 维向量表示 $V_j \in \mathbb R^K$，还可以加一个可选的偏置 $Z_j$。线性预测量为 $H_{ij} = U_i^\top V_j + Z_j$，其中 $p(Y_{ij}=1 \mid U_i, V_j, Z_j) = \sigma(H_{ij})$。
 
-A concrete instance is **performance metric elicitation** [@pmlr-v89-hiranandani19a]. In binary classification, practitioners often have implicit preferences over classifiers that don't match standard metrics like accuracy or F1---for instance, in medical diagnosis, the cost of a false negative (missed disease) may differ greatly from a false positive (unnecessary treatment). This is a $K=2$ factor model where "items" are classifiers with known confusion matrices $V_\theta = (\text{TP}_\theta, \text{TN}_\theta)$, and the "user preference" is the unknown metric weights $\mathbf{m} = (m_{11}, m_{00})$. The utility $\mathbf{m}^\top V_\theta = m_{11} \cdot \text{TP}_\theta + m_{00} \cdot \text{TN}_\theta$ is exactly the factor model form with known item parameters.
+一个具体的例子是**性能度量征询**（performance metric elicitation）[@pmlr-v89-hiranandani19a]。做二分类时，工程师心里对分类器的偏好，常常和准确率、F1 这些标准指标对不上——比如在医学诊断中，漏诊（假阴性）的代价和误诊（假阳性，白治一场）的代价可能差得非常远。这正是一个 $K=2$ 的因子模型："物品"是混淆矩阵已知的各个分类器，$V_\theta = (\text{TP}_\theta, \text{TN}_\theta)$；"用户偏好"则是未知的指标权重 $\mathbf{m} = (m_{11}, m_{00})$。效用 $\mathbf{m}^\top V_\theta = m_{11} \cdot \text{TP}_\theta + m_{00} \cdot \text{TN}_\theta$ 恰好就是物品参数已知的因子模型形式。
 
-For a given user $U$ and an item $j$ with known parameters, the Bernoulli log-likelihood is
+给定用户 $U$ 和一个参数已知的物品 $j$，伯努利对数似然是
 $$\ell(U; y, j) = y \log \sigma(H) + (1-y)\log (1-\sigma(H))$$ {#eq-factor-loglik}
-The gradient with respect to $U$ is $\nabla_U \ell = (y - \sigma(H)) V_j.$ The expected Fisher Information per item is the negative expected Hessian:
+对 $U$ 求梯度得 $\nabla_U \ell = (y - \sigma(H)) V_j$。每个物品的期望 费雪信息就是负的期望 Hessian：
 $$
 \mathcal I_j(U) = \mathbb E[\nabla_U \ell \nabla_U \ell^\top ] = \sigma(H)(1-\sigma(H)) V_j V_j^\top.
 $$ {#eq-factor-fisher-info}
-So each queried item contributes a rank-1 matrix in the direction of $V_j$, scaled by the variance term $\sigma(H)(1-\sigma(H))$. For a sequence of items ${j_t}$, the cumulative information is
+所以每问一个物品，就沿 $V_j$ 这个方向贡献一个秩为 1 的矩阵，再按方差项 $\sigma(H)(1-\sigma(H))$ 缩放。依次询问一列物品 ${j_t}$，累积信息量为
 $$\mathcal I(U) = \sum_t \sigma(H_{j_t})(1-\sigma(H_{j_t})) V_{j_t} V_{j_t}^\top.$$ {#eq-cumulative-fisher-info}
 
-::: {.callout-warning title="Assumption: Correct Model Specification"}
-Fisher information quantifies the informativeness of a query **under the assumed model**. If the model is misspecified---for example, if preferences are not logistic, or if the factor structure has the wrong dimensionality $K$---then queries optimized for the Fisher criterion may not be optimal for learning the true preference structure. Under misspecification, information-theoretic criteria such as mutual information or Bayesian approaches that integrate over model uncertainty can be more robust. In practice, it is worth checking sensitivity to the assumed model by comparing active learning performance across different model specifications.
+::: {.callout-warning title="假设：模型设定正确"}
+费雪信息衡量一次提问的信息量，是**在假定的模型之下**说的。如果模型设定错了——比如偏好并不是逻辑斯蒂形式，或者因子结构取的维度 $K$ 不对——那么按费雪信息准则挑出的问题，对学到真实偏好结构未必最优。设定错误时，互信息这类信息论准则、或者对模型不确定性作积分的贝叶斯方法会更稳健。实践中值得做一下模型敏感性检查：换几种不同的模型设定，比较主动学习的表现差多少。
 :::
 
-In multiple dimensions, information is a matrix. Classical optimal design offers various criteria for selecting informative queries:
+到了多维情形，"信息"就成了一個矩阵。经典的最优试验设计给出了若干准则，用来挑出有信息量的提问：
 
-::: {.callout-note title="Definition: Optimal Design Criteria"}
+::: {.callout-note title="定义：最优设计准则"}
 ::: {#def-optimal-design}
-Given a Fisher Information matrix $\mathcal{I}(U)$, the classical **optimal experimental design** criteria are:
+给定 费雪信息矩阵 $\mathcal{I}(U)$，经典的**最优试验设计（optimal experimental design）**准则有以下几种：
 
-- **A-Optimal (Average)**: Minimize $\text{tr}(\mathcal{I}^{-1})$---the average variance of parameter estimates
-- **D-Optimal (Determinant)**: Maximize $\det(\mathcal{I})$---the volume shrinkage of the posterior ellipsoid
-- **E-Optimal (Eigenvalue)**: Maximize $\lambda_{\min}(\mathcal{I})$---the precision in the worst-case direction
+- **A 最优（Average，平均）**：最小化 $\text{tr}(\mathcal{I}^{-1})$——也就是参数估计的平均方差
+- **D 最优（Determinant，行列式）**：最大化 $\det(\mathcal{I})$——也就是后验椭球体积的缩小程度
+- **E 最优（Eigenvalue，特征值）**：最大化 $\lambda_{\min}(\mathcal{I})$——也就是最坏方向上的精度
 
-All three reduce uncertainty, but emphasize different aspects: A-optimal targets average precision, D-optimal targets overall information volume, and E-optimal targets the least-informed direction.
+三者都是在减少不确定性，只是侧重点不同：A 最优追求平均精度，D 最优追求总的信息量，E 最优则专门补信息最少的那个方向。
 :::
 :::
 
-::: {.callout-warning title="Common Pitfall: Confusing A-Optimal, D-Optimal, and E-Optimal"}
-These three criteria **optimize different objectives** and can select different queries. A-optimal minimizes average variance (good when all parameters matter equally), D-optimal maximizes the determinant of the information matrix (shrinks the posterior ellipsoid volume — good for overall uncertainty), and E-optimal maximizes the minimum eigenvalue (guards against worst-case directions). A common mistake is to treat them as interchangeable. In practice: D-optimal naturally encourages **diversity** in selected items (redundant items give diminishing information), while E-optimal is **conservative** (focuses all effort on the least-informed direction). Choose the criterion based on your downstream task — if you need accurate *ranking* of all items, A-optimal is natural; if you need a single *best* decision, E-optimal may be preferable.
+::: {.callout-warning title="常见坑：把 A 最优、D 最优、E 最优混为一谈"}
+这三个准则**优化的目标并不相同**，选出来的比较也可能不同。A 最优最小化平均方差（每个参数都一样重要时合适）；D 最优最大化信息矩阵的行列式（缩小后验椭球的体积——适合控制整体的不确定性）；E 最优最大化最小特征值（盯住最坏的那个方向）。常见的错误是把三者当成可以互换的东西。实践中：D 最优天然会让选出的物品更**多样**（重复的物品带来的信息越来越少），而 E 最优很**保守**（把全部力气花在信息最少的那个方向上）。选哪个准则要看你的下游任务——如果你需要把所有物品*排序*排准，A 最优更自然；如果你只做一次*最优*决策，E 最优也许更合适。
 :::
 
-Adaptive measurement picks the next item $j$ to maximize an acquisition function such as $\det(\mathcal I+\mathcal I_j)$. We also use reliability as the evaluation metric here. If $\Sigma_U$ is the population covariance and $\widehat{\Sigma}_{\text{err}}$ the average posterior covariance, then $\text{Reliability} = 1 - \mathrm{tr}(\widehat{\Sigma}_{\text{err}}) \mathrm{tr}(\Sigma_U)^{-1}.$ This generalizes the Rasch reliability to multi-dimensional latent traits. Below is a toy simulation with 2-dimensional users and items, comparing random item selection vs D-optimal Fisher active selection:
+自适应测量会这样选下一个物品 $j$：让某个采集函数最大，例如 $\det(\mathcal I+\mathcal I_j)$。这里的评估指标同样用信度。记 $\Sigma_U$ 为总体协方差、$\widehat{\Sigma}_{\text{err}}$ 为平均后验协方差，则 $\text{Reliability} = 1 - \mathrm{tr}(\widehat{\Sigma}_{\text{err}}) \mathrm{tr}(\Sigma_U)^{-1}$。这正是把 Rasch 模型的信度推广到多维潜在特质。下面是一个玩具模拟：用户和物品都是 2 维，比较"随机选物品"和"按 D 最优 费雪信息主动选物品"：
 
-First, set up the factor model simulation with K-dimensional user and item embeddings:
+先来搭好因子模型的模拟环境，用户和物品都用 K 维向量表示：
 
 ```{pyodide-python}
 #| autorun: true
@@ -425,9 +426,9 @@ This follows from the matrix determinant lemma: $\det(A + uv^\top) = (1 + v^\top
 :::
 :::
 
-Pick the pair that maximizes $\log(1 + w x^\top\Sigma x)$. This requires only a vector-matrix-vector product, making it efficient for online selection.
+选出使 $\log(1 + w x^\top\Sigma x)$ 最大的那一对。这一步只需要一次"向量—矩阵—向量"乘法，所以在线挑选时开销很小。
 
-::: {.callout-warning title="Myopic vs. Non-Myopic Query Selection"}
+::: {.callout-warning title="短视与非短视的选题策略"}
 The D-optimal (and A/E-optimal) criteria above are **greedy**: they select each query to maximize the *immediate* information gain, without considering how the current query affects future query opportunities. The optimal policy would look ahead over a budget of $T$ queries and select the sequence that maximizes total information. In practice, the greedy approach works well when queries are roughly exchangeable, but it can perform poorly in **batch selection** settings (selecting multiple queries simultaneously) because it ignores redundancy---two individually informative queries may provide overlapping information. Batch extensions typically add diversity mechanisms, such as penalizing queries whose feature vectors $V_j - V_k$ are correlated with already-selected pairs.
 :::
 
@@ -559,6 +560,7 @@ Quasiconcavity means the function has a single peak---no local maxima to trap us
 
 ::: {.callout-tip title="Algorithm: LPM Elicitation via Binary Search"}
 **Input:** Tolerance $\epsilon > 0$, oracle $\Omega$
+:::
 
 **Initialize:** $\theta_a = 0$, $\theta_b = \pi/2$
 
@@ -570,7 +572,6 @@ Quasiconcavity means the function has a single peak---no local maxima to trap us
 4. Update $[\theta_a, \theta_b]$ to the interval containing the maximum
 
 **Return:** $\hat{\mathbf{m}} = (\cos\hat\theta, \sin\hat\theta)$ where $\hat\theta = (\theta_a + \theta_b)/2$
-:::
 
 Each iteration uses 4 queries and shrinks the search interval by factor of 2, giving **$O(\log(1/\epsilon))$ query complexity**---exponentially better than the $O(1/\epsilon^2)$ rate for general 2D estimation.
 
@@ -598,7 +599,7 @@ These can be elicited by first finding both the maximizer and minimizer of the i
 Suppose items $j$ have feature vectors $X_j \in \mathbb R^d$. Instead of learning a free scalar parameter $V_j$ for each item, we assume $V_j = W^\top X_j,$ where $W \in \mathbb R^d$ is shared across items. The probability that item $j$ beats item $k$ is $p(j \succ k) = \sigma(V_j - V_k) = \sigma (W^\top(X_j - X_k)).$ This is simply logistic regression on pairwise feature differences. Given one comparison outcome $y \in \{0,1\}$ for pair $(j,k)$ with difference $x_{jk} = X_j - X_k$,
 $$\ell(W) = y\log \sigma(W^\top x_{jk}) + (1-y)\log(1-\sigma(W^\top x_{jk})).
 $$ {#eq-logistic-loglik}
-Gradient: $\nabla_W \ell = (y - p) x_{jk}, \quad p = \sigma( W^\top x_{jk} ).$ Fisher Information (expected negative Hessian): $\mathcal I(W) = \mathbb E\big[(y-p)^2 x_{jk}x_{jk}^\top\big] = p(1-p),x_{jk}x_{jk}^\top.$
+Gradient: $\nabla_W \ell = (y - p) x_{jk}, \quad p = \sigma( W^\top x_{jk} ).$ 费雪信息 (expected negative Hessian): $\mathcal I(W) = \mathbb E\big[(y-p)^2 x_{jk}x_{jk}^\top\big] = p(1-p),x_{jk}x_{jk}^\top.$
 
 With Gaussian prior $W \sim \mathcal N(0,\sigma_0^2 I)$, a Laplace approximation yields posterior covariance $\Sigma \approx (\sigma_0^{-2}I + \sum_t p_t(1-p_t) x_t x_t^\top)^{-1}.$ So, as in the Rasch case, Fisher information accumulates to form posterior precision. At each step, pick a candidate pair $(j,k)$ and compute
 $$
@@ -1179,7 +1180,6 @@ $$
 $$ {#eq-adpo-convergence}
 where $d$ is the effective dimension (rank of the Fisher information matrix). This matches the **minimax optimal rate** for $d$-dimensional estimation.
 :::
-:::
 
 The key insight is that D-optimal design ensures the Fisher information grows proportionally to $n$, leading to $O(1/\sqrt{n})$ estimation error.
 
@@ -1208,6 +1208,7 @@ The D-optimal criterion naturally encourages diversity: selecting redundant quer
 - Prompts cover diverse topics or difficulty levels
 - The goal is sample efficiency over raw performance
 
+:::
 ::: {.callout-tip title="Comparison: GP Active Learning vs. ADPO"}
 | Aspect | GP Active Learning | ADPO |
 |--------|-------------------|------|
@@ -1284,7 +1285,7 @@ For readers who want to go deeper into the topics introduced in this chapter, we
 
 We place (\*), (\*\*), and (\*\*\*) for exercises we deem relatively easy, medium, and hard.
 
-### Fisher Information Maximum (\*)
+### 费雪信息 Maximum (\*)
 Show that for the Rasch model with $p = \sigma(U + V_j)$, the Fisher information $\mathcal{I}_j(U) = p(1-p)$ is maximized when $p = 0.5$. What does this imply about the optimal difficulty of items for measuring a user's ability?
 
 ### Sherman-Morrison Update (\*\*)
@@ -1293,7 +1294,7 @@ Derive the Sherman-Morrison formula for efficiently updating the posterior covar
 ### D-Optimal vs A-Optimal (\*\*)
 Construct a 2D example where D-optimal and A-optimal criteria select different items for the next query. Interpret the difference geometrically in terms of the posterior ellipsoid.
 
-### Pairwise Fisher Information (\*\*)
+### Pairwise 费雪信息 (\*\*)
 For the Bradley-Terry model $p(j \succ k | U) = \sigma(U^\top(V_j - V_k))$, derive the Fisher information matrix for $U$ given a single pairwise comparison. How does this relate to the single-item case?
 
 ### Active Selection Implementation (\*\*\*)
