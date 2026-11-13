@@ -249,53 +249,53 @@ P(B \mid M, C) \neq P(B \mid M)
 $$ {#eq-inversion-problem}
 Different groups have different mappings from mental state to behavior due to context.
 
-**In peer review**, a detailed review could reflect:
+**在同行评审里**，一份详细的审稿意见可能来自：
 
-- **True expertise** ($M$): Reviewer knows the area deeply and can provide thorough feedback
-- **Available time** ($C$): Senior researchers have more flexible schedules, can spend 3 hours on a review
-- **Language proficiency** ($C$): Native English speakers write longer reviews more quickly
-- **Not fatigue** ($C$): Reviews written at 2am are shorter but not necessarily less expert
+- **真正的水平**（$M$）：这位审稿人对这个方向理解很深，能给出充分的意见
+- **有闲暇时间**（$C$）：资深研究员时间安排更灵活，能花三小时写一份审稿意见
+- **语言流利**（$C$）：英语母语者写得更快、也更长
+- **并不疲劳**（$C$）：凌晨两点写的意见更短，但未必外行
 
-If we train on behavior (detailed reviews = good), we conflate expertise with privilege. The system learns to assist reviewers who already have advantages.
+如果我们就拿行为来训练（写得详细 = 好），那就把"水平"和"条件优势"混成一回事了。系统最后学会的，是去服务那些本来就占优势的人。
 
-::: {.callout-warning title="The Inversion Problem in Practice"}
-**Suppose** we observe that Reviewer A writes reviews averaging 800 words, while Reviewer B writes 400-word reviews.
+::: {.callout-warning title="现实中的反演问题"}
+**假设**我们观察到：审稿人 A 的审稿意见平均 800 字，审稿人 B 只写 400 字。
 
-**Naive interpretation**: A is twice as thorough as B → query A twice as much → learn A's style better → assistant works better for A.
+**天真的解读**：A 比 B 认真一倍 → 那就多问 A 一倍 → 对 A 的风格学得更好 → 助手对 A 就更好用。
 
-**Reality**: A is a senior professor with a light teaching load. B is a postdoc with 60-hour weeks, writing reviews at midnight. B's shorter reviews may be equally expert but reflect time constraints, not preferences.
+**实情**：A 是一位教学工作量不重的资深教授；B 是一位每周工作 60 小时的博士后，只能在半夜写审稿意见。B 写得短，可能同样内行，反映的是时间不够，而不是他的偏好。
 
-**Result**: Active learning queries A more → model learns A's style → assists A well → A uses it more → provides more data. Meanwhile, B gets poor assistance → disengages → provides less data. The gap widens.
+**结果**：主动学习更多地去问 A → 模型学到的是 A 的风格 → 对 A 服务好 → A 用得更多 → 数据更多。与此同时，B 得到的帮助很差 → 不想用了 → 数据更少。差距越拉越大。
 
-**This is the inversion problem**: optimizing for revealed behavior systematically misunderstands groups whose context differs.
+**这就是反演问题**：按显见的行为来优化，会系统性地误解那些处境不同的人。
 :::
 
-**Fairness Implications**: If we query productive reviewers more, we systematically undersample:
+**公平性后果**：如果我们更多地去问"有产出"的审稿人，就会系统性地少采到：
 
-- Junior reviewers (less time, heavier teaching loads)
-- Non-native English speakers (writing reviews takes longer)
-- Reviewers with caregiving responsibilities (less flexible time)
-- Reviewers in disadvantageous time zones (synchronous discussions happen while they sleep)
+- 资浅的审稿人（时间少、教学任务重）
+- 英语非母语的审稿人（写审稿意见更花时间）
+- 需要照顾家人的审稿人（时间不灵活）
+- 处在不利时区的审稿人（线上讨论正好在他们的睡梦中）
 
-The AI assistant becomes good at helping senior, privileged reviewers and poor at helping those already disadvantaged. This is **disparate impact**—unequal quality of assistance across demographics.
+于是这位 AI 助手变得很会帮资深、条件优越的审稿人，却不太会帮那些本来就处于不利地位的人。这就是**差别性影响（disparate impact）**——对不同人群提供的帮助质量不一样。
 
-**Connection to Chapter 4**: Active learning via Fisher information (@sec-fisher-information) queries where $\det(\mathcal{I}(\theta))$ is maximized—where the model is most uncertain. But uncertainty may be highest for well-represented groups with complex preferences. Minority groups may have simpler preference patterns (less uncertainty) or may be learned poorly initially (undersampled, so model is uncertain but queries go to majority anyway). Either way, information-maximizing strategies can undersample minorities.
+**承接第 3 章**：基于 Fisher 信息的主动学习（@sec-fisher-information）会去问 $\det(\mathcal{I}(\theta))$ 最大的地方——也就是模型最不确定的地方。可模型最不确定的，未必是少数群体，而可能是那些样本充足、偏好又复杂的群体。少数群体的偏好模式也许更简单（因而不确定性更低），也许一开始就学得差（因为样本少，模型虽然不确定，但询问的机会还是给了多数群体）。无论哪种情况，追求信息最大的策略都会少采到少数群体。
 
-#### Alternative: Stratified Sampling {#sec-stratified-sampling}
+#### 另一种做法：分层抽样 {#sec-stratified-sampling}
 
-**Stratified sampling** ensures we learn from diverse reviewer populations, even if less "efficient":
+**分层抽样**能保证我们向多种多样的审稿人群体学习，哪怕这样做"效率"低一些：
 
-- Divide reviewers into strata (junior/senior, institution type, language background)
-- Ensure minimum sampling from each stratum
-- Within each stratum, can still use active learning
+- 把审稿人分成若干层（资浅/资深、学校类型、语言背景）
+- 保证每一层都有最低限度的样本
+- 在每一层内部，仍然可以用主动学习
 
-This sacrifices some statistical efficiency (we might query less informative comparisons) but ensures **representation**—all groups contribute training data proportionally.
+这样要牺牲一些统计效率（我们可能问到一些信息量较小的比较），但换来了**代表性**——各组按各自的比例贡献训练数据。
 
-**The Tradeoff**: Efficiency vs. fairness. Pure active learning maximizes information gain but may exacerbate disparities. Stratified sampling ensures fairness but uses more queries to achieve the same overall model quality.
+**这里的取舍**：效率与公平。纯主动学习最大化信息增益，但可能加剧差距；分层抽样保证了公平，却要更多次询问才能达到同样的整体模型质量。
 
-There is no "right" answer. But you must choose consciously and transparently.
+这里没有"标准答案"。但你必须有意识地、摆在明面上做这个选择。
 
-#### Code Example: Stratified Sampling vs. Active Learning {#sec-code-elicitation}
+#### 代码示例：分层抽样与主动学习 {#sec-code-elicitation}
 
 Let's simulate this tradeoff concretely. We'll create a population of reviewers with varying expertise and context, then compare three elicitation strategies:
 
