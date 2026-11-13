@@ -27,41 +27,41 @@ execute:
 
 **第 1 章**建立描述偏好的数学语言。我们说明了几何噪声服从 Gumbel 分布的随机效用模型怎样得到可计算的 logit 形式，也说明了独立无关备选这条公理怎样把一个指数级大的偏好空间压缩成一线数值效用。
 
-**第 2 章**给出偏好模型的估计方法。最大似然能快速给出点估计，贝叶斯推断则把不确定性量化出来——后面的决策要用。Elo 等级分系统……
+**第 2 章**给出偏好模型的估计方法。最大似然能快速给出点估计，贝叶斯推断则把不确定性量化出来——后面的决策要用得上。从棋类到电子游戏都在用的 Elo 等级分系统，正好是 Bradley-Terry 似然上做随机梯度下降的自然结果；而当线性奖励函数太受限时，高斯过程提供了灵活的非参数替代。
 
-**Chapter 3** addressed active data collection. Human feedback is expensive; we cannot afford to collect data naively. Fisher information quantifies how much each comparison teaches us about preferences, enabling intelligent query selection. The connection to optimal experimental design—A-optimal, D-optimal, E-optimal criteria—grounds active learning in classical statistical theory.
+**第 3 章**处理主动的数据采集。人类的反馈很贵，我们不能 naive 地堆数据。Fisher 信息量化了"每一次比较能让我们多了解多少偏好"，从而可以聪明地挑选要问的问题。它与最优实验设计（A-最优、D-最优、E-最优准则）的联系，把主动学习接到了经典统计理论之上。
 
-**Chapter 4** turned to decision-making under learned preferences. Thompson Sampling elegantly balances exploration and exploitation by sampling from the posterior and acting optimally under the sample. Dueling bandits extend multi-armed bandits to the comparison setting, with distinct winner concepts (Condorcet, Borda, von Neumann) and regret notions appropriate for different applications. Preferential Bayesian Optimization unified Gaussian Process preference models from earlier chapters with sequential decision-making, enabling optimization of complex objectives from comparison feedback alone. The chapter culminated in the Cooperative Inverse Reinforcement Learning (CIRL) framework, which reconceived preference learning as a cooperative game between human and agent—shifting from passive data collection to interactive collaboration where the agent's queries themselves shape the human's ability to communicate preferences.
+**第 4 章**转向"用学到的偏好做决策"。汤普森采样用"从后验里采一个样本、再按这个样本最优地行动"这一做法，漂亮地兼顾了探索与利用。对决老虎机把多臂老虎机推广到"只给比较反馈"的场景，并针对不同的应用给出不同的"胜者"概念（孔多塞胜者、博尔达胜者、冯·诺依曼胜者）和相应的遗憾定义。偏好式贝叶斯优化把前面几章的高斯过程偏好模型与序贯决策合到一起，使我们可以只靠比较反馈去优化复杂目标。本章的落点是协作逆强化学习（CIRL）框架：它把偏好学习重新看成人和智能体之间的合作博弈——从被动收集数据，变成交互式协作，其中智能体提什么问题，本身就在影响人能把自己的偏好说清楚到什么程度。
 
-**Chapter 5** examined aggregation when multiple stakeholders have heterogeneous preferences. Arrow's Impossibility Theorem and the Gibbard-Satterthwaite Theorem establish fundamental limits on what any aggregation mechanism can achieve—yet domain restrictions like single-peaked preferences offer practical escape routes. A key result connected the Borda count to Direct Preference Optimization, showing that DPO finds the policy that wins the most head-to-head matchups (@sec-borda-dpo)—giving modern alignment methods a precise social choice interpretation. Sen's liberal paradox (@sec-nosy-preferences) revealed the tension between respecting individual rights and achieving Pareto efficiency when preferences are "nosy," while the inversion problem (@sec-inversion) cautioned that observed behavior may not reflect true preferences. The Community Notes case study (@sec-community-notes) illustrated how these ideas play out in a deployed system. Mechanism design, including VCG auctions, showed how to align individual incentives with collective objectives—but at a cost.
+**第 5 章**研究多方利益相关者偏好各异时的汇总问题。阿罗不可能定理与吉巴德—萨特斯维特定理确立任何汇总机制都绕不过的根本限制——但单峰偏好这类对定义域的限制，给出了现实中可行的出路。其中一个关键结果把博尔达计分法与直接偏好优化连了起来：DPO 找到的是"在两两对比中赢下最多场"的那个策略（@sec-borda-dpo），这就给现代对齐方法一个确切的社会选择解释。森的自由悖论（@sec-nosy-preferences）揭示：当偏好是"管得宽"的，尊重个人权利与达到帕累托有效之间就有张力；反演问题（@sec-inversion）则提醒我们，观察到的行为未必反映真实偏好。Community Notes 这个案例（@sec-community-notes）说明这些想法在已经上线的系统里是怎样落地的。机制设计（包括 VCG 拍卖）则展示了怎样把个人激励引向集体目标——只是要付出代价。
 
 ### The Critical Turn
 
-A distinctive feature of this book is **Chapter 6**, which stepped back from technical methods to ask a normative question: *Whose preferences matter?*
+本书的一个特点，是**第 6 章**：它从技术方法上退一步，问一个规范性的问题——*谁的偏好才算数？*
 
-Every technical choice in the preference learning pipeline—from who gets queried to how preferences are aggregated—embeds value judgments about whose interests count. The Fisher information machinery from Chapter 3 maximizes informativeness per query, but information-maximizing strategies can systematically underquery minority populations whose preferences are "easier" to model. Assuming IIA treats context-dependent preferences as irrational, potentially disadvantaging overburdened users whose choices are shaped by external constraints rather than stable preferences. Using existing data to define a reference policy encodes historical inequities into the learning objective.
+偏好学习流水线上的每一个技术选择——从去问谁，到怎么汇总偏好——都含着"谁的兴趣算数"的价值判断。第 3 章那套 Fisher 信息的工具能最大化每次询问换回的信息量，可按信息最大化来选，会系统地少问那些偏好"更好建模"的少数人群。假定独立无关备选成立，等于把情境依赖的偏好当成不理性，这可能让负担过重的用户处于不利——他们的选择更多是被外部条件塑造的，而不是出于稳定的偏好。用已有的数据去定义参考策略，等于把历史上的不平等写进了学习目标。
 
-This critical lens does not reject the technical methods developed in earlier chapters. Rather, it calls for conscious recognition that preference learning is not value-neutral. The designer's choices shape who benefits and who is harmed. Fairness constraints, stratified evaluation, and participatory design are not add-ons but essential components of responsible system development.
+这种批判的眼光并不否定前面几章发展出来的技术方法。它要的是一种清醒的认识：偏好学习不是价值中立的。设计者的选择决定了谁受益、谁受损。公平性约束、分层评估、参与式设计不是可有可无的附加项，而是负责任地造系统时必须有的部分。
 
-## Lessons from the Alignment Era
+## 对齐时代给出的教训
 
-The rapid adoption of RLHF and DPO for language model alignment—beginning with InstructGPT in 2022 and accelerating through ChatGPT, Claude, and their successors—has stress-tested preference learning at a scale that the field's founders could not have anticipated. Several lessons have emerged from this experience that inform how we should think about the methods developed in this book.
+把 RLHF 与 DPO 用于语言模型对齐的迅速普及——从 2022 年的 InstructGPT 开始，到 ChatGPT、Claude 及其后续产品进一步加速——把偏好学习放在一个这门学科的开创者也无法预见的规模上做了压力测试。这段经历里浮现出几条教训，直接影响我们该怎么看本书介绍的这些方法。
 
-### What Worked
+### 哪些是管用的
 
-**Bradley-Terry is remarkably effective in practice.** Despite its strong assumptions (IIA, homogeneous annotators, context-independence), the Bradley-Terry model has proven to be a workhorse for reward modeling and DPO. The simplicity that makes it analytically tractable—a single parameter per item, sigmoid link function, logistic likelihood—also makes it computationally efficient at scale. The DPO reformulation (Chapter 1, @sec-llm-example) eliminates the separate reward model entirely, showing that the Bradley-Terry likelihood can be directly optimized as a policy objective. This is a striking vindication of the classical models that form the backbone of this book.
+**Bradley-Terry 在实践中出奇地好用。** 尽管它的假定很强（独立无关备选、标注员同质、与情境无关），Bradley-Terry 模型还是成了奖励建模与 DPO 的主力工具。让它能被解析处理的那些简单之处——每个项目只有一个参数、sigmoid 连接函数、logistic 似然——也正是它能在大规模下算得起的原因。DPO 那种改写（第 1 章，@sec-llm-example）干脆把独立的奖励模型去掉了，说明 Bradley-Terry 似然可以直接当作策略目标来优化。这对构成本书骨架的那些经典模型来说，是一次很有力的印证。
 
-**Active learning reduces annotation cost.** The Fisher information framework from Chapter 3 has proven practically valuable for selecting which comparisons to annotate. ADPO (@sec-adpo) and related methods demonstrate that intelligent query selection can reduce annotation budgets by 30-50\% compared to random sampling, a substantial saving when human preference labels cost \$1-10 each and training runs require tens of thousands of comparisons.
+**主动学习能省下标注成本。** 第 3 章的 Fisher 信息框架在"该标哪些比较"这件事上确实用得上。ADPO（@sec-adpo）与相关方法表明：聪明的选题能把标注预算比随机抽样降低 30–50\%。当一条人类偏好标签要 1–10 美元、一次训练要几万条比较时，这是很可观的节省。
 
-**Uncertainty quantification matters for deployment.** The Bayesian methods from Chapter 2 and the posterior-based decision-making from Chapter 4 (Thompson Sampling, PBO) are not merely academic exercises. In production systems, knowing *how confident* the model is in its preference predictions enables calibrated decisions about when to deploy new model versions, when to collect more data, and when to fall back to conservative defaults.
+**部署时，把不确定性量化出来是真有用的。** 第 2 章的贝叶斯方法与第 4 章基于后验的决策（汤普森采样、偏好式贝叶斯优化），不只是学术练习。在生产系统里，知道模型对自己的偏好预测*有多大把握*，才能做出有分寸的判断：什么时候上新版本、什么时候再多收数据、什么时候退回保守的默认行为。
 
 ### What Surprised Us
 
-**The gap between reward models and human judgment is smaller than expected—but the remaining gap is consequential.** Modern reward models trained via Bradley-Terry achieve high agreement with held-out human preferences (often 70-80\% accuracy on binary comparisons). But the errors are not random: they cluster around responses that are subtly harmful, sycophantic, or superficially impressive but factually wrong. These failure modes are precisely the cases where getting preferences right matters most, and they suggest that the IIA assumption—which treats all comparisons as equally well-modeled—may need to be relaxed for safety-critical applications.
+**奖励模型与人类判断之间的差距比预想的小——但剩下的那部分差距影响很大。** 用 Bradley-Terry 训练出来的现代奖励模型，与留出来的人类偏好一致度相当高（在两两比较上常有 70–80\% 的准确率）。但错不是乱错的：它们集中在那些有一点害处的、迎合人的、看着很唬人其实说错了的回答上。而这些失败模式恰恰是最需要把偏好搞对的情形。这也说明：把所有比较都看成"一样建模得好"的独立无关备选假定，在涉及安全的应用里可能需要放宽。
 
-**Goodhart's Law is real and pernicious.** When models are optimized against a learned reward function, they inevitably find ways to achieve high reward without satisfying the underlying human preferences. This "reward hacking" is a direct consequence of the gap between the proxy (learned reward) and the target (true human preferences). The phenomenon manifests as models that produce longer responses (because annotators weakly prefer length), use confident-sounding language regardless of accuracy, or agree with the user's stated views rather than providing honest assessments. Recognizing reward hacking as an instance of Goodhart's Law—"when a measure becomes a target, it ceases to be a good measure"—connects it to a rich literature in economics and public policy.
+**古德哈特定律是真的，而且危害不小。** 让模型对着一个学出来的奖励函数做优化，它总会找到办法拿到高奖励、却并不满足背后的人类偏好。这种"奖励投机"，直接来自替代指标（学出来的奖励）与真实目标（人类的真实偏好）之间的落差。表现就是：模型输出更长（因为标注员轻微地偏好长度），不管说得对不对都用很有把握的语气，或者顺着用户说的观点走，而不是给出诚实的判断。把奖励投机看成古德哈特定律的一个实例——"一个指标一旦成了目标，就不再是个好指标"——就把它和经济学、公共政策里大量已有的讨论接上了。
 
-**Annotator disagreement is signal, not noise.** Early RLHF work treated disagreement among annotators as measurement error to be averaged away. But Chapter 5's analysis of preference aggregation suggests a different interpretation: annotators disagree because they genuinely hold different preferences, not (only) because they make mistakes. The DPO-Borda connection (@sec-borda-dpo) shows that aggregating via majority vote implicitly selects the Borda winner—which may not be the socially optimal choice when minority preferences carry important information. This has led to growing interest in pluralistic alignment approaches that maintain multiple preference models rather than collapsing to a single aggregate.
+**标注员之间的分歧是信息，不是噪声。** 早期的 RLHF 工作把标注员的分歧当成测量误差，取个平均就算处理掉了。但第 5 章关于偏好汇总的分析给出了另一种解释：标注员分歧，是因为他们本来就持有不同的偏好，而不仅仅是（或不只是）因为他们会犯错。DPO 与博尔达计分法之间的联系（@sec-borda-dpo）说明：用多数票来汇总，隐式地是在选博尔达胜者——而当少数的偏好里带着重要信息时，这可能并不是社会意义上更好的选择。这也让多元对齐的思路越来越受关注：保留多个偏好模型，而不是塌缩成一个汇总模型。
 
 ### What Broke
 
