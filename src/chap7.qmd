@@ -171,57 +171,57 @@ AI 系统越来越能干，它们做的事也就越来越难由人来评。语�
 
 **预期成果。** 一篇报告，给出各方法的准确率与标定程度随样本量变化的学习曲线，讨论贝叶斯的不确定性量化在什么情况下值回它的计算开销，并附上完整文档化的代码，包括数据预处理的脚本。
 
-### Project 3: Active Preference Elicitation for Personalized Recommendation (\*\*)
+### 项目 3：面向个性化推荐的主动偏好征询（\*\*）
 
-**题目说明。** When human feedback is expensive, active query selection can dramatically reduce annotation cost. This project builds an end-to-end active preference elicitation system for a concrete domain---such as food preferences, music taste, or movie recommendations---and measures how much the Fisher information framework improves over random querying.
+**题目说明。** 人类的反馈很贵时，主动挑选要问的问题能大幅降低标注成本。这个项目要在一个具体的领域里（比如食物偏好、音乐口味、电影推荐）搭一套端到端的主动偏好征询系统，实测 Fisher 信息框架比随机提问能好多少。
 
 **建议方法。**
 
 - Implement a Rasch or factor model (@sec-factor-models) with Fisher-information-based query selection (@sec-measurement, @sec-fisher-information).
-- Compare A-optimal, D-optimal, and E-optimal criteria (@sec-factor-models-active) for selecting the next comparison to present.
-- Collect real preference data from at least 10 participants (or use a realistic simulator) and measure the reduction in queries needed to reach a target prediction accuracy.
-- Optionally extend to the pairwise setting using the active pair selection framework from @sec-pairwise-active.
+- 在选下一个要呈现的比较时，对比 A-最优、D-最优、E-最优这几种准则（@sec-factor-models-active）。
+- 从至少 10 位参与者那里收集真实的偏好数据（或者用一个贴近实际的模拟器），测出达到同样预测精度需要少问多少问题。
+- 可选的扩展：用 @sec-pairwise-active. 里讲的主动配对选择框架，推广到两两比较的场景。
 
-**预期成果。** A working interactive system (command-line or web-based) that adaptively selects queries, an empirical evaluation showing query savings relative to random selection, and a manuscript discussing the practical benefits and limitations of active elicitation.
+**预期成果。** 一个能跑的交互系统（命令行或网页都行），能自适应地挑选要问的问题；一份实证评估，给出相对于随机选择的提问节省；以及一篇讨论主动征询的实际收益与局限的报告。
 
-### Project 4: Dueling Bandits for A/B Testing with Preference Feedback (\*\*)
+### 项目 4：用对决老虎机做基于偏好反馈的 A/B 测试（\*\*）
 
-**题目说明。** Traditional A/B testing compares treatments using scalar metrics (click-through rate, revenue), but in many settings the outcome of interest is a human preference judgment---e.g., "Which UI layout do you prefer?" This project formulates A/B testing as a dueling bandit problem and evaluates whether dueling bandit algorithms can identify the best variant faster than naive round-robin comparisons.
+**题目说明。** 传统的 A/B 测试用标量指标（点击率、收入）来比较不同方案，但很多场景里真正关心的是人类的偏好判断——比如"你更喜欢哪个界面布局？"这个项目把 A/B 测试表述成一个对决老虎机问题，并评估：与"两两轮转"这种朴素的比较方式相比，对决老虎机的算法能不能更快找出最好的那个方案。
 
 **建议方法。**
 
 - Implement at least two dueling bandit algorithms from Chapter 4, such as RUCB or Double Thompson Sampling, targeting different winner concepts (Condorcet vs. Borda, @sec-borda).
-- Define appropriate regret metrics for the A/B testing setting and track cumulative regret over time.
-- Simulate a realistic A/B testing scenario with 5--10 variants and heterogeneous user preferences (using mixture models from @sec-factor-models to generate synthetic users).
-- Compare sample efficiency against uniform random pairing and standard Thompson Sampling (@sec-thompson-sampling) on scalar proxy metrics.
+- 为 A/B 测试这个场景定义合适的遗憾指标，并跟踪累计遗憾随时间的变化。
+- 模拟一个贴近实际的 A/B 测试场景，包含 5–10 个方案与偏好各异的（用 @sec-factor-models 的混合模型来生成合成的）。
+- 与"均匀随机配对"以及标量替代指标上的标准汤普森采样（@sec-thompson-sampling）比较样本效率。
 
-**预期成果。** A manuscript presenting regret curves and sample complexity comparisons, a discussion of which winner concept is most appropriate for A/B testing, and modular code that could be adapted to other dueling bandit applications.
+**预期成果。** 一篇报告，给出遗憾曲线与样本复杂度的对比，讨论在 A/B 测试里哪种"胜者"概念最合适，并给出模块化的代码，便于用到其他对决老虎机的应用里。
 
-### Project 5: Preferential Bayesian Optimization for Human-in-the-Loop Design (\*\*)
+### 项目 5：面向人机协同设计的偏好式贝叶斯优化（\*\*）
 
-**题目说明。** Preferential Bayesian Optimization (PBO) enables optimization of complex objectives---such as the taste of a recipe, the aesthetics of a generated image, or the comfort of a robot trajectory---from pairwise human feedback alone. This project applies PBO to a concrete design problem where scalar evaluation is difficult but pairwise comparison is natural.
+**题目说明。** 偏好式贝叶斯优化（PBO）可以只靠人类的两两比较反馈，去优化那些很难给出分数的目标——比如一道菜的味道、一张生成图像的美观程度、一条机器人轨迹的舒适度。这个项目把 PBO 用到一个具体的设计问题上：那里给不出标量的评价，但做两两比较很自然。
 
 **建议方法。**
 
 - Implement the GP-based PBO framework from Chapter 4, including a Gaussian Process preference model with Laplace approximation (@sec-gp-inference) and an acquisition function (Expected Improvement of the Copeland score or Thompson Sampling).
-- Choose a design domain with a continuous parameter space (e.g., color palettes, font configurations, audio equalization settings, or procedurally generated environments).
-- Collect preference feedback from at least 5 participants and track convergence to their preferred design.
-- Compare PBO against random search and, if a scalar proxy is available, against standard Bayesian Optimization.
+- 选一个参数空间是连续的设计领域（例如配色方案、字体排版、音频均衡设置，或者程序生成的场景）。
+- 从至少 5 位参与者那里收集偏好反馈，跟踪他们是否逐渐收敛到自己喜欢的设计。
+- 把 PBO 与随机搜索比较；如果有标量的替代指标，再与标准的贝叶斯优化比较。
 
-**预期成果。** A manuscript reporting convergence rates and user satisfaction, a working PBO system with a human-facing interface, and an analysis of how posterior uncertainty evolves with the number of comparisons.
+**预期成果。** 一篇报告，给出收敛速度与用户满意度；一个有面向用户界面的、能跑的 PBO 系统；以及一份分析：后验的不确定性怎样随着比较次数变化。
 
-### Project 6: The DPO-Borda Connection: Empirical Validation on Multi-Annotator Data (\*\*)
+### 项目 6：DPO 与博尔达计分法的联系：在多标注员数据上的实证检验（\*\*）
 
-**题目说明。** Chapter 5 establishes a theoretical connection between Direct Preference Optimization and the Borda count (@sec-borda-dpo): DPO finds the policy that maximizes pairwise win rate, i.e., the Borda winner. But does this hold empirically when annotators are heterogeneous and preferences are noisy? This project tests the DPO-Borda connection on real multi-annotator preference data and investigates when the Borda winner diverges from other social choice solutions.
+**题目说明。** 第 5 章在理论上打通了直接偏好优化与博尔达计分法（@sec-borda-dpo）：DPO 找的是"两两对比胜率最高"的策略，也就是博尔达胜者。但当标注员各不相同、偏好又带噪声时，事上真的如此吗？这个项目要在真实的多标注员偏好数据上检验这条联系，并研究博尔达胜者会在什么时候偏离其他的社会选择结果。
 
 **建议方法。**
 
 - Use a publicly available multi-annotator preference dataset (e.g., from Chatbot Arena or similar).
-- Compute the Borda ranking, Condorcet ranking (if it exists), and plurality ranking from raw annotations.
-- Train a DPO model and compare its implicit ranking to each social choice solution.
-- Analyze cases where the rankings diverge: are these cases where annotators have genuinely heterogeneous preferences, or where the data is simply noisy? Use the mixture model framework from @sec-factor-models to test for latent preference clusters.
+- 从原始标注出发，分别算出博尔达排名、孔多塞排名（如果存在）、以及多数票排名。
+- 训练一个 DPO 模型，把它隐含的排名与每一种社会选择结果作比较。
+- 分析几种排名出现分歧的情形：这些情形里，标注员的偏好是真的各不相同，还是数据只是噪声大？可以用 @sec-factor-models 的混合模型框架来检验是否存在潜在的偏好群体。
 
-**预期成果。** A manuscript quantifying the agreement between DPO-implied rankings and classical social choice rankings, an analysis of when and why they diverge, and reproducible code for all experiments.
+**预期成果。** 一篇报告，量化 DPO 隐含的排名与经典社会选择排名的一致程度，分析它们在什么时候、因为什么而分开，并给出所有实验的可复现代码。
 
 ### Project 7: Auditing a Preference Learning Pipeline for Compounding Bias (\*\*)
 
