@@ -1,0 +1,63 @@
+name: Render 中文版 and deploy to Pages
+
+on:
+  push:
+    branches: [zh]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # 只为让 Quarto 的 compose 阶段能启动一个 python3 内核。
+      # 全部单元格的执行由 _quarto.yml 里的 execute.eval: false 关闭，
+      # 因此不需要 torch / botorch / scikit-learn，交互单元格在浏览器里由 Pyodide 运行。
+      # 下面这个包集合是在本机验证过能渲染通过的最小集合：只装 ipykernel
+      # （或再加 nbclient/nbformat、matplotlib）都不够，内核起不来会报 Broken pipe。
+      - name: 安装内核依赖
+        run: |
+          python -m pip install --upgrade pip jupyter ipykernel numpy matplotlib
+          echo "QUARTO_PYTHON=$(which python)" >> "$GITHUB_ENV"
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.11.9
+
+      # 上游仓库把 _extensions/ 写进了 .gitignore，所以扩展必须在构建时安装。
+      - name: 安装 Quarto 扩展
+        run: |
+          quarto add --no-prompt coatless-quarto/pyodide
+          quarto add --no-prompt leovan/quarto-pseudocode
+          quarto add --no-prompt pandoc-ext/section-bibliographies
+
+      - name: 渲染 HTML
+        run: quarto render --to html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _book
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

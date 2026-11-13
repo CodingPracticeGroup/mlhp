@@ -1,38 +1,40 @@
 ---
-title: Teaching Materials
+title: 教学材料
 format: html
 ---
 
-This page collects resources for instructors using *Machine Learning from Human Preferences* in their courses. The materials below were developed for Stanford's CS329H but can be adapted to courses of varying length and focus.
+这一页收集的是给教师用的材料，方便把《Machine Learning from Human Preferences》（人类偏好机器学习）直接开进自己的课。下面这些材料最初是为 Stanford 的 CS329H 准备的，课时长短、内容侧重不同的课都可以按需要取用。
 
-## Lecture Slides
+## 课堂讲义
 
-Each chapter has an accompanying slide deck in RevealJS format.
+每一章都配有一套 RevealJS 格式的讲义。下面这些链接目前指向英文原稿。
 
-| Chapter | Topic | Slides |
+| 章节 | 主题 | 讲义 |
 |:--------|:------|:-------|
-| Introduction | Overview and motivation | [Slides](../slides/chap0.html) |
-| Chapter 1 | Foundations | [Slides](../slides/chap1.html) |
-| Chapter 2 | Learning | [Slides](../slides/chap2.html) |
-| Chapter 3 | Elicitation | [Slides](../slides/chap3.html) |
-| Chapter 4 | Decisions | [Slides](../slides/chap4.html) |
-| Chapter 5 | Aggregation | [Slides](../slides/chap5.html) |
-| Chapter 6 | Whose? | [Slides](../slides/chap6.html) |
+| 引言 | 全书概览与动机 | [讲义](https://mlhp.stanford.edu/slides/chap0.html) |
+| 第 1 章 | 基础 | [讲义](https://mlhp.stanford.edu/slides/chap1.html) |
+| 第 2 章 | 学习 | [讲义](https://mlhp.stanford.edu/slides/chap2.html) |
+| 第 3 章 | 偏好征询 | [讲义](https://mlhp.stanford.edu/slides/chap3.html) |
+| 第 4 章 | 决策 | [讲义](https://mlhp.stanford.edu/slides/chap4.html) |
+| 第 5 章 | 聚合 | [讲义](https://mlhp.stanford.edu/slides/chap5.html) |
+| 第 6 章 | 谁的偏好 | [讲义](https://mlhp.stanford.edu/slides/chap6.html) |
 
-## Problem Sets
+## 习题
 
-| Problem Set | Topics |
+| 习题 | 涉及主题 |
 |:------------|:-------|
-| [Problem Set 1](psets/pset1.html) | Foundations |
-| [Problem Set 2](psets/pset2.html) | Learning |
-| [Problem Set 3](psets/pset3.html) | Elicitation |
-| [Problem Set 4](psets/pset4.html) | Decisions |
+| [习题 1](https://github.com/CodingPracticeGroup/mlhp/blob/zh/src/psets/pset1.qmd) | 基础 |
+| [习题 2](https://github.com/CodingPracticeGroup/mlhp/blob/zh/src/psets/pset2.qmd) | 学习 |
+| [习题 3](https://github.com/CodingPracticeGroup/mlhp/blob/zh/src/psets/pset3.qmd) | 偏好征询 |
+| 习题 4 | 决策（上游仓库里的这个文件是空的，暂未提供内容） |
 
-## Suggested Course Pathways
+目前习题链接指向的是仓库里的源文件：习题正文需要真正执行代码（第 1 题就要 `torch`、`transformers`、`peft`），本译本还没把它接进构建；上游站点同样没有发布习题页面。
 
-The book supports several course configurations depending on audience and length. Chapter 1 is foundational to all pathways.
+## 建议的开课路径
 
-- **Applied AI** (e.g., early graduate ML course): Chapters 1, 2, and 4.
-- **Discrete choice and economics**: Skim Chapter 1, then Chapters 2 and 4.
-- **Deep learning focus**: Chapters 2--4.
-- **Computation and society**: Chapters 1, 5, and 6.
+按听课对象和课时长短，这本书可以拼成几种不同的课。无论哪一种，第 1 章都是打底的一章。
+
+- **应用人工智能**（例如研究生一年级的机器学习课）：第 1、2、4 章。
+- **离散选择与经济学**：第 1 章快速过一遍，然后讲第 2 章和第 4 章。
+- **以深度学习为主**：第 2 至第 4 章。
+- **计算与社会**：第 1、5、6 章。

@@ -1,14 +1,27 @@
+# 简体中文版（zh 分支）相对 upstream 的配置差异，集中记在这里：
+#   1. 新增 lang: zh —— 界面文案（搜索、侧栏折叠、深色模式、定理/引理等标题）走 Quarto 自带的中文语言包。
+#   2. crossref 前缀改为中文/符号，避免 "Figure 1"、"Section 3.2" 这类英文前缀。
+#   3. 删掉 language.crossref-ch-prefix: Chapter —— 本书没有 @ch- 形式的章节引用，留着只会输出英文。
+#   4. 删掉 google-analytics 与 downloads: [pdf] —— 前者在国内不可达，后者会指向一个不存在的 PDF。
+#   5. 习题不在本书的 chapters 列表里：book 类型的 project.render 不会额外渲染未列出的文件（实测只渲染 11 页），
+#      所以照上游处理讲义的办法，给 src/psets/ 单独建一个嵌套项目，渲染到 _book/src/psets/。见 src/psets/_quarto.yml。
+#      （pset4.qmd 在 upstream 里是 0 字节的空文件，未纳入。）
+#   6. repo-url 指向本 fork。
+
 # Required Quarto extensions (install with `quarto add <name>`):
-#   - coatless/pyodide
-#   - pandoc-ext/boxes
+#   - coatless-quarto/pyodide
 #   - pandoc-ext/section-bibliographies
 #   - leovan/quarto-pseudocode
+# （上游注释里的 coatless/pyodide 与 pandoc-ext/boxes 已失效：前者改名到 coatless-quarto，
+#    后者在正文里没有任何 .box 用法，8 处分块用的都是 Quarto 内置的 callout。）
 
 project:
   type: book
   output-dir: _book
   preview:
     port: 4200
+
+lang: zh
 
 resources:
   - "*.pdf"
@@ -18,16 +31,13 @@ citation-location: document # citations in margin
 link-citations: true       # citations link to references
 
 bibliography: src/references.bib
-reference-section-title: References
+reference-section-title: 参考文献
 
 crossref:
-  fig-prefix: Figure
-  tbl-prefix: Table
-  sec-prefix: Section
-
-language:
-  crossref-ch-prefix: Chapter
-  crossref-apx-prefix: Appendix
+  fig-prefix: 图
+  tbl-prefix: 表
+  eq-prefix: 式
+  sec-prefix: "§"
 
 df-print: kable
 filters:
@@ -38,7 +48,7 @@ format:
     theme:
       light: [flatly, resources/scss/global.scss]
       dark: [darkly, resources/scss/global.scss]
-    published-title: "Updated"
+    published-title: "更新于"
     code-fold: false
     code-overflow: scroll
     code-line-numbers: true
@@ -119,8 +129,8 @@ execute:
   tidy: true
 
 book:
-  title: "Machine Learning from Human Preferences"
-  subtitle: ""
+  title: "人类偏好机器学习"
+  subtitle: "Machine Learning from Human Preferences（简体中文译本）"
   author:
     - name: Sang T. Truong
       orcid: 0000-0001-8069-9410
@@ -130,13 +140,11 @@ book:
       orcid: 0000-0002-4023-419X
     
   date: last-modified
-  repo-url: https://github.com/stair-lab/mlhp
+  repo-url: https://github.com/CodingPracticeGroup/mlhp
   repo-actions: [source, issue]
-  downloads: [pdf]
   sidebar:
     style: "docked"
     footer: license.qmd
-  google-analytics: "G-05EBMFEHP2"
   chapters:
     - index.qmd
     - src/chap1.qmd

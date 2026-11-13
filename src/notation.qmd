@@ -1,112 +1,112 @@
-# Mathematical Notation {#sec-mathematical-notation .unnumbered}
+# 数学记号 {#sec-mathematical-notation .unnumbered}
 
-This appendix consolidates the mathematical notation used throughout the book. Symbols are grouped by topic; the **Introduced** column indicates the chapter where each symbol first appears.
+本附录汇总全书用到的数学记号，按主题分组。每一节标明这些记号主要出现在哪一章。
 
-## General
+## 通用记号
 
-| Symbol | Meaning |
+| 符号 | 含义 |
 |--------|---------|
-| $M \in \mathbb{N}$ | Number of items (alternatives) |
-| $j, j', k \in \{1, \ldots, M\}$ | Item (alternative) indices |
-| $N \in \mathbb{N}$ | Number of users (agents) |
-| $i \in \{1, \ldots, N\}$ | User (agent) index |
-| $\prec, \succ$ | Weak preference relation / strict preference |
-| $H_{ij} \in \mathbb{R}$ | Latent utility of user $i$ for item $j$ |
-| $V_j \in \mathbb{R}$ or $\mathbb{R}^K$ | Item appeal / item embedding vector |
-| $U_i \in \mathbb{R}^K$ | User embedding / preference vector |
-| $Y_{jj'} \in \{0, 1\}$ | Binary preference outcome ($1$ means $j \succ j'$) |
-| $\varepsilon_j \in \mathbb{R}$ | Stochastic utility shock for item $j$ (i.i.d.) |
-| $\sigma(x) = 1/(1+e^{-x})$ | Logistic sigmoid function |
-| $p(\cdot \mid \cdot)$ | Conditional probability |
-| $x$ | Context / prompt (in LLM setting) |
-| $y, y_w, y_l$ | Response / winning response / losing response |
-| $d \in \mathbb{N}$ | Dimensionality of feature vectors |
-| $\boldsymbol{x}_j \in \mathbb{R}^d$ | Feature vector of item $j$ |
-| $\mathcal{D}_t = \{(V_j, Y_{ij})\}_{j=1}^t$ | Observed dataset at time $t$ |
+| $M \in \mathbb{N}$ | 物品（备选方案）的总数 |
+| $j, j', k \in \{1, \ldots, M\}$ | 物品（备选方案）的下标 |
+| $N \in \mathbb{N}$ | 用户（决策主体）的总数 |
+| $i \in \{1, \ldots, N\}$ | 用户（决策主体）的下标 |
+| $\prec, \succ$ | 弱偏好关系 / 严格偏好 |
+| $H_{ij} \in \mathbb{R}$ | 用户 $i$ 对物品 $j$ 的潜在效用 |
+| $V_j \in \mathbb{R}$ 或 $\mathbb{R}^K$ | 物品的吸引力 / 物品的向量表示 |
+| $U_i \in \mathbb{R}^K$ | 用户的向量表示 / 偏好向量 |
+| $Y_{jj'} \in \{0, 1\}$ | 二值的偏好结果（$1$ 表示 $j \succ j'$） |
+| $\varepsilon_j \in \mathbb{R}$ | 物品 $j$ 上的随机效用扰动（独立同分布） |
+| $\sigma(x) = 1/(1+e^{-x})$ | logistic sigmoid 函数 |
+| $p(\cdot \mid \cdot)$ | 条件概率 |
+| $x$ | 上下文 / 提示（大语言模型场景下的叫法） |
+| $y, y_w, y_l$ | 回答 / 获胜的回答 / 落败的回答 |
+| $d \in \mathbb{N}$ | 特征向量的维度 |
+| $\boldsymbol{x}_j \in \mathbb{R}^d$ | 物品 $j$ 的特征向量 |
+| $\mathcal{D}_t = \{(V_j, Y_{ij})\}_{j=1}^t$ | 到时刻 $t$ 为止观察到的数据集 |
 
-## Preference Models (Chapter 1)
+## 偏好模型（第 1 章）
 
-| Symbol | Meaning |
+| 符号 | 含义 |
 |--------|---------|
-| $0$ | Outside ("no-choice") option index |
-| $L = (j_1, \dots, j_M)$ | Full ranking (permutation of items) |
-| $(j, \mathcal{S})$ | Observation that $j$ is chosen from $\mathcal{S}$ |
-| $H_j \in \mathbb{R}$ | Latent utility (single-user case) |
-| $r(x, y) \in \mathbb{R}$ | Reward function |
-| $p(j \succ k) = \sigma(V_j - V_k)$ | Bradley-Terry comparison probability |
-| $\tilde{V}_j = V_j + \epsilon_j$ | Random utility ($\epsilon_j$ is noise) |
-| $p(j \mid \mathcal{S}) = e^{V_j} / \sum_{k \in \mathcal{S}} e^{V_k}$ | Multinomial logit (softmax) choice probability |
-| $\prod_r e^{V_{j_r}} / \sum_{s \geq r} e^{V_{j_s}}$ | Plackett-Luce ranking probability |
-| $\alpha_i \in (0,1)$ | Population weight of subgroup $i$ ($\sum_i \alpha_i = 1$) |
-| $\beta \in \mathbb{R}^d$ | Random-coefficients vector (linear RUM) |
-| $\Sigma \in \mathbb{R}^{d \times d}$ | Covariance matrix of $\beta$ |
-| $\mathcal{GP}(m, k)$ | Gaussian Process with mean $m$ and kernel $k$ |
-| $\ell \in \mathbb{R}^+$ | Length-scale parameter (RBF kernel) |
-| $\sigma_f^2 \in \mathbb{R}^+$ | Signal variance (GP kernel) |
+| $0$ | "不选"这个选项的下标 |
+| $L = (j_1, \dots, j_M)$ | 完整排序（物品的一种排列） |
+| $(j, \mathcal{S})$ | 观察到"从 $\mathcal{S}$ 里选中的是 $j$" |
+| $H_j \in \mathbb{R}$ | 潜在效用（只有一个用户的情形） |
+| $r(x, y) \in \mathbb{R}$ | 奖励函数 |
+| $p(j \succ k) = \sigma(V_j - V_k)$ | Bradley-Terry 的比较概率 |
+| $\tilde{V}_j = V_j + \epsilon_j$ | 随机效用（$\epsilon_j$ 是噪声） |
+| $p(j \mid \mathcal{S}) = e^{V_j} / \sum_{k \in \mathcal{S}} e^{V_k}$ | 多项 logit（softmax）选择概率 |
+| $\prod_r e^{V_{j_r}} / \sum_{s \geq r} e^{V_{j_s}}$ | Plackett-Luce 的排序概率 |
+| $\alpha_i \in (0,1)$ | 子群体 $i$ 在总体中所占的比例（$\sum_i \alpha_i = 1$） |
+| $\beta \in \mathbb{R}^d$ | 随机系数向量（线性随机效用模型） |
+| $\Sigma \in \mathbb{R}^{d \times d}$ | $\beta$ 的协方差矩阵 |
+| $\mathcal{GP}(m, k)$ | 均值为 $m$、核函数为 $k$ 的高斯过程 |
+| $\ell \in \mathbb{R}^+$ | 长度尺度参数（RBF 核） |
+| $\sigma_f^2 \in \mathbb{R}^+$ | 信号方差（高斯过程的核函数） |
 
-## Learning and Estimation (Chapter 2)
+## 学习与估计（第 2 章）
 
-| Symbol | Meaning |
+| 符号 | 含义 |
 |--------|---------|
-| $\ell(V) = \sum \log \sigma(V_w - V_\ell)$ | Bradley-Terry log-likelihood |
-| $\hat{V}_{\text{MLE}} = \arg\max_V \ell(V)$ | Maximum likelihood estimate |
-| $p(\theta \mid \mathcal{D}) \propto p(\mathcal{D} \mid \theta)\,p(\theta)$ | Posterior distribution (Bayes' rule) |
-| $K$ | Elo step size / learning rate |
-| $\lambda$ | L2 regularization strength |
-| $\pi_\theta(y \mid x)$ | Policy (language model) parameterized by $\theta$ |
-| $\pi_{\text{ref}}(y \mid x)$ | Reference policy in DPO |
-| $\beta$ | DPO temperature parameter |
+| $\ell(V) = \sum \log \sigma(V_w - V_\ell)$ | Bradley-Terry 的对数似然 |
+| $\hat{V}_{\text{MLE}} = \arg\max_V \ell(V)$ | 最大似然估计 |
+| $p(\theta \mid \mathcal{D}) \propto p(\mathcal{D} \mid \theta)\,p(\theta)$ | 后验分布（贝叶斯法则） |
+| $K$ | Elo 的更新步长 / 学习率 |
+| $\lambda$ | L2 正则化强度 |
+| $\pi_\theta(y \mid x)$ | 以 $\theta$ 为参数的策略（语言模型） |
+| $\pi_{\text{ref}}(y \mid x)$ | DPO 中的参考策略 |
+| $\beta$ | DPO 的温度参数 |
 
-## Elicitation and Measurement (Chapter 3)
+## 偏好征询与测量（第 3 章）
 
-| Symbol | Meaning |
+| 符号 | 含义 |
 |--------|---------|
-| $\mathcal{I}(U)$ | Fisher information (scalar or matrix) |
-| $Z_j$ | Item offset / difficulty ($-V_j$ in Rasch model) |
-| $\Lambda = \Sigma^{-1}$ | Posterior precision matrix |
-| $\text{Rel} = 1 - \text{tr}(\hat{\Sigma}_{\text{err}}) / \text{tr}(\Sigma_U)$ | Reliability |
-| $\Delta_D, \Delta_A, \Delta_E$ | D-optimal, A-optimal, E-optimal acquisition functions |
-| $a(Q)$ | Acquisition function value for query $Q$ |
-| $H(y)$ | Entropy of random variable $y$ |
-| $I(r; y)$ | Mutual information between $r$ and $y$ |
+| $\mathcal{I}(U)$ | 费雪信息（标量或矩阵） |
+| $Z_j$ | 物品的偏移量 / 难度（在 Rasch 模型里就是 $-V_j$） |
+| $\Lambda = \Sigma^{-1}$ | 后验精度矩阵 |
+| $\text{Rel} = 1 - \text{tr}(\hat{\Sigma}_{\text{err}}) / \text{tr}(\Sigma_U)$ | 信度 |
+| $\Delta_D, \Delta_A, \Delta_E$ | D-最优、A-最优、E-最优三种采集函数 |
+| $a(Q)$ | 查询 $Q$ 的采集函数取值 |
+| $H(y)$ | 随机变量 $y$ 的熵 |
+| $I(r; y)$ | $r$ 与 $y$ 之间的互信息 |
 
-## Sequential Decisions (Chapter 4)
+## 序贯决策（第 4 章）
 
-| Symbol | Meaning |
+| 符号 | 含义 |
 |--------|---------|
-| $\tilde{U}_i^{(t)} \sim p(U_i \mid \mathcal{D}_t)$ | Posterior sample (Thompson Sampling) |
-| $\alpha(\cdot)$ | Acquisition function |
-| $R(T) = \sum_{t=1}^T (\mu^* - \mu_{a_t})$ | Cumulative regret after $T$ rounds |
-| $\mu_t(\cdot),\; \sigma_t^2(\cdot)$ | GP posterior mean and variance |
-| $k(\cdot, \cdot)$ | Kernel (covariance) function |
-| $\pi_f([\mathbf{x}, \mathbf{x}'])$ | Preference function: probability $\mathbf{x} \succ \mathbf{x}'$ |
+| $\tilde{U}_i^{(t)} \sim p(U_i \mid \mathcal{D}_t)$ | 从后验中抽出的样本（汤普森采样） |
+| $\alpha(\cdot)$ | 采集函数 |
+| $R(T) = \sum_{t=1}^T (\mu^* - \mu_{a_t})$ | $T$ 轮之后的累计遗憾 |
+| $\mu_t(\cdot),\; \sigma_t^2(\cdot)$ | 高斯过程的后验均值与后验方差 |
+| $k(\cdot, \cdot)$ | 核函数（协方差函数） |
+| $\pi_f([\mathbf{x}, \mathbf{x}'])$ | 偏好函数：给出 $\mathbf{x} \succ \mathbf{x}'$ 的概率 |
 
-## Social Choice and Aggregation (Chapter 5)
+## 社会选择与聚合（第 5 章）
 
-| Symbol | Meaning |
+| 符号 | 含义 |
 |--------|---------|
-| $N = \{1, \ldots, n\}$ | Set of $n$ voters (agents) |
-| $A = \{a_1, \ldots, a_m\}$ | Set of $m$ alternatives |
-| $\succ_i$ | Voter $i$'s strict preference ordering |
-| $\mathcal{L}(A)$ | Set of all strict linear orders over $A$ |
-| $f: \mathcal{L}(A)^n \to A$ | Social choice function (profile $\to$ winner) |
-| $F: \mathcal{L}(A)^n \to \mathcal{L}(A)$ | Social welfare function (profile $\to$ ranking) |
-| $\text{SP}(Y)$ | Single-peaked preferences on ordered set $Y$ |
-| $\text{peak}(\succ_i)$ | Peak (ideal point) of voter $i$ |
-| $v_i$ | Private valuation of agent $i$ (mechanism design) |
-| $\varphi(v)$ | Virtual valuation (Myerson framework) |
+| $N = \{1, \ldots, n\}$ | $n$ 个投票人（主体）的集合 |
+| $A = \{a_1, \ldots, a_m\}$ | $m$ 个备选方案的集合 |
+| $\succ_i$ | 投票人 $i$ 的严格偏好排序 |
+| $\mathcal{L}(A)$ | $A$ 上所有严格线性排序构成的集合 |
+| $f: \mathcal{L}(A)^n \to A$ | 社会选择函数（全体偏好 $\to$ 胜者） |
+| $F: \mathcal{L}(A)^n \to \mathcal{L}(A)$ | 社会福利函数（全体偏好 $\to$ 排序） |
+| $\text{SP}(Y)$ | 在有序集合 $Y$ 上的单峰偏好 |
+| $\text{peak}(\succ_i)$ | 投票人 $i$ 的峰值（理想点） |
+| $v_i$ | 主体 $i$ 的私人估值（机制设计） |
+| $\varphi(v)$ | 虚拟估值（Myerson 框架） |
 
-## Fairness (Chapter 6)
+## 公平性（第 6 章）
 
-| Symbol | Meaning |
+| 符号 | 含义 |
 |--------|---------|
-| $\mathcal{E}$ | Elicitation policy |
-| $\mathcal{L}$ | Learning model structure |
-| $\mathcal{A}$ | Aggregation function |
-| $\mathcal{D}$ | Decision policy |
-| $d(\cdot, \cdot)$ | Distance metric for individual fairness |
-| $\mathcal{G}$ | Set of protected groups |
-| $\text{Nosy}(p)$ | True if preference $p$ concerns others' choices (Sen) |
-| $\mathcal{F}_{\text{ind}}$ | Individual fairness constraint: $d(x_i, x_j) \leq \epsilon \Rightarrow d(f(x_i), f(x_j)) \leq \delta$ |
-| $\mathcal{F}_{\text{group}}$ | Group fairness constraint: $\mathbb{E}[f(x) \mid G{=}g_1] = \mathbb{E}[f(x) \mid G{=}g_2]$ |
-| $B, M, C$ | Behavior, Mental state, Context (inversion problem) |
+| $\mathcal{E}$ | 偏好征询策略 |
+| $\mathcal{L}$ | 学习模型的结构 |
+| $\mathcal{A}$ | 聚合函数 |
+| $\mathcal{D}$ | 决策策略 |
+| $d(\cdot, \cdot)$ | 个体公平所用的距离度量 |
+| $\mathcal{G}$ | 受保护群体的集合 |
+| $\text{Nosy}(p)$ | 当偏好 $p$ 关心的是别人的选择时取真（Sen 的用法） |
+| $\mathcal{F}_{\text{ind}}$ | 个体公平约束：$d(x_i, x_j) \leq \epsilon \Rightarrow d(f(x_i), f(x_j)) \leq \delta$ |
+| $\mathcal{F}_{\text{group}}$ | 群体公平约束：$\mathbb{E}[f(x) \mid G{=}g_1] = \mathbb{E}[f(x) \mid G{=}g_2]$ |
+| $B, M, C$ | 行为（Behavior）、心理状态（Mental state）、情境（Context），用于讨论反转问题 |

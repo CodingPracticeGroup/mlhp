@@ -1,86 +1,89 @@
-# Introduction {.unnumbered #sec-intro}
+# 引言 {.unnumbered #sec-intro}
 
+::: {.callout-note title="关于这个中文译本"}
+这是《Machine Learning from Human Preferences》的简体中文译本，由 [CodingPracticeGroup](https://github.com/CodingPracticeGroup/mlhp) 在原作者桑 T. 特龙（Sang T. Truong）、安德烈亚斯·豪普特（Andreas Haupt）、桑米·科约（Sanmi Koyejo）原作的基础上翻译整理，原作与译文都按 CC BY-NC 4.0 授权。公式、代码、伪代码、文献引用一律保持原样，只译文字部分。译文若有理解偏差，责任在译者；原书请见 [mlhp.stanford.edu](https://mlhp.stanford.edu/)。本译本面向本科低年级读者，所以每处抽象定义后面都尽量跟一个具体例子；术语第一次出现时给出英文原词。
+:::
 
-Machine learning is increasingly shaping various aspects of our lives, from education and healthcare to scientific discovery. A key challenge in developing trustworthy intelligent systems is ensuring they align with human preferences. Learning from human feedback offers a promising solution to this challenge. This book introduces the foundations and practical applications of machine learning from human preferences. Instead of manually predefining the learning goal, the book presents preference-based learning that incorporates human feedback to guide the learning process, drawing insights from related fields such as economics, psychology, and human-computer interaction. Throughout, we emphasize not only the methods themselves but also their assumptions, limitations, and the conditions under which they can and cannot be applied---understanding when a model fails is as important as understanding when it works. By the end of this book, readers will be equipped with the key concepts and tools needed to design systems that effectively align with human preferences. 
+机器学习正在越来越多地影响我们生活的各个方面，从教育、医疗到科学发现。要做出值得信任的智能系统，一个关键难题是：让系统的判断和人的偏好对得上。从人的反馈里学习，被认为是解决这个难题的一条可行路子。这本书讲的就是"按人类偏好来学习"这件事的基本原理和实际用法。以前的做法是人工事先定好学习目标；这本书讲的是另一套办法：把人的反馈放进学习过程里，让它来引导学习。这方面的思路不少来自经济学、心理学、人机交互这些相邻领域。全书在讲方法的同时，也一直盯着方法的前提、局限，以及"什么时候能用、什么时候不能用"。搞清一个模型在什么时候会失效，和搞清它在什么时候有效，同样重要。读完这本书，你应当能够自己设计出真正贴合人类偏好的系统，并知道该用哪些概念和工具去做。
 
-The book is intended for researchers, practitioners, and students who are interested in integrating machine learning with human-centered application. We assume some basic knowledge of probability and statistics, but provides sufficient background and references for the readers to follow the main ideas. The book also provides illustrative program examples and datasets. The field of machine learning from human preference is a vibrant area of research and practice with many open challenges and opportunities, and we hope that this book will inspire readers to further explore and advance this exciting field.
+这本书写给研究人员、工程实践者，以及对"机器学习 + 以人为中心的应用"感兴趣的学生。我们假定你学过一点概率论和数理统计的基础；书中该交代的背景都交代了，该给的参考文献也给了，跟得上主线思路就够了。书里还配了可直接看懂的程序例子和数据集。按人类偏好来学习，是一个正在快速发展的方向，敞开的问题和机会都很多。希望这本书能推动更多读者去把它往下做。
 
-We hope with the present book to both allow more use of human preferences in machine learning, and new data modalities as Artificial Intelligence systems become increasingly important.
+我们写这本书，是希望两件事同时发生：一是在机器学习里更多地用上人类偏好这种数据，二是随着人工智能系统越来越重要，也用上新形态的数据。
 
 Stanford, May 2025, THK
 
-## Structure of this book
-The book has three parts which introduce foundational models, present learning paradigms, and discuss societal considerations.
+## 全书结构
+这本书分三部分：先讲基础的模型，再讲学习的做法，最后讨论与社会有关的问题。
 
-### Part 1: Foundations
-**Chapter 1** lays the mathematical groundwork for the rest of the book. It covers random preference models, types of comparison data (binary rankings, accept-reject, lists), and deterministic and stochastic utility models including the Rasch model, Bradley-Terry, and Gaussian Processes. A central theme is the Independence of Irrelevant Alternatives (IIA) axiom: how it simplifies modeling, its connection to modern methods like DPO and Elo, and its key limitations due to population heterogeneity.
+### 第一部分：基础
+**第 1 章**为全书搭好数学底座。内容包括：随机偏好模型、比较数据的几种形态（二元排名、接受/拒绝、列表），以及确定性和随机性的效用模型，具体涉及 Rasch 模型、Bradley-Terry 模型、高斯过程。贯穿本章的一条主线是"无关备选独立性"（Independence of Irrelevant Alternatives, IIA）这条公理：它为什么能让建模变简单，它和 DPO、Elo 这些现代方法有什么关系，以及一旦人群内部本来就不一致，它为什么撑不住。
 
-### Part 2: Learning
-The second part introduces approaches to learning from and acting on comparisons.
+### 第二部分：学习
+第二部分讲怎么从比较数据里学，学到之后又怎么用。
 
--   **Chapter 2** studies how to infer utility from preference data. It covers maximum likelihood estimation, Bayesian inference via MCMC and Laplace approximation, and online learning through Elo ratings as stochastic gradient descent. The chapter also addresses regularization, model selection via cross-validation, and modern optimization methods, with a case study on LLM preference learning.
+-   **第 2 章**研究怎么从偏好数据里把效用推断出来。内容包括最大似然估计、用 MCMC 和拉普拉斯近似做的贝叶斯推断，以及把 Elo 等级分看成随机梯度下降的在线学习。还讲正则化、用交叉验证选模型、现代优化方法，并以语言模型的偏好学习作为完整案例。
 
--   **Chapter 3** considers active data collection with the goal of efficient preference elicitation. Fisher information quantifies how much each comparison teaches us, enabling optimal query selection via A-optimal, D-optimal, and E-optimal design criteria. The chapter includes applications to robotic trajectory learning and active DPO for language model alignment.
+-   **第 3 章**研究怎么主动收集数据，目标是"用最少的提问把偏好问清楚"。用费雪信息来衡量"这一场比较能教会我们多少"，于是可以按 A-最优、D-最优、E-最优三种准则去挑该问哪一对。应用例子包括机器人轨迹学习，以及用于语言模型对齐的主动 DPO。
 
--   **Chapter 4** studies how learned preferences guide sequential decisions under uncertainty. It introduces Thompson Sampling for both linear and nonlinear objectives, dueling bandits with distinct winner concepts (Condorcet, Borda, von Neumann), preferential Bayesian optimization, and human-agent cooperation through CIRL.
+-   **第 4 章**研究一件事：学到的偏好，怎么指导不确定环境下的连续决策。内容包括线性与非线性目标下的汤普森采样、几种不同的"赢家"定义（孔多塞胜者、博尔达胜者、冯·诺依曼胜者）之下的对决老虎机、偏好型贝叶斯优化，以及通过 CIRL 实现人与智能体的协作。
 
-### Part 3: Society
-The final part of the book addresses the societal dimensions of preference learning: how to aggregate diverse preferences and whose preferences should count.
+### 第三部分：社会
+最后一部分讲偏好学习和社会的交集：分歧这么多，偏好该怎么汇总；以及，谁的偏好应该算数。
 
--   **Chapter 5** examines preference aggregation when multiple stakeholders disagree. It introduces social choice theory, Arrow's and Gibbard-Satterthwaite's impossibility theorems, and ways to escape these impossibilities through domain restrictions and scoring rules. It connects the Borda count to DPO, discusses nosy preferences and the liberal paradox, analyzes Community Notes as a case study, and covers mechanism design for incentive-compatible preference elicitation.
+-   **第 5 章**讨论多方意见不一致时的偏好聚合。引入社会选择理论、阿罗不可能定理和 Gibbard-Satterthwaite 定理，再讲怎么靠限制定义域、靠评分规则绕开这些"不可能"。还把博尔达计数和 DPO 接起来，讨论多管闲事的偏好（nosy preferences）与自由主义悖论，用社区笔记（Community Notes）做案例分析，最后讲机制设计：怎么定规则，让人愿意如实说出自己的偏好。
 
--   **Chapter 6** asks a normative question: *whose preferences matter?* It shows how technical design choices at each stage of the preference learning pipeline embed value judgments. The chapter covers individual and group fairness, how unfairness compounds across pipeline stages, and design principles for responsible preference learning systems, including human values, AI alignment, and human-centered design.
+-   **第 6 章**问的是一个规范问题：*谁的偏好才算数？*它说明：在偏好学习流水线的每一步，技术上的选择其实都悄悄做了价值判断。本章涉及个体公平与群体公平、不公平如何在流水线各环节层层叠加，以及"要做负责任的系统该怎么设计"，包括人的价值、AI 对齐、以人为中心的设计。
 
-**Chapter 7** concludes the book by reflecting on its interdisciplinary approach and discussing open challenges, including moving beyond pairwise comparisons, scalable oversight, heterogeneity and personalization, fairness, and foundation model alignment.
+**第 7 章**收尾，回顾这本书跨学科的思路，并讨论还没解决的问题：怎么走出"只能两两比较"，怎么在监督者本身跟不上模型能力时做监督，异质性与个性化，公平，以及基础模型的对齐。
 
-## How to engage with this book
-There are four models of reading, and teaching with, this book. Chapter 1 is foundational to all of the book, so is part of all of these pathways.
+## 怎么读这本书
+读这本书、或者用它来开课，有四种走法。无论你选哪一种，第 1 章都是底座，都要读。
 
- - For practitioners and those teaching applied AI content, we recommend Chapters 1, 2, and 4, which can be used as a sequence in an early graduate course on Machine Learning. This sequence covers foundations, learning methods, and decision-making with human preferences.
+ - 面向实践者，以及讲应用人工智能内容的人：建议读第 1、2、4 章。这三章可以按顺序讲完，正好够一门研究生低年级的机器学习课。这条线覆盖基础、学习方法，以及"按人类偏好做决策"。
 
- - For people with background in discrete choice, we propose to skim Chapter 1, and study Chapters 2 and 4. These studies allow readers to integrate machine learning in their studies of discrete choice, demand models, and Industrial Organization.
+ - 已有离散选择方面背景的人：第 1 章快速过一遍，重点读第 2 章和第 4 章。这样你就能把机器学习放进自己对离散选择、需求模型、产业组织的研究里。
 
- - For those with deep background in machine learning, we propose to study Chapters 2-4. These chapters maximize the amount of machine learning covered, and are suitable for a deep learning-based course on machine learning.
+ - 机器学习背景比较深的人：建议读第 2 至 4 章。这三章讲机器学习本身最多，适合一门以深度学习为主的机器学习课。
 
- - For those interested in the societal and theoretical foundations of machine learning from comparisons, we recommend Chapters 1, 5, and 6. Chapter 1 establishes the modeling foundations, Chapter 5 studies aggregation and mechanism design, and Chapter 6 examines fairness and value alignment. This pathway is suitable for a course on Computation and Society.
+ - 关心"从比较数据学习"的社会与理论问题的人：建议读第 1、5、6 章。第 1 章把建模基础立起来，第 5 章讲聚合与机制设计，第 6 章讲公平与价值对齐。这条线适合一门"计算与社会"的课。
 
-## For instructors
+## 给授课教师的说明
 
-This book is designed to support course instruction, and each chapter includes lecture plan callouts with suggested timing. A few notes for instructors adopting this book:
+这本书本来就是为上课设计的，每一章都带有课时安排提示，标明建议用多少时间。准备采用这本书的老师，有几点请注意：
 
-- **Pacing**: The book can be covered in a 10-week quarter (as in Stanford's CS329H) or a 15-week semester. For a quarter: allocate approximately 2 weeks each for Chapters 1--2, 1.5 weeks for Chapter 3, 2.5 weeks for Chapter 4, and 1 week each for Chapters 5--6. For a semester, expand each chapter proportionally.
-- **Core vs. optional material**: The "Beyond Bradley-Terry" sections in Chapter 1 and the RL foundations section in Chapter 4 (marked "Optional") can be skipped without loss of continuity. All other material is core.
-- **Assumptions and limitations**: Throughout the book, callout boxes marked with warnings highlight key assumptions and their limitations. We encourage instructors to treat these as first-class content---understanding when models fail is as pedagogically important as understanding when they work.
-- **Cross-chapter connections**: Several results connect across chapters in non-obvious ways: Elo is SGD on the Bradley-Terry likelihood (Ch1--2); DPO implicitly optimizes the Borda score (Ch2--5); Fisher information drives both active learning (Ch3) and fairness auditing (Ch6). Emphasizing these connections reinforces the book's unified perspective.
-- **Assessment**: Each chapter includes exercises at three difficulty levels, discussion questions for class participation, and quick check questions for self-assessment. Problem sets are available on the [Teaching Materials](src/teaching.qmd) page.
+- **进度**：全书可以在一个 10 周的学季里讲完（Stanford 的 CS329H 就是这么排的），也可以铺到 15 周的学期。按学季排：第 1、2 章各约 2 周，第 3 章 1.5 周，第 4 章 2.5 周，第 5、6 章各 1 周。按学期排，各章时间等比例放宽。
+- **必讲与可略**：第 1 章里"超出 Bradley-Terry 之外"的小节，以及第 4 章讲强化学习基础、标了"可选"的那节，可以整段跳过，不影响后面的连贯性。其余内容都是主线。
+- **假设与局限**：全书用带警示标记的提示框，标出了关键假设和它的局限。建议老师把这些框当成正课内容来讲——什么时候模型会失效，和什么时候它有效，在教学上一样重要。
+- **跨章的联结**：有几个结论表面上不相干，其实是同一件事：Elo 就是在 Bradley-Terry 的似然上做随机梯度下降（第 1、2 章）；DPO 实际上在优化博尔达得分（第 2、5 章）；费雪信息既是主动学习的驱动量（第 3 章），也是公平性审计的抓手（第 6 章）。把这些联系点出来，正好能强化全书"一套框架看下来"的效果。
+- **考核**：每章都配了三档难度的练习、适合课堂讨论的问题，以及用来自查的快问快答。成套的习题见[教学材料](src/teaching.qmd)页。
 
-## Prior knowledge
-The book assumes knowledge of the fundamentals of statistics, linear algebra and machine learning. Many example code excerpts are written in `python`, and make experience in the `python` programming language valuable for readers.
+## 前置知识
+这本书假定你学过统计学、线性代数和机器学习的基础。书里的示例代码大多用 `python` 写，所以会一点 `python` 会更顺。
 
-## Recommended background texts
+## 建议的背景读物
 
-For readers seeking to strengthen their prerequisites or deepen their understanding of the fields this book draws from, we recommend the following companion texts:
+如果想把先修知识补扎实，或者想把这本书借力的几个领域弄得更透，下面这些配套教材值得一读：
 
-- **Abu-Mostafa, Magdon-Ismail, and Lin**, [*Learning from Data*](https://amlbook.com/) — An exceptionally clear introduction to the core ideas of machine learning, emphasizing generalization, bias-variance tradeoffs, and the limits of learning from finite data. Ideal preparation for the statistical learning concepts in Chapters 2--4.
-- **Bishop**, [*Pattern Recognition and Machine Learning*](https://www.microsoft.com/en-us/research/publication/pattern-recognition-machine-learning/) — Comprehensive coverage of Gaussian processes, Bayesian inference, and logistic regression, all of which appear throughout this book.
-- **Russell and Norvig**, [*Artificial Intelligence: A Modern Approach*](https://aima.cs.berkeley.edu/) — The standard AI textbook, providing context for the reinforcement learning and decision-making concepts in Chapter 4.
-- **Sen**, [*Collective Choice and Social Welfare*](https://www.cambridge.org/core/books/machine-learning/621D3E616DF879E494B094CC93ED36A4) — For readers wanting depth in social choice theory and welfare economics before Chapter 5, Sen's classic text provides the rigorous foundations.
+- **Abu-Mostafa、Magdon-Ismail、Lin**，《[*Learning from Data*](https://amlbook.com/)》——把机器学习的核心思想讲得极为清楚：泛化、偏差与方差的权衡、有限数据能学到什么是有上限的。读第 2 至 4 章之前，这本是最好的准备。
+- **Bishop**，《[*Pattern Recognition and Machine Learning*](https://www.microsoft.com/en-us/research/publication/pattern-recognition-machine-learning/)》——高斯过程、贝叶斯推断、logistic 回归都讲得很完整，这几样在全书里反复出现。
+- **Russell 和 Norvig**，《[*Artificial Intelligence: A Modern Approach*](https://aima.cs.berkeley.edu/)》——人工智能的标准教材，读第 4 章时会用到的强化学习与决策概念，这里能补上背景。
+- **Sen**，《[*Collective Choice and Social Welfare*](https://www.cambridge.org/core/books/machine-learning/621D3E616DF879E494B094CC93ED36A4)》——想在读第 5 章之前把社会选择理论与福利经济学的底子打牢，Sen 这本经典给的就是严格的基础。
 
-## Additional Materials
-Every chapter has problems for readers and slides for teaching of the material available. See the [Teaching Materials](src/teaching.qmd) page for all slides, problem sets, and suggested course pathways.
+## 附加材料
+每一章都配了给学生做的习题，以及用于讲课的讲义。全部讲义、习题和建议的开课路径，见[教学材料](src/teaching.qmd)页。
 
-## Acknowledgments {#sec-ack}
+## 致谢 {#sec-ack}
 
-Initial versions of this book were compiled as lecture notes to the class CS329H: Machine Learning from Human Preferences at Stanford University taught in Fall 2023 and Fall 2024. We thank Rehaan Ahmad, Ahmed Ahmed, Jirayu Burapacheep, Michael Byun, Akash Chaurasia, Andrew Conkey, Tanvi Deshpande, Eric Han, Laya Iyer, Adarsh Jeewajee, Shreyas Kar, Arjun Karanam, Jared Moore, Aashiq Muhamed, Bidipta Sarkar, William Shabecoff, Stephan Sharkov, Max Sobol Mark, Kushal Thaman, Joe Vincent, Yibo Zhang, Duc Nguyen, Grace Sodunke, Ky Nguyen, and Mykkel Kochenderfer for their early contributions and feedback.
+这本书的早期版本，是 Stanford 在 2023 年秋季和 2024 年秋季开设的 CS329H: Machine Learning from Human Preferences 一课的讲义。以下这些人为早期版本做过贡献、提过意见，在此致谢：Rehaan Ahmad、Ahmed Ahmed、Jirayu Burapacheep、Michael Byun、Akash Chaurasia、Andrew Conkey、Tanvi Deshpande、Eric Han、Laya Iyer、Adarsh Jeewajee、Shreyas Kar、Arjun Karanam、Jared Moore、Aashiq Muhamed、Bidipta Sarkar、William Shabecoff、Stephan Sharkov、Max Sobol Mark、Kushal Thaman、Joe Vincent、Yibo Zhang、Duc Nguyen、Grace Sodunke、Ky Nguyen、Mykkel Kochenderfer。
 
 ::: {.content-visible when-format="html"}
 
-## Citation
-Thanks for reading our book! We hope you find this book useful in your research and teaching.
+## 引用
+谢谢你读这本书！希望它在你的研究和教学中用得上。
 
 ::: {#quarto-appendix .default}
 
-BibTeX citation:
+BibTeX 引用：
 <pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@book{mlhp,
   author    = {Truong, Sang and Haupt, Andreas and Koyejo, Sanmi},
   title     = {{Machine Learning from Human Preferences}},
@@ -90,7 +93,7 @@ BibTeX citation:
   note      = {}
 }</code></pre>
 
-For attribution, please cite this work as:
+引用本书原文时，请用下面这条：
 <div id="ref-mlhp" class="csl-entry quarto-appendix-citeas">
   S. Truong, A. Haupt, and S. Koyejo. 2025. Machine Learning from Human Preferences. Stanford University.
 </div>
