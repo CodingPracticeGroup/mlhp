@@ -158,60 +158,60 @@ This chapter provides the missing normative framework: **whose preferences shoul
 
 为了让这些抽象问题落到实处，本章自始至终用同一个具体的例子：一个帮审稿人写审稿意见的 AI 系统。它从每位审稿人过去写的审稿意见中学习，帮他评审新的论文。
 
-**The Setting**: Consider a large ML conference with 10,000 submitted papers and 5,000 reviewers. Each paper needs at least 3 reviews. Reviewers bid on papers (prefer / willing / not-willing), and a matching algorithm assigns papers to reviewers. An AI assistant learns from past reviews to help reviewers write better, more efficient reviews.
+**场景设定**：考虑一个大型机器学习会议，收到 10,000 篇投稿、有 5,000 位审稿人。每篇论文至少要 3 份审稿意见。审稿人对论文表态（愿意审 / 可以审 / 不想审），再由一个匹配算法把论文分配给审稿人。一个 AI 助手从过往的审稿意见中学习，帮审稿人把意见写得更好、更省力。
 
-**Why This Example?** Peer review combines all the challenges of preference learning:
+**为什么选这个例子？** 同行评审把偏好学习会遇到的难点全都凑齐了：
 
-- **Elicitation**: Which reviewers should we query for more feedback to train the assistant? Senior reviewers write more detailed reviews (more training data), but this may leave junior reviewers under-served.
+- **征询**：该向哪些审稿人再要一些反馈来训练助手？资深审稿人写的意见更详细（训练数据更多），但这样可能让资深以外的审稿人得不到同等服务。
 
-- **Learning**: Reviewers have context-dependent preferences (fatigue, load, framing). Should we assume IIA? Or model context explicitly?
+- **学习**：审稿人的偏好是情境依赖的（疲劳、任务量、表述方式）。我们还假定独立无关备选成立吗？还是把情境明确建进模型？
 
-- **Aggregation**: Should the shared model weight all reviewers equally? Or weight by review volume (more data from seniors)?
+- **汇总**：共享模型该对所有审稿人一视同仁，还是按审稿量加权（资深者数据多）？
 
-- **Decision**: If a reviewer tends to write harsh reviews, should the assistant help them be consistently harsh? Or nudge toward constructive feedback?
+- **决策**：如果某位审稿人一贯写得严厉，助手该帮他保持这种一贯的严厉，还是把他往建设性的方向推？
 
-Moreover, peer review has clear stakeholders (reviewers, authors, editors, scientific community), measurable outcomes (review quality, author satisfaction, acceptance rates), and real fairness concerns (junior vs. senior reviewers, underrepresented subfields, institutional prestige).
+而且同行评审的利益相关者很清楚（审稿人、作者、领域主席、学术共同体），结果可以度量（审稿质量、作者满意度、录用率），也确实存在公平问题（资浅与资深审稿人、小众方向、学校名气）。
 
-We will trace how design choices at each pipeline stage create fairness implications, and how these compound into systematic disadvantages for some groups.
+我们会一路跟踪：流水线各阶段的设计选择怎样产生公平性后果，这些后果又怎样叠加成某些群体的系统性不利。
 
-### Connection to Earlier Chapters {#sec-chapter-connections}
+### 与前文的联系 {#sec-chapter-connections}
 
-This chapter builds directly on the technical foundations from Chapters 2--6:
+本章直接建立在前面几章的技术基础之上：
 
-**From Chapter 2 (Foundations)**: The Bradley-Terry model assumes IIA—if reviewer prefers Paper A over Paper B, adding Paper C shouldn't change this. But in @sec-learning-assumptions, we'll see why this assumption has fairness consequences: it treats context-dependent preferences as invalid, disadvantaging overburdened reviewers.
+**承接第 1 章（基础）**：Bradley-Terry 模型假定独立无关备选——如果一位审稿人认为论文 A 比 B 好，那么再拿出论文 C 也不该改变这一点。但在 @sec-learning-assumptions 我们会看到，这个假定为何在公平性上有后果：它把情境依赖的偏好当成不合理的，从而让负担过重的审稿人处于不利。
 
-**From Chapter 3 (Learning)**: DPO maximizes a weighted Borda rule where $\pi_{\text{ref}}$ is trained on existing data (@eq-dpo). But existing data reflects existing inequities. In @sec-aggregation-fairness, we'll analyze how status quo bias in $\pi_{\text{ref}}$ weights senior reviewers more heavily.
+**承接第 2 章（学习）**：DPO 最大化的是一条加权博尔达规则，其中的 $\pi_{\text{ref}}$ 是在已有数据上训练出来的（@eq-dpo）。可已有的数据反映的是已有的不平等。在 @sec-aggregation-fairness 我们会分析：$\pi_{\text{ref}}$ 里的现状偏差怎样让资深审稿人被赋予更高的权重。
 
-**From Chapter 4 (Elicitation)**: Active learning via Fisher information (@sec-fisher-information) queries where the model is most uncertain. But uncertainty may be highest for well-represented groups with complex preferences. In @sec-elicitation-fairness, we'll show how information-maximizing strategies can undersample minorities.
+**承接第 3 章（偏好征询）**：基于 Fisher 信息的主动学习（@sec-fisher-information）会去问模型最不确定的地方。可模型最不确定的，未必是少数群体，而可能是那些样本充足、偏好又复杂的群体。在 @sec-elicitation-fairness 我们会说明：追求信息最大的策略为什么反而会少采到少数群体。
 
-**From Chapter 5 (Decisions)**: Thompson Sampling explores based on posterior uncertainty (@sec-thompson-sampling). But should we explore over what users *want* (liberal) or what's *best* for them (illiberal)? In @sec-liberal-illiberal, we'll formalize this distinction using Sen's framework of nosy preferences.
+**承接第 4 章（决策）**：汤普森采样按后验的不确定程度来探索（@sec-thompson-sampling）。但我们要探索的，是用户*想要的*东西（自由主义式），还是对他们*更好的*东西（非自由主义式）？在 @sec-liberal-illiberal 我们会用森关于"管得宽"偏好的框架，把这个区别写清楚。
 
-**From Chapter 6 (Aggregation)**: Arrow's theorem and Sen's Impossibility of a Paretian Liberal (@sec-fairness-concepts) show that no aggregation mechanism satisfies all desirable properties. In @sec-fairness-incompatibility, we'll see how adding fairness constraints further limits our options.
+**承接第 5 章（聚合）**：阿罗定理与森的帕累托自由不可能性（@sec-fairness-concepts）说明，没有哪种汇总机制能满足所有我们想要的性质。在 @sec-fairness-incompatibility 我们会看到：再加上公平性约束，可选的余地只会更小。
 
-The technical methods are powerful. But applying them responsibly requires understanding *whose* preferences you're optimizing for and *whose* interests you're serving.
+这些技术方法确实很强。但要负起责任地用起来，就得明白自己*在为谁的偏好*做优化、*在为谁*的利益服务。
 
-### Roadmap for This Chapter {#sec-roadmap}
+### 本章路线 {#sec-roadmap}
 
-The rest of this chapter proceeds as follows:
+本章余下内容的安排如下：
 
-- **@sec-design-choices** analyzes the four-stage pipeline in detail, showing how each stage embeds value judgments and how unfairness compounds across stages.
+- **@sec-design-choices** 详细分析这条四阶段流水线，说明每个阶段里含着什么价值判断，以及不公平怎样跨阶段叠加。
 
-- **@sec-fairness-concepts** formalizes key fairness distinctions: individual vs. group fairness, process vs. outcome fairness, and the fundamental incompatibilities between them.
+- **@sec-fairness-concepts** 把几组关键的公平区分写清楚：个体公平与群体公平、过程公平与结果公平，以及它们之间根本性的不相容。
 
-- **@sec-design-principles** provides eight concrete design principles for building fairer preference learning systems, along with red flags to watch for.
+- **@sec-design-principles** 给出八条具体可落地的设计原则，用来建造更公平的偏好学习系统，并列出需要警惕的危险信号。
 
-- **Governance** (discussed throughout the chapter) examines governance mechanisms for deciding whose preferences matter: designer discretion, user control, participatory design, regulatory oversight, and professional standards.
+- **治理**（贯穿全章讨论）：考察在"谁的偏好算数"这个问题上可用的治理机制——由设计者自行决定、交给用户控制、参与式设计、监管，以及职业规范。
 
-- **Design Principles** (@sec-design-principles) distills the chapter's insights into actionable principles for building fairer preference learning systems.
+- **设计原则**（@sec-design-principles）：把本章的要点提炼成可操作的原则，用于建造更公平的偏好学习系统。
 
-Let's begin by tracing the AI review assistant through the four-stage pipeline, seeing how fairness issues emerge and compound at each step.
+我们先跟着这位 AI 审稿助手走完四个阶段，看公平问题怎样在每一步出现、又怎样叠加起来。
 
-## Design Decisions as Value Choices {#sec-design-choices}
+## 设计决定就是价值选择 {#sec-design-choices}
 
-::: {.callout-caution title="Worked Example: Value Choices in the AI Review Assistant Pipeline" collapse="false"}
-Consider building an AI assistant for peer review. At each pipeline stage, a seemingly neutral technical choice embeds a value judgment.
+::: {.callout-caution title="完整算例：AI 审稿助手流水线里的价值选择" collapse="false"}
+设想我们要为同行评审做一个 AI 助手。在流水线的每个阶段，一个看起来中性的技术选择都含着一个价值判断。
 
-| Stage | Technical Choice | Value Embedded | Who Benefits | Who Is Harmed |
+| 阶段 | 技术选择 | 里面含的价值 | 谁受益 | 谁受损 |
 |:---|:---|:---|:---|:---|
 | **Elicitation** $\mathcal{E}$ | Query reviewers with highest Fisher information | Efficiency over representation | Well-represented subfields | Niche/emerging areas |
 | **Learning** $\mathcal{L}$ | Fit Bradley-Terry (assumes IIA) | Assumes context-independent preferences | Average-context reviewers | Overburdened reviewers whose preferences are context-dependent |
