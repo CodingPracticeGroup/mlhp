@@ -1,5 +1,5 @@
 ---
-title: Conclusion
+title: "结语"
 format: html
 filters:
   - pyodide
@@ -9,25 +9,25 @@ execute:
     auto: true
 ---
 
-Machine learning systems are increasingly shaping consequential decisions in our lives—from the content we consume to the opportunities we receive. A central challenge in developing trustworthy AI is ensuring these systems align with human preferences rather than optimizing for proxies that diverge from what people actually value. This book has presented a comprehensive framework for learning from human feedback, drawing on nearly a century of research across economics, psychology, statistics, and computer science.
+机器学习系统正在越来越多地左右我们生活中有分量的决定——从我们读到什么内容，到我们能得到什么机会。要做出可信的 AI，一个核心挑战就是让这些系统与人类的偏好对齐，而不是去优化那些与人真正看重的东西逐渐跑偏的替代指标。本书给出了一套完整的框架，用来从人类反馈中学习；它背后是经济学、心理学、统计学与计算机科学近一个世纪的研究积累。
 
-## Our Approach
+## 我们的进路
 
-This book has taken an interdisciplinary approach to machine learning from human preferences, weaving together insights from diverse fields into a unified technical and conceptual framework.
+本书用的是跨学科的方式来做"从人类偏好中学习"这件事：把各个领域的洞见织在一起，形成一个统一的、技术与概念兼备的框架。
 
-### Foundations from Multiple Disciplines
+### 来自多个学科的基础
 
-Our treatment began with foundational models that originated outside of machine learning. The Bradley-Terry model (@sec-bradley-terry), introduced in 1952 for ranking chess players, provides the mathematical backbone for modern preference learning—including state-of-the-art methods like Direct Preference Optimization for language model alignment. Thurstone's law of comparative judgment from psychophysics (1927), Luce's choice axiom (1959), and McFadden's discrete choice econometrics (1974) all inform how we model the relationship between latent utilities and observed choices.
+我们从一个不在机器学习内部诞生的基础模型讲起。Bradley-Terry 模型（@sec-bradley-terry）1952 年提出时是用来给棋手排名的，如今却是现代偏好学习的数学骨架——连面向语言模型对齐的最先进方法（直接偏好优化）也建在它上面。心理物理学中 Thurstone 的比较判断定律（1927）、Luce 的选择公理（1959）、McFadden 的离散选择计量经济学（1974），共同塑造了我们如何刻画"潜在效用"与"观察到的选择"之间的关系。
 
-This interdisciplinary foundation is not merely historical context. Understanding *why* the Bradley-Terry model arises from random utility assumptions, and *when* its key assumption—Independence of Irrelevant Alternatives—fails, equips practitioners to recognize the limitations of their methods. The red-bus/blue-bus problem and preference heterogeneity are not abstract concerns but practical challenges that arise in real applications.
+这一跨学科的基础不只是历史背景。理解了 Bradley-Terry 模型*为什么*会从随机效用假设里推出来、它的关键假定——独立无关备选——*在什么时候*会失效，实践者才看得出来自己用的方法有什么边界。红巴士／蓝巴士问题、偏好的异质性，都不是抽象的担忧，而是真实应用中迟早会碰到的问题。
 
-### From Axioms to Algorithms
+### 从公理到算法
 
-The book progressed from axiomatic foundations to practical algorithms:
+本书的推进顺序是：先讲公理基础，再讲可用的算法。
 
-**Chapter 1** established the mathematical language of preferences. We showed how random utility models with Gumbel-distributed noise yield the tractable logit form, and how the IIA axiom collapses an exponentially large preference space to a linear number of parameters. These are not arbitrary modeling choices—they encode specific assumptions about human cognition that may or may not hold in practice.
+**第 1 章**建立描述偏好的数学语言。我们说明了几何噪声服从 Gumbel 分布的随机效用模型怎样得到可计算的 logit 形式，也说明了独立无关备选这条公理怎样把一个指数级大的偏好空间压缩成一线数值效用。
 
-**Chapter 2** developed estimation methods for preference models. Maximum likelihood estimation provides point estimates efficiently, while Bayesian inference quantifies uncertainty—essential for downstream decision-making. The Elo rating system, used from chess to video games, emerges naturally as stochastic gradient descent on the Bradley-Terry likelihood. Gaussian Processes offer flexible nonparametric alternatives when linear reward functions are too restrictive.
+**第 2 章**给出偏好模型的估计方法。最大似然能快速给出点估计，贝叶斯推断则把不确定性量化出来——后面的决策要用。Elo 等级分系统……
 
 **Chapter 3** addressed active data collection. Human feedback is expensive; we cannot afford to collect data naively. Fisher information quantifies how much each comparison teaches us about preferences, enabling intelligent query selection. The connection to optimal experimental design—A-optimal, D-optimal, E-optimal criteria—grounds active learning in classical statistical theory.
 
