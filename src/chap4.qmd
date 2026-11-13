@@ -134,11 +134,11 @@ filters:
 老虎机框架假定物品的效用**不随时间变化**：每一臂的奖励分布在各轮之间保持不变。本章所有遗憾上界都依赖这条平稳性假设。现实中偏好会漂移——用户的口味会变，语言模型的回答质量随训练在变，物品集合本身也会变（新产品、新模型版本）。效用不平稳时，标准的遗憾上界就不再成立，算法必须显式地处理漂移，例如给早先的观测打折（第 2 章的 Elo K 因子其实隐含地做了这件事），或者使用带滑动窗口、变点检测的不平稳老虎机算法。
 :::
 
-Each user $i$ interacts with a set of available items indexed by $j$, each characterized by a known parameter vector $V_j \in \mathbb{R}^K$. The user's utility function is $H_{ij} = h_i(V_j),$ where $h_i: \mathbb{R}^K \rightarrow \mathbb{R}$ maps item features to latent utility. We only observe noisy or partial feedback, such as item-wise or pairwise responses. The agent's objective is to select items sequentially to maximize reward.
+每位用户 $i$ 会与一组可用物品打交道，物品用下标 $j$ 表示，各自带有已知的参数向量 $V_j \in \mathbb{R}^K$。用户的效用函数是 $H_{ij} = h_i(V_j)$，其中 $h_i: \mathbb{R}^K \rightarrow \mathbb{R}$ 把物品特征映射到潜在效用。我们只能观察到带噪声或不完整的反馈，例如逐条的回答或两两比较的结果。智能体的目标是一个接一个地挑选物品，使奖励最大。
 
-In the **linear case**, we assume $h_i(V_j) = U_i^\top V_j$, with $U_i \in \mathbb{R}^K$ representing the user's latent vector. This recovers the logistic or Rasch model when observations are binary: $p(Y_{ij}=1) = \sigma(U_i^\top V_j).$ In this setting, the uncertainty about $U_i$ defines a posterior distribution $p(U_i \mid \text{data})$, and the system's exploration–exploitation tradeoff can be quantified by the expected utility and posterior variance. Algorithms such as Thompson Sampling operate directly on this posterior, balancing exploration (reducing uncertainty about $U_i$) and exploitation (recommending high-utility $V_j$).
+**线性情形**下我们设 $h_i(V_j) = U_i^\top V_j$，其中 $U_i \in \mathbb{R}^K$ 是这位用户的隐向量。当观测是二值的，它就退化成了逻辑斯蒂模型或 Rasch 模型：$p(Y_{ij}=1) = \sigma(U_i^\top V_j)$。在这套设定里，对 $U_i$ 的不确定性由后验分布 $p(U_i \mid \text{data})$ 描述，系统的探索—利用权衡可以用期望效用与后验方差来刻画。汤普森采样这类算法直接在这套后验上操作，一边探索（减少对 $U_i$ 的不确定性），一边利用（推荐高效用的 $V_j$）。
 
-In the **nonlinear case**, a common choice is to place a Gaussian process prior over $h_i$: $h_i \sim \mathcal{GP}(m(\cdot), k(\cdot,\cdot)),$ where the kernel $k(V, V')$ encodes similarity between items. This yields the Bayesian optimization formulation. The system uses acquisition functions (e.g., Thompson Sampling or expected improvement) to trade off exploitation and exploration.
+**非线性情形**里，常见的做法是给 $h_i$ 设一个高斯过程先验：$h_i \sim \mathcal{GP}(m(\cdot), k(\cdot,\cdot))$，其中核函数 $k(V, V')$ 刻画物品之间的相似程度。这就得到了贝叶斯优化的形式。系统用采集函数（例如汤普森采样或期望改进）在利用与探索之间做取舍。
 
 {{< include _plt_setup.qmd >}}
 
@@ -1041,45 +1041,22 @@ Thompson Sampling provides a remarkably simple and effective solution to the exp
 
 一般我们假定手上有一组可选行动。这里有个值得注意的假设：我们做出的任何观测，都是对收益的无偏估计。也就是说，如果我们观测到人在一组选项里更偏好某一个（或几个），那说明被偏好的那个选项隐式收益更高。放到前面那几个例子里：饮食偏好上，这意味着人更喜欢被选中的那道菜；视频推荐上，这意味着用户对自己点开的那条视频更开心、更满意或更有收获。
 
-The overarching context is that we do not have direct or reliable access to rewards. We may not have a 
-reward at all (for some decisions, it may be impossible to define a real value to the outcome), or it may be 
-noisy (for example, if we ask a human to rate their satisfaction on a scale of 1 to 10). We use relative 
-comparisons to evaluate the best of multiple options in this case. Our goal is to minimize total regret in 
-the face of noisy comparisons. Humans may not always provide consistent observations (since human decision-making 
-is not guaranteed to be consistent). However, we can still determine an optimal strategy with the observed 
-comparisons. We aim to minimize the frequency of sub-optimal decisions according to human preferences. In practice, 
-many formulations of bandits can allow for infinitely many bandits (for example, in continuous-value and high-dimensional 
-spaces). However, this situation can be intractable when determining an optimal decision strategy. With 
-infinite options, how can we always ensure we have chosen the best? We will constrain our bandits to a 
-discrete space to enable efficient exploration. We will assume that we have $k$ bandits, $b_i, i \in [1, k]$, 
-and our task is to choose the one that will minimize regret.
+总的背景是：我们拿不到直接的、可靠的奖励。有时压根没有奖励这个量（有些决策根本没法给结果定出一个真实数值），有时它带噪声（比如让人在 1 到 10 之间给自己的满意度打分）。这种情况下，我们改用相对比较来在多个选项里判断谁最好。目标是：在比较本身带噪声的前提下，把总遗憾降到最低。人给出的回答未必前后一致（因为人的决策本来就不保证一致），但即便如此，我们仍能从观测到的比较中确定一个最优策略，尽量让"按人的偏好来说是次优的决定"少发生。实践中，很多老虎机的设定允许有无穷多个臂（比如连续、高维的空间），但要在这种情形下确定最优决策策略往往算不动——选项无穷多，怎么保证每次选的都是最好的？我们把老虎机限制在离散空间里，好让探索能有效进行。假设共有 $k$ 个老虎机 $b_i, i \in [1, k]$，任务是选出使遗憾最小的那一个。
 
-With the framework outlined, we now define our approach more formally. This method was introduced by 
- [@YUE20121538], and proofs for the guarantees and derivations of parameters can be found in their work.
+框架交代清楚了，下面把方法写得更正式一些。这套方法由 [@YUE20121538] 提出，相关保证的证明与参数的推导可以在他们的工作里找到。
 
-To determine the optimal action, we will compare pairwise to ascertain the probability that an action $b_i$ is 
-preferred over another $b_j$, where $i \ne j$. Concretely, we assume access to a function $\epsilon$ that helps 
-determine this probability; in practice, this can be done with an oracle, such as asking a human which of two 
-options they prefer: $$P(b_i > b_j) = \varepsilon(b_i, b_j) + \frac{1}{2}.$$ {#eq-preference-probability} With this model, three basic properties 
-govern the values provided by $\epsilon$:
+为了确定最优行动，我们用两两比较来弄清"行动 $b_i$ 被偏好于 $b_j$（$i \ne j$）"的概率。具体来说，假定有一个函数 $\epsilon$ 帮助我们算出这个概率；实践中可以交给神谕来做，比如问人两个选项里更想要哪个：$$P(b_i > b_j) = \varepsilon(b_i, b_j) + \frac{1}{2}.$$ {#eq-preference-probability} 在这个模型下，$\epsilon$ 给出的数值满足三条基本性质：
 $$\epsilon(b_i, b_j) = -\epsilon(b_j, b_i), \epsilon(b_i, b_i) = 0, \epsilon(b_i, b_j) \in \left(-\frac{1}{2}, \frac{1}{2} \right).$$ {#eq-epsilon-properties}
 
-We assume there is a total ordering of bandits, such that $b_i \succ b_j$ implies $\epsilon(b_i, b_j) > 0$. We 
-impose two constraints to properly model comparisons:
+我们假定老虎机之间存在全序，使得 $b_i \succ b_j$ 蕴含 $\epsilon(b_i, b_j) > 0$。为了让比较模型说得通，再加两条约束：
 
--   **Strong Stochastic Transitivity**: We must maintain our total ordering of bandits, and as such, the comparison 
-    model also respects this ordering:
+-   **强随机传递性（Strong Stochastic Transitivity）**：既然要保持老虎机之间的全序，比较模型也必须与这个顺序一致：
     $$b_i \succ b_j \succ b_k \Rightarrow \epsilon(b_i, b_k) \ge \text{max}\{\epsilon(b_i, b_j), \epsilon(b_j, b_k)\}.$$ {#eq-stochastic-transitivity}
 
--   **Stochastic Triangle Inequality**: We also impose a triangle inequality, which captures the condition that the probability 
-    of a bandit winning (or losing) a comparison will exhibit diminishing returns as it becomes increasingly superior (or inferior) 
-    to the competing bandit:
+-   **随机三角不等式（Stochastic Triangle Inequality）**：还要求满足一条三角不等式。它刻画的是：当一个老虎机越来越强（或越来越弱）时，它赢（或输）一次比较的概率提升会越来越小：
     $$b_i \succ b_j \succ b_k \Rightarrow \epsilon(b_i, b_k) \le \epsilon(b_i, b_j) + \epsilon(b_j, b_k).$$ {#eq-triangle-inequality}
 
-These assumptions may initially seem limiting; however, common models for comparisons satisfy these constraints.
-For example, the Bradley-Terry Model follows $P(b_i > b_j) = \frac{\mu_i}{\mu_i + \mu_j}$.
-The Gaussian model with unit variance also satisfies these constraints: $P(b_i > b_j) = P(X_i - X_j > 0)$,
-where $X_i - X_j \sim N(\mu_i - \mu_j, 2)$.
+这些假定乍看像是很强的限制，其实常用的比较模型都满足：例如 Bradley-Terry 模型满足 $P(b_i > b_j) = \frac{\mu_i}{\mu_i + \mu_j}$；方差为单位方差的高斯模型也满足这些条件：$P(b_i > b_j) = P(X_i - X_j > 0)$，其中 $X_i - X_j \sim N(\mu_i - \mu_j, 2)$。
 
 ::: {.callout-note title="Code: Preference Matrix Visualization" collapse="false"}
 
