@@ -577,61 +577,61 @@ print(f"\nDPO's implicit aggregation recovers the Borda winner: {labels[borda_ra
 print(f"This is the response that wins the most head-to-head matchups.")
 ```
 
-::: {.callout-tip title="Proof Sketch" collapse="true"}
-Write $\hat{\pi} = \pi^* / \pi_{\text{ref}}$ for the density ratio. Let $\bar{\sigma}(\Delta r^*(x, y', y)) = \mathbb{P}(y \succ y' | x; r^*)$ denote the Bradley-Terry probability under the true reward $r^*$.
+::: {.callout-tip title="证明要点" collapse="true"}
+记密度比为 $\hat{\pi} = \pi^* / \pi_{\text{ref}}$。记 $\bar{\sigma}(\Delta r^*(x, y', y)) = \mathbb{P}(y \succ y' | x; r^*)$ 为真实奖励 $r^*$ 下的 Bradley-Terry 概率。
 
-The DPO loss is:
+DPO 的损失是：
 $$
 \mathcal{L}_{\text{DPO}}(\pi) = -\mathbb{E}_{x,y,y'}\Big[\bar{\sigma}(\Delta r^*) \cdot \log \sigma\big(\beta \log \frac{\hat{\pi}(y' | x)}{\hat{\pi}(y | x)}\big) + (1 - \bar{\sigma}(\Delta r^*)) \cdot \log\big(1 - \sigma(\beta \log \frac{\hat{\pi}(y | x)}{\hat{\pi}(y' | x)})\big)\Big]
 $$
 
-Taking the gradient with respect to $\hat{\pi}(y | x)$ and setting to zero:
+对 $\hat{\pi}(y | x)$ 求梯度并令其为零：
 $$
 \mathbb{E}_{y' \sim \hat{\pi}}\Big[\sigma\big(\beta \log \frac{\pi(y | x)}{\pi(y' | x)}\big)\Big] = \underbrace{\mathbb{E}_{y' \sim \mathcal{D}(\cdot | x)}\big[\bar{\sigma}(\Delta r^*(x, y', y))\big]}_{\text{Borda score of } y}
 $$
 
-The right-hand side is exactly the expected win rate of $y$ against a random alternative—i.e., its Borda score.
+右边正是 $y$ 对阵一个随机候选项时的期望胜率——也就是它的博尔达分数。
 :::
 
-## Multi-Issue Voting and Separable Preferences {#sec-multi-issue}
+## 多议题投票与可分偏好 {#sec-multi-issue}
 
-Real-world decisions often involve multiple independent issues. For example, an AI system might need to optimize for helpfulness, harmlessness, *and* honesty simultaneously. How should we aggregate preferences when there are multiple dimensions?
+现实中的决定往往同时牵涉多个彼此独立的议题。例如一个 AI 系统可能要同时把有用、无害、诚实这三件事都做好。存在多个维度时，偏好该怎么汇总？
 
-### Voting by Committees
+### 委员会投票
 
-::: {.callout-note title="Definition: Voting by Committees"}
-Let $K = \{1, \ldots, k\}$ be a set of "objects" (issues), and let $Y = 2^K$ be the set of all subsets (possible outcomes include any combination of objects). A voting scheme $f: \mathcal{P}^n \to 2^K$ is **voting by committees** if for each object $x \in K$, there exists a committee $C_x = (N, W_x)$ where $W_x$ is a family of winning coalitions, such that:
+::: {.callout-note title="定义：委员会投票"}
+设 $K = \{1, \ldots, k\}$ 是一组"对象"（议题），$Y = 2^K$ 是它的全部子集构成的集合（任何对象组合都算一种可能结果）。若对每个对象 $x \in K$ 都存在一个委员会 $C_x = (N, W_x)$，其中 $W_x$ 是一族"获胜联盟"，并且满足下面这条，则投票方案 $f: \mathcal{P}^n \to 2^K$ 称为**委员会投票（voting by committees）**：
 
-- The outcome includes object $x$ if and only if $\{i : x \in B(\succ_i)\} \in W_x$
+- 结果里包含对象 $x$，当且仅当 $\{i : x \in B(\succ_i)\} \in W_x$
 
-where $B(\succ_i)$ is voter $i$'s top-ranked subset.
+其中 $B(\succ_i)$ 是选民 $i$ 排第一位的那个子集。
 :::
 
-### Separable Preferences
+### 可分偏好
 
-When can we decompose multi-issue decisions into independent single-issue decisions?
+什么时候可以把"多个议题的决定"拆成若干个互不相干的单议题决定？
 
-::: {.callout-note title="Definition: Separable Preferences"}
-A preference $\succ$ on $2^K$ is **separable** if for all $A \subseteq K$ and $x \notin A$:
+::: {.callout-note title="定义：可分偏好"}
+一个 $2^K$ 上的偏好 $\succ$ 称为**可分的**，如果对一切 $A \subseteq K$ 与 $x \notin A$ 都有：
 $$
 A \cup \{x\} \succ A \quad \Longleftrightarrow \quad x \in G(\succ)
 $$ {#eq-separable}
-where $G(\succ) = \{x \in K : \{x\} \succ \emptyset\}$ is the set of objects the voter considers "good" in isolation.
+其中 $G(\succ) = \{x \in K : \{x\} \succ \emptyset\}$ 是这位选民认为"单独看就是好的"那些对象的集合。
 :::
 
-Separability means that whether you want to add object $x$ to a bundle doesn't depend on what's already in the bundle—it only depends on whether $x$ is intrinsically good.
+可分性的意思是：要不要往一个组合里加上对象 $x$，与这个组合里已经有什么无关——只取决于 $x$ 本身是不是好的。
 
-::: {.callout-important title="Characterization on Separable Domains"}
-**Theorem**: A voting scheme satisfies surjectivity (S), strategy-proofness (SP), and separability (SEP) if and only if $f$ is voting by committees.
+::: {.callout-important title="可分定义域上的刻画"}
+**定理**：一条投票规则满足满射性（S）、策略免疫（SP）与可分性（SEP），当且仅当 $f$ 是委员会投票。
 
-Note: Voting by committees generally does *not* satisfy Pareto efficiency.
+注意：委员会投票一般*不*满足帕累托有效。
 :::
 
-**Application to RLHF**: When training language models, we often want to optimize for multiple criteria (helpful, harmless, honest). If annotator preferences are separable across these criteria, we can aggregate each criterion independently. But preferences are often *not* separable—for instance, a highly helpful response might necessarily involve some risk of harm, creating dependencies between criteria.
+**对 RLHF 的意义**：训练语言模型时，我们常常同时想优化好几项标准（有用、无害、诚实）。如果标注员在这些标准上的偏好是可分的，就能一条一条分别汇总。可现实里的偏好常常*不可分*——例如很有帮助的回答必然带一定风险，几条标准之间就有了牵连。
 
-## Nosy Preferences and the Liberal Paradox {#sec-nosy-preferences}
+## "管得宽"的偏好与自由悖论 {#sec-nosy-preferences}
 
-A crucial distinction in preference aggregation is between *private* preferences (caring only about your own outcomes) and *nosy* preferences (caring about what others receive).
+在偏好汇总中，有一处关键区分：*私人*偏好（只管自己的结果）与"管得宽"的偏好（nosy preferences，也在意别人得到什么）。
 
 ### Private vs. Nosy Preferences
 
