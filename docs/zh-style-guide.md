@@ -201,7 +201,7 @@
 1. `docs/`、`scripts/`、`.github/` 是本分支新增的，不属于书的内容。
 2. `index.qmd` 开头增加一个"关于这个中文译本"的说明框（原文没有）。
 3. `_quarto.yml`：新增 `lang: zh`；`crossref` 前缀改为中文/`§`；删掉 `language.crossref-ch-prefix`、`google-analytics`、`downloads: [pdf]`；`repo-url` 指向本 fork；书名副标题注明是译本。
-4. 习题：`src/psets/pset1.qmd`–`pset3.qmd` 原文没有 YAML front matter，译稿加上带标题的头部，否则直接渲染出来是没有标题、没有书壳的裸页。曾尝试新增嵌套项目 `src/psets/_quarto.yml`，但它引用的 SCSS 字体路径相对于该目录解析，构建报 `lstat .../resources/fonts/et-book/roman-line-figures.ttf` 不存在而失败，因此删除；习题目前仍未接入构建，`src/teaching.qmd` 里的习题链接暂时指向 GitHub 上的源文件。`project.render` 里追加习题文件也无效（book 类型只渲染书内文件，实测仍只输出 11 页）。
+4. 习题：`src/psets/pset1.qmd`–`pset3.qmd` 原文没有 YAML front matter，译稿加上带标题的头部，否则直接渲染出来是没有标题、没有书壳的裸页。习题现已接入发布：新增嵌套站点项目 `src/psets/_quarto.yml`（`lang: zh`、`execute: eval: false`，输出到 `_book/src/psets/`），book 项目本身不会渲染这些文件，因此 `.github/workflows/render-zh.yml` 在主项目渲染后单独渲染它们。两点必要说明：(a) 主题 scss 按项目根相对路径引用字体，缺 `src/psets/resources`（指向 `../../resources` 的符号链接）时构建报 `lstat .../src/psets/resources/fonts/et-book/roman-line-figures.ttf` 不存在；(b) CI 里必须逐个文件渲染，实测 `quarto render pset2.qmd pset3.qmd` 会让 `pset2.html` 的内容变成 pset3（输出互相覆盖）。`src/teaching.qmd` 的习题链接已从 GitHub 源文件地址改回本地 `psets/psetN.html`。
 5. `src/teaching.qmd`：习题 4 一行注明"上游仓库里的这个文件是空的，暂未提供内容"（`src/psets/pset4.qmd` 为 0 字节）。
 6. `license.qmd`：删掉 hits.seeyoufarm 访客计数徽章（它统计的是 mlhp.stanford.edu 的访问量，放在译本上会误导读者），改为写明原作与本译本的授权归属。
 7. `src/notation.qmd`：原英文那句"Introduced 列标明符号首次出现的章节"，表里其实没有这一列，因此译成"每一节标明这些记号主要出现在哪一章"。这是 upstream 自身的文实不符。
@@ -211,7 +211,7 @@
 11. `src/chap1.qmd`：一处把 `[@breiman2001statistical; @rudin2022interpretable]` 写成两条并排的 `@` 引用，渲染结果相同。
 
 12. 原稿有少量排版疏漏，译文按正常排版写出，校验会显示为公式片段的增删（只改排版与标点，不改含义）：
-    (a) 个别变量漏写数学定界符，译文按上下文补上 `$`。已遇到 `src/chap2.qmd` 的 `(V)`、`src/chap3.qmd` 的 `(U)`、`((x,y))`、`(x_{jk})`、`(\Delta_D)`、`(\hat\theta \Sigma)`（此处原文还漏了逗号）等写法；后续章节若再遇到同类疏漏，按同样处理，不必逐条另立条目，但要在提交说明里点明。
+    (a) 个别变量漏写数学定界符，译文按上下文补上 `$`。已遇到 `src/chap2.qmd` 的 `(V)`、`src/chap3.qmd` 的 `(U)`、`((x,y))`、`(x_{jk})`、`(\Delta_D)`、`(\hat\theta \Sigma)`（此处原文还漏了逗号）、`src/chap1.qmd` 练习题中原文写成裸文本的 `K-dimensional factor model`（译文作 `$K$ 维因子模型`，与同一文件其余 `$K$` 写法一致）；`src/glossary.qmd` 的 Individual Fairness 条目原文只说 "for a Lipschitz constant $L$ and appropriate metrics"，译文为了读者能读懂记号，补出"$d$ 是事先约定的相似度度量"，因而多出 `$d$` 这个片段。后续章节若再遇到同类疏漏，按同样处理，不必逐条另立条目，但要在提交说明里点明。
     (b) `src/chap3.qmd` 中 "maximizes expected \textbf{incremental} information" 用的是原始 LaTeX 命令，实测渲染结果是页面上直接显示 "\textbf{incremental}" 这几个字符（见 `_book/src/chap3.html`），译文改成 Markdown 粗体"**增量**"。
 13. `src/chap2.qmd` 交叉验证一节有一句正文直接印出了代码里的格式化占位符（`{cv_scores.mean():.4f} ± {cv_scores.std():.4f}`），没有代入数值。这是 upstream 的笔误。本分支不擅自填入数字（那是代码运行结果，不是原文内容），只在该句后补了一句说明，指出按原样保留。
 
