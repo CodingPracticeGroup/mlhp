@@ -834,45 +834,45 @@ print(f"  Naive method:    {len(naive_selected)} notes  (precision: {len(naive_s
 print(f"  Bridging method: {len(bridge_selected)} notes (precision: {len(bridge_selected & true_good)/max(len(bridge_selected),1):.0%})")
 ```
 
-The bridging model's advantage is most pronounced for **polarizing notes**—notes with strong ideological slant that would be overrated by ideological allies and underrated by opponents under naive averaging. By controlling for the $p_i \cdot q_j$ interaction term, the model isolates genuine quality from ideological agreement, effectively identifying notes that earn cross-partisan respect.
+搭桥模型的优势在**立场对立明显的笔记**上最突出——这类笔记带有较强的立场倾向，用简单平均来算会被同立场的人高估、被对立立场的人低估。通过控制住 $p_i \cdot q_j$ 这个交互项，模型能把"笔记本身的质量"单独分离出来。
 
-## The Inversion Problem: Behavior vs. Preferences {#sec-inversion}
+## 反演问题：行为与偏好 {#sec-inversion}
 
-A fundamental challenge in preference learning is the **inversion problem**: observed behavior does not necessarily reveal underlying preferences or utility.
+偏好学习中有一个根本性的难题，就是**反演问题（inversion problem）**：看到的行为并不必然反映背后的偏好或效用。
 
-### Behavior ≠ Mental State
+### 行为 ≠ 心理状态
 
-::: {.callout-important title="The Inversion Problem"}
-Standard revealed preference theory assumes that choices reveal preferences: if someone chooses $x$ over $y$, they must prefer $x$ to $y$. But this assumption can fail when:
+::: {.callout-important title="反演问题"}
+标准的显示偏好理论假定：选择会显示偏好——一个人若选了 $x$ 而不是 $y$，那他必然更想要 $x$ 而不是 $y$。但下面这些情形里，这个假定并不成立：
 
-1. **Habit formation**: Repeated behavior creates habits that persist even when preferences change
-2. **Cognitive limitations**: Fatigue, distraction, or bounded rationality lead to suboptimal choices
-3. **Context effects**: The same underlying preference produces different behaviors in different contexts
-4. **Strategic behavior**: People may choose strategically rather than according to true preferences
+1. **习惯形成**：重复的行为会养成习惯，即使偏好已经变了，习惯还在
+2. **认知限制**：疲劳、分心、有限理性都会导致不理想的选择
+3. **情境效应**：同一个底层偏好，在不同情境下会表现出不同的行为
+4. **策略性行为**：人有时是按策略来选，而不是照真实偏好选
 :::
 
-**Example: The Doritos Problem**
+**例子：薯片问题**
 
-Consider a smart pantry system that observes eating behavior. A user consistently chooses Doritos when offered. The system infers: "User prefers Doritos." But the user might actually prefer healthier options—they just succumb to availability and habit when Doritos are present. Optimizing for observed "preferences" (engagement) may not optimize for true welfare.
+设想一个智能储物柜系统，它观察的是进食行为。用户每次有薯片时都选了薯片，系统于是推断："用户喜欢薯片。"可用户也许其实更想要健康的选项——只是薯片在手边、又成了习惯，就没忍住。反过来，如果系统被要求帮助用户吃得更健康，它就得判断：哪些选择反映的是真实意图，哪些只是环境与习惯的产物。
 
-**Example: Doctor Fatigue**
+**例子：医生的疲劳**
 
-Studies show that doctors' prescribing patterns change systematically throughout the day as fatigue accumulates. Late-afternoon decisions may reflect fatigue more than medical judgment. A preference learning system that treats all decisions equally would encode fatigue-induced biases as "preferences."
+有研究显示，医生开药的模式会随着一天中疲劳的积累而发生系统性的变化。临近傍晚时的判断，更多反映的是疲劳而不是医学判断。如果一个偏好学习系统对所有决策一视同仁，就会把疲劳带来的偏差当成偏好学进去。
 
 ### Implications for RLHF
 
-The inversion problem has direct implications for training AI systems from human feedback:
+反演问题对"用人类反馈训练 AI 系统"有直接的影响：
 
-1. **Annotator fatigue**: Quality of preference labels may degrade over long annotation sessions
-2. **Engagement vs. satisfaction**: Optimizing for clicks or watch time may not optimize for user welfare
-3. **Context-dependent feedback**: The same annotator might give different feedback depending on their mood, prior examples, or framing
-4. **Strategic annotation**: If annotators believe certain patterns lead to better outcomes for them, they may annotate strategically
+1. **标注员疲劳**：标注时间一长，偏好标签的质量就会下降
+2. **点击量不等于满意**：优化点击或观看时长，未必是在优化用户的真实福祉
+3. **依赖上下文的反馈**：同一位标注员，心情不同、前面见过的样例不同、说法不同，给出的反馈就可能不同
+4. **策略性标注**：如果标注员认为某种标注方式对自己更有利，他们就可能按策略来标
 
-**Potential solutions**:
-- Weight annotations by estimated quality or consistency
-- Use deliberation or discussion before labeling to reduce noise
-- Explicitly model annotator state (fatigue, expertise) as latent variables
-- Collect meta-feedback about label confidence
+**可以考虑的做法**：
+- 按估计出的标注质量或一致性给标注加权
+- 在打标之前先安排讨论或深思，减少噪声
+- 把标注员的状态（疲劳程度、专业程度）显式建模为潜变量
+- 收集关于标注可信度的元反馈
 
 ## Privacy and Personalization {#sec-privacy}
 
