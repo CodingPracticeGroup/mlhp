@@ -709,73 +709,73 @@ plt.tight_layout(); plt.show()
 ```
 :::
 
-### Robotic Trajectory Learning {#sec-robotics-trajectory}
+### 机器人轨迹学习 {#sec-robotics-trajectory}
 
-The linear preference framework applies directly to robotic trajectory learning [@pmlr-v87-biyik18a]. Consider a robot choosing between trajectories $\xi_A$ and $\xi_B$. The human evaluates them via a reward function:
+线性偏好框架可以直接用到机器人轨迹学习上 [@pmlr-v87-biyik18a]。设想一台机器人要在两条轨迹 $\xi_A$ 和 $\xi_B$ 之间做选择，人通过一个奖励函数来评价它们：
 $$
 R(\xi) = w^\top \phi(\xi)
 $$ {#eq-trajectory-reward}
-where $w \in \mathbb{R}^N$ are unknown weights and $\phi(\xi) \in \mathbb{R}^N$ extracts features (e.g., distance to lane boundaries, proximity to obstacles, heading, speed). This is exactly our linear model with "items" being trajectories and "features" being $\phi(\xi)$.
+其中 $w \in \mathbb{R}^N$ 是未知的权重，$\phi(\xi) \in \mathbb{R}^N$ 负责抽取特征（例如到车道边线的距离、与障碍物的接近程度、朝向、速度）。这正是我们的线性模型，只是"物品"换成了轨迹，"特征"换成了 $\phi(\xi)$。
 
-**Geometric Interpretation.** Each pairwise comparison "prefer $\xi_A$ over $\xi_B$" yields a constraint:
+**几何解释。** 每一次两两比较"认为 $\xi_A$ 好于 $\xi_B$"都给出一个约束：
 $$
 w^\top (\phi(\xi_A) - \phi(\xi_B)) > 0
 $$
-This defines a **half-space** in the weight space. The feasible region for $w$ is the intersection of all half-spaces consistent with observed preferences. Each query splits this region---orthogonal queries reduce volume by approximately half.
+这就是权重空间里的一个**半空间**。所有与已观测偏好相容的半空间取交集，就是 $w$ 的可行区域。每次提问都会把这个区域切一刀——方向相互正交的提问大约每次能切掉一半体积。
 
-The optimal query selection criterion maximizes the minimum volume removed regardless of the oracle's answer. For query feature difference $\Phi = \phi(\xi_A) - \phi(\xi_B)$, this is $\max_\Phi \min\{\mathbb{E}[1 - f_\Phi(w)], \mathbb{E}[1 - f_{-\Phi}(w)]\}$ where $f_\Phi(w) = \min(1, \exp(w^\top \Phi))$ soft-weights consistency with the preference. This selects balanced queries where either response is informative.
+最优的选题准则是：不管神谕怎么回答，都要保证"至少能切掉"的区域体积最大。设这次提问的特征差为 $\Phi = \phi(\xi_A) - \phi(\xi_B)$，准则就是 $\max_\Phi \min\{\mathbb{E}[1 - f_\Phi(w)], \mathbb{E}[1 - f_{-\Phi}(w)]\}$，其中 $f_\Phi(w) = \min(1, \exp(w^\top \Phi))$ 用来对"与偏好一致的程度"做软加权。这样选出的是"两边都均衡"的问题——无论回答哪一边都很有信息量。
 
-**Driving Simulator Example.** In a 2D driving simulator, trajectory features include:
+**驾驶仿真器示例。** 在一个二维驾驶仿真环境里，轨迹特征包括：
 
-- Distance to lane boundaries
-- Distance to other vehicles
-- Heading angle
-- Speed
+- 到车道边线的距离
+- 到其他车辆的距离
+- 车头朝向角度
+- 车速
 
-With no learned preferences, the simulated car moves erratically. After 30 comparison queries, it learns to follow the lane direction. After 70 queries, it additionally learns to avoid collisions while staying in lane. The features with highest learned weights correspond to collision avoidance and lane-keeping.
+不学任何偏好时，仿真中的汽车开得歪歪扭扭。做了 30 次比较之后，它学会了顺着车道方向开；到 70 次之后，它还学会了在保持车道的同时避让碰撞。学到的权重最大的那几个特征，正对应"避撞"和"保持车道"。
 
-**Why Active Selection Matters.** Both active and random query selection eventually converge to the true reward weights. However, active selection achieves target performance **faster**---critical in time-sensitive applications. For exoskeleton rehabilitation [@Li_2021], the robot must adapt to individual patients quickly; waiting for asymptotic convergence is not acceptable. Active learning provides crucial early-stage advantages.
+**为什么主动选题重要。** 主动选题和随机选题最后都能收敛到真实的奖励权重。区别在于主动选题**更快**达到目标性能——这在时间敏感的场合非常关键。外骨骼康复 [@Li_2021] 就是如此：机器人必须很快适应每位患者，等它慢慢渐近收敛是不能接受的。主动学习的价值恰恰体现在前期。
 
-**Imitation Learning with Compatibility.** When learning from multiple human demonstrators, *multimodality* arises: different people use different strategies for the same task (e.g., picking up an object from the left vs. right). Naive imitation learning fails on contradictory demonstrations.
+**带相容性判断的模仿学习。** 从多位人类示范者那里学习时会出现*多模式*现象：同一个任务，不同的人做法不同（比如从左边还是右边去拿物体）。朴素的模仿学习碰到互相矛盾的示范就会失效。
 
-The solution is to measure **compatibility** of new demonstrations with the base policy:
+解决办法是衡量新示范与基础策略之间的**相容性**：
 
-- **Likelihood**: How close is the demonstrated action to the base policy's prediction?
-- **Novelty**: How uncertain is the base policy at this state?
+- **似然度**：示范给出的动作，与基础策略预测的动作差得远吗？
+- **新颖度**：基础策略在这个状态下有多不确定？
 
-Demonstrations with low likelihood in low-novelty states indicate conflicting modes and should be filtered. This compatibility-based filtering improves success rates while using less data than naive aggregation [@gandhi2022eliciting].
+那些"似然低、可新颖度也低"的示范，说明它和已有的模式相冲突，应当滤掉。这种基于相容性的筛选，比把所有示范一股脑合在一起用的数据更少，成功率却更高 [@gandhi2022eliciting]。
 
-**Foundation Models for Representations.** Recent work leverages foundation models pretrained on human video (R3M [@nair2022r3m], Voltron [@karamcheti2023voltron]) to provide better trajectory features $\phi(\xi)$. These models learn that human hands are similar to robotic end-effectors, enabling 2-3x higher success rates with 5-10x fewer demonstrations. For preference learning, better representations mean each comparison is more informative.
+**用基础模型提供特征。** 近期工作会借助在人类视频上预训练的基础模型（R3M [@nair2022r3m]、Voltron [@karamcheti2023voltron]）来给出更好的轨迹特征 $\phi(\xi)$。这类模型能学到人手和机器人末端执行器的相似之处，从而用少 5 到 10 倍的示范就把成功率提高 2 到 3 倍。对偏好学习来说，特征表示更好，意味着每一次比较都更有信息量。
 
-### Non-Linear Scoring Functions {#sec-nonlinear-scoring}
+### 非线性打分函数 {#sec-nonlinear-scoring}
 
-So far we set $V_j=W^\top X_j$. Suppose instead that items are scored by a non-linear function
+到这里我们都设 $V_j=W^\top X_j$。现在换一种设法：物品由一个非线性函数打分
 $$V_j = f_\theta(X_j),\qquad \theta\in\mathbb{R}^p, \qquad p(j \succ k) = \sigma (f_\theta(X_j) - f_\theta(X_k))$$ {#eq-nonlinear-scoring}
-We want an online procedure that chooses the next comparison $(j,k)$ to learn $\theta$ quickly. Exact Bayesian design is intractable for general $f_\theta$. There is a simple and effective approximation that keeps all the math and code lightweight: local Gaussian posterior over $\theta$ via Laplace + first-order model. Work at the current estimate $\hat\theta$. Linearize the non-linear scorer around $\hat\theta$:
+我们希望有一个在线过程：每次自己挑下一次比较 $(j,k)$，好尽快学会 $\theta$。对一般的 $f_\theta$ 来说，精确的贝叶斯设计算不动。有一个简单又好用的近似，能把数学和代码都保持得很轻：用拉普拉斯近似加一阶模型，把 $\theta$ 的后验看成一个局部高斯分布。具体做法是在当前的 $\hat\theta$ 处工作，把非线性打分函数在 $\hat\theta$ 附近线性化：
 $$
 f_\theta(X_j) \approx f_{\hat\theta}(X_j) + J_j\Delta\theta, \qquad
 J_j \equiv \left.\frac{\partial f_\theta(X_j)}{\partial \theta}\right| _{\theta = \hat\theta} \in \mathbb{R}^{1\times p}.
 $$ {#eq-linearization}
-The pairwise logit for $(j,k)$ becomes
+于是配对 $(j,k)$ 的逻辑斯蒂线性预测值就变成
 $$\underbrace{f_\theta(X_j)-f_\theta(X_k)}_{\text{logit}} \approx \underbrace{f_{\hat\theta}(X_j)-f_{\hat\theta}(X_k)}_{\text{offset}} + \underbrace{(J_j-J_k)}_{\phi_{jk}}\Delta\theta.$$ {#eq-pairwise-logit-approx}
 
-Define the local "design vector" $\phi_{jk}\in\mathbb{R}^{1\times p}$. With a Gaussian prior $\theta\sim\mathcal N(0,\sigma_0^2 I)$ and Bernoulli likelihood, the Laplace posterior around $\hat\theta$ is
+把 $\phi_{jk}\in\mathbb{R}^{1\times p}$ 定义为局部的"设计向量"。设高斯先验 $\theta\sim\mathcal N(0,\sigma_0^2 I)$、似然为伯努利分布，那么 $\hat\theta$ 附近的拉普拉斯后验是
 $$
 \theta \mid \mathcal D \approx \mathcal N(\hat\theta,;\Sigma),\qquad
 \Sigma^{-1} = \sigma_0^{-2} I + \sum_{t} w_t \phi_t^\top \phi_t
 $$ {#eq-laplace-posterior}
 where $w_t = p_t(1-p_t)$ with $p_t = \sigma\big(f_{\hat\theta}(X_{j_t})-f_{\hat\theta}(X_{k_t})\big)$.
-This is exactly the same structure as the linear case, with (x_{jk}) replaced by $\phi_{jk}=J_j-J_k$. You only need Jacobian rows $J_j$. At the current $(\hat\theta \Sigma)$ and for a candidate $(j,k)$, compute $p=\sigma\big(f_{\hat\theta}(X_j)-f_{\hat\theta}(X_k)\big)$ and $w = p(1-p)$.Compute $\phi = J_j-J_k$ at $\hat \theta$. Then use any standard optimal design score with Sherman–Morrison:
+这和线性情形结构完全一样，只是把 $x_{jk}$ 换成了 $\phi_{jk}=J_j-J_k$，而你需要准备的只有雅可比的每一行 $J_j$。在当前的 $(\hat\theta, \Sigma)$ 处，对一个候选配对 $(j,k)$，先算 $p=\sigma\big(f_{\hat\theta}(X_j)-f_{\hat\theta}(X_k)\big)$ 与 $w = p(1-p)$，再在 $\hat \theta$ 处算出 $\phi = J_j-J_k$。之后套用任意一个标准的最优设计得分，用 Sherman-Morrison 公式即可：
 
 * D-optimal (log-det gain): $\Delta_D(j,k) = \log ( 1 + w\phi \Sigma \phi^\top )$.
 * A-optimal (trace drop): $\Delta_A(j,k) = \dfrac{w \phi \Sigma^2 \phi^\top }{ 1+w \phi \Sigma \phi^\top}$.
 * E-optimal proxy: $\Delta_E^{\text{proxy}}(j,k) = w \phi \Sigma \phi^\top$.
 
-Pick the pair with the largest gain. This is tractable because it only needs a vector–matrix–vector product with $\Sigma$ and a Jacobian row. Mutual-information acquisition like BALD reduces to the same formulas under the Laplace Gaussian approximation. Maximizing (\Delta_D) is a good default.
+选出增益最大的那一对。这么做算得起，因为它只需要一次与 $\Sigma$ 的"向量—矩阵—向量"乘法，再加一行雅可比。像 BALD 那样基于互信息的采集函数，在拉普拉斯高斯近似下会化成同样的式子。拿不准时，最大化 $\Delta_D$ 是个不错的默认选择。
 
 <!-- Note to work more on this expansion -->
 
-We use a tiny two-layer network $f_\theta(x)=a^\top \tanh(Bx)$ with $\theta=(a,B)$. We derive $J_j$ analytically. First, define the network and its Jacobian:
+下面用一个很小的两层网络 $f_\theta(x)=a^\top \tanh(Bx)$ 来演示，其中 $\theta=(a,B)$。$J_j$ 可以解析地求出来。先定义这个网络以及它的雅可比：
 
 ```{pyodide-python}
 #| autorun: true
