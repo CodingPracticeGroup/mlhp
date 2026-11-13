@@ -465,24 +465,24 @@ $$ {#eq-borda}
 
 有一个出人意料的结果，把博尔达计分法与当代的 RLHF 方法——具体说是直接偏好优化（Direct Preference Optimization, DPO）——连到了一起。
 
-::: {.callout-important title="Theorem: DPO-Borda Equivalence"}
-Assume that responses $y, y'$ are drawn from a reference policy $\pi_{\text{ref}}(\cdot | x)$. Define the **$\pi$-weighted Borda winner** as:
+::: {.callout-important title="定理：博尔达与 DPO 的等价性"}
+假定回答 $y, y'$ 由参考策略 $\pi_{\text{ref}}(\cdot | x)$ 生成。定义 **$\pi$ 加权的博尔达胜者**为：
 $$
 y^* = \arg\max_{y \in Y} \mathbb{E}_{y' \sim \pi_{\text{ref}}(\cdot | x)}\big[\mathbf{1}[y \succ y' \mid x]\big]
 $$ {#eq-borda-weighted}
-Consider DPO training with reference policy $\pi_{\text{ref}}$. Then the DPO-optimal policy $\pi_{\text{DPO}}$ satisfies:
+考虑用参考策略 $\pi_{\text{ref}}$ 做 DPO 训练，则 DPO 的最优策略 $\pi_{\text{DPO}}$ 满足：
 $$
 \frac{\pi_{\text{DPO}}(y | x)}{\pi_{\text{ref}}(y | x)} \propto \text{(weighted Borda score of } y \text{)}
 $$
 :::
 
-In other words, **DPO finds a policy that upweights responses proportionally to their Borda scores**. This provides a social choice interpretation of what DPO is doing: it aggregates pairwise preferences by finding the response that would win the most head-to-head matchups against alternatives drawn from the reference policy.
+换句话说，**DPO 找到的策略，会按各回答的博尔达分数成比例地提高它们的概率**。这给 DPO 的行为一个社会选择意义上的解释：它是在用两两偏好做汇总——找的是"与从参考策略抽出的其他回答逐一对阵、赢下最多场"的那个回答。
 
-::: {.callout-warning title="When DPO Does Not Find the Borda Winner"}
-The DPO-Borda equivalence assumes that comparison pairs are **sampled uniformly** from the reference policy and that the Bradley-Terry model is correctly specified. In practice, these assumptions often fail: (1) annotation pipelines may oversample certain response types (e.g., longer or more controversial outputs), creating **non-uniform pair sampling** that changes the implicit social choice rule; (2) different annotator pools have different preference distributions, so the effective Borda score depends on *who* annotates *which* pairs; (3) if the Bradley-Terry model is misspecified (e.g., preferences are intransitive or context-dependent), the DPO objective no longer corresponds to any clean social choice rule. Practitioners should be aware that the Borda interpretation provides useful intuition but may not hold exactly in deployed systems.
+::: {.callout-warning title="DPO 什么时候找不到博尔达胜者"}
+博尔达与 DPO 等价这件事，假定了两两比较的配对是从参考策略中**均匀采样**得到的，并且 Bradley-Terry 模型设定正确。实践中这两条常常不成立：（1）标注流水线可能过度采到某类回答（例如更长的、或更有争议的输出），造成**配对采样不均匀**，于是隐含的社会选择规则就被改变了；（2）不同的标注员群体偏好分布不同，实际生效的博尔达分数取决于*由谁来标注*、*标的是哪一对*；（3）如果 Bradley-Terry 模型设定错了（例如偏好不传递，或随上下文变化），DPO 的目标就不再对应任何干净的社会选择规则。实践者应当清楚：博尔达这个解释提供了有用的直觉，但在真实系统里未必严格成立。
 :::
 
-The following code demonstrates the DPO-Borda connection empirically: we compute the Borda scores from pairwise preferences and verify that DPO's implicit reward ranking matches the Borda ranking.
+下面的代码从实验上验证博尔达与 DPO 的这层关系：先由两两偏好算出博尔达分数，再检查 DPO 的隐式奖励排序是否与博尔达排序一致。
 
 ```{pyodide-python}
 #| autorun: true
