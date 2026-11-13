@@ -2441,54 +2441,54 @@ $$
 \mathbb{E}_{a \sim \pi_\theta(\cdot|s)}\left[\nabla_\theta \log \pi_\theta(a \mid s) \cdot b(s)\right] = b(s) \cdot \nabla_\theta \sum_{a} \pi_\theta(a \mid s) = b(s) \cdot \nabla_\theta \, 1 = 0
 $$ {#eq-baseline-unbiased}
 
-The probabilities sum to 1 regardless of $\theta$, so the gradient of that sum is zero.
+无论 $\theta$ 取什么，这些概率之和总是 1，所以这个和的梯度为零。
 
-The variance-minimizing baseline turns out to be $b^*(s_t) = V^\pi(s_t)$, which reduces the gradient to use the **advantage** $A^\pi(s_t, a_t) = G_t - V^\pi(s_t)$. Intuitively, we only reinforce actions that are *better than average*---actions with positive advantage get upweighted, while those with negative advantage get downweighted.
+能让方差最小的基线，结果就是 $b^*(s_t) = V^\pi(s_t)$，此时梯度里用到的量就变成了**优势** $A^\pi(s_t, a_t) = G_t - V^\pi(s_t)$。直观地说：我们只强化那些*好于平均*的行动——优势为正的行动被加大权重，优势为负的被调低权重。
 
 ::: {.callout-caution}
-In practice, $V^\pi(s)$ is unknown and must itself be estimated, typically by training a separate neural network (the **critic** or **value network**) alongside the policy. This adds computational cost and can introduce its own approximation errors. GRPO, discussed next, avoids this entirely.
+实际使用时，$V^\pi(s)$ 是未知的，本身也得去估计——通常是**与策略并行训练另一个神经网络**（即**价值网络**，也叫 critic 或 value network）。这既多花算力，又可能引入自己的近似误差。接下来要讲的 GRPO 完全绕开了这一步。
 :::
 
-### From RLHF to GRPO {#sec-grpo}
+### 从 RLHF 到 GRPO {#sec-grpo}
 
-We now connect the policy gradient framework to the **RLHF pipeline** introduced in Chapter 1 and develop GRPO as a modern, critic-free alternative to PPO.
+下面把策略梯度这套框架和第 1 章介绍的 **RLHF 流程**接起来，并把 GRPO 作为一种不用价值网络的现代替代方案发展出来。
 
-**The RLHF objective.** Recall from Chapter 1 that RLHF trains a reward model $r_\phi(x, y)$ on human preference data using the Bradley-Terry likelihood, then optimizes the policy to maximize reward while staying close to a reference policy $\pi_{\text{ref}}$:
+**RLHF 的目标。** 复习一下第 1 章：RLHF 先用 Bradley-Terry 似然在人类偏好数据上训练一个奖励模型 $r_\phi(x, y)$，然后再优化策略，使奖励尽量大，同时不离开参考策略 $\pi_{\text{ref}}$ 太远：
 $$
 J_{\text{RLHF}}(\theta) = \mathbb{E}_{x \sim \mathcal{D},\, y \sim \pi_\theta(\cdot|x)}\left[r_\phi(x, y)\right] - \beta \, \text{KL}\left[\pi_\theta(\cdot|x) \,\|\, \pi_{\text{ref}}(\cdot|x)\right]
 $$ {#eq-rlhf-objective}
 
-The KL penalty prevents **reward hacking**: without it, the policy could exploit imperfections in the learned reward model $r_\phi$ to achieve high reward scores that do not correspond to genuinely preferred outputs (see Chapter 7 for empirical discussion).
+KL 惩罚项是为了防止**奖励投机（reward hacking）**：没有它，策略就会去钻学出来的奖励模型 $r_\phi$ 的空子，拿到很高的奖励分数，对应的输出却并不是人真正更喜欢的（第 7 章有实证方面的讨论）。
 
-**PPO.** Proximal Policy Optimization [@schulman2017proximal] applies the policy gradient theorem to the RLHF objective using a **clipped surrogate** that prevents excessively large policy updates. PPO requires a learned value function $V_\psi(s)$ (the critic) to estimate advantages. Training this critic adds computational cost---roughly doubling the model parameters in the LLM setting, since the critic is typically the same size as the policy. Trust Region Policy Optimization [TRPO; @schulman2015trust] preceded PPO with a similar motivation but used a hard KL constraint instead of clipping.
+**PPO。** 近端策略优化（Proximal Policy Optimization, PPO）[@schulman2017proximal] 把策略梯度定理用在 RLHF 目标上，用的是一个**裁剪过的代理目标**，防止策略更新迈得太大。PPO 需要一个学出来的价值函数 $V_\psi(s)$（也就是价值网络，critic）来估计优势。训练这个价值网络要额外花算力——在大模型的场合差不多让模型参数量翻倍，因为价值网络通常和政策网络一样大。在它之前，信任域策略优化（Trust Region Policy Optimization, TRPO；@schulman2015trust）出于类似的考虑，但用的是硬性的 KL 约束，而不是裁剪。
 
-**GRPO: Group Relative Policy Optimization.** GRPO [@shao2024deepseekmath] eliminates the critic by replacing the learned value baseline with a **group-relative** baseline computed from multiple sampled outputs. The key idea is conceptually parallel to the dueling bandit paradigm from earlier in this chapter: rather than estimating absolute values (which requires a critic), we compare outputs *within a group* to determine which are relatively better.
+**GRPO：组相对策略优化。** GRPO [@shao2024deepseekmath] 把价值网络（critic）整个去掉了：它不再用学出来的价值基线，而是用**组相对**的基线——从一组采样出来的输出里算出来。其核心思路，和本章前面对决老虎机的范式在概念上是平行的：不去估计绝对价值（那需要一个价值网络），而是把*同一组内*的输出互相比一比，看哪些相对更好。
 
-::: {.callout-note title="Algorithm: Group Relative Policy Optimization (GRPO)"}
-**Input:** Policy $\pi_\theta$, reference policy $\pi_{\text{ref}}$, reward model $r_\phi$, group size $G$, clip range $\epsilon$, KL weight $\beta$
+::: {.callout-note title="算法：组相对策略优化（GRPO）"}
+**输入：** 策略 $\pi_\theta$、参考策略 $\pi_{\text{ref}}$、奖励模型 $r_\phi$、组大小 $G$、裁剪范围 $\epsilon$、KL 权重 $\beta$
 
-For each prompt $x \sim \mathcal{D}$:
+对每个提示 $x \sim \mathcal{D}$：
 
-1. **Sample** a group of outputs: $\{y_1, \ldots, y_G\} \sim \pi_{\theta_{\text{old}}}(\cdot \mid x)$
-2. **Score** each output: $r_i = r_\phi(x, y_i)$ for $i = 1, \ldots, G$
-3. **Normalize** to get group-relative advantages:
+1. **采样**一组输出：$\{y_1, \ldots, y_G\} \sim \pi_{\theta_{\text{old}}}(\cdot \mid x)$
+2. 给每个输出**打分**：$r_i = r_\phi(x, y_i)$，$i = 1, \ldots, G$
+3. **标准化**，得到组相对优势：
 $$
 \hat{A}_i = \frac{r_i - \text{mean}(\{r_j\}_{j=1}^G)}{\text{std}(\{r_j\}_{j=1}^G)}
 $$ {#eq-grpo-advantage}
-4. **Update** the policy by maximizing:
+4. **更新**策略，最大化：
 $$
 \mathcal{L}_{\text{GRPO}}(\theta) = \frac{1}{G}\sum_{i=1}^{G} \min\!\left(\rho_i \hat{A}_i, \; \text{clip}(\rho_i, 1{-}\epsilon, 1{+}\epsilon) \, \hat{A}_i\right) - \beta \, \text{KL}[\pi_\theta \| \pi_{\text{ref}}]
 $$ {#eq-grpo-loss}
-where $\rho_i = \pi_\theta(y_i \mid x) \,/\, \pi_{\theta_{\text{old}}}(y_i \mid x)$ is the importance ratio.
+其中 $\rho_i = \pi_\theta(y_i \mid x) \,/\, \pi_{\theta_{\text{old}}}(y_i \mid x)$ 是重要性比率。
 :::
 
-The z-score normalization in @eq-grpo-advantage plays the same role as pairwise comparisons in dueling bandits: it tells us which outputs are *relatively* better within the group, without requiring an absolute value estimate. When the group mean is high (all outputs are good), only the *best* outputs receive positive advantage; when the group mean is low, even mediocre outputs can be positively reinforced.
+式 @eq-grpo-advantage 里的这个 z 分数标准化，起的作用和对决老虎机里的两两比较一样：它只告诉我们组内哪些输出*相对*更好，而不需要任何绝对价值的估计。当整组的均值很高（说明个个都不错）时，只有*最好*的那几个输出会拿到正优势；当整组均值很低时，平平的输出也能得到正向强化。
 
-::: {.callout-tip title="Key Insight: GRPO and Dueling Bandits"}
-GRPO's group-relative baseline is the RL analog of the dueling bandit paradigm. In dueling bandits, we never observe absolute arm rewards---only pairwise comparisons. Similarly, GRPO never estimates absolute state values---only relative quality within a sampled group. This connection runs deeper: the Bradley-Terry reward model $r_\phi$ that scores GRPO's outputs is the same preference model that defines the dueling bandit's comparison probabilities. The circle from preference models (Chapter 1) through sequential decision-making (this chapter) back to policy optimization closes here.
+::: {.callout-tip title="关键洞见：GRPO 与对决老虎机"}
+GRPO 的组相对基线，正是对决老虎机范式在强化学习里的对应物。对决老虎机从不观测各臂的绝对奖励，只看两两比较；GRPO 也从不估计状态的绝对价值，只在一个采样出来的组内比相对好坏。这层联系还要再深一层：给 GRPO 的输出打分的 Bradley-Terry 奖励模型 $r_\phi$，与定义对决老虎机比较概率的是同一个偏好模型。于是从偏好模型（第 1 章）、到序贯决策（本章）、再到策略优化的这条圈，在这里闭上了。
 :::
 
-**Connection to DPO.** When $G = 2$ and the reward comes from a Bradley-Terry model, GRPO's advantage reduces to $\hat{A}_1 = -\hat{A}_2 \propto r_\phi(x, y_1) - r_\phi(x, y_2)$. This reward difference is exactly the quantity that determines preference probabilities in the Bradley-Terry model: $p(y_1 \succ y_2 \mid x) = \sigma(r_\phi(x, y_1) - r_\phi(x, y_2))$. DPO optimizes this signal directly on a fixed offline dataset, while GRPO generates fresh samples during training and generalizes to groups larger than 2. The online sampling allows GRPO to explore the policy's current output distribution, while DPO is limited to the distribution that generated the training data.
+**与 DPO 的关系。** 当 $G = 2$、且奖励来自一个 Bradley-Terry 模型时，GRPO 的优势就退化为 $\hat{A}_1 = -\hat{A}_2 \propto r_\phi(x, y_1) - r_\phi(x, y_2)$。而这个奖励差，正是 Bradley-Terry 模型里决定偏好概率的那个量：$p(y_1 \succ y_2 \mid x) = \sigma(r_\phi(x, y_1) - r_\phi(x, y_2))$。DPO 直接在一个固定的离线数据集上优化这个信号；GRPO 则在训练过程中现生成新样本，并且能推广到一组多于 2 个的情形。在线采样让 GRPO 可以探索策略当前的输出分布，DPO 则被限制在"生成训练数据的那个分布"里。
 
 ::: {.callout-note title="Code: REINFORCE vs. GRPO on a Preference Bandit" collapse="false"}
 
