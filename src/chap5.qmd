@@ -306,27 +306,27 @@ $B$ 在两两多数比较中同时赢过 $A$ 和 $C$。孔多塞胜者：**B**�
 
 这些考虑在生成式 AI 和大模型里尤其现实，因为它们的训练要用到人类偏好数据。如果简单地把反馈汇总起来，很可能只对多数的偏好过拟合，把少数的视角丢掉（这就是"多数人的暴政"的一种形式）；反过来，想让所有人都满意，又可能谁也没法满足，目标变得自相矛盾。这些不可能性结论提醒我们：天下没有免费的午餐，必须自己想清楚把哪些性质排在前面（例如是多给专业标注员一些权重，还是保住更广泛的公平；是偏重一致性，还是偏重包容）。设计出能体现集体人类价值的 AI 汇总机制，至今仍是未竟的课题，通常要把传统投票理论的洞见（用来理解取舍与失效模式）和机器学习方法（用来建模偏好数据、从中学习）结合起来。总之，社会选择理论为"从人类偏好中学习的系统"提供了一份警示性的指南：要清楚自己放松了哪条公平标准，也要把任何一条偏好汇总流水线里做出的妥协摆在明面上。
 
-## Escaping Impossibility: Domain Restrictions {#sec-domain-restrictions}
+## 绕开不可能性：限制定义域 {#sec-domain-restrictions}
 
-Arrow's and Gibbard–Satterthwaite's theorems assume an *unrestricted domain*: any transitive preference ordering is admissible. But what if we restrict the types of preferences that can occur? In many real-world settings, preferences have natural structure that we can exploit.
+阿罗定理与吉巴德—萨特斯维特定理都假定了*定义域不受限制*：任何传递的偏好次序都允许出现。但如果我们限制一下可能出现的偏好类型呢？现实中的许多场景里，偏好本身带有天然的结构，正好可以利用。
 
-### Single-Peaked Preferences {#sec-single-peaked}
+### 单峰偏好 {#sec-single-peaked}
 
-One of the most important restricted domains is *single-peaked preferences*. The idea is that alternatives can be arranged along a line (e.g., a left-right political spectrum, a temperature setting, or a budget level), and each voter has an "ideal point" or "peak" on this line, with preferences decreasing monotonically as we move away from the peak in either direction.
+最重要的几类受限定义域之一，就是*单峰偏好（single-peaked preferences）*。思路是：候选项可以排在一条线上（比如政治光谱的左到右、温度的高低、预算的多少），每位选民在这条线上都有一个"理想点"或"峰值"，从峰值往任一侧离开，偏好程度都单调下降。
 
-::: {.callout-note title="Definition: Single-Peaked Preferences"}
-Let $Y$ be a totally ordered set of alternatives. A preference ordering $\succ$ over $Y$ is **single-peaked** if there exists a peak $p(\succ) \in Y$ such that for all $y, y' \in Y$:
+::: {.callout-note title="定义：单峰偏好"}
+设 $Y$ 是一个全序的候选项集合。$Y$ 上的一个偏好次序 $\succ$ 称为**单峰的**，如果存在一个峰值 $p(\succ) \in Y$，使得对所有 $y, y' \in Y$ 都有：
 
-- If $y < y' \leq p(\succ)$, then $y' \succ y$
-- If $p(\succ) \leq y' < y$, then $y' \succ y$
+- 若 $y < y' \leq p(\succ)$，则 $y' \succ y$
+- 若 $p(\succ) \leq y' < y$，则 $y' \succ y$
 
-The set of all single-peaked preferences on $Y$ is denoted $\text{SP}(Y)$.
+$Y$ 上所有单峰偏好的集合记作 $\text{SP}(Y)$。
 :::
 
-Intuitively, a voter with peak $p$ always prefers alternatives closer to $p$ over alternatives farther from $p$. This rules out preferences like "I prefer the extremes to the middle"—which would create the kind of cycles that drive Arrow's impossibility.
+直观地说，峰值为 $p$ 的选民总是更喜欢离 $p$ 近的候选项，离 $p$ 越远越不喜欢。像"两头都比中间好"这种偏好就被排除了——而正是这类偏好会造成阿罗不可能性里的那些循环。
 
-::: {.callout-warning title="When Is Single-Peakedness Reasonable?"}
-Single-peakedness is a powerful escape from impossibility, but it requires alternatives to be ordered along a **single dimension**. This is natural for some settings: budget levels, temperature, or dosage amounts. However, it fails when preferences are inherently **multi-dimensional**---for instance, in LLM alignment, annotators may evaluate responses along multiple axes (helpfulness, harmlessness, conciseness, formality) with different trade-offs, producing multi-peaked preferences. In political settings, the assumption of a one-dimensional left-right spectrum is a simplification that breaks down for cross-cutting issues. Before relying on single-peaked domain restrictions, practitioners should verify that the assumption is empirically supported, for example by checking whether the preference data can be embedded in one dimension with low distortion.
+::: {.callout-warning title="什么时候可以说偏好是单峰的？"}
+单峰性是从不可能性里脱身的一条有力出路，但它要求候选项能排在**一条线**上。有些场合这一点很自然：预算数额、温度档位、给药剂量。但当偏好本身是**多维**的，这个前提就没了——例如在大模型对齐里，标注员可能同时看好几个维度（有没有帮助、有没有害、是否简洁、语气是否正式），各自的取舍还不同，得到的就是多峰偏好。政治议题上，"左—右"一条线本来就是一种简化，遇到交叉议题就会失效。所以，在依赖单峰定义域之前，实践者应当先确认这个假设有经验证据支持，例如看看偏好数据能不能用很低失真的方式嵌入到一维上。
 :::
 
 **Example: Temperature preferences.** Consider three colleagues deciding on the office thermostat setting. The alternatives are temperatures from 65°F to 75°F. Alice prefers 68°F (her peak), with utility decreasing as temperature moves away from 68. Bob prefers 72°F. Carol prefers 70°F. All three have single-peaked preferences on the temperature spectrum.
