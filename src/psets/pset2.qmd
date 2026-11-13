@@ -1,3 +1,8 @@
+---
+title: "习题 2：估计与不确定性量化"
+lang: zh
+---
+
 ## Exercises
 ### Question 1: Uncertainty Quantification in Preference Learning (40 points) {#sec-question-1-uncertainty-quantification-in-preference-learning-40-points .unnumbered}
 

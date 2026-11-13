@@ -1,3 +1,8 @@
+---
+title: "习题 3：主动征询与序贯决策"
+lang: zh
+---
+
 ## Exercises
 ### Question 1: Preferential Bayesian Optimization (30 points) {#sec-question-1-preferential-bayesian-optimization-30-points .unnumbered}
 
