@@ -948,37 +948,24 @@ Fisher information matrix, thus minimizing the volume of the confidence
 ellipsoid for the estimated parameters. In this exercise, you will
 analyze D-optimal designs for this model.
 
-(a) **Fisher Information Matrix for the Bradley-Terry Model (12
-    points)**
-
-    (i) **(Written, 6 points).** Derive the Fisher information matrix
-        for the Bradley-Terry model at a design point $(x_1, x_2)$. Show
-        that the Fisher information matrix at a design point is:
+(a) **Bradley-Terry 模型的 Fisher 信息矩阵（12 分）**
+    (i) **（笔答，6 分）**。请推出 Bradley-Terry 模型在设计点 $(x_1, x_2)$ 处的 Fisher 信息矩阵，并证明它等于：
         $$I(x_1, x_2, \theta) = w(x_1, x_2, \theta) (x_1 - x_2)(x_1 - x_2)^\top,$$
-        where $w(x_1, x_2, \theta)$ is a weight function given by:
-        $$w(x_1, x_2, \theta) = \frac{e^{\theta^\top x_1} e^{\theta^\top x_2}}{\left(e^{\theta^\top x_1} + e^{\theta^\top x_2}\right)^2} =\sigma'(\theta^\top (x_1-x_2)).$$
-        $\sigma'$ is the derivative of the sigmoid function.
+        其中权重函数 $w(x_1, x_2, \theta)$ 为：
+        $$w(x_1, x_2, \theta) = \frac{e^{\theta^\top x_1} e^{\theta^\top x_2}}{\left(e^{\theta^\top x_1} + e^{\theta^\top x_2}\right)^2} = \sigma'(\theta^\top(x_1 - x_2))$$
+        这里 $\sigma'$ 是 sigmoid 函数的导数。
 
-    (ii) **(Coding, 6 points).** Implement `fisher_matrix` in
-         `d_optimal/main.py` based on the derived expression.
+    (ii) **（编程，6 分）**。根据你推出的表达式，在 `d_optimal/main.py` 中实现 `fisher_matrix`。
 
-(b) **D-optimal Design Criterion (18 points)**
+(b) **D-最优设计准则（18 分）**
 
-    (i) **(Coding, 11 points).** In the context of the Bradley-Terry
-        model, a D-optimal design maximizes the determinant of the
-        Fisher information matrix. Suppose we have a set of candidate
-        items $\{x_1, \dots, x_n\}$, and we can choose $N$ comparisons
-        to make. Formally, the D-optimal design maximizes:
-        $$\det\left( \sum_{i=1}^N w(x_{i1}, x_{i2}, \theta) (x_{i1} - x_{i2})(x_{i1} - x_{i2})^\top \right),$$
-        where $(x_{i1}, x_{i2})$ denotes a pair of compared items in the
-        design. Implement a greedy algorithm to approximate the
-        D-optimal design. Given a set of $n$ items and their feature
-        vectors $\{x_1, \dots, x_n\}$, your task is to iteratively
-        select the pair of items $(x_{i1}, x_{i2})$ that maximizes the
-        determinant of the Fisher information matrix. Please implement
-        `greedy_fisher`. Note that the setup in the code assumes we have
-        a dataset of all possible differences between pairs of items as
-        opposed to directly selecting the pairs.
+    (i) **（编程，11 分）** 在 Bradley-Terry 模型中，D-最优设计最大化 Fisher 信息矩阵的行列式。
+        假设有一批候选项目 $\{x_1, \dots, x_n\}$，我们可以选择做 $N$ 次比较。形式上，D-最优设计最大化：
+        $$\det\left( \sum_{i=1}^N w(x_{i1}, x_{i2}, \theta) (x_{i1} - x_{i2})(x_{i1} - x_{i2})^\top \right)$$
+        其中 $(x_{i1}, x_{i2})$ 是设计中实际比较的一对项目。请实现一个贪心算法来近似 D-最优设计：
+        给定 $n$ 个项目及其特征向量 $\{x_1, \dots, x_n\}$，你要反复选出能让 Fisher 信息矩阵行列式最大的那一对项目
+        $(x_{i1}, x_{i2})$。请实现 `greedy_fisher`。注意：代码里的设定是"已经有了所有项目两两之差构成的数据集"，
+        而不是直接选出项目对。
 
     (ii) **(Written + Coding, 7 points).** Notice that
          `posterior_inv_cov` uses a Laplace approximation for the
@@ -988,7 +975,9 @@ analyze D-optimal designs for this model.
          the Hessian. Please run the file `d_optimal/main.py` and attach
          a plot of the norm of the covariance matrix of the posterior.
          What difference do you observe between greedy and random
-         sampling? What is the win rate of greedy?
+    (ii) **（笔答 + 编程，7 分）** 注意：`posterior_inv_cov` 在标注完所选点后，
+         用拉普拉斯近似得到以真实权重为中心的后验。但你会发现，求 Hessian 时这个近似其实不依赖标签。
+         请运行 `d_optimal/main.py`，附上后验协方差矩阵范数的图。贪心选择与随机抽样之间你观察到什么差别？贪心的胜率是多少？
 
 ::: {.callout-note title="代码"}
 ```{python ex2-q4-1}
