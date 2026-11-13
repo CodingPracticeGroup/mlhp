@@ -2381,35 +2381,35 @@ $$
 V^\pi(s) = \mathbb{E}_{a \sim \pi(\cdot|s)}\left[R(s,a) + \gamma \, \mathbb{E}_{s' \sim P(\cdot|s,a)}[V^\pi(s')]\right]
 $$ {#eq-bellman}
 
-### The Policy Gradient Theorem {#sec-policy-gradient}
+### 策略梯度定理 {#sec-policy-gradient}
 
-We now derive the central result that enables gradient-based policy optimization. The challenge is that the RL objective @eq-rl-objective depends on $\theta$ both through the policy $\pi_\theta$ (which determines which actions are taken) and through the resulting trajectory distribution (which determines which states are visited). The **policy gradient theorem** shows that we can compute gradients using only the policy's log-probabilities, without differentiating through the environment dynamics.
+下面推导的那个结果是梯度式策略优化的核心。难点在于：RL 目标 @eq-rl-objective 同时通过两条路依赖 $\theta$——一条是策略 $\pi_\theta$ 本身（它决定会选到哪些行动），另一条是由它决定的轨迹分布（它决定会走到哪些状态）。**策略梯度定理**说明：只用策略的对数概率就能算出梯度，不必穿过环境的动力学去求导。
 
-**The score function trick.** For any parameterized distribution $\pi_\theta(a \mid s)$, we can write:
+**得分函数技巧（score function trick）。** 对任何参数化的分布 $\pi_\theta(a \mid s)$，都可以写成：
 $$
 \nabla_\theta \pi_\theta(a \mid s) = \pi_\theta(a \mid s) \, \nabla_\theta \log \pi_\theta(a \mid s)
 $$ {#eq-score-function}
 
-This identity converts a gradient of a probability into an expectation-friendly form. The term $\nabla_\theta \log \pi_\theta(a \mid s)$ is called the **score function**---the same quantity that appears in the Fisher information matrix (Chapter 3), though here it serves a different purpose: instead of measuring information content, it tells us how to adjust the policy to increase reward.
+这个恒等式把"概率的梯度"变成了适合写成期望的形式。其中 $\nabla_\theta \log \pi_\theta(a \mid s)$ 称为**得分函数（score function）**——它和第 3 章费雪信息矩阵里出现的是同一个量，用途却不同：在那里它用来衡量信息量，在这里它告诉我们该怎样调整策略才能让奖励更高。
 
-**Trajectory probability.** The probability of a trajectory under policy $\pi_\theta$ factors as:
+**轨迹的概率。** 在策略 $\pi_\theta$ 下一条轨迹的概率可以分解为：
 $$
 p(\tau \mid \theta) = \rho_0(s_0) \prod_{t=0}^{T} \pi_\theta(a_t \mid s_t) \, P(s_{t+1} \mid s_t, a_t)
 $$ {#eq-trajectory-prob}
 
-Taking the log-gradient, the transition terms $P(s_{t+1} \mid s_t, a_t)$ vanish because they do not depend on $\theta$:
+对它取对数梯度时，转移项 $P(s_{t+1} \mid s_t, a_t)$ 会消失，因为它们不依赖 $\theta$：
 $$
 \nabla_\theta \log p(\tau \mid \theta) = \sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t \mid s_t)
 $$ {#eq-log-trajectory-grad}
 
-This is the key insight: **the environment dynamics drop out of the gradient**, so we can estimate policy gradients without knowing or differentiating through the transition function $P$.
+这就是关键洞见：**环境的动力学从梯度里消失了**——即使不知道转移函数 $P$、也不对它求导，我们照样能估计策略梯度。
 
-::: {.callout-important title="Theorem: Policy Gradient"}
-For a parameterized policy $\pi_\theta$ with RL objective $J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}[\sum_{t=0}^{T} \gamma^t R(s_t, a_t)]$:
+::: {.callout-important title="定理：策略梯度"}
+对一条参数化策略 $\pi_\theta$ 与它的 RL 目标 $J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}[\sum_{t=0}^{T} \gamma^t R(s_t, a_t)]$：
 $$
 \nabla_\theta J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}\left[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t \mid s_t) \cdot G_t\right]
 $$ {#eq-policy-gradient-theorem}
-where $G_t = \sum_{t'=t}^{T} \gamma^{t'-t} R(s_{t'}, a_{t'})$ is the **return** (cumulative discounted reward) from time step $t$ onward.
+其中 $G_t = \sum_{t'=t}^{T} \gamma^{t'-t} R(s_{t'}, a_{t'})$ 是从时刻 $t$ 往后的**回报**（累计折扣奖励）。
 :::
 
 *证明要点。* 把 $J(\theta) = \mathbb{E}_{\tau \sim p(\cdot|\theta)}[R(\tau)]$ 写开，其中 $R(\tau) = \sum_t \gamma^t R(s_t, a_t)$。对轨迹分布用得分函数技巧（score function trick）：$\nabla_\theta J = \mathbb{E}_\tau[R(\tau) \nabla_\theta \log p(\tau|\theta)]$。再代入 @eq-log-trajectory-grad。最后注意：时刻 $t$ 的行动影响不了更早时刻的奖励，所以求和里的每一项都可以把 $R(\tau)$ 换成它之后的回报 $G_t$。$\square$
