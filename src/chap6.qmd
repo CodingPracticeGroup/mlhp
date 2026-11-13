@@ -991,22 +991,22 @@ for i, strategy in enumerate(strategies):
 
 **结果解读**：
 
-1. **Volume-weighted aggregation (DPO default)**: Learns senior reviewers' style well (they dominate training data). Provides excellent assistance to seniors, poor assistance to juniors. **Group unfairness**: systematic disparity.
+1. **按数量加权汇总（DPO 的默认做法）**：把资深审稿人的风格学得很好（他们在训练数据里占主导）。给资深者的帮助很好，给资浅者的帮助很差。**群体不公平**：系统性的差距。
 
-2. **Equal-weighted aggregation**: Balances both groups. Quality is more equitable—neither group is perfectly served, but both get reasonable assistance.
+2. **等权重汇总**：两组都兼顾。质量更均等——哪一组都谈不上完美，但两边都能得到说得过去的帮助。
 
-3. **Group-stratified aggregation**: Ensures proportional representation (30% senior, 70% junior). Since juniors are the majority, learned style is closer to theirs. This corrects for the participation imbalance.
+3. **按群体分层的汇总**：保证按人口比例代表（资深 30%、资浅 70%）。因为资浅者是多数，学到的风格就更接近他们。这就纠正了参与度的失衡。
 
-**Key Insight**: Volume-weighted aggregation (the default in DPO and many systems) creates group unfairness by privileging high-participation groups. Equal or stratified weighting ensures fairer outcomes but may reduce statistical efficiency.
+**关键洞见**：按数量加权汇总（DPO 与很多系统的默认做法）会让参与度高的群体占优，从而造成群体不公平。等权重或分层加权能得到更公平的结果，但可能降低统计效率。
 
-**Design Principle**: When aggregating preferences, examine participation patterns. If participation correlates with privilege, use equal or stratified weighting to ensure fairness—don't default to volume-weighting without justification.
+**设计原则**：汇总偏好时，先看清参与的模式。如果参与程度与条件优势相关，就用等权重或分层加权来保证公平——不要不加理由地默认按数量加权。
 
 **与现实系统的对应**：
-- **RLHF for LLMs**: High-volume annotators dominate $\pi_{\text{ref}}$. If annotator demographics are skewed, the model learns skewed preferences.
-- **Recommender systems**: Power users dominate collaborative filtering. Their preferences are overweighted in recommendations for everyone.
-- **Voting systems**: Turnout differs by demographics. Volume-weighted aggregation (like electoral systems without turnout adjustment) underweights low-turnout groups.
+- **大模型的 RLHF**：标注量大的标注员在 $\pi_{\text{ref}}$ 里占主导。如果标注员的人群构成本身就是偏的，模型学到的偏好也就是偏的。
+- **推荐系统**：重度用户主导了协同过滤。他们的偏好在给所有人的推荐里都被放大了。
+- **投票制度**：不同人口的投票率不一样。按参与量汇总（就像不对投票率作调整的选举制度）会压低低投票率群体的声音。
 
-Next, we'll see how the decision stage adds another layer: when should we defer to preferences vs. override them?
+最后看决策阶段又叠上了一层：什么时候该听用户的，什么时候该替他推翻？
 
 ### 决策：自由主义式还是非自由主义式的协助 {#sec-liberal-illiberal}
 
@@ -1184,34 +1184,34 @@ print(f"  → Converges to community standard, reduces diversity")
 
 **结果解读**：
 
-1. **Liberal assistance**: Helps each reviewer be consistent with their own style. Biased reviewers become more harsh (the assistant helps them efficiently write harsh reviews). Unbiased reviewers become more constructive. **Result**: Individual autonomy respected, but bias amplified. Authors from disadvantaged groups receive systematically harsher reviews.
+1. **自由主义式的协助**：帮每位审稿人把他自己的风格保持住。偏严苛的审稿人变得更严苛（助手帮他更高效地写出严苛的意见），本来就建设性的审稿人则更建设性。**结果**：个人自主得到尊重，但风格差距被放大，作者受到的影响也更分化。
 
-2. **Illiberal assistance**: Nudges all reviewers toward the community standard. Biased reviewers are corrected toward constructive tone. But unbiased reviewers are also pulled toward the standard—diversity is reduced. **Result**: Homogenization. If the "community standard" itself reflects dominant norms, minority voices are erased.
+2. **非自由主义式的协助**：把所有审稿人都往共同体标准上推。偏严苛的审稿人被往建设性的方向纠正。但本来就建设性的审稿人也被往标准拉——多样性下降了。**结果**：趋同，虽然整体语气更温和。
 
-**Key Insight**: Neither liberal nor illiberal assistance is fair in all contexts. Liberal respects autonomy but may amplify harm. Illiberal promotes standards but may erase diversity.
+**关键洞见**：两种协助都不是在所有场景下都公平。自由主义式尊重自主，但可能放大伤害；非自由主义式维护标准，但可能抹掉多样性。
 
-**Design Principle**: Use **structured paternalism**:
-- Default to liberal assistance (respect stated preferences)
-- Override when justified: harms third parties, poor conditions (fatigue, manipulation), collective action problems
-- Be transparent about overrides (explain to users why)
-- Provide recourse (appeal mechanism)
+**设计原则**：采用**结构化的家长主义**：
+- 默认自由主义式的协助（尊重用户说出来的偏好）
+- 在这些情况下可以替他推翻：会伤害第三方；条件不利（疲劳、被引导）；集体行动的问题
+- 替他做主时要透明（向用户说明为什么）
+- 提供救济渠道（申诉机制）
 
-**When to choose illiberal**:
-- High-stakes domains (healthcare, criminal justice): outcomes matter more than process
-- Third-party harm is severe (hate speech, harassment)
-- User explicitly consents to "help me be better" (coaching mode)
+**什么时候选非自由主义式**：
+- 后果重的领域（医疗、刑事司法）：结果比过程更要紧
+- 对第三方的伤害很重（仇恨言论、骚扰）
+- 用户明确同意"帮我做得更好"（辅导模式）
 
-**When to choose liberal**:
-- Low-stakes domains (entertainment, shopping): personal preference is paramount
-- Diversity of perspectives is valuable (creative work, academic review)
-- Users have established expertise (senior researchers less needing intervention)
+**什么时候选自由主义式**：
+- 后果轻的领域（娱乐、购物）：个人偏好最重要
+- 观点的多样性有价值（创作、学术评审）
+- 用户本身已有专业能力（资深研究者不太需要干预）
 
 **与现实系统的对应**：
-- **Content moderation**: Liberal = "free speech" (respect stated preferences). Illiberal = community standards (remove harmful content even if users prefer it).
-- **Health apps**: Liberal = track what user reports. Illiberal = nudge toward healthier behaviors (paternalistic).
-- **LLM alignment**: Should the model always satisfy user requests (liberal) or refuse harmful requests (illiberal)?
+- **内容审核**：自由主义式＝"言论自由"（尊重用户说出来的偏好）。非自由主义式＝共同体标准（哪怕用户更喜欢，有害内容也要撤下）。
+- **健康类应用**：自由主义式＝按用户自己报的情况记录。非自由主义式＝把他往更健康的行为上推（家长主义）。
+- **大模型对齐**：模型是该始终满足用户的请求（自由主义式），还是该拒绝有害的请求（非自由主义式）？
 
-Finally, we'll see how all four pipeline stages compound unfairness through feedback loops.
+最后我们来看，四个阶段合起来，怎样通过反馈回路把不公平一层层叠加起来。
 
 ### 不公平怎样叠加：走完整条流水线 {#sec-compounding-unfairness}
 
