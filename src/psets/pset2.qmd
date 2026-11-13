@@ -740,7 +740,7 @@ model.train(num_iterations=100, subset_size=50)
 ```
 :::
 
-### 第 3 题：线性性能指标的引出（30 分） {#sec-question-3-linear-performance-metric-elicitation-30-points .unnumbered}
+### 第 3 题：线性性能指标的征询（30 分） {#sec-question-3-linear-performance-metric-elicitation-30-points .unnumbered}
 
 1.  **（笔答，10 分）** 关于本题的问题设定，先读一下 <https://tinyurl.com/3b92sufm>。设有一个线性性能指标
     $$p(C) = 1-\alpha (FP)-\beta (FN)$$
@@ -757,7 +757,7 @@ model.train(num_iterations=100, subset_size=50)
 
 2.  **（笔答 + 编程，5 分）** 在 `lpme/main.py` 中实现 `classifier_metrics`。做完后运行 `plot_confusion_region` 并附上生成的图。关于"可能的混淆矩阵构成的区域"，你注意到了什么？
 
-3.  **（编程，15 分）** 实现 `search_theta`，把裁判（oracle）实际在用的指标（由 $\theta$ 参数化）引出来。多换几个裁判的 theta 试试，运行 `start_search`，看你能把它逼近到什么程度！
+3.  **（编程，15 分）** 实现 `search_theta`，把裁判（oracle）实际在用的指标（由 $\theta$ 参数化）征询出来。多换几个裁判的 theta 试试，运行 `start_search`，看你能把它逼近到什么程度！
 
 ::: {.callout-note title="代码"}
 ```{python ex2-q3-1}
@@ -1124,11 +1124,11 @@ plt.show()
 ```
 :::
 
-### 第 5 题：非参数的指标引出（30 分） {#sec-question-5-nonparametric-metric-elicitation-30-points .unnumbered}
+### 第 5 题：非参数的指标征询（30 分） {#sec-question-5-nonparametric-metric-elicitation-30-points .unnumbered}
 
-本题讨论用高斯过程（GP）来做性能指标的引出：把混淆矩阵中的元素——假正率（FP）与假负率（FN）——映射到一个未知的性能指标上。目标是用分类器两两比较得到的相对偏好，学出一个把 FP、FN 映射到该指标的非线性函数。后验推断用椭圆切片采样（elliptical slice sampling）。
+本题讨论用高斯过程（GP）来做性能指标的征询：把混淆矩阵中的元素——假正率（FP）与假负率（FN）——映射到一个未知的性能指标上。目标是用分类器两两比较得到的相对偏好，学出一个把 FP、FN 映射到该指标的非线性函数。后验推断用椭圆切片采样（elliptical slice sampling）。
 
-(a) **用高斯过程做指标引出（10 分）**
+(a) **用高斯过程做指标征询（10 分）**
 
     (i) **（笔答，2 分）** 假设性能指标 $\phi(C)$ 是混淆矩阵 $C$ 的非线性函数。为简单起见，设 $\phi$ 只依赖 FP 与 FN，即
         $$\phi(\text{FP}, \text{FN}) \sim \mathcal{GP}(0, k((\text{FP}, \text{FN}), (\text{FP}, \text{FN})))$$
@@ -1158,10 +1158,10 @@ plt.show()
           （也就是说，FP 与 FN 的边际增加对性能指标的影响越来越小）。请说明这个非线性函数背后的心理学动机，
           以及为什么用对数形式来刻画人类对分类错误的感知可能是合适的。
 
-          运行 `npme/main.py`，附上 $\phi_{\text{true}}$ 与你引出的指标之比较的图。你在图里注意到了什么？
+          运行 `npme/main.py`，附上 $\phi_{\text{true}}$ 与你征询到的指标之比较的图。你在图里注意到了什么？
 
     (iv) **（笔答 + 编程，4 分）** GP 训练好、也拿到了函数 $\phi(\text{FP}, \text{FN})$ 的后验样本之后，
-         我们该怎么评估引出的这个指标的质量？请提出一种方法来评估引出的指标 $\phi$ 与用户真实偏好的符合程度，
+         我们该怎么评估征询到的这个指标的质量？请提出一种方法来评估征询到的指标 $\phi$ 与用户真实偏好的符合程度，
          并在 `evaluate_elicited_metric` 中实现它（可以结合你在 (iii) 中看到的图）。
 
 ::: {.callout-note title="代码"}
