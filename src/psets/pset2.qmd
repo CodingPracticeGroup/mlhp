@@ -441,18 +441,15 @@ $$P(x_1 \succ x_2 | \theta) = \sigma(\theta^\top (x_1 - x_2)),$$
 
 其中 $\theta \in \mathbb{R}^d$ 是模型的参数向量，$\sigma(z)$ 是 sigmoid 函数 $\sigma(z) = \frac{1}{1 + e^{-z}}$。目标是依次挑选项目对，使通过偏好提问获得的关于 $\theta$ 的信息最多。
 
-(a) **Expected Information Gain (15 points)**
+(a) **期望信息增益（15 分）**
 
-    (i) **Derive the Expected Information Gain (Written, 3 points).**
-        Suppose that after observing a preference between two items
-        $x_1$ and $x_2$, the posterior distribution over $\theta$ is
-        updated. The information gain from this observation is the
-        reduction in uncertainty about $\theta$ measured using the
-        Kullback-Leibler (KL) divergence between the prior and posterior
-        distributions. Given the current posterior distribution
-        $P(\theta | \mathcal{D})$ and a possible observation
-        $y \in \{0, 1\}$ (where $y = 1$ if $x_1$ is preferred over
-        $x_2$, and $y = 0$ otherwise), the expected information gain is: $$\begin{aligned}
+(i) **推出期望信息增益（笔答，3 分）。** 假设在观察到两个项目
+        $x_1$ 与 $x_2$ 之间的偏好之后，关于 $\theta$ 的后验分布被更新了。这次观察带来的信息增益，
+        就是用先验与后验分布之间的库尔贝克—莱布勒（KL）散度来衡量的"关于 $\theta$ 的不确定性
+        减少了多少"。给定当前的后验分布
+        $P(\theta | \mathcal{D})$ 与一种可能的观察结果
+        $y \in \{0, 1\}$（若 $x_1$ 比 $x_2$ 更被偏好则 $y = 1$，
+        否则 $y = 0$），期望信息增益为：$$\begin{aligned}
     \mathbb{E}[\text{IG}(x_1, x_2)] = &P(y=1 | x_1, x_2, \theta) D_{\text{KL}}\left( P(\theta | y = 1, \mathcal{D}) \parallel P(\theta | \mathcal{D}) \right) \\+ 
     &P(y=0 | x_1, x_2, \theta) D_{\text{KL}}\left( P(\theta | y = 0, \mathcal{D}) \parallel P(\theta | \mathcal{D}) \right)
 \end{aligned}$$
@@ -484,11 +481,7 @@ $$P(x_1 \succ x_2 | \theta) = \sigma(\theta^\top (x_1 - x_2)),$$
           posterior mean $\mu'$ and covariance $\Sigma'$ can be updated
           using an approximation method such as Laplace's approximation.
 
-          Using these assumptions, compute the expected information gain
-          for a specific query $(x_1, x_2)$ in closed form. You may
-          express the information gain in terms of the updated mean
-          $\mu'$ and covariance $\Sigma'$ after observing the preference
-          outcome.
+在这些假设下，请对一次具体的提问 $(x_1, x_2)$ 以闭式算出期望信息增益。你可以把它写成观察到偏好结果之后更新得到的均值 $\mu'$ 与协方差 $\Sigma'$ 的函数。
 
     (iv) **Laplace Approximation for Posterior (Written, 4 points).**
          The Laplace approximation for the posterior is given by $$\begin{aligned}
