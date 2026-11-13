@@ -1326,7 +1326,7 @@ $$ {#eq-rasch-bt-exercise}
 
 (b) 用这个似然，把在 $(\mathbf{x}_{j_1}, \mathbf{x}_{j_2})$ 上更新之后 $p, \mathbf{w}_1, \mathbf{w}_2$ 的后验分布化简一下，先验那几项保留原样不动。
 
-(c) 设先验为 $p\sim B(1, 1)$、$w_1\sim N (0, \mathbf{I})$、$w_2\sim N(0, \mathbf{I})$，其中 $B$ 表示 Beta 分布、$\mathcal{N}$ 表示正态分布（三者独立抽样）。你会发现 (b) 里的后验没有简单的闭式形式，只能用数值方法。其中一种能近似地从后验 $\pi$ 采样的方法叫 Metropolis-Hastings（至于为什么想从后验里采样，后面会讲）。大体上，Metropolis-Hastings 以及类似的所谓马尔可夫链蒙特卡洛（Markov Chain Monte Carlo, MCMC）方法的想法是这样的：构造一条马尔可夫链 $\{x_t\}_{t=1}^\infty$，让它的"遍历"分布正好是你想要的那个分布。\footnote{也就是说，在给定 $x_{t-1}$ 的条件下，$x_{t}$ 与 $(x_1, x_2, \dots, x_{t-2})$ 相互独立。} 由马尔可夫链的性质，当 $t \gg 0$ 时，$x_t$ 就近似等同于从"遍历"分布里抽出来的。在 Metropolis-Hastings 里，我们先从一个选定的概率核 $Q(\bullet | x_t)$（例如加高斯噪声）采样，得到一个提议分布 $\tilde Q(\bullet | x_t)$，而接受这个提议的概率是
+(c) 设先验为 $p\sim B(1, 1)$、$w_1\sim N (0, \mathbf{I})$、$w_2\sim N(0, \mathbf{I})$，其中 $B$ 表示 Beta 分布、$\mathcal{N}$ 表示正态分布（三者独立抽样）。你会发现 (b) 里的后验没有简单的闭式形式，只能用数值方法。其中一种能近似地从后验 $\pi$ 采样的方法叫 Metropolis-Hastings（至于为什么想从后验里采样，后面会讲）。大体上，Metropolis-Hastings 以及类似的所谓马尔可夫链蒙特卡洛（Markov Chain Monte Carlo, MCMC）方法的想法是这样的：构造一条马尔可夫链 $\{x_t\}_{t=1}^\infty$，让它的"遍历"分布正好是你想要的那个分布。\footnote{也就是说，在给定 $x_{t-1}$ 的条件下，$x_{t}$ 与 $(x_1, x_2, \dots, x_{t-2})$ 相互独立。} 由马尔可夫链的性质，当 $t \gg 0$ 时，$x_t$ 就近似等同于从"遍历"分布里抽出来的。在 Metropolis-Hastings 里，$x_{t+1}$ 的提议分布 $\tilde Q(\bullet | x_t)$ 这样得到：从选定的概率核 $Q(\bullet | x_t)$（例如加高斯噪声）中采样。接受该提议的概率为
 
 $$
 x_{t+1}=\begin{cases} \tilde Q(\bullet | x_t) & \text{with probability } A, \\ x_t & \text{with probability } 1 - A. \end{cases}
