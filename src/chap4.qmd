@@ -1167,53 +1167,16 @@ $$\hat{C}_t = \left( \hat{P}_t - c_t, \hat{P}_t + c_t \right),$$ {#eq-confidence
 
 -   弱遗憾（weak regret）：想刻画的是"会偏好最优老虎机 $b^*$ 多过我们在这一步给出的**更好**那个选项 $b_1, b_2$"的那部分用户占比：$\tilde{R}_T = \sum_{t = 1}^T \text{min} \left\{ \epsilon(b^*, b_1^{(t)}), \epsilon(b^*, b_2^{(t)}) \right\}$
 
-### Winner Concepts {#sec-borda}
+### "胜者"的概念 {#sec-borda}
 
-The best bandit described in our regret definition is called a
-**Condorcet Winner**. This is the strongest form of winner. It's the
-action **$A_{i}$** which is preferred to each other action **$A_j$**
-with $p > 0.5$ in a head-to-head election. While the above introduced
-notions of regret assume an overall best bandit to exist, there might be
-settings, where no bandit wins more than half head-to-head duels. A set
-of actions without a Condorcet winner is described by the following
-preference matrix, where each entry $\Delta_{jk}$ is
-$p(j \succ k) - 0.5$, the probability that action $j$ is preferred over
-action $k$ minus 0.5. There is no Condorcet winner as there is no action
-that is preferred with $p > 0.5$ over all other actions. Imagine, you
-want to find the best pizza to eat (=action). There may not be a pizza
-that wins more than half of the head-to-head duels against every other
-pizza.
+我们在遗憾定义里说的那个"最好的老虎机"，称为**孔多塞胜者（Condorcet Winner）**，这是最强的胜者定义：它指的是那个动作 **$A_{i}$**，在两两对比中它以 $p > 0.5$ 的概率胜过其他每一个动作 **$A_j$**。上面这些遗憾的定义都假定"存在一个全局最好的老虎机"，但有些情形下没有任何老虎机能赢下超过一半的两两对决。没有孔多塞胜者的那组动作可以用下面这张偏好矩阵来描述：每个条目 $\Delta_{jk}$ 等于 $p(j \succ k) - 0.5$，也就是"$j$ 被偏好于 $k$"的概率减去 0.5。这里没有孔多塞胜者，因为没有任何动作能以 $p > 0.5$ 胜过所有其他动作。打个比方：你想找出"最好吃的比萨"（也就是最好的动作），可也许根本不存在这样一张比萨：它对任意其他比萨都能赢下一半以上的对决。
 
-However, we might still have an intuition of the best pizza. Therefore
-Sui et al., 2018 introduce the concepts of different $\textit{winners}$
-in dueling bandit problems [@advancements_dueling]. In this example, we
-might define the best pizza as the most popular one. We call the Pizza
-receiving the most votes in a public vote the **Borda Winner**, or
-formally, Borda winner
-$j = \arg\max_{i \in A, i \neq j} \left(\sum p(j \succ i)\right)$. In
-contrast to the Condorcet Winner setting, there is always guaranteed to
-be one or more (in the case of a tie) Borda winners for a set of
-actions. However - if there is a Condorcet Winner, this might not
-necessarily be the same as a Borda Winner: In our Pizza example, a
-Pepperoni Pizza might win more than half of its head-to-head duels,
-while the Cheese-Pizza is still the most popular in a public poll.
+但我们心里可能还是有"哪张比萨最好"的判断。为此 Sui et al., 2018 提出了对决老虎机中几种不同的 $\textit{winners}$（胜者）概念 [@advancements_dueling]。在这个例子里，我们也许会把"最有人气的比萨"当作最好的比萨。把公开投票中得票最多的那种比萨称为**博尔达胜者（Borda Winner）**，形式化写出来就是博尔达胜者 $j = \arg\max_{i \in A, i \neq j} \left(\sum p(j \succ i)\right)$。与孔多塞胜者不同，任何一组动作都**一定**存在博尔达胜者（并列时可能不止一个）。不过——即便存在孔多塞胜者，它也不一定就是博尔达胜者：在比萨例子里，可能是腊肠比萨赢下了超过一半的两两对决，但公开投票里最受欢迎的却是芝士比萨。
 
-A more generic concept of winner is the **Von Neumann Winner**, which
-describes a probability distribution rather than a single bandit winner.
-A Von Neumann winner simply prescribes a probability distribution $W$
-such that sampling from this distribution 'beats' an action from the
-random uniform distribution with $p > 0.5$. In our pizza example, this
-would correspond to trusting a friend to order whichever Pizza he likes,
-because this may still be preferred to ordering randomly. Formally, $W$
-is a Von Neumann if $(j \sim W, k \sim R) [p(p(j \succ k) > 0.5) > 0.5]$
-where $R$ describes the uniform probability distribution over our
-actions. The concept of a Von Neumann winner is useful in contextual
-bandits, which will be introduced later. In these settings, the
-preference matrix depends on different context, which may have different
-Borda winners, just as different parties may vote for different pizzas.
+更一般的胜者概念是**冯·诺依曼胜者（Von Neumann Winner）**，它描述的是一个概率分布，而不是某一个具体的老虎机。冯·诺依曼胜者就是给出一个分布 $W$，使得"从这个分布里抽一个"对上"从均匀分布里抽一个"时有 $p > 0.5$ 的概率占优。还用比萨的例子说：这相当于相信朋友会点他自己爱吃的，因为这样大概率比瞎点更好。形式上，若 $(j \sim W, k \sim R) [p(p(j \succ k) > 0.5) > 0.5]$，就称 $W$ 是一个冯·诺依曼胜者，其中 $R$ 是动作上的均匀分布。冯·诺依曼胜者这个概念在上下文老虎机里很有用（后面会讲）。在那类设定里，偏好矩阵随上下文而变，不同的上下文可能对应不同的博尔达胜者——就像不同的人群会投票给不同的比萨。
 
 ::: {.callout-important title="No Universal Winner Concept"}
-The three winner concepts---Condorcet, Borda, and von Neumann---can identify **different** items as the "best," and a Condorcet winner may not even exist. The choice of winner concept is therefore a **normative design decision**, not a purely technical one: it determines what "regret" means and what the algorithm optimizes for. This parallels a deeper tension formalized by Arrow's impossibility theorem (@sec-aggregation): there is no aggregation rule that satisfies all desirable properties simultaneously. When deploying dueling bandit algorithms, practitioners should explicitly choose a winner concept that matches their application's values---majority dominance (Condorcet), average popularity (Borda), or worst-case robustness (von Neumann).
+三种"胜者"概念——孔多塞、博尔达、冯·诺依曼——可能把**不同**的物品判为"最好"，甚至可能连孔多塞胜者都不存在。因此，选哪种胜者概念是一个**带有价值取向的设计决定**，而不只是技术选择：它决定了"遗憾"是什么意思、算法在优化什么。这背后是阿罗不可能定理（@sec-aggregation）所形式化的更深矛盾：不存在同时满足所有良好性质的聚合规则。所以部署对决老虎机算法时，应当明确挑一个与自己应用场景价值观相符的胜者概念——多数碾压（孔多塞）、平均人气（博尔达），还是最坏情形下的稳健（冯·诺依曼）。
 :::
 
 ::: {#fig-condorcet_violation}
