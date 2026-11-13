@@ -1350,68 +1350,32 @@ print("  → Arm 0 barely beats everyone, but Arm 1 dominates Arm 2,3 strongly!"
 
 :::
 
-Next, we introduce two performance measures for the planner. The
-**asymptotic ex-post regret** is defined as
+接下来介绍两个给规划者用的性能指标。**渐近事后遗憾（asymptotic ex-post regret）** 定义为
 $$\text{Regret}(\mu_1, \ldots \mu_K) = T\cdot \max_i \mu_i - \sum_{i=1}^T E[\mu_{I_t}].$$ {#eq-asymptotic-regret}
 
-Intuitively, this represents the difference between the reward achieved
-by always taking the action with the highest possible reward and the
-expected welfare of the recommendation algorithm (based on the actions
-it recommends at each timestep).
+直观上，它衡量的是"每次都直接取那个真实奖励最高的动作"能得到的奖励，与该推荐算法的期望总收益（按它在每个时刻推荐的动作计算）之间的差距。
 
-We also define a weaker performance measure, the **Bayesian regret**,
-which is defined as
+我们还定义一个更弱的性能指标，**贝叶斯遗憾（Bayesian regret）**：
 $$\text {Bayesian regret}=E_{\mu_1, \ldots, \mu_K \sim \text {Prior}}\left[\operatorname{Regret}\left(\mu_1, \ldots, \mu_K\right)\right]$$ {#eq-bayesian-regret}
 
-With a Bayesian optimal policy, we would like either definition of
-regret to vanish as $T\to \infty$; we are considering "large-market
-optimal\" settings where there are many short-lived, rather than a few
-long-term, users. Note the fact that ex-post regret is prior-free makes
-it robust to inaccuracies on the prior.
+在贝叶斯最优策略下，我们希望无论按哪种定义，遗憾都随 $T\to \infty$ 趋于零。我们考虑的是"大市场最优"的设定：面对的是大量短暂出现的用户，而不是少数长期留存的用户。还要注意一点：事后遗憾不依赖先验，因此先验不准时它依然稳健。
 
-### Acquisition Functions
+### 采集函数
 
-Various strategies have been developed to balance the
-exploration-exploitation trade-off. These strategies differ in selecting
-arms based on past experiences and rewards.
+为了平衡探索与利用，人们提出了好几种策略。它们的区别在于：如何根据过去的经验和奖励来挑臂。
 
-#### Classical Acquisition Functions
+#### 经典采集函数
 
-**Uniform** acquisition function is the most straightforward approach where
-each arm is selected uniformly randomly over time. This strategy does
-not consider the past rewards and treats each arm equally promising
-regardless of the observed outcomes. It is a purely explorative strategy
-that ensures each arm is sampled enough to estimate its expected reward,
-but it does not exploit the information to optimize rewards. In
-mathematical terms, if $N_t(a)$ denotes the number of times arm $a$ has
-been selected up to time $t$, the Uniform Strategy would ensure that
-$N_t(a) \approx \frac{t}{K}$ for all arms $a$ as $t$ grows large:
-$P(a_t = a) = \frac{1}{K}$
+**均匀采样（Uniform）** 采集函数最直白：每次在所有臂上均匀随机选。它完全不看历史奖励，把每个臂都当作同样有希望。这是一种纯探索的策略，能保证每个臂都被采样足够多次、从而估计出各自的期望奖励，但它没有利用这些信息去提升奖励。用数学语言说，若 $N_t(a)$ 表示到时刻 $t$ 为止臂 $a$ 被选中的次数，均匀策略会保证当 $t$ 足够大时，对每个臂 $a$ 都有 $N_t(a) \approx \frac{t}{K}$：$P(a_t = a) = \frac{1}{K}$
 
-The **Epsilon Greedy** is a popular method that introduces a
-balance between exploration and exploitation. With a small probability
-$\epsilon$, it explores by choosing an arm at random, and with a
-probability $1 - \epsilon$, it exploits by selecting the arm with the
-highest estimated reward so far. This strategy incrementally favors
-actions that have historically yielded higher rewards, but still allows
-for occasional exploration to discover better options potentially. The
-parameter $\epsilon$ is chosen based on the desired exploration level,
-often set between 0.01 and 0.1. $$P(a_t = a) =
+**ε-贪心（Epsilon Greedy）** 是常用的折中办法：以小概率 $\epsilon$ 随机选一个臂去探索，以概率 $1 - \epsilon$ 利用现有信息，选截至目前估计奖励最高的那个臂。这样策略会逐步偏向历史上带来更高奖励的行动，同时仍保留偶尔探索、发现更好选项的可能。参数 $\epsilon$ 由你希望的探索程度决定，一般取 0.01 到 0.1 之间。
+$$P(a_t = a) =
 \begin{cases}
 \frac{\epsilon}{K} + 1 - \epsilon & \text{if } a = \arg\max_{a'} \hat{\mu}_{a'} \\
 \frac{\epsilon}{K} & \text{otherwise}
 \end{cases}$$ {#eq-epsilon-greedy}
 
-**Upper Confidence Bound** (UCB) acquisition function takes a more
-sophisticated approach to the exploration-exploitation dilemma. It
-selects arms based on both the estimated rewards and the uncertainty or
-variance associated with those estimates. Specifically, it favors arms
-with high upper confidence bounds on the estimated rewards, which is a
-sum of the estimated mean and a confidence interval that decreases with
-the number of times the arm has been played. This ensures that arms with
-less certainty (those played less often) are considered more often,
-naturally balancing exploration with exploitation as the uncertainty is
-reduced over time.
+**上置信界（Upper Confidence Bound, UCB）** 采集函数处理探索—利用这对矛盾时更讲究：它同时看估计出的奖励和这些估计的不确定度（方差）。具体来说，它偏向"估计奖励的上置信界"高的臂——这个上界等于估计均值加上一个置信区间，而这个区间随该臂被尝试的次数增多而变窄。这样，把握小（试得少）的臂会被更多地考虑，随着不确定性随时间下降，探索与利用自然就被平衡起来了。
 
 $$P(a_t = a) =
 \begin{cases}
