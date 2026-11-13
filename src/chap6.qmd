@@ -1643,37 +1643,37 @@ print(f"  → Violates individual fairness: Group B papers matched sub-optimally
 
 Make this choice consciously and transparently, documenting why.
 
-### Process vs. Outcome Fairness {#sec-process-outcome-fairness}
+### 过程公平与结果公平 {#sec-process-outcome-fairness}
 
-Another fundamental tension: fair **process** vs. fair **outcomes**.
+另一组根本性的张力：公平的**过程**与公平的**结果**。
 
-**Process fairness** (procedural justice): Same rules and opportunities for all. Equal treatment.
+**过程公平**（程序正义）：对所有人用同样的规则、给同样的机会，一视同仁。
 
-**Outcome fairness** (distributive justice): Equitable results. Equal outcomes, adjusting for disadvantages.
+**结果公平**（分配正义）：结果要公道。考虑到各处处于不利地位，让结果趋于平等。
 
 **放到同行评审里**：
 
-**Process fairness**: All reviewers bid with equal weight. Matching algorithm treats all bids equally. No adjustment for demographics or privilege.
+**过程公平**：所有审稿人的表态权重相同，匹配算法对每一条表态一视同仁，不因人口特征或条件优势做任何调整。
 
-**Outcome fairness**: Adjust bid weights to ensure junior reviewers, underrepresented subfields, and under-resourced institutions get quality assignments proportional to their population.
+**结果公平**：调整表态的权重，让资浅审稿人、代表性不足子领域的论文、资源较少机构的研究者，都能按各自的人数比例拿到质量相当的任务。
 
-#### The Tension {#sec-process-outcome-tension}
+#### 张力在哪里 {#sec-process-outcome-tension}
 
-**Process fairness says**: Don't adjust for demographics—that's discrimination. Treat everyone equally.
+**过程公平说**：不要按人口特征做调整，那就是歧视。对人人都一样。
 
-**Outcome fairness says**: Equal treatment of unequal groups perpetuates inequality. Must adjust to correct historical disadvantages.
+**结果公平说**：对本来不平等的群体一视同仁，只会把不平等继续下去。必须做调整，才能纠正历史造成的劣势。
 
-These conflict when groups have different baseline resources or positions. A process-fair system produces outcome-unfair results if groups start from unequal positions.
+当各个群体的起点资源或地位不同时，两者就会冲突。如果各群体起始位置不平等，一个过程公平的系统给出的就是结果不公平的答案。
 
-**Connection to Sen's Liberalism** (@sec-liberal-illiberal):
-- **Liberal assistance** is process-fair: respect each user's stated preferences, don't override
-- **Illiberal assistance** is outcome-fair: override preferences to achieve equitable outcomes
+**与森的自由主义思路的联系**（@sec-liberal-illiberal）：
+- **自由主义式的协助**是过程公平的：尊重每位用户说出来的偏好，不替他推翻。
+- **非自由主义式的协助**是结果公平的：为了得到公道的结果而推翻偏好。
 
-The same philosophical tension appears across scales: individual assistance and system-wide fairness.
+同一个哲学上的张力，在不同尺度上都会出现：对单个用户的协助，与整个系统的公平。
 
-#### Code Example: Process vs. Outcome Fairness {#sec-code-process-outcome}
+#### 代码示例：过程公平与结果公平 {#sec-code-process-outcome}
 
-Let's simulate a bidding system for paper-reviewer matching with process-fair vs. outcome-fair allocation:
+下面模拟论文—审稿人匹配中的表态系统，比较过程公平的分配与结果公平的分配：
 
 ```{pyodide-python}
 #| echo: true
