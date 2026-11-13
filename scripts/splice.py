@@ -27,8 +27,11 @@ lines = open(path, encoding="utf-8").read().split("\n")
 
 if not (1 <= start <= end <= len(lines)):
     sys.exit(f"行号越界：文件共 {len(lines)} 行，要求 {start}-{end}")
-if expect is not None and not lines[start - 1].startswith(expect):
-    sys.exit(f"起始行不匹配，未做任何修改。\n实际: {lines[start-1][:120]}\n期望前缀: {expect}")
+if expect is not None:
+    got = lines[start - 1]
+    # 写 here-doc 时容易顺手把 $ { } 等转义，这里容忍多写的反斜杠
+    if not got.startswith(expect) and not got.startswith(expect.replace("\\", "")):
+        sys.exit(f"起始行不匹配，未做任何修改。\n实际: {got[:120]}\n期望前缀: {expect}")
 
 lines[start - 1:end] = new.rstrip("\n").split("\n")
 open(path, "w", encoding="utf-8").write("\n".join(lines))
