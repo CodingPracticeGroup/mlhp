@@ -922,7 +922,7 @@ print("- Equal-weighted balances both groups")
 print("- Group-stratified ensures proportional representation")
 ```
 
-Now simulate how the AI assistant (trained on aggregated style) serves different groups:
+接着模拟：用汇总出来的风格训练出的助手，服务不同群体时表现如何。
 
 ```{pyodide-python}
 #| echo: true
@@ -1852,31 +1852,31 @@ print(f"  → Fair outcome: both groups get similar quality papers")
 
 **结果解读**：
 
-1. **Process-fair allocation**: Equal bid weights. Seniors, who bid strategically on high-quality papers, get better assignments. Juniors, who bid less strategically, get worse papers. **Process is fair** (same rules) but **outcome is unfair** (systematic disparity).
+1. **过程公平的分配**：所有表态的权重相同。资深者更会把表态用在质量高的论文上（会策略性地表态），于是拿到更好的任务；资浅者不擅长策略性表态，拿到的论文就更差。**过程是公平的**（规则一样），但**结果不公平**（得到的任务质量差很多）。
 
-2. **Outcome-fair allocation**: Boost junior bids to compensate for less strategic bidding. Outcomes are equalized. But **process is "unfair"** (different groups treated differently) even though **outcome is fair** (equal results).
+2. **结果公平的分配**：给资浅者的表态加权，补偿他们不太会策略性表态这一点。结果被拉平了。但**过程看起来"不公平"**（两组被区别对待），尽管**结果是公平的**（两边拿到的任务质量相当）。
 
-**Key Insight**: Process and outcome fairness are **fundamentally in tension** when groups have unequal starting positions or differential access to strategic information.
+**关键洞见**：当各群体的起点不同、对策略性信息的掌握也不同时，过程公平与结果公平**本质上就是对立的**。
 
-**Design Principle**: Choose based on domain and stakes:
-- **Process fairness** in low-stakes domains where autonomy matters more than outcomes (entertainment, shopping)
-- **Outcome fairness** in high-stakes domains where systemic disparities must be corrected (hiring, credit, healthcare, education)
+**设计原则**：按领域与后果的轻重来选：
+- 在后果轻、自主比结果更要紧的领域（娱乐、购物），用**过程公平**。
+- 在后果重、必须纠正系统性差距的领域（招聘、信贷、医疗、教育），用**结果公平**。
 
-**Connection to Liberal vs. Illiberal** (@sec-liberal-illiberal):
-- Liberal assistance = process fairness (respect preferences)
-- Illiberal assistance = outcome fairness (adjust for better outcomes)
+**与自由主义／非自由主义的关系**（@sec-liberal-illiberal）：
+- 自由主义式的协助＝过程公平（尊重偏好）
+- 非自由主义式的协助＝结果公平（为更好的结果做调整）
 
-Same tension, different scale.
+同一个张力，只是尺度不同。
 
 ---
 
-**Summary of Section 7.3**: We formalized two fundamental fairness conflicts:
-- **Individual vs. group fairness**: Mathematically incompatible (Dwork et al.)
-- **Process vs. outcome fairness**: Philosophically incompatible in practice
+**上一节的小结**：我们把两组根本性的公平冲突写清楚了：
+- **个体公平与群体公平**：数学上不相容（Dwork 等人）
+- **过程公平与结果公平**：在实践中观念上不相容
 
-These aren't failures of engineering—they're **impossibility results**. No system satisfies all fairness criteria. You must choose which to prioritize, make that choice consciously, and be transparent about tradeoffs.
+这些都不是工程没做好，而是**不可能性结论**。没有系统能满足所有公平标准。你必须选定优先级，有意识地选定，并把取舍说清楚。
 
-Next, we provide eight concrete design principles for navigating these impossibilities in practice.
+接下来给出八条具体的设计原则，帮助你在现实中与这些不可能性共处。
 
 ## 面向公平偏好学习的设计原则 {#sec-design-principles}
 
