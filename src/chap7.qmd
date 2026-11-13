@@ -177,7 +177,7 @@ AI 系统越来越能干，它们做的事也就越来越难由人来评。语�
 
 **建议方法。**
 
-- Implement a Rasch or factor model (@sec-factor-models) with Fisher-information-based query selection (@sec-measurement, @sec-fisher-information).
+- 实现一个 Rasch 模型或因子模型（@sec-factor-models），配上基于 Fisher 信息的选题（@sec-measurement、@sec-fisher-information）。
 - 在选下一个要呈现的比较时，对比 A-最优、D-最优、E-最优这几种准则（@sec-factor-models-active）。
 - 从至少 10 位参与者那里收集真实的偏好数据（或者用一个贴近实际的模拟器），测出达到同样预测精度需要少问多少问题。
 - 可选的扩展：用 @sec-pairwise-active. 里讲的主动配对选择框架，推广到两两比较的场景。
@@ -190,7 +190,7 @@ AI 系统越来越能干，它们做的事也就越来越难由人来评。语�
 
 **建议方法。**
 
-- Implement at least two dueling bandit algorithms from Chapter 4, such as RUCB or Double Thompson Sampling, targeting different winner concepts (Condorcet vs. Borda, @sec-borda).
+- 至少实现第 4 章里的两种对决老虎机算法，例如 RUCB 或双重汤普森采样，分别针对不同种"胜者"概念（孔多塞与博尔达，@sec-borda）。
 - 为 A/B 测试这个场景定义合适的遗憾指标，并跟踪累计遗憾随时间的变化。
 - 模拟一个贴近实际的 A/B 测试场景，包含 5–10 个方案与偏好各异的（用 @sec-factor-models 的混合模型来生成合成的）。
 - 与"均匀随机配对"以及标量替代指标上的标准汤普森采样（@sec-thompson-sampling）比较样本效率。
@@ -203,7 +203,7 @@ AI 系统越来越能干，它们做的事也就越来越难由人来评。语�
 
 **建议方法。**
 
-- Implement the GP-based PBO framework from Chapter 4, including a Gaussian Process preference model with Laplace approximation (@sec-gp-inference) and an acquisition function (Expected Improvement of the Copeland score or Thompson Sampling).
+- 实现第 4 章基于高斯过程的偏好式贝叶斯优化框架，包括带拉普拉斯近似的高斯过程偏好模型（@sec-gp-inference），以及一个采集函数（对 Copeland 得分的期望改进，或者汤普森采样）。
 - 选一个参数空间是连续的设计领域（例如配色方案、字体排版、音频均衡设置，或者程序生成的场景）。
 - 从至少 5 位参与者那里收集偏好反馈，跟踪他们是否逐渐收敛到自己喜欢的设计。
 - 把 PBO 与随机搜索比较；如果有标量的替代指标，再与标准的贝叶斯优化比较。
@@ -216,7 +216,7 @@ AI 系统越来越能干，它们做的事也就越来越难由人来评。语�
 
 **建议方法。**
 
-- Use a publicly available multi-annotator preference dataset (e.g., from Chatbot Arena or similar).
+- 使用一份公开可得的多标注员偏好数据集（例如 Chatbot Arena 或类似的数据集）。
 - 从原始标注出发，分别算出博尔达排名、孔多塞排名（如果存在）、以及多数票排名。
 - 训练一个 DPO 模型，把它隐含的排名与每一种社会选择结果作比较。
 - 分析几种排名出现分歧的情形：这些情形里，标注员的偏好是真的各不相同，还是数据只是噪声大？可以用 @sec-factor-models 的混合模型框架来检验是否存在潜在的偏好群体。
