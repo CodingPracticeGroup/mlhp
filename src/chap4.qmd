@@ -1,5 +1,5 @@
 ---
-title: Decisions
+title: 决策
 format:
   html:
     include-after-body:
@@ -37,101 +37,101 @@ filters:
 
 
 ::: {.callout-note}
-## Intended Learning Outcomes
+## 学习目标
 
-By the end of this chapter you will be able to:
+学完本章，你将能够：
 
-- **Distinguish** the measurement perspective (reducing uncertainty) from the reward maximization perspective (managing uncertainty) in preference learning.
-- **Derive** Thompson Sampling for linear objectives using Laplace approximation to handle intractable posteriors.
-- **Extend** Thompson Sampling to nonlinear objectives using Gaussian Processes and GP classification.
-- **Define** regret (strong, weak, and Bayesian) in dueling bandit settings and explain when each notion is appropriate.
-- **Compare** winner concepts—Condorcet, Borda, and Von Neumann winners—and identify when they may diverge.
-- **Apply** acquisition functions (Uniform, Epsilon-Greedy, UCB, Pure Exploration, qEUBO) for sequential decision-making with preference feedback.
-- **Analyze** regret bounds for Preferential Bayesian Optimization algorithms and understand their convergence guarantees.
-- **Implement** Thompson Sampling and dueling bandit algorithms in practical settings.
-- **(Optional)** **Derive** the policy gradient theorem and explain how REINFORCE and GRPO use it for preference-based optimization.
+- **分清**偏好学习里的两种立场：测量立场（减少不确定性）与奖励最大化立场（管理不确定性）。
+- **推导**线性目标下的汤普森采样（Thompson Sampling），并用拉普拉斯近似处理算不动的后验。
+- **推广**汤普森采样到非线性目标：改用高斯过程与高斯过程分类。
+- **定义**对决老虎机（dueling bandit）设定下的遗憾（regret）——强遗憾、弱遗憾与贝叶斯遗憾，并说明各自适合什么场合。
+- **比较**几种"胜者"概念——孔多塞胜者、博尔达胜者、冯·诺依曼胜者——并说清它们什么时候会不一致。
+- **使用**若干采集函数（均匀采样、ε-贪心、UCB、纯探索、qEUBO）在只有偏好反馈的情况下做序贯决策。
+- **分析**偏好型贝叶斯优化算法的遗憾上界，理解它的收敛保证。
+- **实现**汤普森采样与对决老虎机算法，用到实际问题里。
+- **（选学）** **推导**策略梯度定理，并解释 REINFORCE 与 GRPO 如何用它来做基于偏好的优化。
 
 :::
 
-::: {.callout-tip title="Suggested Lecture Plan" collapse="true"}
-This chapter can be covered in four 50-minute lectures:
+::: {.callout-tip title="建议课时安排" collapse="true"}
+本章内容可以安排在四节 50 分钟的课上讲完：
 
-**Lecture 1** (Sections 4.1–4.2): Thompson Sampling
+**第 1 课时**（4.1–4.2 节）：汤普森采样
 
-- Motivation: From measurement to decision-making (10 min)
-- Exploration-exploitation tradeoff (10 min)
-- Thompson Sampling with Laplace approximation (linear case) (15 min)
-- Code demo: Linear Thompson Sampling simulation (15 min)
+- 引子：从测量到决策（10 分钟）
+- 探索与利用的权衡（10 分钟）
+- 用拉普拉斯近似的汤普森采样（线性情形）（15 分钟）
+- 代码演示：线性汤普森采样的模拟（15 分钟）
 
-**Lecture 2** (Sections 4.2–4.3): GP Thompson Sampling and Dueling Bandits
+**第 2 课时**（4.2–4.3 节）：高斯过程汤普森采样与对决老虎机
 
-- Gaussian Process Thompson Sampling (nonlinear case) (20 min)
-- From multi-armed bandits to dueling bandits (15 min)
-- Regret definitions and winner concepts (15 min)
+- 高斯过程汤普森采样（非线性情形）（20 分钟）
+- 从多臂老虎机到对决老虎机（15 分钟）
+- 遗憾的定义与各种"胜者"概念（15 分钟）
 
-**Lecture 3** (Sections 4.3–4.4): Dueling Bandit Algorithms and Applications
+**第 3 课时**（4.3–4.4 节）：对决老虎机算法与应用
 
-- Acquisition functions: Uniform, ε-Greedy, UCB (10 min)
-- Interleaved Filter algorithm (15 min)
-- DBGD, Sparring EXP4, Feel-good Thompson Sampling (10 min)
-- Case studies: LLM response selection and clinical trials (15 min)
+- 采集函数：均匀采样、ε-贪心、UCB（10 分钟）
+- 交错筛选（Interleaved Filter）算法（15 分钟）
+- DBGD、Sparring EXP4、乐观汤普森采样（10 分钟）
+- 案例：大语言模型的回答选择与临床试验（15 分钟）
 
-**Lecture 4** (Sections 4.5 and 4.7): Preferential Bayesian Optimization and CIRL
+**第 4 课时**（4.5 与 4.7 节）：偏好型贝叶斯优化与合作逆强化学习
 
-- PBO problem formulation and Copeland scores (15 min)
-- Acquisition functions: qEUBO, Pure Exploration, POP-BO (15 min)
-- CIRL: From passive oracles to active human agents (15 min)
-- Discussion: Choice architecture and responsible deployment (5 min)
+- 偏好型贝叶斯优化的问题设定与 Copeland 分数（15 分钟）
+- 采集函数：qEUBO、纯探索、POP-BO（15 分钟）
+- 合作逆强化学习：从被动的"神谕"到会主动行动的人（15 分钟）
+- 讨论：选择架构与负责任的部署（5 分钟）
 
-**Lecture 5 (Optional)** (Section 4.6): RL Foundations for Preference Optimization
+**第 5 课时（选学）**（4.6 节）：偏好优化的强化学习基础
 
-- MDP formulation and the LLM generation MDP (10 min)
-- Policy gradient theorem derivation (15 min)
-- REINFORCE, baselines, and variance reduction (10 min)
-- GRPO: From RLHF to group-relative optimization (15 min)
+- 马尔可夫决策过程的表述，以及语言模型生成过程的马尔可夫决策过程（10 分钟）
+- 策略梯度定理的推导（15 分钟）
+- REINFORCE、基线与方差缩减（10 分钟）
+- GRPO：从人类反馈强化学习到组内相对优化（15 分钟）
 :::
 
-## Chapter Overview
+## 本章内容安排
 
-Chapter 1 developed models for how preferences arise from latent utilities. Chapter 2 showed how to estimate these utilities from observed data. Chapter 3 addressed how to *collect* data efficiently through active query selection. This chapter tackles the complementary question: **given uncertainty about user preferences, how should we choose actions to maximize reward?**
+第 1 章建立了"偏好如何从潜在效用产生"的模型，第 2 章讲了怎样从观测数据里估计这些效用，第 3 章解决了如何用主动选题高效地*收集*数据。本章要回答的是一个与之互补的问题：**在对用户偏好还不确定的情况下，我们该怎样选行动，才能让奖励最大？**
 
-The shift is subtle but important. Chapter 3's measurement perspective treats uncertainty as something to be *reduced*---the goal is to learn the preference function as accurately as possible. This chapter's reward maximization perspective treats uncertainty as something to be *managed*---the goal is to make good decisions *now*, even with incomplete knowledge. Consider an LLM serving system: it must decide which response to show each user, balancing exploitation (showing responses it believes are good) against exploration (trying novel responses to learn what users prefer).
+这一步转变很细微，但很重要。第 3 章的测量立场把不确定性看成需要被*消除*的东西——目标是把偏好函数学得尽可能准。本章的奖励最大化立场则把不确定性看成需要被*管理*的东西——目标是**当下**就做出好决策，哪怕了解并不完整。设想一个提供大语言模型服务的系统：它要决定给每位用户展示哪个回答，既要在利用（展示它认为好的回答）和探索（试一些新回答，弄清用户喜欢什么）之间权衡。
 
-**Chapter Structure.** We build from simple to complex settings:
+**本章结构。** 我们由简到繁逐个场景推进：
 
-1. **Thompson Sampling** (@sec-thompson-sampling): Linear and nonlinear (GP) approaches to sequential decision-making with preference feedback
-2. **Dueling Bandits** (@sec-borda): When actions can only be compared pairwise, introducing regret notions and winner concepts (Condorcet, Borda, von Neumann)
-3. **Applications**: Case studies connecting these methods to LLM alignment and clinical trials
-4. **Preferential Bayesian Optimization**: Advanced acquisition functions (qEUBO, POP-BO) with convergence guarantees
-5. **RL Foundations (Optional)** (@sec-rl-foundations): MDP formulation, the policy gradient theorem, and GRPO for preference optimization
-6. **Human-Agent Cooperation (CIRL)**: Moving beyond passive oracles to model humans as strategic agents
+1. **汤普森采样**（@sec-thompson-sampling）：在只有偏好反馈时如何做序贯决策，包括线性和非线性（高斯过程）两种做法
+2. **对决老虎机**（@sec-borda）：当行动只能两两比较时怎么办，由此引出遗憾的几种定义和各种"胜者"概念（孔多塞、博尔达、冯·诺依曼）
+3. **应用**：把上面这些方法接到大语言模型对齐与临床试验上的两个案例
+4. **偏好型贝叶斯优化**：带收敛保证的进阶采集函数（qEUBO、POP-BO）
+5. **强化学习基础（选学）**（@sec-rl-foundations）：马尔可夫决策过程的表述、策略梯度定理，以及用于偏好优化的 GRPO
+6. **人机协作（合作逆强化学习）**：不再把人当成被动的神谕，而是把人当作有策略的行动者
 
-**Connections to Prior Chapters:**
+**与前几章的联系：**
 
-| Concept | Chapters 1–3 | This Chapter |
+| 概念 | 第 1–3 章 | 本章 |
 |---------|-------------|--------------|
-| Bradley-Terry model | Likelihood, MLE, Fisher info | Dueling bandit preference model, LLM selection |
-| Laplace approximation | GP posterior inference | Thompson Sampling posterior |
-| Acquisition functions | D-optimal, info gain (Ch. 3) | UCB, qEUBO, Pure Exploration |
-| DPO / reward learning | Objective function, ADPO (Ch. 3) | Reward maximization under uncertainty |
-| Policy gradient / GRPO | RLHF pipeline (Ch. 1) | Full derivation, GRPO algorithm (Optional) |
-| Winner concepts | — | Condorcet, Borda, von Neumann → reappear in Ch. 5 |
+| Bradley-Terry 模型 | 似然、最大似然估计、费雪信息 | 对决老虎机的偏好模型、语言模型的回答选择 |
+| 拉普拉斯近似 | 高斯过程后验推断 | 汤普森采样用的后验 |
+| 采集函数 | D 最优、信息增益（第 3 章） | UCB、qEUBO、纯探索 |
+| DPO / 奖励学习 | 目标函数、ADPO（第 3 章） | 不确定条件下的奖励最大化 |
+| 策略梯度 / GRPO | 人类反馈强化学习流程（第 2 章） | 完整推导、GRPO 算法（选学） |
+| "胜者"概念 | — | 孔多塞、博尔达、冯·诺依曼 → 第 5 章还会再出现 |
 
-## The Reward Maximization under Uncertainty Problem
+## 不确定条件下的奖励最大化问题
 
-::: {.callout-tip title="Historical Note: Thompson Sampling"}
-Thompson Sampling dates back to 1933, when William Thompson proposed it for clinical trials. For decades it was largely forgotten, overshadowed by frequentist methods like UCB (Upper Confidence Bound). Its rediscovery in the 2010s, particularly for online advertising and recommendation systems, revealed that this simple Bayesian algorithm often outperforms more complex alternatives. The key insight: **sample a plausible world from your beliefs, then act optimally within it**.
+::: {.callout-tip title="历史注记：汤普森采样"}
+汤普森采样最早可以追溯到 1933 年：William Thompson 提出它是为了做临床试验。此后几十年它几乎被人忘掉，被 UCB（上置信界，Upper Confidence Bound）这类频率学派的方案盖过了风头。到 2010 年代，随着在线广告和推荐系统的兴起，人们重新发现了它——结果发现这个简单的贝叶斯算法常常胜过那些更复杂的办法。关键的思路只有一句：**从你的信念里抽出一个可能的世界，然后在这个世界里做最优的选择**。
 :::
 
-The fundamental tension in sequential decision-making is the **exploration-exploitation tradeoff**:
+序贯决策中最根本的张力，是**探索与利用的权衡**：
 
-- **Exploitation**: Choose actions believed to be good based on current knowledge
-- **Exploration**: Try uncertain actions to gain information for better future decisions
+- **利用**：按现有的知识，选那些看起来好的行动
+- **探索**：试那些没把握的行动，为以后的决策换来信息
 
-A purely exploitative strategy may miss superior options it never tried. A purely explorative strategy wastes resources on suboptimal choices. Effective algorithms balance both.
+只用利用的策略，可能一辈子错过从没试过的更好选项；只用探索的策略，则把资源浪费在明知次等的选择上。有效的算法要两头兼顾。
 
-::: {.callout-warning title="Assumption: Stationary Utilities"}
-The bandit framework assumes item utilities are **fixed over time**: the reward distribution for each arm does not change across rounds. All regret bounds in this chapter rely on this stationarity assumption. In practice, preferences drift---users' tastes evolve, LLM responses improve through training, and the item set itself may change (new products, new model versions). When utilities are non-stationary, standard regret bounds no longer apply, and algorithms must explicitly account for drift, for instance by discounting old observations (as the Elo K-factor does implicitly in Chapter 2) or by using non-stationary bandit algorithms with sliding windows or change-point detection.
+::: {.callout-warning title="假设：效用是平稳的"}
+老虎机框架假定物品的效用**不随时间变化**：每一臂的奖励分布在各轮之间保持不变。本章所有遗憾上界都依赖这条平稳性假设。现实中偏好会漂移——用户的口味会变，语言模型的回答质量随训练在变，物品集合本身也会变（新产品、新模型版本）。效用不平稳时，标准的遗憾上界就不再成立，算法必须显式地处理漂移，例如给早先的观测打折（第 2 章的 Elo K 因子其实隐含地做了这件事），或者使用带滑动窗口、变点检测的不平稳老虎机算法。
 :::
 
 Each user $i$ interacts with a set of available items indexed by $j$, each characterized by a known parameter vector $V_j \in \mathbb{R}^K$. The user's utility function is $H_{ij} = h_i(V_j),$ where $h_i: \mathbb{R}^K \rightarrow \mathbb{R}$ maps item features to latent utility. We only observe noisy or partial feedback, such as item-wise or pairwise responses. The agent's objective is to select items sequentially to maximize reward.
