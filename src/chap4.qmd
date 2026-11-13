@@ -2353,30 +2353,30 @@ $$ {#eq-rl-objective}
 策略 $\pi_\theta(a_t \mid s_t)$ 就是语言模型本身：给定上文，它输出下一个 token 上的分布。
 :::
 
-The next section introduces CIRL, which extends this single-agent MDP to a **two-player cooperative game** where a human and robot jointly optimize a shared reward.
+下一节的 CIRL 会把这个单智能体 MDP 推广成一个**双人合作博弈**：人和机器共同优化一份共享的奖励。
 
-### Value Functions and the Advantage
+### 价值函数与优势
 
-To understand *how much better* one action is compared to others, we define three related quantities.
+要弄清楚某个行动比别的行动*好多少*，需要先定义三个彼此相关的量。
 
-The **state-value function** measures the expected return starting from state $s$ and following policy $\pi$:
+**状态价值函数（state-value function）** 度量的是：从状态 $s$ 出发、此后一直按策略 $\pi$ 行事，能拿到的期望回报：
 $$
 V^\pi(s) = \mathbb{E}_{\tau \sim \pi}\left[\sum_{t=0}^{T} \gamma^t R(s_t, a_t) \;\middle|\; s_0 = s\right]
 $$ {#eq-rl-value-function}
 
-The **action-value function** additionally conditions on taking a specific first action:
+**动作价值函数（action-value function）** 在此基础上再多一个条件：第一步必须采取某个指定的行动：
 $$
 Q^\pi(s, a) = \mathbb{E}_{\tau \sim \pi}\left[\sum_{t=0}^{T} \gamma^t R(s_t, a_t) \;\middle|\; s_0 = s, a_0 = a\right]
 $$ {#eq-q-function}
 
-The **advantage function** is the difference:
+**优势函数（advantage function）** 就是两者之差：
 $$
 A^\pi(s, a) = Q^\pi(s, a) - V^\pi(s)
 $$ {#eq-advantage}
 
-The advantage tells us how much better action $a$ is compared to the *average* action under the current policy at state $s$. By definition, $\mathbb{E}_{a \sim \pi(\cdot|s)}[A^\pi(s,a)] = 0$---some actions have positive advantage (better than average) and others negative. This quantity will reappear as the key ingredient in GRPO's group-relative baseline.
+优势函数告诉我们：在状态 $s$ 下，行动 $a$ 比当前策略下的*平均*行动好多少。按定义有 $\mathbb{E}_{a \sim \pi(\cdot|s)}[A^\pi(s,a)] = 0$——有的行动优势为正（好于平均），有的为负。GRPO 的组相对基线，关键成分正是这个量，后面还会再遇到它。
 
-These quantities satisfy the **Bellman equation**, which recursively relates the value of a state to the values of its successors:
+这些量满足**贝尔曼方程（Bellman equation）**：它把一个状态的价值与后继状态的价值递归地联系起来：
 $$
 V^\pi(s) = \mathbb{E}_{a \sim \pi(\cdot|s)}\left[R(s,a) + \gamma \, \mathbb{E}_{s' \sim P(\cdot|s,a)}[V^\pi(s')]\right]
 $$ {#eq-bellman}
