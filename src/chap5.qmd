@@ -111,20 +111,20 @@ filters:
 
 5. **机制设计**（@sec-mechanism-design–@sec-mip）：拍卖、VCG 机制、最优拍卖设计、同行预测，以及激励相容的在线学习。
 
-## Social Choice Theory {#sec-aggregation}
+## 社会选择理论 {#sec-aggregation}
 
-In many applications, human preferences must be aggregated across multiple individuals to determine a collective decision or ranking. This process is central to social choice theory, which provides a mathematical foundation for preference aggregation. Unlike individual preference modeling, which focuses on how a single person makes decisions, social choice theory addresses the challenge of combining multiple preference profiles into a single coherent outcome. A social welfare function (SWF) takes as input each individual's preference ranking over a set of alternatives and produces a social ranking of those alternatives. A related concept is a social choice function (SCF), which selects a single winning alternative given individuals’ preferences. Many voting rules can be seen as social choice functions that aim to reflect the group’s preferences. Formally, let $N=\{1,2,\dots,n\}$ be a set of $n$ voters (agents) and $A=\{a_1,\dots,a_m\}$ a set of $m$ alternatives (with $m \ge 3$). Each voter $i$ has a preference order $\succ_i$ over $A$. A social choice function is a mapping $f: (\succ_1,\dots,\succ_n)\mapsto A$ that picks a winning alternative for each possible profile of individual preferences. A social welfare function is a mapping that produces a complete societal ranking $\succ^*$ of the alternatives. The central question is: can we design an aggregation rule that faithfully represents individual preferences while satisfying certain fairness or rationality axioms?
+很多应用都需要把许多人的偏好汇总起来，得出一个集体的决定或排序。这件事正是社会选择理论（social choice theory）研究的核心——它给"汇总偏好"提供了数学基础。前面讲的个人偏好模型关心的是一个人怎么做决定；社会选择理论面对的难题则是：怎样把许多份偏好档案合成一个说得通的结果。**社会福祉函数（social welfare function, SWF）** 的输入是每个人对一组候选项的排序，输出是这些候选项的一个"社会排序"。与之相近的概念是**社会选择函数（social choice function, SCF）**：给定每个人的偏好，它直接选出一个获胜的候选项。许多投票规则都可以看成社会选择函数，目的是让结果尽量反映群体的偏好。形式化地说：设 $N=\{1,2,\dots,n\}$ 是 $n$ 位选民（主体）的集合，$A=\{a_1,\dots,a_m\}$ 是 $m$ 个候选项的集合（其中 $m \ge 3$）。每位选民 $i$ 对 $A$ 有一个偏好次序 $\succ_i$。社会选择函数就是一个映射 $f: (\succ_1,\dots,\succ_n)\mapsto A$：对每一份个人偏好组成的档案，它都挑出一个获胜候选项。社会福祉函数则是产生一个完整的社会排序 $\succ^*$ 的映射。核心问题是：能不能设计出一种汇总规则，既如实反映每个人的偏好，又满足某些公平性或合理性公理？
 
-Many common voting rules illustrate different methods of aggregation, each with its own merits and vulnerabilities:
+常见的几种投票规则恰好展示了不同的汇总思路，每一种都有自己的可取之处和薄弱之处：
 
-- Plurality: Each voter names their top choice; the alternative with the most votes wins.
-- Borda Count: Voters rank all alternatives, and points are assigned based on the position in each ranking. For example, with $m$ alternatives, a voter’s top-ranked alternative gets $m-1$ points, the second-ranked gets $m-2$, and so on down to 0. The Borda score of an alternative is the sum of points from all voters, and the winner is the alternative with the highest total score.
-- Single Transferable Vote (STV): Voters rank choices, and the count proceeds in rounds. In each round, the alternative with the fewest votes is eliminated and those votes are transferred to the next preferred remaining alternative on each ballot, until one candidate has a majority.
-- Condorcet Methods: These look for a candidate that wins in all pairwise majority contests against other alternatives (the Condorcet winner), if such an alternative exists.
+- 简单多数制（Plurality）：每位选民只写自己最想要的那一个，得票最多的候选项获胜。
+- 博尔达计分法（Borda Count）：选民对所有候选项排出完整次序，再按每个人排在第几位来给分。例如共有 $m$ 个候选项时，某位选民的第一名得 $m-1$ 分，第二名得 $m-2$ 分，依次递减到 0 分。一个候选项的博尔达分数就是它从所有选民那里得到的分数之和，总分最高者获胜。
+- 可转移单票制（Single Transferable Vote, STV）：选民排出完整次序，计票一轮一轮进行。每一轮先淘汰当前得票最少的候选项，把这些票转移到对应选票上下一个还活着的候选项，直到某一位拿到过半票数。
+- 孔多塞方法：如果存在某个候选项在两两多数比较中赢过所有其他候选项（即孔多塞胜者），就把它选出来。
 
-However, preference aggregation is not always straightforward. The Condorcet paradox illustrates that majority preferences can be cyclic (rock-paper-scissors style), so that no single alternative is majority-preferred to all others, violating transitivity. Different voting rules can yield different winners on the same profile, highlighting how the choice of rule influences the outcome.
+不过，汇总偏好并不总是顺顺当当的事。孔多塞悖说明：多数人的偏好可能成环（像石头剪刀布那样），于是没有任何一个候选项能在多数比较中赢过所有其他候选项，传递性也就被破坏了。同一份偏好档案，用不同的投票规则会选出不同的胜者——这正说明规则的选择会直接左右结果。
 
-The following code demonstrates how the same set of voter preferences can produce different winners under different voting rules—a phenomenon that underscores why the choice of aggregation method is itself a value judgment.
+下面这段代码演示的是：同一组选民偏好，换一种投票规则就可能选出不同的胜者——这件事本身就说明，选哪种汇总方法其实是一种价值判断。
 
 ```{pyodide-python}
 #| autorun: true
