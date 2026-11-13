@@ -2101,70 +2101,70 @@ $$ {#eq-fairness-constrained-optimization}
 
 **小结**：这八条原则给的是在不可能性结论之下仍能把系统做得更公平的具体做法。没有哪个系统是完美公平的，但有意识地照着做，处境不利群体的处境会有明显改善。
 
-## Quick Check
+## 快问快答
 
-Test your understanding before proceeding to the exercises.
+在做课末练习之前，先用这几道题检验一下自己的理解。
 
-1. A company collects RLHF annotations from crowdworkers paid per comparison. Explain how the inversion problem applies here: what aspects of annotator *behavior* might not reflect their true *preferences*?
+1. 一家公司向按条计酬的众包标注员收集 RLHF 标注。请说明这里反演问题会怎样出现：标注员的*行为*里，有哪些方面其实并不反映他们真正的*偏好*？
 
-2. Individual fairness says similar entities should be treated similarly; group fairness says protected groups should have equal outcomes. Construct a concrete example where satisfying one violates the other.
+2. 个体公平说"相似的个体要被相似地对待"，群体公平说"受保护的群体在结果上要平等"。请构造一个具体的例子，使得满足其中一条就会破坏另一条。
 
-3. In the four-stage pipeline ($\mathcal{E} \to \mathcal{L} \to \mathcal{A} \to \mathcal{D}$), explain how a 10% bias at the elicitation stage could compound into a larger gap after one feedback cycle.
+3. 在四阶段流水线（$\mathcal{E} \to \mathcal{L} \to \mathcal{A} \to \mathcal{D}$）里，说明征询阶段 10% 的偏差怎样经过一轮反馈回路，变成一个更大的差距。
 
-4. When is illiberal assistance (overriding user preferences) justified according to Sen's framework? Give an example involving an AI assistant.
+4. 按森的框架，什么时候非自由主义式的协助（替用户推翻他的偏好）才站得住？请举一个涉及 AI 助手的例子。
 
-## Summary
+## 本章小结
 
-- Every technical choice in a preference learning system---who gets queried, what model structure is assumed, how preferences are aggregated, when to defer vs. override---embeds a **value judgment** about whose preferences matter and how they should be weighted.
-- The **four-stage pipeline** ($\mathcal{E} \to \mathcal{L} \to \mathcal{A} \to \mathcal{D}$) provides a systematic framework for auditing where value choices enter: elicitation determines who is heard, learning determines what structures are imposed, aggregation determines how voices are combined, and decision determines when to act.
-- The **inversion problem** is fundamental: observed behavior (clicks, ratings, comparison choices) does not equal underlying preferences. Fatigue, time constraints, cultural norms, and interface design systematically distort behavior, and these distortions disproportionately affect overburdened groups.
-- **Individual fairness** (similar entities treated similarly) and **group fairness** (protected groups have equal outcomes) are **fundamentally incompatible**---satisfying one can violate the other, forcing explicit tradeoffs rather than seeking a single "fair" solution.
-- **Unfairness compounds** across the pipeline: small biases at each stage multiply through feedback loops, where improved service for well-represented groups generates more data, further improving their service while neglecting others.
-- Sen's distinction between **nosy and non-nosy preferences** determines when systems should respect stated preferences (liberal assistance) versus override them (illiberal assistance), providing a principled framework for paternalism in AI.
-- The chapter's **eight design principles**---from making value tradeoffs explicit to auditing for feedback loops---provide concrete, actionable guidance for building fairer preference learning systems despite impossibility results.
+- 偏好学习系统里的每个技术选择——去问谁、假定什么模型结构、怎么汇总偏好、什么时候听用户的什么时候替他做主——都含着一个**价值判断**：谁的偏好算数，各算多少。
+- **四阶段流水线**（$\mathcal{E} \to \mathcal{L} \to \mathcal{A} \to \mathcal{D}$）给了一个可以按步骤自查的框架，看价值选择从哪里进来：征询决定谁的声音被听到，学习决定强加了什么结构，汇总决定这些声音怎样合成一个，决策决定什么时候付诸行动。
+- **反演问题**是根本性的：看得见的行为（点击、评分、比较选择）不等于背后的偏好。疲劳、时间紧张、文化规范、界面设计都会系统性地扭曲行为，而这些扭曲对负担过重的群体影响尤其大。
+- **个体公平**（相似的个体被相似地对待）与**群体公平**（受保护的群体在结果上平等）**根本不相容**——满足一条可能就要破坏另一条，所以只能做明确的取舍，而不是去找那个唯一的"公平解"。
+- **不公平会叠加**：每个阶段的小偏差，会通过反馈回路相互放大——样本充足的群体被服务得更好，就产生更多数据，服务更好，而其他群体继续被冷落。
+- 森关于**"管得宽"与非"管得宽"偏好**的区分，给出了系统该尊重用户说出来的偏好（自由主义式的协助）、还是该替他推翻（非自由主义式的协助）的判断依据，为 AI 中的家长主义提供了一个有原则的框架。
+- 本章的**八条设计原则**——从把价值取舍摆到明面上，到审计反馈回路——给的是具体可操作的做法：即使不可能性结论摆在那里，系统仍然可以做得更公平。
 
-## Exercises {#sec-exercises}
+## 练习 {#sec-exercises}
 
-These exercises deepen understanding of the fairness concepts, tradeoffs, and impossibilities introduced in this chapter. Difficulty levels: * (easy), ** (medium), *** (hard).
+下面这些练习用来加深理解本章介绍的公平概念、取舍与不可能性。难度分为：*（基础）、**（进阶）、***（高级）。
 
-### Exercise 1: Individual vs. Group Fairness Conflict (*)
+### 练习 1：个体公平与群体公平的冲突（*）
 
-Consider a paper-reviewer matching scenario:
-- 80 papers from Subfield A (mainstream topic with 60 expert reviewers available)
-- 20 papers from Subfield B (small topic with 10 expert reviewers available)
-- Each paper needs 3 reviewers
+考虑一个论文—审稿人的匹配场景：
+- 子领域 A 有 80 篇论文（主流主题，能找到 60 位对口专家）
+- 子领域 B 有 20 篇论文（小众主题，只有 10 位对口专家）
+- 每篇论文需要 3 位审稿人
 
-**Individual fairness constraint**: Papers on similar topics should get reviewers with similar expertise. Formally, if topics $d(p_i, p_j) \leq \epsilon$, then expertise quality $d(r(p_i), r(p_j)) \leq \delta$.
+**个体公平的约束**：主题相近的论文，应当配上专业程度相近的审稿人。形式化地写：若主题上 $d(p_i, p_j) \leq \epsilon$，则审稿人的专业程度满足 $d(r(p_i), r(p_j)) \leq \delta$。
 
-**Group fairness constraint**: Papers from Subfield A and B should receive equally expert reviewers on average. Formally, $\mathbb{E}[\text{expertise} \mid \text{Subfield A}] = \mathbb{E}[\text{expertise} \mid \text{Subfield B}]$.
+**群体公平的约束**：来自子领域 A 与 B 的论文，平均而言应当配上专业程度相同的审稿人。形式化地写：$\mathbb{E}[\text{expertise} \mid \text{Subfield A}] = \mathbb{E}[\text{expertise} \mid \text{Subfield B}]$。
 
-**(a)** Prove that these constraints are **incompatible** in this setting. Show that satisfying individual fairness (similar papers get similar reviewers) necessarily violates group fairness (Subfield B papers get less-expert reviewers on average due to limited expert pool).
+**(a)** 证明在这个场景里这两条约束**不相容**：说明满足个体公平（相似的论文配相似的审稿人）必然会破坏群体公平（因为专家池子就那么大，子领域 B 的论文平均只能配上专业程度较低的审稿人）。
 
-**(b)** Propose a modified fairness criterion that is achievable. For example, could you satisfy "individual fairness within each subfield" while allowing between-group disparities? Formalize your proposal.
+**(b)** 提出一个改过的、可以做到的公平标准。例如：能不能在每个子领域**内部**满足个体公平，同时允许子领域**之间**存在差距？请把你的方案形式化写出来。
 
 ---
 
-### Exercise 2: Inversion Problem Formalization (**)
+### 练习 2：把反演问题形式化（**）
 
-Let $B$ denote observed behavior (e.g., review length in words), $M$ denote mental state (true expertise), and $C$ denote context (available time). Consider two reviewer groups:
+用 $B$ 表示观察到的行为（例如审稿意见的字数），$M$ 表示心理状态（真实的专业水平），$C$ 表示情境（可用于审稿的时间）。考虑两组审稿人：
 
-**Group 1 (juniors)**: Often overburdened
-- $P(B \geq 500 \mid M = \text{high}, C = \text{low time}) = 0.3$  (high expertise but limited time → short review)
+**群体 1（资浅者）**：常常负担过重
+- $P(B \geq 500 \mid M = \text{high}, C = \text{low time}) = 0.3$  （水平很高但时间少 → 写得短）
 - $P(B \geq 500 \mid M = \text{low}, C = \text{low time}) = 0.1$
-- $P(C = \text{low time}) = 0.7$  (juniors have less time 70% of the time)
+- $P(C = \text{low time}) = 0.7$  （资浅者有 70% 的时间都很紧张）
 
-**Group 2 (seniors)**: More flexible time
-- $P(B \geq 500 \mid M = \text{high}, C = \text{good time}) = 0.9$  (high expertise + time → long review)
+**群体 2（资深者）**：时间更灵活
+- $P(B \geq 500 \mid M = \text{high}, C = \text{good time}) = 0.9$  （水平高又有时间 → 写得长）
 - $P(B \geq 500 \mid M = \text{low}, C = \text{good time}) = 0.2$
-- $P(C = \text{good time}) = 0.9$  (seniors have good time 90% of the time)
+- $P(C = \text{good time}) = 0.9$  （资深者有 90% 的时间比较宽裕）
 
-Assume $P(M = \text{high}) = 0.6$ for both groups (similar expertise distributions).
+设两组中 $P(M = \text{high}) = 0.6$ 相同（专业水平的分布是一样的）。
 
-**(a)** Compute $P(M = \text{high} \mid B \geq 500)$ for each group using Bayes' rule. Show that even with equal expertise, seniors appear more expert when measured by behavior.
+**(a)** 用贝叶斯公式分别算出每组的 $P(M = \text{high} \mid B \geq 500)$。说明：即使两组的专业水平相同，按行为来衡量时，资深者看起来更内行。
 
-**(b)** If we use **productivity-based sampling** (query probability proportional to $P(B \geq 500)$), compute the query ratio between seniors and juniors. How much more do we query seniors?
+**(b)** 如果用**按产出采样**（被问的概率与 $P(B \geq 500)$ 成正比），算出资深者与资浅者的被问比例。我们会多问资深者多少？
 
-**(c)** Derive a **correction factor** to infer $M$ from $B$ that accounts for differential context $C$ across groups. Under what conditions is this correction **identifiable** from data?
+**(c)** 推出一个**校正因子**，用来从 $B$ 推断 $M$ 时把各群体情境 $C$ 的差异考虑进去。这个校正在什么条件下才能从数据中**识别**出来？
 
 ---
 
