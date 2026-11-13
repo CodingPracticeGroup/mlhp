@@ -88,7 +88,7 @@ filters:
 - **第 4 章**处理偏好不确定下的序贯决策，前提是假设我们知道要追求什么样的结果。
 - **第 5 章**讲了汇总机制，提供了技术工具，但没有回答规范性的问题：该汇总谁的偏好。
 
-This chapter provides the missing normative framework: **whose preferences should we learn from, and how should we weigh them?**
+本章要补上正缺的那一层规范性框架：**我们该向谁的偏好学习，又该给他们各分多少权重？**
 
 每一个技术选择里都含着价值判断。选哪种主动学习策略，决定了*该问谁*（要效率还是要代表性）。假定独立无关备选（IIA）成立，就等于对*什么样的偏好才算合理*施加了结构（要"理性"的偏好，还是要符合真实的心理）。选定 DPO 的参考策略 $\pi_{\text{ref}}$，决定了*谁的偏好更有分量*（按使用量大的用户为主，还是一视同仁）。决定什么时候推翻用户说出来的偏好，决定了*哪些偏好会被尊重*（自由主义式的协助，还是非自由主义式的协助）。
 
@@ -247,7 +247,7 @@ This chapter provides the missing normative framework: **whose preferences shoul
 $$
 P(B \mid M, C) \neq P(B \mid M)
 $$ {#eq-inversion-problem}
-Different groups have different mappings from mental state to behavior due to context.
+由于所处情境不同，不同群体从"心理状态"到"行为"的映射关系也不一样。
 
 **在同行评审里**，一份详细的审稿意见可能来自：
 
@@ -297,7 +297,7 @@ Different groups have different mappings from mental state to behavior due to co
 
 #### 代码示例：分层抽样与主动学习 {#sec-code-elicitation}
 
-Let's simulate this tradeoff concretely. We'll create a population of reviewers with varying expertise and context, then compare three elicitation strategies:
+我们把这个取舍具体模拟一下。先造一批专业水平与所处情境各不相同的审稿人，然后比较三种征询策略：
 
 {{< include _plt_setup.qmd >}}
 
@@ -444,20 +444,20 @@ for strategy in strategies:
     print()
 ```
 
-**Interpretation**:
+**结果解读**：
 
-1. **Uniform sampling**: Queries all reviewers equally. Learning error is similar across groups (fairest).
+1. **一律采集**：对所有审稿人一视同仁地询问。各组的学习误差差不多（最公平）。
 
-2. **Productive sampling**: Queries based on observed behavior (review length). Because seniors write longer reviews due to more time (not expertise), they get queried much more. Result: learns seniors well, juniors poorly. **This is the inversion problem in action.**
+2. **按产出采集**：按观察到的行为（审稿意见的长短）来决定问谁。可资深者写得长是因为时间多，不是水平高，结果被问得多得多。最终：对资深者学得好，对资浅者学得差。**这正是反演问题在起作用。**
 
-3. **Stratified sampling**: Ensures proportional representation. Learning quality is balanced across groups—sacrifices some efficiency for fairness.
+3. **分层采集**：保证各组按人口比例被采到。各组的学习质量就比较均衡——代价是牺牲一些效率换来公平。
 
-**Key Insight**: Optimizing for revealed preferences (review length) creates disparate impact. The system becomes good at serving already-privileged groups.
+**关键洞见**：按显见的偏好信号（审稿意见的长短）来优化，会造成差别性影响。系统最后变得擅长服务的，还是那些本来占优势的群体。
 
-**Connection to Real Systems**: This pattern appears in:
-- RLHF for LLMs: high-volume annotators dominate training data
-- Recommender systems: power users get better recommendations (more historical data)
-- Active learning for robotics: demonstrations from experienced users oversample certain interaction styles
+**与现实系统的对应**：这种模式在下列场景中都会出现：
+- 大模型的 RLHF：标注量大的标注员占据了训练数据
+- 推荐系统：重度用户的推荐更准（历史数据多）
+- 机器人上的主动学习：经验丰富用户的演示会让某些交互方式被过度采样
 
 **设计原则**：当征询策略会影响代表性时，就按相关的人口特征分层来做，以保证公平——哪怕这会降低统计效率。
 
@@ -780,7 +780,7 @@ print(f"  High-load reviewers: {high_acc_ctx:.3f}")
 print(f"  Disparity: {abs(low_acc_ctx - high_acc_ctx):.3f}")
 ```
 
-**Interpretation**:
+**结果解读**：
 
 1. **Standard Bradley-Terry**: Assumes preferences are context-free. Works well for low-load reviewers (seniors) whose preferences are relatively stable. Works poorly for high-load reviewers (juniors) whose preferences shift with fatigue. **Individual unfairness**: similar reviewers treated differently.
 
@@ -989,7 +989,7 @@ for i, strategy in enumerate(strategies):
     print()
 ```
 
-**Interpretation**:
+**结果解读**：
 
 1. **Volume-weighted aggregation (DPO default)**: Learns senior reviewers' style well (they dominate training data). Provides excellent assistance to seniors, poor assistance to juniors. **Group unfairness**: systematic disparity.
 
@@ -1182,7 +1182,7 @@ print(f"  Final:   Biased={illiberal_biased[-1]:.2f}, Unbiased={illiberal_unbias
 print(f"  → Converges to community standard, reduces diversity")
 ```
 
-**Interpretation**:
+**结果解读**：
 
 1. **Liberal assistance**: Helps each reviewer be consistent with their own style. Biased reviewers become more harsh (the assistant helps them efficiently write harsh reviews). Unbiased reviewers become more constructive. **Result**: Individual autonomy respected, but bias amplified. Authors from disadvantaged groups receive systematically harsher reviews.
 
@@ -1367,7 +1367,7 @@ print()
 print("Mechanism: Better assistance → more usage → more queries → even better assistance → ...")
 ```
 
-**Interpretation**:
+**结果解读**：
 
 1. **Round 0**: Seniors have slightly better assistance (10% advantage) due to initial data imbalance.
 
@@ -1629,7 +1629,7 @@ print(f"  → Satisfies group fairness: both groups get similar avg quality")
 print(f"  → Violates individual fairness: Group B papers matched sub-optimally to boost avg")
 ```
 
-**Interpretation**:
+**结果解读**：
 
 1. **Greedy matching** (individual fairness): Each paper gets its best-available reviewer. Group A papers get high-expertise reviewers (many available). Group B papers get lower-expertise reviewers (few available). **Satisfies individual fairness** (similar papers within a group get similar treatment) but **violates group fairness** (systematic disparity between groups).
 
@@ -1850,7 +1850,7 @@ print(f"  → Unfair process: junior bids weighted more (demographic adjustment)
 print(f"  → Fair outcome: both groups get similar quality papers")
 ```
 
-**Interpretation**:
+**结果解读**：
 
 1. **Process-fair allocation**: Equal bid weights. Seniors, who bid strategically on high-quality papers, get better assignments. Juniors, who bid less strategically, get worse papers. **Process is fair** (same rules) but **outcome is unfair** (systematic disparity).
 
