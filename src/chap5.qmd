@@ -425,45 +425,45 @@ print(f"Outcome with manipulation: {manip_outcome} (distance: {abs(manip_outcome
 print("Manipulation did not help voter 1!" if abs(manip_outcome - voter_peaks[0]) >= abs(true_outcome - voter_peaks[0]) else "Manipulation helped!")
 ```
 
-## Scoring Rules and the DPO-Borda Connection {#sec-borda-dpo}
+## 计分规则与博尔达—DPO 的关系 {#sec-borda-dpo}
 
-Another way to escape Arrow's impossibility is to relax the Independence of Irrelevant Alternatives (IIA) axiom. The **Borda count** is a classic scoring rule that does exactly this.
+绕开阿罗不可能性的另一条路，是放松"独立无关备选"（IIA）这条公理。**博尔达计分法**正是这样一条经典的计分规则。
 
-### The Borda Count
+### 博尔达计分法
 
-::: {.callout-note title="Definition: Borda Count / Soft Copeland Score"}
-For a preference profile, the **Borda score** (or soft Copeland score) of alternative $y \in Y$ equals the expected number of alternatives ranked below $y$ by a randomly chosen voter. Equivalently, it counts the number of pairwise "matches" that $y$ wins against other alternatives:
+::: {.callout-note title="定义：博尔达计分法 / 软科佩兰分数"}
+对一份偏好档案，候选项 $y \in Y$ 的**博尔达分数**（也叫软科佩兰分数）等于：随机选一位选民，被他排在 $y$ 之后的候选项个数的期望。等价地说，它数的是 $y$ 与其他候选项两两"对阵"时赢下的场数：
 $$
 \text{Borda}(y) = \sum_{i=1}^{n} |\{y' \neq y : y \succ_i y'\}| = \sum_{y' \neq y} |\{i : y \succ_i y'\}|
 $$ {#eq-borda}
-The **Borda winner** is the alternative with the maximum Borda score.
+**博尔达胜者**就是博尔达分数最高的那个候选项。
 :::
 
-The Borda count satisfies many desirable properties but violates IIA. However, we can define a weaker version of IIA that Borda *does* satisfy.
+博尔达计分法满足许多好性质，但违反 IIA。不过，我们可以定义一个更弱的 IIA，而博尔达法*确实*满足它。
 
-::: {.callout-note title="Definition: Modified IIA (IIA')"}
-Fix alternatives $y, y' \in Y$. If two preference profiles have, for every agent:
-1. The same pairwise ordering of $y$ vs. $y'$, AND
-2. The same *number* of alternatives strictly between $y$ and $y'$
+::: {.callout-note title="定义：放宽后的独立无关备选（IIA′）"}
+固定两个候选项 $y, y' \in Y$。若两份偏好档案对每位主体都有：
+1. $y$ 与 $y'$ 之间的两两次序相同，并且
+2. 严格夹在 $y$ 与 $y'$ 之间的候选项*个数*也相同
 
-then it should not be the case that $f(\succ) = y$ and $f(\succ') = y'$.
+那么就不应当出现 $f(\succ) = y$ 而 $f(\succ') = y'$。
 :::
 
-This relaxation allows the social choice to depend on *how far apart* two alternatives are in each voter's ranking, not just their relative order.
+这样放宽之后，社会选择就可以取决于两个候选项在每位选民排序里*隔得多远*，而不只是它们的先后次序。
 
-::: {.callout-important title="Theorem: Properties of Borda Count"}
-The Borda count satisfies:
-- **Unrestricted domain (U)**
-- **Pareto efficiency (PE)**
-- **Non-dictatorship (ND)**
-- **Modified IIA (IIA')**
+::: {.callout-important title="定理：博尔达计分法的性质"}
+博尔达计分法满足：
+- **定义域不受限制（U）**
+- **帕累托有效（PE）**
+- **非独裁（ND）**
+- **放宽后的独立无关备选（IIA′）**
 
-By relaxing IIA to IIA', we escape Arrow's impossibility.
+把 IIA 放宽成 IIA′，我们就绕开了阿罗的不可能性。
 :::
 
-### Connection to Direct Preference Optimization (DPO)
+### 与直接偏好优化（DPO）的关系
 
-A remarkable result connects the Borda count to modern RLHF methods, specifically Direct Preference Optimization (DPO).
+有一个出人意料的结果，把博尔达计分法与当代的 RLHF 方法——具体说是直接偏好优化（Direct Preference Optimization, DPO）——连到了一起。
 
 ::: {.callout-important title="Theorem: DPO-Borda Equivalence"}
 Assume that responses $y, y'$ are drawn from a reference policy $\pi_{\text{ref}}(\cdot | x)$. Define the **$\pi$-weighted Borda winner** as:
