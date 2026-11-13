@@ -1099,33 +1099,33 @@ MIP 框架虽然给出了漂亮的理论保证，真正落地却有几重困难�
 
 ## 讨论题
 
-1. **Arrow's theorem and cardinal utilities**: Arrow's Impossibility Theorem applies to ordinal preferences. How does allowing cardinal utilities (like summing utilities across voters) change the picture? What new problems arise when we allow interpersonal utility comparisons?
+1. **阿罗定理与基数效用**：阿罗不可能定理针对的是序数偏好。如果允许使用基数效用（例如把各位选民的效用相加），情况会怎样变化？一旦允许效用的人际比较，又会冒出哪些新问题？
 
-2. **Single-peaked preferences in practice**: Can you think of real-world preference domains that are plausibly single-peaked? What about domains that clearly violate single-peakedness? How might you test whether a given preference dataset is approximately single-peaked?
+2. **现实中的单峰偏好**：你能想到哪些现实中确实像是单峰的偏好领域？又有哪些明显违反单峰性？如果手上有一份偏好数据集，你会怎么检验它是否"近似单峰"？
 
-3. **DPO and Borda**: The DPO-Borda connection suggests that DPO finds the response that wins the most pairwise comparisons. Is this what we actually want for language model alignment? What are scenarios where the Borda winner might not be the "best" response?
+3. **DPO 与博尔达**：博尔达与 DPO 的联系说明 DPO 找到的是"在两两比较中赢下最多场"的那个回答。这正是语言模型对齐想要的吗？在哪些场景里，博尔达胜者未必是"最好"的回答？
 
-4. **Nosy preferences in content moderation**: Give three examples of nosy preferences that arise in content moderation for social media platforms. For each, discuss whether you think the platform should respect or override this preference.
+4. **内容审核中"管得宽"的偏好**：举三个社交平台内容审核里会出现的"管得宽"的偏好的例子。逐条讨论：平台应当尊重这个偏好，还是替用户做主？
 
-5. **The inversion problem**: How should RLHF systems handle the possibility that annotator choices don't reflect their true preferences (due to fatigue, cognitive biases, or the structure of the annotation task)? Propose a concrete intervention.
+5. **反演问题**：标注员的选择未必反映他们的真实偏好（可能因为疲劳、认知偏差，或标注任务本身的结构）。RLHF 系统该怎么处理这种可能性？请提出一个具体的干预做法。
 
-6. **Privacy vs. personalization**: A streaming service wants to personalize recommendations but users are concerned about privacy. Using the Contextual Integrity framework, design a data policy that balances these concerns. What transmission principles would you specify?
+6. **隐私与个性化**：一个流媒体平台想做个性化推荐，用户又担心隐私。请用情境完整性框架设计一份数据政策，把这两头平衡好。你会规定哪些传递原则？
 
-7. **Paternalism trade-offs**: Consider an AI assistant that notices a user frequently asks questions late at night that they seem to regret in the morning. Should the assistant intervene? If so, how? Discuss the ethical considerations.
+7. **家长主义的取舍**：设想一个 AI 助手注意到：用户总在深夜问一些问题，到早上又似乎后悔。它该不该介入？如果该，怎么介入？请讨论其中的伦理考虑。
 
-8. **Mechanism design without money**: In RLHF, we cannot pay annotators based on the "truth" of their labels (since there's no ground truth). How do peer prediction mechanisms like MIP help? What assumptions do they require?
+8. **不用钱的机制设计**：在 RLHF 里，我们不能按标签"对不对"付钱给标注员（因为根本没有标准答案）。像 MIP 这样的同行预测机制能帮上什么忙？它需要哪些前提？
 
-9. **Community Notes vs. majority voting**: Why does Community Notes use a factor model instead of simple majority voting? What problems would majority voting create for controversial topics?
+9. **Community Notes 与多数表决**：Community Notes 为什么用因子模型，而不用简单多数表决？在争议话题上，多数表决会造成什么问题？
 
-10. **Strategic annotators**: If RLHF annotators knew their labels would influence the model's behavior, would they have incentives to vote strategically? How does Gibbard-Satterthwaite apply here?
+10. **会讲策略的标注员**：如果 RLHF 的标注员知道自己的标签会影响模型的行为，他们是否有动机策略性地投票？吉巴德—萨特斯维特定理在这里怎样适用？
 
-11. **Auction design for AI compute**: Cloud providers sell AI compute resources. Design an auction mechanism for allocating GPU time that maximizes welfare. What properties should it have?
+11. **为 AI 算力设计拍卖**：云服务商要出售 AI 算力。请为 GPU 时长的分配设计一个使社会福利最大的拍卖机制。它应当具备哪些性质？
 
-12. **VCG and AI alignment**: Could VCG-like mechanisms be used to aggregate diverse stakeholder preferences for AI system design? What would the "payments" be in this context?
+12. **VCG 与 AI 对齐**：能不能用 VCG 那样的机制来汇总多方利益相关者对 AI 系统设计的偏好？在这种场景里，"付款"会是什么？
 
-13. **Pluralistic alignment**: Instead of aggregating preferences into a single objective, some propose that AI systems should preserve preference diversity. How would you operationalize this? What are the trade-offs?
+13. **多元对齐**：也有人主张，AI 系统不该把偏好汇总成一个目标，而应保留偏好的多样性。你会怎么把这件事具体化？其中的取舍是什么？
 
-14. **Separability across criteria**: When is it reasonable to assume that preferences over "helpful," "harmless," and "honest" are separable? When does this assumption fail? Give concrete examples.
+14. **各项标准之间的可分性**：把"有用""无害""诚实"这三项上的偏好假定成可分的，什么时候合理？什么时候这个假定会失效？请给出具体例子。
 
 15. **Contextual Integrity violations**: Identify three ways that current AI systems might violate contextual integrity norms. For each, propose a design change that would restore contextual integrity.
 
