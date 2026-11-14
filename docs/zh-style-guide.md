@@ -205,7 +205,10 @@
 5. `src/teaching.qmd`：习题 4 一行注明"上游仓库里的这个文件是空的，暂未提供内容"（`src/psets/pset4.qmd` 为 0 字节）。
 6. `license.qmd`：删掉 hits.seeyoufarm 访客计数徽章（它统计的是 mlhp.stanford.edu 的访问量，放在译本上会误导读者），改为写明原作与本译本的授权归属。
 7. `src/notation.qmd`：原英文那句"Introduced 列标明符号首次出现的章节"，表里其实没有这一列，因此译成"每一节标明这些记号主要出现在哪一章"。这是 upstream 自身的文实不符。
-8. 上游正文有 3 处引用在 `src/references.bib` 里没有对应条目（`auer_cesa-bianchi_fischer_2002`、`kahneman_tversky_1979`、`mcfadden1981econometric`），渲染时显示为空。原文即如此，本分支未擅自补造条目。
+8. 【更正】先前这里写着"上游正文有 3 处引用在 `src/references.bib` 里没有对应条目，渲染时显示为空"。**这条不成立**，是核对方法错了：pandoc 把 `@key` 渲染成正文里的作者年份（如 `Auer等2002年`），HTML 里不会出现这个键，所以按键名去生成页里搜会搜不到，误以为没渲染。
+
+    重新核对的结果：`auer_cesa-bianchi_fischer_2002`、`kahneman_tversky_1979`、`mcfadden1981econometric` 三个键在 `src/references.bib` 里都有条目，在本站构建中也都正常渲染——第 5 章那句显示为"(Russo和Roy2015年;Auer等2002年;Lai和Robbins1985年)"，第 1 章显示为"(Train2009年;Ben-Akiva和Lerman1985年;McFadden1981年)"，第 4 章延伸阅读里那条显示为"Kahneman 和 Tversky (1979年)"。反过来，上游站点用旧版构建，`Prospect Theory` 那条在他们的页面里反而找不到。也就是说这不是译稿的差异，本分支未增删任何引用键。
+
 9. `src/chap1.qmd`：原"本章视频导览"框里的 `{{< video animations/ch1/chapter1_narrated.mp4 >}}` 已删除，改为一句说明：该 mp4 被仓库 `.gitignore` 的 `*.html`/`*.mp4` 规则排除、未随仓库发布，且上游站点同一路径返回 404。
 10. `src/chap1.qmd`：Metropolis-Hastings 那段原文有一句语法不完整的句子（`the distribution is a proposal $P$ for $x_{t+1}$ is made via sampling from ...`，其中 $P$ 在下文没有出现，公式里用的是 $\tilde Q$）。译文按上下文与公式译为"从概率核 $Q(\bullet | x_t)$ 采样得到提议分布 $\tilde Q(\bullet | x_t)$"，未保留悬空的 $P$（$x_{t+1}$ 与 $\tilde Q$ 均保留）。
 11. `src/chap1.qmd`：一处把 `[@breiman2001statistical; @rudin2022interpretable]` 写成两条并排的 `@` 引用，渲染结果相同。
@@ -233,6 +236,7 @@
 
 1. `inline_math`：脚本按行用 `$` 配对切分，中英混排时切分边界会偏移，导致若干条目"看似丢失/新增"（例如原文 `$k > 2$` 与译文 `$k>2$` 会被算成两条）。核对方法是把差异条目在译文里逐个搜索。第 1 章已逐条核对，5 处"丢失"均在正文中。
 2. 有意偏离（见本节）产生的 `div_blocks`、`shortcodes` 差异。
+3. **不要在生成页里按引用键名搜索来判断引用有没有渲染。** pandoc 会把 `@key` 换成作者年份，HTML 里没有键名；正确的核法是回到正文看那句有没有出现"（××年）"这样的引文。第 5 节第 8 条当初就是这么误判的。
 
 其余项（标题、行间公式、代码块、引用键、标签、单元格选项、`\text{}` 等命令）必须完全一致。
 
