@@ -17,19 +17,26 @@
 | `src/chap5.qmd` 第 5 章 聚合、`src/chap6.qmd` 第 6 章 谁的？、`src/chap7.qmd` 第 7 章 结语 | 已译 | 同上（含代码示例解读、练习、讨论题、文献说明、延伸阅读） |
 | 习题集 `src/psets/pset1.qmd`–`pset3.qmd`（`pset4.qmd` 上游为空文件） | 已译 | 嵌套站点项目 `src/psets/_quarto.yml`（`lang: zh`、`execute: eval: false`）；`title` 中文化；callout 标题统一为"代码"；`check-translation.py` ALL_OK |
 
-习题集的两处构建注意：
+| 讲义 `src/slides/chap0.qmd`–`chap6.qmd`（7 个 revealjs 讲稿，4,991 行） | 已译 | 逐行 1:1 替换（`scripts/apply-line-translations.py`，会核对每行的 `$…$` 多重集合与结构标记）；`check-translation.py` 全部 ALL_OK；`check-blocks.py` 全部平衡；逐章渲染成功，公式排版实测 chap1 179/179、chap2 132、chap3 140/140、chap4 273/273、chap6 77/77 |
+
+习题集与讲义的构建注意：
 
 - `src/psets/resources` 是指向 `../../resources` 的符号链接。主题 scss 按项目根相对路径引用字体，缺这个链接时 `quarto render` 会报 `lstat '.../src/psets/resources/fonts/et-book/roman-line-figures.ttf'`。
 - CI 里逐个文件渲染（`for f in pset1 pset2 pset3; do quarto render "$f.qmd"; done`）。一次传入多个文档时输出会互相覆盖：实测 `quarto render pset2.qmd pset3.qmd` 后 `pset2.html` 内容变成 pset3。
+- 讲义同理：`src/slides/_quarto.yml` 是嵌套项目（revealjs，输出 `_book/slides/`），主项目不渲染它；嵌套项目只认自己目录下的 `_extensions/`，所以 CI 在 `src/slides` 里再装一次 `coatless-quarto/pyodide`。本地那份 `_extensions` 是旧版 dev 快照，缺 `qpyodide-monaco-editor-init.html`，直接渲染会报 `Error reading dependencies from ...`，`quarto add` 更新后即正常。
 
 ## 待做
 
-1. 讲义 `src/slides/*.qmd`：在 CI 里生成，使 `/slides/chapN.html` 存在，再把 `src/teaching.qmd` 里的讲义链接改成相对路径。（不在原定目标范围内，属于额外工作，未开工。）
+无。原定范围（正文、前后 matter、习题、讲义）已全部译出并通过校验。
 2. ~~决定是否修掉第 4 章那 12 个未闭合 `:::`~~ —— 经核实这个"缺陷"不存在：那是我写的校验脚本把四冒号围栏（`:::: algorithm`）误判成未闭合。脚本已改对，正文无需改动。
 
 ## 已完成的复查
 
-- 术语一致性复查（整站 + 习题集）：按风格指南第 4 节逐词统计主译名，未发现同一概念两个译名。检查中发现习题里 `elicitation` 有 8 处译作"引出"，与正文的"征询"不一致，已统一为"征询"（提交 `zh: 术语统一——习题中的 elicitation 改为与正文一致的"征询"`）。另外 4 处"引出"是"由此引出…"这类普通动词用法，保留。人名按表执行：Bradley-Terry、Dwork、Sen、Lipschitz、Gumbel 保留拉丁，阿罗、博尔达、孔多塞、贝叶斯、汤普森、拉普拉斯用中文；"无限臂老虎机"是 infinite-armed bandit 的构词，不是"多臂老虎机"的另一种译法。
+- 用户报告的两处线上显示问题（已修复并验证）：
+  1. **难度星号被吞**：第 2 章"题目按难度标注：() 入门，() 中等…"。根因是同一段里出现成对的 `*`，被 Markdown 当粗体标记消费掉（上游站点同样如此）。全仓扫描后确认只有这一处真正被吞：`src/chap2.qmd:1503`，已按第 1 章已有写法加反斜杠转义。标题里的 `(*)`、`(**)` 是孤立单个星号，实测渲染正常（在 `_book/src/chap1.html` 中可见"离散选择模型 (**)"），未改动。
+  2. **公式全部显示成源码**：根因是 `_quarto.yml` 里上游手写的 MathJax 3 脚本与 Quarto 1.11 自带的 MathJax 4 同时加载，v4 组件报版本冲突后抛 `TypeError`，整页没有排版。删掉那行 v3 脚本后实测：第 1 章 625/625、第 2 章 232/232、第 3 章 323/323、第 6 章 166/166 处公式全部排版，控制台零报错（上游同页 550 处，本站此前为 0）。
+- 顺带更正了两条我自己记错的结论（风格指南第 5 节第 8、15 条）：三个引用键其实都在 `references.bib` 里且能正常渲染（`pandoc` 把 `@key` 换成作者年份，按键名去 HTML 里搜自然搜不到，这是当初误判的原因）；第 4 章的"12 个未闭合 `:::`"是校验脚本把 `::::` 误当开框。
+- 术语一致性复查（整站 + 习题集）：按风格指南第 4 节逐词统计主译名，发现 `Fisher information` 混用两种写法，已统一为表中的"费雪信息"（18 处，提交见 `git log`）。检查中发现习题里 `elicitation` 有 8 处译作"引出"，与正文的"征询"不一致，已统一为"征询"。另外 4 处"引出"是"由此引出…"这类普通动词用法，保留。人名按表执行：Bradley-Terry、Dwork、Sen、Lipschitz、Gumbel 保留拉丁，阿罗、博尔达、孔多塞、贝叶斯、汤普森、拉普拉斯用中文；"无限臂老虎机"是 infinite-armed bandit 的构词，不是"多臂老虎机"的另一种译法。
 - 结构与不变量：15 个文件逐个跑 `check-translation.py`，`license`/`chap4–7`/`notation`/`teaching`/`pset1–3` 全部 ALL_OK；`index`、`chap1`、`chap2`、`chap3`、`glossary` 显示 HAS_DIFF，差异全部对应风格指南第 5 节已登记的条目（第 2、9、10、12 条），无新增偏离。
 - 整站渲染：`.github/workflows/render-zh.yml` 对分支 `zh` 的最新提交 `0d8f619` 构建并部署成功（`gh run watch 43465352846 --exit-status` 退出码 0）。线上已核对：首页、`src/chap4.html`、`src/chap7.html`、`src/psets/pset2.html`、`src/psets/pset3.html` 均返回 200 且标题为中文；`src/teaching.html` 的习题链接指向相对路径 `psets/psetN.html`。
 

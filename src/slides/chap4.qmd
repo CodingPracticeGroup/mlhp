@@ -1,67 +1,67 @@
 ---
-title: "Machine Learning from Human Preferences"
-subtitle: "Chapter 4: Decisions"
-footer: "Chapter 4: Decisions"
+title: "人类偏好机器学习"
+subtitle: "第 4 章：决策"
+footer: "第 4 章：决策"
 ---
 
-## Chapter Overview
+## 本章概览
 
-- **Chapter 3**: the *measurement* perspective --- reduce uncertainty to learn preferences accurately
-- **Chapter 4**: the *reward maximization* perspective --- manage uncertainty to make good decisions now
-
-. . .
-
-**Structure of this chapter:**
-
-1. **Thompson Sampling** --- Bayesian exploration-exploitation via posterior sampling
-2. **Dueling Bandits** --- sequential decisions from pairwise comparisons
-3. **Preferential Bayesian Optimization** --- black-box optimization with preference feedback
-4. **Cooperative Inverse Reinforcement Learning** --- learning from an active human partner
-
-## Exploration vs Exploitation
-
-Two competing goals in sequential decision-making:
-
-- **Exploitation**: choose the action believed best given current knowledge
-  - Greedy --- maximizes immediate expected reward
-- **Exploration**: try uncertain actions to gather information for better future decisions
-  - Informative --- reduces uncertainty about the environment
+- **第 3 章**：站在*测量*的角度——降低不确定性，把偏好学准
+- **第 4 章**：站在*最大化奖励*的角度——管好不确定性，把当下的决定做好
 
 . . .
 
-**The core tension:**
+**本章的结构：**
 
-- Purely exploitative $\Rightarrow$ risk missing superior options forever
-- Purely explorative $\Rightarrow$ waste resources on suboptimal actions
-- Good algorithms **balance** both, concentrating exploration where it matters most
+1. **汤普森采样**——通过从后验中采样，在贝叶斯框架下权衡探索与利用
+2. **对决老虎机**——从成对比较中做序贯决策
+3. **偏好式贝叶斯优化**——只给偏好反馈的黑盒优化
+4. **合作逆强化学习**——向一个会主动行动的人类伙伴学习
 
-## Thompson Sampling --- Core Idea
+## 探索 与 利用
 
-> "Sample a plausible world from your beliefs, then act optimally within it."
+序贯决策中互相冲突的两个目标：
 
-. . .
-
-**The recipe:**
-
-1. Maintain a posterior over unknown parameters: $p(U_i \mid \mathcal{D}_t)$
-2. **Sample** from the posterior: $\tilde{U}_i^{(t)} \sim p(U_i \mid \mathcal{D}_t)$
-3. **Act optimally** under the sample: $j^* = \arg\max_j \tilde{U}_i^{(t)\top} V_j$
+- **利用**：按当前的认识，选认为最好的那个动作
+  - 贪心——最大化眼前的期望奖励
+- **探索**：试试没把握的动作，为将来的决定收集信息
+  - 有信息量——降低对环境的不确定性
 
 . . .
 
-**Why it works:**
+**核心张力：**
 
-- When posterior is **wide** (uncertain) $\Rightarrow$ samples vary wildly $\Rightarrow$ exploration
-- When posterior is **concentrated** $\Rightarrow$ samples cluster near MAP $\Rightarrow$ exploitation
-- Automatically balances the two --- no tuning parameter needed
+- 只利用 $\Rightarrow$ 可能永远错过更好的选项
+- 只探索 $\Rightarrow$ 把资源浪费在次优的动作上
+- 好的算法会**兼顾**两者，把探索用在最关键的地方
 
-## Linear Model Setup
+## 汤普森采样——核心思想
 
-Recall the latent factor model from Chapter 2:
+> "从你的信念里抽出一个可能的世界，然后在这个世界里按最优的方式行动。"
 
-- User embedding: $U_i \in \mathbb{R}^K$, item features: $V_j \in \mathbb{R}^K$
-- Latent utility: $H_{ij} = U_i^\top V_j$
-- Binary feedback via logistic link:
+. . .
+
+**做法：**
+
+1. 维护未知参数的后验：$p(U_i \mid \mathcal{D}_t)$
+2. 从后验中**采样**：$\tilde{U}_i^{(t)} \sim p(U_i \mid \mathcal{D}_t)$
+3. 在这个样本下**按最优行动**：$j^* = \arg\max_j \tilde{U}_i^{(t)\top} V_j$
+
+. . .
+
+**为什么有效：**
+
+- 后验很**宽**（不确定）时 $\Rightarrow$ 抽出来的样本差异很大 $\Rightarrow$ 表现为探索
+- 后验很**集中**时 $\Rightarrow$ 样本都聚在 MAP 附近 $\Rightarrow$ 表现为利用
+- 两者自动平衡——不需要额外调参
+
+## 线性模型的设定
+
+回顾第 2 章的隐因子模型：
+
+- 用户向量：$U_i \in \mathbb{R}^K$，物品特征：$V_j \in \mathbb{R}^K$
+- 隐效用：$H_{ij} = U_i^\top V_j$
+- 通过 logistic 链接得到二值反馈：
 
 $$
 p(Y_{ij} = 1 \mid U_i, V_j) = \sigma(U_i^\top V_j)
@@ -69,17 +69,17 @@ $$
 
 . . .
 
-**Challenge for Thompson Sampling:**
+**汤普森采样遇到的困难：**
 
-- We need the posterior $p(U_i \mid \mathcal{D}_t)$
-- Logistic likelihood $\times$ Gaussian prior $\Rightarrow$ posterior is **not Gaussian**
-- Exact inference is intractable $\Rightarrow$ need approximation
+- 我们需要后验 $p(U_i \mid \mathcal{D}_t)$
+- logistic 似然 $\times$ 高斯先验 $\Rightarrow$ 后验**不是高斯的**
+- 精确推断算不动 $\Rightarrow$ 需要近似
 
-## Laplace Approximation
+## 拉普拉斯近似
 
-**Idea:** Approximate a non-Gaussian posterior with a Gaussian centered at its mode.
+**思路：** 用一个以众数为中心的高斯，去近似那个非高斯的后验。
 
-The log-posterior is:
+对数后验是：
 
 $$
 \ell(U_i) = \log p(U_i) + \sum_{j \in \mathcal{D}_t} \log p(Y_{ij} \mid U_i)
@@ -87,17 +87,17 @@ $$
 
 . . .
 
-Second-order Taylor expansion around the MAP estimate $\hat{U}_i$:
+在 MAP 估计 $\hat{U}_i$ 处做二阶泰勒展开：
 
 $$
 \ell(U_i) \approx \ell(\hat{U}_i) - \tfrac{1}{2}(U_i - \hat{U}_i)^\top G\, (U_i - \hat{U}_i)
 $$
 
-where $G = -\nabla^2_{U_i} \ell(\hat{U}_i)$ is the **negative Hessian** (precision matrix) evaluated at the mode.
+其中 $G = -\nabla^2_{U_i} \ell(\hat{U}_i)$ 是在众数处取到的**负 Hessian**（也就是精度矩阵）。
 
-## Laplace Approximation --- Result
+## 拉普拉斯近似——结果
 
-Exponentiating the quadratic gives a Gaussian:
+把这个二次型取指数，就得到一个高斯：
 
 $$
 p(U_i \mid \mathcal{D}_t) \approx \mathcal{N}(\hat{U}_i,\; G^{-1})
@@ -105,31 +105,31 @@ $$
 
 . . .
 
-For the logistic model with prior $p(U_i) = \mathcal{N}(0, I)$:
+对逻辑模型、先验取 $p(U_i) = \mathcal{N}(0, I)$ 的情形：
 
 $$
 G = I + \sum_{j \in \mathcal{D}_t} p_j(1 - p_j)\, V_j V_j^\top
 $$
 
-where $p_j = \sigma(\hat{U}_i^\top V_j)$ is the predicted probability at the MAP.
+其中 $p_j = \sigma(\hat{U}_i^\top V_j)$ 是在 MAP 处算出的预测概率。
 
 . . .
 
-**Interpretation:** $I$ is the prior contribution; $\sum p_j(1-p_j) V_j V_j^\top$ is data information. Items with $p_j \approx 0.5$ contribute most to precision (most informative comparisons).
+**解释：** $I$ 是先验的贡献；$\sum p_j(1-p_j) V_j V_j^\top$ 是数据带来的信息。$p_j \approx 0.5$ 的物品对精度的贡献最大（信息量最大）。
 
-## Linear Thompson Sampling Algorithm
+## 线性汤普森采样算法
 
-At each time step $t$:
-
-. . .
-
-**Step 1 --- Update posterior:**
-
-Compute MAP estimate $\hat{U}_i = \arg\max_{U_i} \ell(U_i)$ via gradient ascent
+在每个时刻 $t$：
 
 . . .
 
-**Step 2 --- Compute Hessian:**
+**第 1 步——更新后验：**
+
+用梯度上升求 MAP 估计 $\hat{U}_i = \arg\max_{U_i} \ell(U_i)$
+
+. . .
+
+**第 2 步——计算 Hessian：**
 
 $$
 G = I + \sum_{j \in \mathcal{D}_t} p_j(1 - p_j)\, V_j V_j^\top
@@ -137,7 +137,7 @@ $$
 
 . . .
 
-**Step 3 --- Sample:**
+**第 3 步——采样：**
 
 $$
 \tilde{U}_i^{(t)} \sim \mathcal{N}(\hat{U}_i,\; G^{-1})
@@ -145,37 +145,37 @@ $$
 
 . . .
 
-**Step 4 --- Select item:**
+**第 4 步——选择物品：**
 
 $$
 j^* = \arg\max_j\; \tilde{U}_i^{(t)\top} V_j
 $$
 
-## From Linear to Nonlinear --- GP Motivation
+## 从线性到非线性——为什么要用 GP
 
-- **Linear model**: utility $= U_i^\top V_j$ is a linear function of item features
-- **Limitation**: real preference landscapes are often highly nonlinear
-  - Saturation effects (diminishing returns)
-  - Interaction effects between features
-  - Complex decision boundaries
+- **线性模型**：效用 $= U_i^\top V_j$，是物品特征的线性函数
+- **局限**：真实的偏好曲面往往高度非线性
+  - 饱和效应（收益递减）
+  - 特征之间的交互作用
+  - 复杂的判定边界
 
 . . .
 
-**Solution:** Move from a parametric user vector $U_i$ to a **nonparametric** utility function $h_i$
+**解决办法：** 从参数化的用户向量 $U_i$，转向**非参数**的效用函数 $h_i$
 
-- Instead of $H_{ij} = U_i^\top V_j$, model $H_{ij} = h_i(V_j)$
-- Place a **Gaussian Process** prior over $h_i$
-- Flexibility to capture arbitrary smooth utility functions
+- 不再写 $H_{ij} = U_i^\top V_j$，而是建模 $H_{ij} = h_i(V_j)$
+- 给 $h_i$ 设一个**高斯过程**先验
+- 这样就能表达任意光滑的效用函数
 
-## Gaussian Processes
+## 高斯过程
 
-A GP defines a distribution over functions:
+GP 定义的是函数上的一个分布：
 
 $$
 h_i \sim \mathcal{GP}(m(\cdot),\; k(\cdot, \cdot))
 $$
 
-For any finite set of inputs $\{V_1, \ldots, V_M\}$, the function values are jointly normal:
+对任意有限的一组输入 $\{V_1, \ldots, V_M\}$，这些点上的函数值服从联合正态：
 
 $$
 H_{i,1:M} = [h_i(V_1), \ldots, h_i(V_M)] \sim \mathcal{N}(m_{1:M},\; K_{1:M})
@@ -185,28 +185,28 @@ $$
 
 where:
 
-- $m_{1:M} = [m(V_1), \ldots, m(V_M)]$ is the mean vector
-- $[K_{1:M}]_{jk} = k(V_j, V_k)$ is the covariance matrix
-- Kernel $k(V, V')$ encodes similarity: **similar items $\Rightarrow$ similar utilities**
+- $m_{1:M} = [m(V_1), \ldots, m(V_M)]$ 是均值向量
+- $[K_{1:M}]_{jk} = k(V_j, V_k)$ 是协方差矩阵
+- 核函数 $k(V, V')$ 编码的是相似度：**相似的物品 $\Rightarrow$ 相似的效用**
 
-## RBF Kernel
+## 径向基核
 
-The Radial Basis Function (squared exponential) kernel:
+径向基（RBF，即平方指数）核：
 
 $$
 k(V, V') = \sigma^2 \exp\!\left(-\tfrac{\|V - V'\|^2}{2\ell^2}\right)
 $$
 
-- $\ell$ (**lengthscale**): controls smoothness --- small $\ell \Rightarrow$ wiggly, large $\ell \Rightarrow$ smooth
-- $\sigma^2$ (**amplitude**): controls the magnitude of function variations
+- $\ell$（**长度尺度**）：控制光滑程度——小的 $\ell \Rightarrow$ 起伏多，大的 $\ell \Rightarrow$ 很平滑
+- $\sigma^2$（**幅度**）：控制函数波动的量级
 
 . . .
 
 ![](figures/chap4_gp_kernel_samples.png){fig-align="center" width="55%"}
 
-## GP Classification with Laplace
+## 用拉普拉斯近似做 GP 分类
 
-Binary observations through a logistic link:
+二值的观测通过 logistic 链接产生：
 
 $$
 p(Y_{ij} = 1 \mid h_i(V_j)) = \sigma(h_i(V_j))
@@ -214,24 +214,24 @@ $$
 
 . . .
 
-**Problem:** Non-Gaussian likelihood $\Rightarrow$ intractable posterior over $H_i$
+**问题：** 非高斯的似然 $\Rightarrow$ $H_i$ 上的后验算不动
 
-**Solution:** Laplace approximation again!
+**解决办法：** 还是用拉普拉斯近似！
 
-Log-posterior over function values:
+在函数值上的对数后验：
 
 $$
 \ell(H_i) = \sum_{j \in \mathcal{D}_t} \log p(Y_{ij} \mid H_{i,j}) - \tfrac{1}{2} H_i^\top K_t^{-1} H_i
 $$
 
-- First term: log-likelihood (data fit)
-- Second term: log-prior from GP (smoothness penalty)
+- 第一项：对数似然（拟合数据）
+- 第二项：来自 GP 的对数先验（光滑性惩罚）
 
-Expand around mode $\hat{H}_i$, define $W = -\nabla^2 \ell(\hat{H}_i)$
+在众数 $\hat{H}_i$ 处展开，并记 $W = -\nabla^2 \ell(\hat{H}_i)$
 
-## GP Laplace Result
+## GP 的拉普拉斯近似结果
 
-Approximate posterior over observed function values:
+已观测函数值上的近似后验：
 
 $$
 p(H_i \mid \mathcal{D}_t) \approx \mathcal{N}(\hat{H}_i,\; (K_t^{-1} + W)^{-1})
@@ -239,7 +239,7 @@ $$
 
 . . .
 
-**Predictive distribution** at a new input $V_*$:
+**预测分布**——在新的输入 $V_*$ 处：
 
 $$
 \begin{aligned}
@@ -252,12 +252,12 @@ where $k_* = [k(V_1, V_*), \ldots, k(V_t, V_*)]^\top$.
 
 . . .
 
-- $\mu_t(V_*)$: best guess of utility at $V_*$
-- $\sigma_t^2(V_*)$: uncertainty about utility at $V_*$ --- drives exploration
+- $\mu_t(V_*)$：对 $V_*$ 处效用的最佳猜测
+- $\sigma_t^2(V_*)$：对 $V_*$ 处效用的不确定程度——它驱动探索
 
-## GP Thompson Sampling Algorithm
+## 高斯过程汤普森采样算法
 
-**Step 1 --- Approximate posterior** via Laplace:
+**第 1 步——用拉普拉斯近似得到后验**：
 
 $$
 p(h_i \mid \mathcal{D}_t) \approx \mathcal{GP}(\mu_t(\cdot),\; k_t(\cdot, \cdot))
@@ -265,7 +265,7 @@ $$
 
 . . .
 
-**Step 2 --- Sample function:**
+**第 2 步——采样一个函数：**
 
 $$
 \tilde{h}_i \sim \mathcal{GP}(\mu_t(\cdot),\; k_t(\cdot, \cdot))
@@ -273,7 +273,7 @@ $$
 
 . . .
 
-**Step 3 --- Select item:**
+**第 3 步——选择物品：**
 
 $$
 j^* = \arg\max_j\; \tilde{h}_i(V_j)
@@ -281,40 +281,40 @@ $$
 
 . . .
 
-**Exploration-exploitation mechanism:**
+**探索—利用是怎么发生的：**
 
-- Uncertain regions $\Rightarrow$ high variance in $\tilde{h}_i(V_j)$ $\Rightarrow$ occasionally sampled high $\Rightarrow$ **exploration**
-- As posterior concentrates with data $\Rightarrow$ samples cluster near mean $\Rightarrow$ **exploitation**
+- 不确定的区域 $\Rightarrow$ $\tilde{h}_i(V_j)$ 的方差大 $\Rightarrow$ 偶尔会被抽到很高的值 $\Rightarrow$ **探索**
+- 随着数据增多后验变集中 $\Rightarrow$ 样本都聚在均值附近 $\Rightarrow$ **利用**
 
-## Key Insight --- Thompson Sampling
+## 关键洞见——汤普森采样
 
-> "Sample a plausible world, act optimally within it."
+> "抽出一个可能的世界，然后在这个世界里按最优的方式行动。"
 
 . . .
 
 **Properties:**
 
-- Automatically balances exploration (high posterior variance) and exploitation (concentrated posterior)
-- No explicit exploration bonus or tuning parameter
-- Works with both **linear** and **nonlinear** (GP) models
-- Combined with **Laplace approximation** $\Rightarrow$ tractable posteriors for logistic models
+- 自动平衡探索（后验方差大时）与利用（后验集中时）
+- 不需要显式的探索奖励，也没有要调的参数
+- **线性**模型和**非线性**（GP）模型都能用
+- 与**拉普拉斯近似**结合 $\Rightarrow$ 逻辑模型的后验也算得动了
 
 . . .
 
 **Versatility:**
 
-| Model | Posterior | Sample | Select |
+| 模型 | 后验 | 采样 | 选择 |
 |-------|-----------|--------|--------|
 | Linear | $\mathcal{N}(\hat{U}_i, G^{-1})$ | $\tilde{U}_i \sim \mathcal{N}$ | $\arg\max_j \tilde{U}_i^\top V_j$ |
 | GP | $\mathcal{GP}(\mu_t, k_t)$ | $\tilde{h}_i \sim \mathcal{GP}$ | $\arg\max_j \tilde{h}_i(V_j)$ |
 
-## Motivation --- Dueling Bandits
+## 动机——对决老虎机
 
-In many settings, **reward is not directly observable** --- only relative comparisons are available.
+很多场景里**奖励不能直接观察到**——只能拿到相对的比较。
 
 . . .
 
-**Example:** Which movie do you prefer?
+**例子：** 你更喜欢哪部电影？
 
 <center>
 <img src="figures/avenger.jpg" width="200">
@@ -325,25 +325,25 @@ In many settings, **reward is not directly observable** --- only relative compar
 
 . . .
 
-### ***Which one do you prefer?***
+### ***你更喜欢哪一部？***
 
-It is often easier and more reliable for humans to **compare** than to assign absolute scores.
+对人来**比较**两件事，往往比给出绝对分数更容易、也更可靠。
 
-## From MABs to Dueling Bandits
+## 从多臂老虎机到对决老虎机
 
 :::: {.columns}
 ::: {.column width="50%"}
-**Multi-Armed Bandits:**
+**多臂老虎机：**
 
-- Select one arm $\rightarrow$ observe scalar reward
-- Goal: maximize total reward
+- 选一个臂 $\rightarrow$ 观察一个标量奖励
+- 目标：让累计奖励最大
 - Feedback: $r_t \in \mathbb{R}$
 :::
 ::: {.column width="50%"}
-**Dueling Bandits:**
+**对决老虎机：**
 
-- Select a **pair** of arms $\rightarrow$ observe which is preferred
-- Goal: identify the best arm
+- 选出**一对**臂 $\rightarrow$ 观察哪个被偏好
+- 目标：找出最好的那个臂
 - Feedback: $b_i \succ b_j$ or $b_j \succ b_i$
 :::
 ::::
@@ -354,11 +354,11 @@ It is often easier and more reliable for humans to **compare** than to assign ab
 
 . . .
 
-**Applications:** dietary preference learning, video recommendation, exoskeleton gait optimization, information retrieval
+**应用：** 饮食偏好学习、视频推荐、外骨骼步态优化、信息检索
 
-## Formal Definition
+## 形式化定义
 
-Consider $K$ bandits $\mathcal{B} = \{b_1, \ldots, b_K\}$. The preference model:
+设有 $K$ 个老虎机 $\mathcal{B} = \{b_1, \ldots, b_K\}$。偏好模型为：
 
 $$
 P(b_i \succ b_j) = \epsilon(b_i, b_j) + \tfrac{1}{2}
@@ -370,17 +370,17 @@ $$
 
 - $\epsilon(b_i, b_i) = 0$ (no self-preference)
 - $\epsilon(b_i, b_j) = -\epsilon(b_j, b_i)$ (antisymmetry)
-- $\epsilon \in (-\tfrac{1}{2},\; \tfrac{1}{2})$ (proper probabilities)
+- $\epsilon \in (-\tfrac{1}{2},\; \tfrac{1}{2})$（这样概率才合理）
 
 . . .
 
-**Structural assumptions:** Strong Stochastic Transitivity (SST) and Stochastic Triangle Inequality ensure a coherent preference ordering.
+**结构性假设：** 强随机传递性（SST）与随机三角不等式，保证偏好排序是连贯的。
 
-## Empirical Estimation
+## 经验估计
 
-After $t$ comparisons between $b_i$ and $b_j$:
+在 $b_i$ 与 $b_j$ 之间做了 $t$ 次比较之后：
 
-**Running estimate:**
+**在线估计：**
 
 $$
 \hat{P}_{i,j} = \frac{\#\{b_i \text{ wins}\}}{\#\{\text{comparisons of } b_i \text{ vs } b_j\}}
@@ -388,23 +388,23 @@ $$
 
 . . .
 
-**Confidence interval:**
+**置信区间：**
 
 $$
 \hat{C}_t = (\hat{P}_t - c_t,\; \hat{P}_t + c_t)
 $$
 
-where $c_t = \sqrt{\tfrac{4\log(1/\delta)}{t}}$ and $\delta = \tfrac{1}{TK^2}$.
+其中 $c_t = \sqrt{\tfrac{4\log(1/\delta)}{t}}$，$\delta = \tfrac{1}{TK^2}$。
 
-Width shrinks as $O(1/\sqrt{t})$; union bound over all $K^2$ pairs and $T$ rounds ensures simultaneous coverage.
+区间宽度按 $O(1/\sqrt{t})$ 收缩；对所有 $K^2$ 个对和 $T$ 轮做并集界，就能保证同时都覆盖到。
 
-## Regret Definitions
+## 遗憾的定义
 
-Assuming a best bandit $b^*$, three notions of regret:
+假设存在最好的老虎机 $b^*$，遗憾有三种定义：
 
 . . .
 
-**Strong regret** --- penalizes the *worst* option shown:
+**强遗憾**——惩罚被端上来的*最差*那个选项：
 
 $$
 R_T = \sum_{t=1}^T \max\!\big\{\epsilon(b^*, b_1^{(t)}),\; \epsilon(b^*, b_2^{(t)})\big\}
@@ -412,7 +412,7 @@ $$
 
 . . .
 
-**Weak regret** --- penalizes the *best* option shown:
+**弱遗憾**——惩罚被端上来的*最好*那个选项：
 
 $$
 \tilde{R}_T = \sum_{t=1}^T \min\!\big\{\epsilon(b^*, b_1^{(t)}),\; \epsilon(b^*, b_2^{(t)})\big\}
@@ -420,17 +420,17 @@ $$
 
 . . .
 
-**Bayesian regret** --- averaged over prior uncertainty:
+**贝叶斯遗憾**——对先验中的不确定性取平均：
 
 $$
 \mathbb{E}_{\text{Prior}}[\text{Regret}(\mu_1, \ldots, \mu_K)]
 $$
 
-An efficient algorithm achieves **sublinear** regret: $\lim_{T \to \infty} R(T)/T = 0$.
+高效的算法要做到遗憾**次线性**：$\lim_{T \to \infty} R(T)/T = 0$。
 
-## Condorcet Winner
+## 孔多塞胜者
 
-The bandit $b^*$ that beats **every** other bandit in a head-to-head duel:
+那个在单挑中**赢过所有**其他老虎机的 $b^*$：
 
 $$
 P(b^* \succ b_j) \gt \tfrac{1}{2} \quad \text{for all } j \neq *
@@ -438,25 +438,25 @@ $$
 
 . . .
 
-**Strongest winner concept** --- but may **not exist!**
+这是**最强的"胜者"概念**——但它**可能不存在**！
 
-When preferences are **cyclic:**
+当偏好成**环**时：
 
-- A beats B, B beats C, C beats A
-- No single bandit dominates all others
-- Classic example: Rock-Paper-Scissors
+- A 胜 B，B 胜 C，C 胜 A
+- 没有一个老虎机能压过所有其他
+- 经典的例子就是石头剪刀布
 
 . . .
 
-**Preference cycle in practice:** Consider pizza topping preferences with three voter groups:
+**现实中的偏好环：** 设想三种人群对披萨配料的偏好：
 
-- Group 1: Pepperoni $\succ$ Mushroom $\succ$ Hawaiian
-- Group 2: Mushroom $\succ$ Hawaiian $\succ$ Pepperoni
-- Group 3: Hawaiian $\succ$ Pepperoni $\succ$ Mushroom
+- 第 1 组：香肠 $\succ$ 蘑菇 $\succ$ 夏威夷
+- 第 2 组：蘑菇 $\succ$ 夏威夷 $\succ$ 香肠
+- 第 3 组：夏威夷 $\succ$ 香肠 $\succ$ 蘑菇
 
-## Borda Winner
+## 博尔达胜者
 
-The bandit with the highest **total vote count** across all pairwise matchups:
+在所有两两对比中**得票总数**最高的那个老虎机：
 
 $$
 j^* = \arg\max_{i} \sum_{k \neq i} P(b_i \succ b_k)
@@ -466,21 +466,21 @@ $$
 
 **Properties:**
 
-- Always exists (ties possible, but can be broken)
-- Measures **overall popularity** rather than head-to-head dominance
-- Can differ from the Condorcet winner
-- Intuition: "the most popular option on average"
+- 一定存在（可能并列，但可以打破）
+- 衡量的是**总体受欢迎程度**，而不是单挑上的压制
+- 可能与孔多塞胜者不同
+- 直观说法："平均来看最受欢迎的那个"
 
 . . .
 
-**When Borda $\neq$ Condorcet:**
+**什么时候 博尔达 $\neq$ 孔多塞**：
 
-- Condorcet winner barely beats everyone (e.g., 51% in each duel)
-- Borda winner strongly beats most but loses to one (higher total score)
+- 孔多塞胜者对谁都只是勉强赢（每场 51%）
+- 博尔达胜者对多数人大胜、只输给一个，总分反而更高
 
-## Von Neumann Winner
+## 冯·诺依曼胜者
 
-A **probability distribution** $W$ over bandits such that sampling from $W$ beats any fixed arm with probability $\gt \tfrac{1}{2}$:
+一个老虎机上的**概率分布** $W$，使得从 $W$ 中抽样出的那个，对任何固定臂的胜率都 $\gt \tfrac{1}{2}$：
 
 $$
 \sum_{i} W(i)\, P(b_i \succ b_j) \gt \tfrac{1}{2} \quad \text{for all } j
@@ -490,35 +490,35 @@ $$
 
 **Properties:**
 
-- Most **general** winner concept --- allows **mixed strategies**
-- Always exists (by the minimax theorem)
-- Reduces to Condorcet winner when one exists (point mass on $b^*$)
-- Useful when preferences are cyclic or context-dependent
+这是**最一般**的胜者概念——允许**混合策略**
+- 一定存在（由极小极大定理保证）
+- 当孔多塞胜者存在时，它就退化为集中在 $b^*$ 的点质量
+- 在偏好成环或依赖情境时很有用
 
-## When Winners Diverge
+## 当几种胜者不一致时
 
 ![](figures/chap4_winner_divergence.png){fig-align="center" width="55%"}
 
 . . .
 
-- **Arm A**: Condorcet winner --- barely beats all others at 0.51
-- **Arm B**: Borda winner --- dominates C, D strongly but loses to A
+- **臂 A**：孔多塞胜者——对所有其他臂都以 0.51 险胜
+- **臂 B**：博尔达胜者——把 C、D 远远甩开，但输给 A
 
 . . .
 
-**Key lesson:** Different winner concepts can give **different answers**. The choice of winner concept should match the application:
+**关键教训：** 不同的胜者概念会给出**不同的答案**。选哪种概念，要与应用场景匹配：
 
-- Condorcet: when head-to-head dominance matters
-- Borda: when overall popularity matters
-- Von Neumann: when mixed strategies are allowable
+- 孔多塞胜者：在意单挑上是否能压制所有对手时
+- 博尔达胜者：在意总体受欢迎程度时
+- 冯·诺依曼胜者：允许使用混合策略时
 
-## Acquisition Functions
+## 采集函数
 
-Classical strategies for bandit exploration:
+老虎机探索的经典策略：
 
 . . .
 
-**Uniform** --- pure exploration, no exploitation:
+**均匀探索**——只探索，不利用：
 
 $$
 P(a_t = a) = \tfrac{1}{K}
@@ -526,7 +526,7 @@ $$
 
 . . .
 
-**$\epsilon$-Greedy** --- mostly exploit, sometimes explore:
+**$\epsilon$-贪心**——大多数时候利用，偶尔探索：
 
 $$
 a_t = \begin{cases} \arg\max_a \hat{\mu}_a & \text{with probability } 1 - \epsilon \\ \text{random arm} & \text{with probability } \epsilon \end{cases}
@@ -534,53 +534,53 @@ $$
 
 . . .
 
-**Upper Confidence Bound (UCB)** --- optimism under uncertainty:
+**置信上界（UCB）**——对不确定的东西保持乐观：
 
 $$
 a_t = \arg\max_a \left(\hat{\mu}_a + \sqrt{\tfrac{2\ln t}{N_t(a)}}\right)
 $$
 
-- Explores arms with few observations (large bonus) or high estimated reward
+- 会去试那些观察次数少（奖励项大）或估计奖励高的臂
 
-## Interleaved Filter
+## 交错过滤器
 
-Algorithm for finding the **Condorcet winner:**
-
-. . .
-
-1. Randomly choose initial best guess $\hat{b}$, set $W = \mathcal{B} \setminus \{\hat{b}\}$
+用来找**孔多塞胜者**的算法：
 
 . . .
 
-2. Compare $\hat{b}$ against candidates in $W$, update estimates $\hat{P}$ and confidence $\hat{C}$
+1. 随机选一个初始的最佳猜测 $\hat{b}$，令 $W = \mathcal{B} \setminus \{\hat{b}\}$
 
 . . .
 
-3. **Prune:** Remove $b$ from $W$ if $\hat{b}$ is confidently better
+2. 让 $\hat{b}$ 与 $W$ 中的候选逐个比较，更新估计 $\hat{P}$ 与置信度 $\hat{C}$
+
+. . .
+
+3. **剪枝：** 如果能有把握地说 $\hat{b}$ 更好，就把 $b$ 从 $W$ 中删掉
 $$
 \hat{P}_{\hat{b}, b} - c_t \gt \tfrac{1}{2}
 $$
 
 . . .
 
-4. **Promote:** If candidate $b'$ confidently beats $\hat{b}$, set $\hat{b} \leftarrow b'$, reset $W$
+4. **上位：** 如果有把握地说候选 $b'$ 胜过 $\hat{b}$，就令 $\hat{b} \leftarrow b'$，并把 $W$ 重置
 $$
 \hat{P}_{b', \hat{b}} - c_t \gt \tfrac{1}{2}
 $$
 
 . . .
 
-5. **Repeat** until $W = \emptyset$ --- $\hat{b}$ is the Condorcet winner
+5. **重复**，直到 $W = \emptyset$——此时 $\hat{b}$ 就是孔多塞胜者
 
-## Interleaved Filter --- Properties
+## 交错过滤器——性质
 
-**Correctness guarantee:**
+**正确性保证：**
 
-- Returns the correct Condorcet winner with probability $\geq 1 - 1/T$
+- 以 $\geq 1 - 1/T$ 的概率返回正确的孔多塞胜者
 
 . . .
 
-**Regret bound:**
+**遗憾上界：**
 
 $$
 \mathbb{E}[R_T] \leq (1 - \tfrac{1}{T})\,\mathbb{E}[R_T^{IF}] + \mathcal{O}(1)
@@ -588,25 +588,25 @@ $$
 
 . . .
 
-**Key properties:** Simple to implement; bounds hold for both **strong** and **weak** regret; total comparisons scale as $O(K \log K)$ to find the winner.
+**关键性质：** 实现很简单；上界对**强遗憾**和**弱遗憾**都成立；找出胜者所需的比较总量按 $O(K \log K)$ 增长。
 
-## DBGD --- Continuous Action Spaces
+## DBGD——连续动作空间
 
-**Dueling Bandit Gradient Descent:** Extends dueling bandits to **continuous** parameter spaces.
-
-. . .
-
-**Setting:** Optimize $w \in \mathbb{R}^d$ using only pairwise comparison feedback
-
-At each step $t$:
-
-1. Sample random direction: $u_t \sim \text{Uniform}(\mathbb{S}^{d-1})$
-2. Create perturbation: $w_t' = w_t + \delta\, u_t$
-3. **Duel:** Compare $w_t$ vs $w_t'$ via human feedback
+**对决老虎机梯度下降（DBGD）：** 把对决老虎机推广到**连续**的参数空间。
 
 . . .
 
-**Update rule:**
+**设定：** 只用成对比较反馈，来优化 $w \in \mathbb{R}^d$
+
+在每一步 $t$：
+
+1. 随机抽一个方向：$u_t \sim \text{Uniform}(\mathbb{S}^{d-1})$
+2. 造一个扰动：$w_t' = w_t + \delta\, u_t$
+3. **对决：** 用人的反馈比较 $w_t$ 与 $w_t'$
+
+. . .
+
+**更新规则：**
 
 $$
 w_{t+1} = \begin{cases}
@@ -617,394 +617,394 @@ $$
 
 . . .
 
-- Achieves **sublinear regret** in $T$ under smooth, concave reward
-- No gradient computation needed --- only comparison feedback
+在平滑、凹的奖励下能做到关于 $T$ 的**次线性遗憾**
+- 不需要计算梯度——只要有比较反馈
 
-## Contextual Dueling Bandits
+## 带情境的对决老虎机
 
-When preferences **depend on context** (user features, situational variables):
-
-. . .
-
-**Sparring EXP4:**
-
-- Two independent EXP4 instances "duel" each other
-- Each maintains a distribution over a set of expert policies
-- **Adversarial robustness** --- no distributional assumptions on contexts
-- Finds the **Copeland winner** (arm that beats the most other arms)
+当偏好**随情境变化**（用户特征、情境变量）时：
 
 . . .
 
-**Feel-Good Thompson Sampling:**
+**Sparring EXP4：**
 
-- Posterior sampling with a "feel-good" exploration bonus
-- Bonus ensures sufficient exploration of undersampled arms
-- Finds the **Von Neumann winner** (optimal mixed strategy)
-- **Bayesian** --- leverages prior knowledge for faster convergence
+- 两个独立的 EXP4 实例互相"对决"
+- 各自在一组专家策略上维护一个分布
+- **对抗式的稳健性**——不对情境的分布做任何假设
+- 找出 **Copeland 胜者**（能赢过最多其他臂的那个臂）
 
-## Algorithm Comparison {.smaller}
+. . .
 
-| Algorithm | Space | Context? | Winner | Key Strength |
+**Feel-Good 汤普森采样：**
+
+- 在后验采样的基础上加一个"感觉良好"的探索奖励
+- 这个奖励保证对被采样不足的那些臂也有足够的探索
+- 找出**冯·诺依曼胜者**（最优混合策略）
+- **贝叶斯**的——利用先验知识加快收敛
+
+## 算法对比 {.smaller}
+
+| 算法 | 空间 | 是否有情境 | 找哪种胜者 | 主要长处 |
 |-----------|-------|----------|--------|--------------|
-| Interleaved Filter | Finite | No | Condorcet | Simple, provable |
-| DBGD | Continuous | No | Reward max | Gradient-free |
-| Sparring EXP4 | Finite | Yes | Copeland | Adversarial |
-| Feel-good TS | Finite | Yes | Von Neumann | Bayesian |
+| 交错过滤器 | 有限 | 无 | 孔多塞胜者 | 简单、有证明 |
+| DBGD | 连续 | 无 | 奖励最大点 | 不用梯度 |
+| Sparring EXP4 | 有限 | 有 | Copeland 胜者 | 对抗情形下成立 |
+| Feel-good TS | 有限 | 有 | 冯·诺依曼胜者 | 贝叶斯 |
 
 . . .
 
-**How to choose:**
+**怎么选：**
 
-- **Finite arms, no context** $\Rightarrow$ Interleaved Filter (simple, effective)
-- **Continuous space** $\Rightarrow$ DBGD (gradient-free optimization)
-- **Context + adversarial** $\Rightarrow$ Sparring EXP4 (worst-case guarantees)
-- **Context + Bayesian** $\Rightarrow$ Feel-good TS (sample-efficient with good prior)
+- **有限的臂、没有情境** $\Rightarrow$ 交错过滤器（简单有效）
+- **连续空间** $\Rightarrow$ DBGD（无梯度优化）
+- **有情境 + 对抗** $\Rightarrow$ Sparring EXP4（最坏情形保证）
+- **有情境 + 贝叶斯** $\Rightarrow$ Feel-good TS（先验好时很省样本）
 
-## Application --- LLM Response Selection
+## 应用——挑选大模型的回答
 
 :::: {.columns}
 ::: {.column width="55%"}
 **Setup:**
 
-- Context $= $ user prompt $x_t$
-- Actions $= K$ candidate responses
-- Preference model: Bradley-Terry over response embeddings
+- 情境 $= $ 用户的提示 $x_t$
+- 动作 $= K$ 个候选回答
+- 偏好模型：在回答的向量表示上做 Bradley-Terry
 
 . . .
 
-**Key insight:**
+**关键洞见：**
 
-- **Online DPO $\equiv$ Thompson Sampling on a Bradley-Terry model**
-- TS balances showing confident responses vs learning user preferences
+- **在线 DPO $\equiv$ 在 Bradley-Terry 模型上做汤普森采样**
+- 汤普森采样在"给出有把握的回答"与"摸清用户偏好"之间做权衡
 :::
 ::: {.column width="45%"}
 **Pipeline:**
 
-1. User sends prompt $x_t$
-2. Generate $K$ candidate responses
-3. Select pair via TS posterior
-4. User indicates preference
-5. Update BT posterior
+1. 用户发来提示 $x_t$
+2. 生成 $K$ 个候选回答
+3. 用后验（汤普森采样）选出一对
+4. 用户指出更偏好哪个
+5. 更新 Bradley-Terry 后验
 6. Repeat
 :::
 ::::
 
 . . .
 
-As more preferences are collected, the model concentrates on generating responses that align with user values --- the essence of **RLHF**.
+收集到的偏好越多，模型就越集中在生成符合用户价值的回答上——这就是**人类反馈强化学习**的实质。
 
-## Application --- Clinical Trial Dosing
+## 应用——临床试验的给药剂量
 
 :::: {.columns}
 ::: {.column width="55%"}
 **Setup:**
 
-- Context $= $ patient features $x_t$ (age, weight, genetics)
-- Actions $= $ dosage levels (low, medium, high)
-- Reward model: $r(x_t, a_t) = x_t^\top \theta_{a_t}$
+- 情境 $= $ 病人的特征 $x_t$（年龄、体重、基因）
+- 动作 $= $ 剂量档位（低、中、高）
+- 奖励模型：$r(x_t, a_t) = x_t^\top \theta_{a_t}$
 :::
 ::: {.column width="45%"}
-**Key challenge:**
+**关键难点：**
 
-- Exploration cost is **high** --- suboptimal dose can cause harm
-- Must learn quickly with few patients
-- Safety constraints are critical
+- 探索的代价很**高**——剂量不合适会造成伤害
+- 病人很少，还要很快学出来
+- 安全性约束是硬性要求
 :::
 ::::
 
 . . .
 
-**Why Thompson Sampling works well here:**
+**为什么汤普森采样在这里很合适：**
 
-- Concentrates exploration where uncertainty is **highest**
-- Naturally cautious: only explores when posterior is genuinely uncertain
-- Can incorporate **safety priors** (e.g., avoid extreme doses early)
-- Converges faster than uniform exploration --- fewer patients exposed to suboptimal treatments
+- 把探索集中在不确定性**最高**的地方
+- 天生谨慎：只有在后验确实不确定时才去探索
+- 可以融入**安全性先验**（例如一开始避开极端剂量）
+- 比均匀探索收敛更快——暴露在不合适治疗下的病人更少
 
-## Summary --- Thompson Sampling and Dueling Bandits
+## 小结——汤普森采样与对决老虎机
 
-**Thompson Sampling:**
+**汤普森采样：**
 
-- "Sample a plausible world, act optimally" --- elegant Bayesian exploration
-- Works for **linear** models (Laplace on $U_i$) and **GP** models (Laplace on $h_i$)
-- Automatically balances exploration and exploitation via posterior variance
-
-. . .
-
-**Dueling Bandits:**
-
-- Extend multi-armed bandits to **pairwise comparison** feedback
-- Winner concepts: **Condorcet** (strongest), **Borda** (most popular), **Von Neumann** (mixed)
-- Algorithms: Interleaved Filter, DBGD, Sparring EXP4, Feel-good TS
+- "抽出一个可能的世界，在其中按最优行动"——贝叶斯式探索的优雅做法
+- 既能用于**线性**模型（对 $U_i$ 做拉普拉斯近似），也能用于 **GP** 模型（对 $h_i$ 做）
+- 通过后验方差自动平衡探索与利用
 
 . . .
 
-**Applications:** LLM alignment (online DPO), clinical trials, robotic control, recommendation
+**对决老虎机：**
 
-## Motivation — Fire Rendering
-### ***Which looks more like fire? Left or Right?***
+- 把多臂老虎机推广到**成对比较**反馈
+- 胜者概念：**孔多塞胜者**（最强）、**博尔达胜者**（最受欢迎）、**冯·诺依曼胜者**（混合）
+- 算法：交错过滤器、DBGD、Sparring EXP4、Feel-good TS
+
+. . .
+
+**应用：** 大模型对齐（在线 DPO）、临床试验、机器人控制、推荐
+
+## 动机——火焰的渲染
+### ***哪一张更像火？左边还是右边？***
 
 <img src="figures/fire_rendering_left.png" width="350">
 <img src="figures/fire_rendering.png" width="385">
 
-- Rendering realistic visual effects requires tuning many parameters
-- Hard to define a numeric objective — but easy for humans to compare two renderings
-- **Preferential Bayesian Optimization (PBO)**: optimize a black-box function via pairwise comparisons
+- 要渲染出逼真的视觉效果，得调很多参数
+- 很难写清楚一个数值目标——但让人比较两张渲染图很容易
+- **偏好式贝叶斯优化（PBO）**：通过成对比较来优化一个黑盒函数
 
 ::: {style="font-size: 0.7em; text-align: left;"}
 [@astudillo2023qeubo]{.citation}
 :::
 
-## Problem Statement
-- Black-box function $g: \mathcal{X} \rightarrow \mathbb{R}$ on bounded $\mathcal{X} \subseteq \mathbb{R}^q$
-- Goal: find $\mathbf{x}_{\min} = \arg\min_{\mathbf{x} \in \mathcal{X}} g(\mathbf{x})$
-- We cannot evaluate $g$ directly — only query via **duels** $[\mathbf{x}, \mathbf{x}']$
-- Binary feedback $y \in \{0, 1\}$: $y = 1$ if $\mathbf{x}$ is preferred (i.e., lower $g$ value)
-- Goal: find $\mathbf{x}_{\min}$ with **minimal number of duels**
+## 问题设定
+- 有界集 $\mathcal{X} \subseteq \mathbb{R}^q$ 上的黑盒函数 $g: \mathcal{X} \rightarrow \mathbb{R}$
+- 目标：找出 $\mathbf{x}_{\min} = \arg\min_{\mathbf{x} \in \mathcal{X}} g(\mathbf{x})$
+- 不能直接计算 $g$——只能通过**对决** $[\mathbf{x}, \mathbf{x}']$ 来问
+- 反馈是二值的 $y \in \{0, 1\}$：当 $\mathbf{x}$ 被偏好时（即 $g$ 值更小）$y = 1$
+- 目标：用**最少的对决次数**找到 $\mathbf{x}_{\min}$
 
 ::: {style="font-size: 0.7em; text-align: left;"}
 [@gonzalez2017preferential]{.citation}
 :::
 
-## Preference Model
-- Define the duel reward as the difference in objective values:
+## 偏好模型
+- 把对决的奖励定义为两个目标值之差：
 $$f([\mathbf{x}, \mathbf{x}']) = g(\mathbf{x}') - g(\mathbf{x})$$
-- Logistic preference probability:
+- 逻辑形式的偏好概率：
 $$\pi_f([\mathbf{x}, \mathbf{x}']) = \sigma(f([\mathbf{x}, \mathbf{x}']))$$
-- **Key property**: $\pi_f([\mathbf{x}, \mathbf{x}']) \geq 0.5 \iff g(\mathbf{x}) \leq g(\mathbf{x}')$
-- The preferred option has lower $g$ value (i.e., closer to the minimizer)
-- Place a **GP prior** on $f$ and update from observed duel outcomes
+- **关键性质**：$\pi_f([\mathbf{x}, \mathbf{x}']) \geq 0.5 \iff g(\mathbf{x}) \leq g(\mathbf{x}')$
+- 被偏好的那一个 $g$ 值更小（也就是更接近最小值点）
+- 给 $f$ 设一个 **GP 先验**，并用观察到的对决结果来更新
 
 ::: {style="font-size: 0.7em; text-align: left;"}
 [@gonzalez2017preferential]{.citation}
 :::
 
-## Copeland Score
-How do we identify the best option from pairwise preferences?
+## Copeland 分数
+怎么从成对偏好里认出最好的那个选项？
 
-- **Hard Copeland score** (fraction of pairwise wins):
+- **硬 Copeland 分数**（两两获胜的比例）：
 $$S(\mathbf{x}) = \text{Vol}(\mathcal{X})^{-1} \int_{\mathcal{X}} \mathbb{I}_{\{\pi_f([\mathbf{x}, \mathbf{x}']) \geq 0.5\}} \, d\mathbf{x}'$$
-- **Soft Copeland score** (smoother, more tractable):
+- **软 Copeland 分数**（更光滑，更好优化）：
 $$C(\mathbf{x}) = \text{Vol}(\mathcal{X})^{-1} \int_{\mathcal{X}} \pi_f([\mathbf{x}, \mathbf{x}']) \, d\mathbf{x}'$$
-- **Condorcet winner**: $\mathbf{x}_c = \arg\max_{\mathbf{x}} C(\mathbf{x})$
-- Finding the Condorcet winner $\equiv$ solving the optimization problem
+- **孔多塞胜者**：$\mathbf{x}_c = \arg\max_{\mathbf{x}} C(\mathbf{x})$
+- 找孔多塞胜者 $\equiv$ 解这个优化问题
 
 ::: {style="font-size: 0.7em; text-align: left;"}
 [@gonzalez2017preferential]{.citation}; [@zoghi2015copeland]{.citation}
 :::
 
-## Copeland Visualization
+## Copeland 分数的可视化
 
 ![](figures/copeland.png){fig-align="center" width="60%"}
 
 ::: {style="font-size: 0.7em; text-align: left;"}
-The soft Copeland score (bottom) provides a smooth landscape for optimization
-compared to the hard Copeland score (top). The Condorcet winner corresponds to
-the peak of the soft Copeland surface.
+软 Copeland 分数（下方）给出了一个适合优化的光滑曲面，
+硬 Copeland 分数（上方）则不然。孔多塞胜者对应
+软 Copeland 曲面的峰值。
 :::
 
 ::: {style="font-size: 0.7em; text-align: left;"}
 [@gonzalez2017preferential]{.citation}
 :::
 
-## Learning the Preference Function
-- Place a **GP surrogate** on the duel space with posterior:
+## 学习偏好函数
+- 在对决空间上设一个 **GP 代理模型**，其后验为：
 $$p(f_t \mid \mathcal{D}, [\mathbf{x}_t, \mathbf{x}_t'])$$
-- Compute preference probability by marginalizing over the posterior:
+- 对后验做边际化，算出偏好概率：
 $$\pi([\mathbf{x}_t, \mathbf{x}_t']) = \int \sigma(f_t) \, p(f_t \mid \mathcal{D}) \, df_t$$
-- Approximate the soft Copeland score via **Monte Carlo**:
+- 用**蒙特卡洛**近似软 Copeland 分数：
 $$C(\mathbf{x}) \approx \tfrac{1}{M} \sum_{i=1}^{M} \pi([\mathbf{x}, \mathbf{x}_i])$$
-- Use **Laplace approximation** for GP binary classification (as in Chapter 4.1)
+- GP 的二分类用**拉普拉斯近似**处理（同 4.1 节）
 
-## PBO Algorithm Overview
+## PBO 算法总览
 
-**Input:** Initial dataset $\mathcal{D}_0$, acquisition function $\alpha$, budget $T$
+**输入：** 初始数据集 $\mathcal{D}_0$、采集函数 $\alpha$、预算 $T$
 
 **For** $t = 1, \ldots, T$:
 
-1. Fit GP to current data $\mathcal{D}_{t-1}$, obtain posterior $p(f \mid \mathcal{D}_{t-1})$
-2. Select next duel by optimizing acquisition function:
+1. 用当前数据 $\mathcal{D}_{t-1}$ 拟合 GP，得到后验 $p(f \mid \mathcal{D}_{t-1})$
+2. 优化采集函数，选出下一次对决：
 $$[\mathbf{x}_t, \mathbf{x}_t'] = \arg\max_{[\mathbf{x}, \mathbf{x}']} \alpha([\mathbf{x}, \mathbf{x}'] \mid \mathcal{D}_{t-1})$$
-3. Query human: observe $y_t \in \{0, 1\}$
-4. Update dataset: $\mathcal{D}_t = \mathcal{D}_{t-1} \cup \{([\mathbf{x}_t, \mathbf{x}_t'], y_t)\}$
+3. 问人：观察到 $y_t \in \{0, 1\}$
+4. 更新数据集：$\mathcal{D}_t = \mathcal{D}_{t-1} \cup \{([\mathbf{x}_t, \mathbf{x}_t'], y_t)\}$
 
 **Output:** $\hat{\mathbf{x}}_{\min} = \arg\max_{\mathbf{x}} C(\mathbf{x}; \mathcal{D}_T)$
 
-## Acquisition Functions for PBO
-Goal: design a sequential policy for querying duels to find $\mathbf{x}_{\min}$ quickly.
+## PBO 的采集函数
+目标：设计一条序贯策略，决定该问哪些对决，尽快找到 $\mathbf{x}_{\min}$。
 
-We will cover five approaches:
+下面讲五种做法：
 
-| Method | Strategy |
+| 方法 | 策略 |
 |--------|----------|
-| **Pure Exploration** | Maximize preference uncertainty |
-| **POP-BO** | Optimistic selection with confidence sets |
-| **qEUBO** | Expected utility of best option |
-| **qEI** | Expected improvement (and its failure) |
-| **Dueling-TS** | Thompson sampling for duels |
+| **纯探索** | 让偏好的不确定性最大 |
+| **POP-BO** | 在置信集内做乐观选择 |
+| **qEUBO** | "最好那个选项"的期望效用 |
+| **qEI** | 期望改进（以及它会失效的地方） |
+| **Dueling-TS** | 针对对决的汤普森采样 |
 
-## Pure Exploration
-- Select the duel that maximizes **variance of the preference probability**:
+## 纯探索
+- 选那个使**偏好概率的方差**最大的对决：
 $$\alpha_{PE}([\mathbf{x}, \mathbf{x}'] \mid \mathcal{D}) = \mathbb{V}[\sigma(f_*) \mid [\mathbf{x}_*, \mathbf{x}_*'], \mathcal{D}]$$
-- Expanding the variance:
+- 把这个方差展开：
 $$\begin{aligned}
 \mathbb{V}[\sigma(f_*)] &= \int \sigma(f_*)^2 \, p(f_* \mid \mathcal{D}) \, df_* - \mathbb{E}[\sigma(f_*)]^2
 \end{aligned}$$
-- **Intuition**: previously visited duels have lower uncertainty, so they are
-less likely to be revisited
-- Requires MC approximation in practice
+- **直观理解**：问过的对决不确定性更低，因此
+不太会被反复选中
+- 实践中需要蒙特卡洛近似
 
 ::: {style="font-size: 0.7em; text-align: left;"}
 [@gonzalez2017preferential]{.citation}
 :::
 
-## POP-BO — Principled Optimistic PBO
-- Assume $g$ lies in an RKHS with $\|g\|_k \leq B$
-- **MLE update**: $\hat{g}_t^{\text{MLE}} = \arg\max_{\tilde{g} \in \mathcal{B}_g^t} \ell_t(\tilde{g})$
-- **Confidence set** (contains true $g$ w.p. $\geq 1 - \delta$):
+## POP-BO——有原则的乐观 PBO
+- 假设 $g$ 属于某个再生核希尔伯特空间，且 $\|g\|_k \leq B$
+- **最大似然更新**：$\hat{g}_t^{\text{MLE}} = \arg\max_{\tilde{g} \in \mathcal{B}_g^t} \ell_t(\tilde{g})$
+- **置信集**（以 $\geq 1 - \delta$ 的概率包含真实的 $g$）：
 $$\mathcal{B}_g^{t+1} = \{\tilde{g} \mid \ell_t(\tilde{g}) \geq \ell_t(\hat{g}^{\text{MLE}}) - \beta_1\}$$
-- **Optimistic selection**: pick the point that looks best under the most
-favorable model:
+- **乐观选择**：挑那个在最有利
+的模型下看起来最好的点：
 $$\mathbf{x}_t \in \arg\max_{\mathbf{x}} \max_{\tilde{g} \in \mathcal{B}_g^t} \left(\tilde{g}(\mathbf{x}) - \tilde{g}(\mathbf{x}_t')\right)$$
-- Analogous to UCB in standard bandits, but adapted for preferences
+- 与通常老虎机里的 UCB 类似，只是改成了适配偏好的形式
 
 ::: {style="font-size: 0.7em; text-align: left;"}
 [@xu2024principledpreferentialbayesianoptimization]{.citation}
 :::
 
-## qEUBO — Expected Utility of Best Option
-- Extends duels to **$q \gt 2$ options** per query (e.g., show $q$ options,
-user picks best)
-- **qEUBO** acquisition function:
+## qEUBO——最好选项的期望效用
+- 把一次对决扩展到 **$q \gt 2$ 个选项**（例如给出 $q$ 个选项，
+让人挑最好的）
+- **qEUBO** 采集函数：
 $$\text{qEUBO}_n(X) = \mathbb{E}_n\left[\max\{g(x_1), \ldots, g(x_q)\}\right]$$
-- **One-step Bayes optimal value**:
+- **一步贝叶斯最优值**：
 $$V_n(X) = \mathbb{E}_n\left[\max_{x \in \mathcal{X}} \mathbb{E}_{n+1}[g(x)] \mid X_{n+1} = X\right]$$
-- $V_n$ measures the best posterior mean achievable after observing feedback
-on query set $X$
-- qEUBO is a tractable surrogate for $V_n$
+- $V_n$ 衡量的是：在收到反馈之后，后验均值最高能被推到
+什么水平——查询集合记作 $X$
+- qEUBO 是 $V_n$ 的一个可计算的替代
 
 ::: {style="font-size: 0.7em; text-align: left;"}
 [@astudillo2023qeubo]{.citation}
 :::
 
-## qEUBO — One-Step Bayes Optimality
-**Theorem (noise-free):** $\arg\max_{X} \text{qEUBO}_n(X) \subseteq \arg\max_{X} V_n(X)$
+## qEUBO——一步贝叶斯最优
+**定理（无噪声）：** $\arg\max_{X} \text{qEUBO}_n(X) \subseteq \arg\max_{X} V_n(X)$
 
-- Any maximizer of qEUBO is also a maximizer of the one-step Bayes optimal
+- 任何 qEUBO 的最大化点，同时也是一步贝叶斯最优值的最大化点
 value $V_n$
-- This means qEUBO is **one-step Bayes optimal** in the noise-free setting
+- 这就是说，在无噪声的设定下 qEUBO 是**一步贝叶斯最优**的
 
-**Proof sketch:**
+**证明思路：**
 
-- For any query $X$, let $x^+(X, i) = \arg\max_{x} \mathbb{E}_n[g(x) \mid (X, i)]$
-- Show $V_n(X) \leq \text{qEUBO}_n(X^+(X))$ and
+- 对任意查询 $X$，记 $x^+(X, i) = \arg\max_{x} \mathbb{E}_n[g(x) \mid (X, i)]$
+- 证明 $V_n(X) \leq \text{qEUBO}_n(X^+(X))$，并且
 $\text{qEUBO}_n(X) \leq V_n(X)$
-- If $X^*$ maximizes qEUBO but not $V_n$, these inequalities yield a
+- 如果 $X^*$ 让 qEUBO 最大、却没让 $V_n$ 最大，这两个不等式就会
 contradiction
 
 ::: {style="font-size: 0.7em; text-align: left;"}
 [@astudillo2023qeubo]{.citation}
 :::
 
-## qEUBO — Noisy Setting
-**With noise** ($\lambda$-logistic): the gap between qEUBO and the Bayes
-optimal value is bounded.
+## qEUBO——带噪声的情形
+**有噪声时**（$\lambda$-逻辑形式）：qEUBO 与贝叶斯最优值之间的
+差距是有界的。
 
 $$V_t^\lambda(X^*) \geq \max_X V_t^0(X) - \lambda C$$
 
-where $C = L_W\!\left(\tfrac{q-1}{e}\right)$ involves the Lambert W function.
+其中 $C = L_W\!\left(\tfrac{q-1}{e}\right)$ 里出现了朗伯 W 函数。
 
-- As noise $\lambda \to 0$, the bound becomes tight
-- The bound degrades gracefully: more options ($q$) or more noise ($\lambda$)
-increases the gap, but only logarithmically in $q$
-- In practice, qEUBO remains effective even with moderate noise levels
+- 当噪声 $\lambda \to 0$ 时，这个界趋于紧
+- 这个界退化得很温和：选项更多（$q$ 更大）或噪声更大（$\lambda$ 更大）
+都会拉大差距，但对 $q$ 只有对数级的增长
+- 实践中，即使在中等噪声下 qEUBO 依然有效
 
 ::: {style="font-size: 0.7em; text-align: left;"}
 [@astudillo2023qeubo]{.citation}
 :::
 
-## qEI and Its Failure
-- **qEI**: expected improvement over current best posterior mean $\mu_{\min}$:
+## qEI 及其失效
+- **qEI**：相对当前最优后验均值 $\mu_{\min}$ 的期望改进：
 $$\text{qEI} = \sum_{i=1}^{q} \mathbb{E}_{\mathbf{y}}\left[(\mu_{\min} - y_i)_+\right]$$
-- **Counterexample** showing qEI can get permanently trapped:
-  - 4 options $\{1, 2, 3, 4\}$ with carefully chosen prior
-  - qEI **always queries** $(3, 4)$ — never explores other pairs
-  - Constant regret $R \gt 0$ for all $n$, regardless of iterations
-- **Key lesson**: qEI can fail because it only considers improvement over the
-current estimate, not the value of information gained
-- qEUBO avoids this by maximizing the **utility of the best option shown**
+- 一个**反例**说明 qEI 可能永久卡住：
+  - 4 个选项 $\{1, 2, 3, 4\}$，配一个精心挑选的先验
+  - qEI **永远只问** $(3, 4)$——从不去探索其他对
+  - 对任意 $n$，遗憾都是一个正常数 $R \gt 0$，再多轮次也没用
+- **关键教训**：qEI 会失效，因为它只看相对当前估计的改进，
+没有考虑"多获得一点信息"的价值
+- qEUBO 避开了这一点，因为它最大化的是**展示出来的最佳选项的效用**
 
 ::: {style="font-size: 0.7em; text-align: left;"}
 [@astudillo2023qeubo]{.citation}
 :::
 
-## qEUBO — Empirical Results
+## qEUBO——实验结果
 
 ![](figures/qeubo_res.png){fig-align="center" width="55%"}
 
 ::: {style="font-size: 0.7em; text-align: left;"}
-Comparison of qEUBO against baselines on benchmark functions.
-qEUBO consistently finds better solutions with fewer queries, confirming its
-theoretical advantages in practice.
+在基准函数上把 qEUBO 与各基线做对比。
+qEUBO 总能用更少的提问找到更好的解，这与它的
+理论优势在实践中是一致的。
 :::
 
 ::: {style="font-size: 0.7em; text-align: left;"}
 [@astudillo2023qeubo]{.citation}
 :::
 
-## Dueling-Thompson Sampling
-**Step 1** — Select $\mathbf{x}_t$: Sample $\tilde{f}$ from posterior,
-maximize soft Copeland:
+## 对决汤普森采样
+**第 1 步**——选 $\mathbf{x}_t$：从后验中抽出 $\tilde{f}$，再
+最大化软 Copeland 分数：
 $$\mathbf{x}_t = \arg\max_{\mathbf{x}} \int_{\mathcal{X}} \pi_{\tilde{f}}([\mathbf{x}, \mathbf{x}']) \, d\mathbf{x}'$$
 
-**Step 2** — Select $\mathbf{x}_t'$: Maximize uncertainty in the direction
-of $\mathbf{x}_t$:
+**第 2 步**——选 $\mathbf{x}_t'$：在
+$\mathbf{x}_t$ 这个方向上把不确定性最大化：
 $$\mathbf{x}_t' = \arg\max_{\mathbf{x}'} \mathbb{V}[\sigma(f_t) \mid [\mathbf{x}_t, \mathbf{x}'], \mathcal{D}]$$
 
-- Step 1 is **exploitation** (pick the likely Condorcet winner under the
-sample)
-- Step 2 is **exploration** (find the most informative opponent for
-$\mathbf{x}_t$)
+- 第 1 步是**利用**（就在抽出的这个样本下，选出最可能的孔多塞胜者）
+
+- 第 2 步是**探索**（为它找出信息量最大的对手
+$\mathbf{x}_t$）
 
 ::: {style="font-size: 0.7em; text-align: left;"}
 [@gonzalez2017preferential]{.citation}
 :::
 
-## Thompson Sampling Visualization
+## 汤普森采样的可视化
 
 <img src="figures/ts10.png" width="32%">
 <img src="figures/ts30.png" width="32%">
 <img src="figures/ts150.png" width="32%">
 
 ::: {style="font-size: 0.7em; text-align: left;"}
-Soft Copeland score samples (grey curves) after 10, 30, and 150 duels.
-As more data is collected, the posterior concentrates and the algorithm shifts
-from exploration to exploitation. The Condorcet winner estimate (dashed line)
-stabilizes.
+做了 10 次、30 次、150 次对决之后的软 Copeland 分数采样（灰色曲线）。
+数据越多，后验越集中，算法就从
+探索转向利用。孔多塞胜者的估计（虚线）
+也逐渐稳定下来。
 :::
 
 ::: {style="font-size: 0.7em; text-align: left;"}
 [@gonzalez2017preferential]{.citation}
 :::
 
-## Regret Comparison
+## 遗憾对比
 
-| Method | Simple Regret | Key Feature |
+| 方法 | 简单遗憾 | 关键特点 |
 |--------|---------------|-------------|
-| **qEUBO** | $o(1/n)$ | Bayes optimal (noise-free) |
-| **qEI** | Can be $\geq R \gt 0$ | May fail to converge! |
-| **POP-BO** | $\mathcal{O}(\sqrt{\beta_T \gamma_T^{ff'} / T})$ | Provable with confidence sets |
+| **qEUBO** | $o(1/n)$ | 贝叶斯最优（无噪声时） |
+| **qEI** | 可能 $\geq R \gt 0$ | 可能不收敛！ |
+| **POP-BO** | $\mathcal{O}(\sqrt{\beta_T \gamma_T^{ff'} / T})$ | 靠置信集给出可证明的界 |
 
-- **qEUBO**: convergence guaranteed under mild assumptions; one-step Bayes
-optimal
-- **qEI**: counterexample shows it can be permanently trapped with constant
-regret
-- **POP-BO**: regret depends on kernel complexity ($\gamma_T$ = information
-gain)
+- **qEUBO**：在温和的假设下能保证收敛；一步贝叶斯
+最优
+- **qEI**：反例说明它可能带着一个正常数的遗憾永久卡住
 
-## POP-BO Kernel-Specific Rates
-Base rate: $T^{3/4}$ — the **price of preference feedback** (vs $T^{1/2}$
-for direct evaluation).
+- **POP-BO**：遗憾取决于核的复杂度（$\gamma_T$ 是信息
+增益）
+
+## POP-BO 在不同核下的速率
+基础速率是 $T^{3/4}$——这就是**只用偏好反馈的代价**（直接能取值时是 $T^{1/2}$）
+。
 
 $$\begin{aligned}
 \text{Linear}: \quad R_T &= \mathcal{O}(T^{3/4}(\log T)^{3/4}) \\
@@ -1012,124 +1012,124 @@ $$\begin{aligned}
 \text{Mat\acute{e}rn}: \quad &\text{Additional polynomial in } d, \nu
 \end{aligned}$$
 
-- Smoother kernels (e.g., SE) yield tighter bounds
-- The extra $T^{1/4}$ factor compared to standard BO reflects the information
-cost of only receiving binary comparisons rather than function values
+- 核越光滑（例如平方指数核），界越紧
+- 与标准的贝叶斯优化相比多出的那个 $T^{1/4}$ 因子，反映的是
+只能拿到二元比较、拿不到函数值所带来的信息代价
 
 ::: {style="font-size: 0.7em; text-align: left;"}
 [@xu2024principledpreferentialbayesianoptimization]{.citation}
 :::
 
-## Beyond Passive Oracles
-- All PBO algorithms so far assume human $=$ **passive oracle** who simply
-responds to queries
-- In practice, humans are **active agents** who shape the learning process:
-  - A user may deliberately pick challenging examples to teach the system
-  - Humans' feedback depends on their beliefs about how it will be used
-  - Experts may sacrifice short-term accuracy to convey long-term information
-- This motivates a **game-theoretic** perspective on preference learning
-- Key question: what happens when both the human and the robot optimize
-jointly?
+## 不只是一个被动的裁判
+- 前面这些 PBO 算法都假设人 $=$ 一个**被动裁判**，只是回答问题
 
-## CIRL Framework
-**Cooperative Inverse Reinforcement Learning** — a two-player cooperative
-game:
+- 实际上人是**主动的行动者**，会左右学习的过程：
+  - 用户可能特意挑有难度的例子来教系统
+  - 人给出的反馈，取决于他认为这反馈会被怎么用
+  - 专家可能牺牲眼前的准确，去传递更长远的信息
+- 这就把偏好学习引向一个**博弈论**的视角
+- 关键问题：当人和机器人两边都在做优化时，会发生什么？
+
+
+## CIRL 框架
+**合作逆强化学习（CIRL）**——一个两人合作的
+博弈：
 
 :::: {.columns}
 ::: {.column width="50%"}
 **Human H**:
 
-- Knows true reward parameters $\theta \in \Theta$
-- Chooses actions to help the robot learn
+- 知道真实的奖励参数 $\theta \in \Theta$
+- 选行动是为了帮机器人学
 :::
 ::: {.column width="50%"}
 **Robot R**:
 
-- Does not know $\theta$
-- Maintains belief $b_R^t(\theta)$
-- Chooses actions to maximize shared payoff
+- 不知道 $\theta$
+- 维护一个信念 $b_R^t(\theta)$
+- 选行动是为了让共同的收益最大
 :::
 ::::
 
-- **Shared payoff**: $R(s, a_H, a_R; \theta)$ — interests are fully aligned
-- Unlike standard IRL (expert demonstrates $\to$ agent imitates), CIRL models
-**joint optimization** where both agents reason about each other's strategies
+- **共同收益**：$R(s, a_H, a_R; \theta)$——两者的利益完全一致
+- 与标准的逆强化学习（专家演示 $\to$ 智能体模仿）不同，CIRL 建模的是
+**联合优化**，双方都会考虑对方的策略
 
-## CIRL — Formal Definition
-A CIRL game is a tuple $\mathcal{M} = (\mathcal{S}, \{\mathcal{A}_H,
-\mathcal{A}_R\}, T, R, \Theta, P_0)$:
+## CIRL——形式化定义
+一个 CIRL 博弈是一个元组 $\mathcal{M} = (\mathcal{S}, \{\mathcal{A}_H,
+\mathcal{A}_R\}, T, R, \Theta, P_0)$：
 
-- $\mathcal{S}$: state space; $\mathcal{A}_H, \mathcal{A}_R$: action spaces
-- $T(s' \mid s, a_H, a_R)$: transition dynamics
-- $R(s, a_H, a_R; \theta)$: shared reward parameterized by $\theta$
-- $\Theta$: space of reward parameters with prior $P_0(\theta)$
+- $\mathcal{S}$：状态空间；$\mathcal{A}_H, \mathcal{A}_R$：双方的动作空间
+- $T(s' \mid s, a_H, a_R)$：转移动力学
+- $R(s, a_H, a_R; \theta)$：由 $\theta$ 参数化的共同奖励
+- $\Theta$：奖励参数的空间，带先验 $P_0(\theta)$
 
-**Key distinction from standard IRL:**
+**与标准逆强化学习的关键区别：**
 
-- IRL: observe expert, then imitate offline
-- CIRL: human and robot **interact in real time**, both optimizing the
-shared objective
-- The human's policy $\pi_H(a_H \mid s, \theta)$ depends on $\theta$, giving
-the robot information through observation
+- 逆强化学习：观察专家，然后离线模仿
+- CIRL：人和机器人**实时互动**，双方都在优化
+共同目标
+- 人的策略 $\pi_H(a_H \mid s, \theta)$ 取决于 $\theta$，机器人于是
+通过观察就获得了信息
 
-## Teaching vs Demonstrating
-Key insight: expert demonstrations can be **suboptimal** for joint value!
+## 教学 与 演示
+关键洞见：为了共同的价值，专家的演示可能是**次优的**！
 
 :::: {.columns}
 ::: {.column width="50%"}
 **Demonstrating**:
 
-- Human always acts optimally given $\theta$
-- Robot observes and imitates
-- Ignores the teaching opportunity
+- 人总是按 $\theta$ 做出最优行动
+- 机器人观察并模仿
+- 忽略了"教"的机会
 :::
 ::: {.column width="50%"}
 **Teaching**:
 
-- Human sometimes sacrifices immediate reward to **reveal** $\theta$
-- Instructive actions help the robot learn faster
-- Higher cumulative shared reward
+- 人有时会牺牲眼前的奖励，好把 $\theta$ **显露**出来
+- 有启发性的行动能让机器人学得更快
+- 累计的共同奖励更高
 :::
 ::::
 
-- When the robot is uncertain, an action that clearly reveals $\theta$ can
-yield much higher long-term reward than the myopically optimal action
-- CIRL captures this: the human's optimal policy depends on the robot's
-current belief
+- 当机器人拿不准时，一个能把 $\theta$ 讲清楚的动作
+带来的长期回报，可能远高于只顾眼前最优的那个动作
+- CIRL 正好刻画了这一点：人的最优策略取决于机器人
+当前的信念
 
-## Choice Architecture
-As designers of preference elicitation systems, we are **choice architects**:
+## 选择架构
+作为偏好征询系统的设计者，我们其实都是**选择架构师**：
 
-- **Order effects**: first and last items receive disproportionate attention
-- **Framing effects**: how options are described changes their perceived value
-- **Default effects**: pre-selected options are chosen significantly more
+- **顺序效应**：开头和结尾的项目会得到不成比例的关注
+- **框架效应**：同一个选项换个说法，人们感受到的价值就变了
+- **默认效应**：预先选好的选项被选中的概率明显更高
 often
-- **Anchoring effects**: initial reference points skew subsequent judgments
+- **锚定效应**：最初的参照点会带偏后面的判断
 
-Standard choice models (e.g., IIA) do **not** capture these systematic biases.
+标准的选择模型（例如 IIA）**并没有**刻画这些系统性的偏差。
 
-Responsible deployment of preference learning systems requires:
+要把偏好学习系统用得负责任，需要做到：
 
-- Awareness of how query design influences responses
-- Testing for sensitivity to presentation order and framing
-- Transparent reporting of elicitation methodology
+- 明白提问的设计会怎样影响回答
+- 检验结果对呈现顺序、呈现方式是否敏感
+- 把征询方法透明地报告出来
 
-## Summary
-- **PBO**: optimize black-box functions via pairwise comparisons when numeric
-objectives are unavailable
-- **Copeland score**: measures how often an option wins; the Condorcet
-winner = optimizer
-- **Acquisition functions**: Pure Exploration, POP-BO, qEUBO, Dueling-TS
-each balance exploration and exploitation differently
-- **qEUBO**: one-step Bayes optimal (noise-free); **qEI**: can fail to
-converge (counterexample)
-- **Regret**: preference feedback costs an extra $T^{1/4}$ factor compared
-to direct evaluation
-- **CIRL**: humans are strategic agents, not passive oracles — joint
-optimization matters
-- **Looking ahead**: Chapter 5 — from individual preferences to collective
-aggregation
+## 小结
+- **PBO**：当数值
+目标写不出来时，用成对比较来优化黑盒函数
+- **Copeland 分数**：衡量一个选项赢的次数；孔多塞
+胜者 = 最优解
+- **采集函数**：纯探索、POP-BO、qEUBO、Dueling-TS，
+它们对探索与利用的取舍各不相同
+- **qEUBO**：（无噪声时）一步贝叶斯最优；**qEI**：可能
+不收敛（有反例）
+- **遗憾**：与直接取函数值相比，只用偏好反馈要多付出一个 $T^{1/4}$
+因子
+- **CIRL**：人是策略性的行动者，不是被动的裁判——
+联合优化才重要
+- **下一站**：第 5 章——从个人偏好到集体
+聚合
 
-## Discussion and Q&A
-### **Next Chapter:**
-#### Aggregated Preference Optimization via Mechanism Design
+## 讨论与答疑
+### **下一章：**
+#### 用机制设计做聚合式偏好优化
