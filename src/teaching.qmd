@@ -11,13 +11,13 @@ format: html
 
 | 章节 | 主题 | 讲义 |
 |:--------|:------|:-------|
-| 引言 | 全书概览与动机 | [讲义](https://mlhp.stanford.edu/slides/chap0.html) |
-| 第 1 章 | 基础 | [讲义](https://mlhp.stanford.edu/slides/chap1.html) |
-| 第 2 章 | 学习 | [讲义](https://mlhp.stanford.edu/slides/chap2.html) |
-| 第 3 章 | 偏好征询 | [讲义](https://mlhp.stanford.edu/slides/chap3.html) |
-| 第 4 章 | 决策 | [讲义](https://mlhp.stanford.edu/slides/chap4.html) |
-| 第 5 章 | 聚合 | [讲义](https://mlhp.stanford.edu/slides/chap5.html) |
-| 第 6 章 | 谁的偏好 | [讲义](https://mlhp.stanford.edu/slides/chap6.html) |
+| 引言 | 全书概览与动机 | [讲义](../slides/chap0.html) |
+| 第 1 章 | 基础 | [讲义](../slides/chap1.html) |
+| 第 2 章 | 学习 | [讲义](../slides/chap2.html) |
+| 第 3 章 | 偏好征询 | [讲义](../slides/chap3.html) |
+| 第 4 章 | 决策 | [讲义](../slides/chap4.html) |
+| 第 5 章 | 聚合 | [讲义](../slides/chap5.html) |
+| 第 6 章 | 谁的偏好 | [讲义](../slides/chap6.html) |
 
 ## 习题
 

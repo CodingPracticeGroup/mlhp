@@ -230,6 +230,10 @@
 17. `_quarto.yml` 的 `format.html.include-in-header` 里原本手写了一个 MathJax 3 的 `<script>`（上游为旧版 Quarto 加的）。Quarto 1.11 自己会加载 MathJax 4，两个版本同时加载时 v4 的组件会报 `Component core uses 4.1.3 of MathJax; version in use is 3.2.2` 并抛 `TypeError`，结果整页公式都不排版：实测本页 `mjx-container` 为 0（页面里有 232 处公式标记），上游同页为 550。现在删掉这行手写脚本，只保留 Quarto 管理的引擎，`mathjax: macros:` 配置保留。修好后实测：第 1 章 625/625、第 2 章 232/232、第 3 章 323/323、第 6 章 166/166 处公式全部排版，控制台无报错。
 
 
+18. 讲义（`src/slides/`）接入本站。它和习题集一样是嵌套项目（`src/slides/_quarto.yml`，输出目录 `../../_book/slides`，格式 revealjs），主项目不会渲染它，所以 `.github/workflows/render-zh.yml` 里增加了一个"渲染讲义"的步骤：先在 `src/slides` 目录里 `quarto add coatless-quarto/pyodide`（嵌套项目只认自己目录下的 `_extensions/`，仓库根装的扩展对它无效），再逐章 `quarto render chapN.qmd`。同时 `src/teaching.qmd` 里 7 个指向 `https://mlhp.stanford.edu/slides/chapN.html` 的链接改为相对路径 `../slides/chapN.html`；`src/slides/_quarto.yml` 的项目标题 `CS329H Slides` 译为 `CS329H 讲义`。
+
+19. 讲义里有两处章节交叉引用与本书的实际编号不符：`src/slides/chap2.qmd` 开头写"Chapter 2 established models (Rasch, Bradley-Terry, factor models)"（建立模型的是第 1 章），第 322 行写"Connects to **active learning** (Chapter 4)"（主动学习在第 3 章）。这两处按原文照译成"第 2 章""第 4 章"，没有替作者改正——和上游一致更容易核对，读者若按中文站点的目录去找会发现对不上。
+
 ## 5.1 校验脚本的输出怎么读
 
 `scripts/check-translation.py` 有两类已知的假阳性，出现时要人工核对而不是直接改正文：

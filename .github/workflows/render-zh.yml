@@ -57,6 +57,17 @@ jobs:
             quarto render "$f.qmd"
           done
 
+      # 讲义也是嵌套项目（src/slides/_quarto.yml），输出到 _book/slides/，主项目同样不会渲染它们。
+      # 嵌套项目用的是自己目录下的 _extensions/，所以这里要再装一次 pyodide 扩展。
+      - name: 渲染讲义
+        working-directory: src/slides
+        # 逐个渲染，原因同习题集：一次渲染多个文档时输出文件会互相覆盖
+        run: |
+          quarto add --no-prompt coatless-quarto/pyodide
+          for f in chap0 chap1 chap2 chap3 chap4 chap5 chap6; do
+            quarto render "$f.qmd"
+          done
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _book
