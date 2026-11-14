@@ -1,144 +1,144 @@
-# Glossary {.unnumbered}
+# 术语表 {.unnumbered}
 
-Key terms used throughout this book, organized alphabetically. Chapter references indicate where each concept is first introduced or primarily developed.
+本书反复用到的关键术语，按英文术语首字母排序。条目末尾标注的章节，是该概念首次出现或主要展开的地方。
 
-**A-Optimal Design**
-: Experimental design that minimizes the *average* variance of parameter estimates, i.e., $\text{tr}(\mathcal{I}^{-1})$. Contrasts with D-optimal (volume) and E-optimal (worst-case). See @sec-measurement.
+**A-最优设计（A-Optimal Design）**
+: 挑选"该做哪些实验"（比如该比较哪几对物品）的一种准则：让参数估计的*平均*方差最小，也就是让 $\text{tr}(\mathcal{I}^{-1})$ 最小。另外两种思路各管一头：D-最优设计管总体体积，E-最优设计管最差情况。见 @sec-measurement。
 
-**Acquisition Function**
-: A function that quantifies the value of querying a particular item or pair, balancing information gain against expected reward. Used in active learning, Bayesian optimization, and dueling bandits. See @sec-thompson-sampling.
+**采集函数（Acquisition Function）**
+: 回答"下一步该问哪一个"的打分函数：问这个问题能换回多少信息，顺便还能拿到多少回报。主动学习、贝叶斯优化、对决老虎机里都用它。见 @sec-thompson-sampling。
 
-**Active Learning**
-: A paradigm where the learner adaptively selects which queries to pose (e.g., which items to compare) to maximize information gain, rather than passively receiving data. See @sec-measurement.
+**主动学习（Active Learning）**
+: 由学习者自己决定接下来问什么（比如挑哪两个物品来比），把问题问在最有用的地方，而不是被动接收别人给的数据。见 @sec-measurement。
 
-**Arrow's Impossibility Theorem**
-: A foundational result in social choice theory: no social welfare function over three or more alternatives can simultaneously satisfy unanimity, independence of irrelevant alternatives, and non-dictatorship. See @sec-aggregation.
+**阿罗不可能定理（Arrow's Impossibility Theorem）**
+: 社会选择理论里最有名的结论：只要候选项有 3 个或更多，就不存在任何"把个人偏好汇总成集体排序"的规则，能同时满足一致同意（unanimity）、无关备选独立性（IIA）和非独裁这三条要求。见 @sec-aggregation。
 
-**Bayesian Inference**
-: A statistical framework that combines prior beliefs $p(\theta)$ with observed data via Bayes' rule to obtain a posterior distribution $p(\theta \mid \mathcal{D})$, enabling uncertainty quantification over model parameters. See @sec-bayesian.
+**贝叶斯推断（Bayesian Inference）**
+: 一套统计方法：先把看到数据之前的想法写成先验 $p(\theta)$，再用贝叶斯法则把它和观察到的数据合起来，得到后验分布 $p(\theta \mid \mathcal{D})$。它的好处是不只给一个答案，还告诉你这个答案有多不确定。见 @sec-bayesian。
 
-**Borda Count**
-: A positional voting rule where each voter assigns points based on rank position (highest-ranked gets $m-1$ points, next gets $m-2$, etc.). The alternative with the most total points wins. Violates IIA but satisfies other desirable properties. See @sec-aggregation.
+**博尔达计数（Borda Count）**
+: 一种投票计点规则：每个人按名次给候选项发分，第一名胜得 $m-1$ 分，第二名胜得 $m-2$ 分，以此类推；总分最高的胜出。它不满足 IIA，但其它几条好性质是满足的。见 @sec-aggregation。
 
-**Bradley-Terry Model**
-: A pairwise comparison model where the probability that item $j$ beats item $k$ is $p(j \succ k) = \sigma(V_j - V_k)$, with $\sigma$ the logistic function. Equivalent to random utility with i.i.d. Gumbel noise. See @sec-bradley-terry.
+**Bradley-Terry 模型（Bradley-Terry Model，简称 BT 模型）**
+: 最常用的一对一胜负模型：物品 $j$ 赢过物品 $k$ 的概率是 $p(j \succ k) = \sigma(V_j - V_k)$，其中 $\sigma$ 是 logistic 函数。它与"噪声服从独立同分布 Gumbel 分布"的随机效用模型完全等价。见 @sec-bradley-terry。
 
-**Calibration**
-: The property that predicted probabilities match observed frequencies: if a model predicts $p(j \succ k) = 0.7$, then $j$ should beat $k$ approximately 70% of the time in practice. See @sec-model-selection.
+**校准（Calibration）**
+: 指模型报出的概率和实际发生的频率能对上：模型说 $p(j \succ k) = 0.7$，那么在真实数据里，$j$ 就该大约有 70% 的场次赢过 $k$。见 @sec-model-selection。
 
-**Computerized Adaptive Testing (CAT)**
-: An assessment paradigm that selects test items adaptively based on a test-taker's estimated ability, using information-theoretic criteria to maximize measurement precision with fewer items. See @sec-measurement.
+**计算机化自适应测验（Computerized Adaptive Testing, CAT）**
+: 考试系统的做法：根据考生当前被估出来的水平动态挑下一道题，用信息论的准则"用最少的题量换到最高的测量精度"。见 @sec-measurement。
 
-**Condorcet Winner**
-: An alternative that beats every other alternative in pairwise majority comparison. May not exist (see Condorcet paradox). When it exists, many argue it should be the social choice. See @sec-aggregation.
+**孔多塞胜者（Condorcet Winner）**
+: 如果某个候选项按多数票在两两对决中都能击败其它每一个候选项，它就是孔多塞胜者。它未必存在（见孔多塞悖论）。但只要存在，很多人认为就该选它。见 @sec-aggregation。
 
-**Condorcet Paradox**
-: The observation that majority preferences can cycle even when all individual preferences are transitive. With three voters ranking $A \succ B \succ C$, $B \succ C \succ A$, $C \succ A \succ B$: $A$ beats $B$, $B$ beats $C$, $C$ beats $A$. See @sec-aggregation.
+**孔多塞悖论（Condorcet Paradox）**
+: 奇怪之处在于：每个人的偏好都是传递的（觉得 A 比 B 好、B 比 C 好，就觉得 A 比 C 好），可多数投票的结果却会转圈。三个投票人分别排 $A \succ B \succ C$、$B \succ C \succ A$、$C \succ A \succ B$，两两一比就成了 $A$ 胜 $B$、$B$ 胜 $C$、$C$ 胜 $A$。见 @sec-aggregation。
 
-**Cooperative Inverse Reinforcement Learning (CIRL)**
-: A game-theoretic framework where a robot and human jointly optimize the human's reward function, which the robot does not initially know. The robot must actively learn preferences through interaction. See Chapter 4.
+**合作逆强化学习（Cooperative Inverse Reinforcement Learning, CIRL）**
+: 一个博弈框架：机器人和人一起优化"人的奖励函数"，但机器人一开始并不知道这个奖励函数长什么样，所以它必须主动通过互动去摸清人的偏好。见第 4 章。
 
-**Cross-Validation**
-: A model selection technique that partitions data into training and validation folds, fitting on training data and evaluating on held-out data. Used to select regularization strength, kernel hyperparameters, and model complexity. See @sec-model-selection.
+**交叉验证（Cross-Validation）**
+: 选模型的办法：把数据分成若干份，用其中一部分训练，另一部分只留着做检查。正则化强度、核函数的超参数、模型复杂度，都靠它来挑。见 @sec-model-selection。
 
-**D-Optimal Design**
-: Experimental design that maximizes $\det(\mathcal{I})$, the determinant of the Fisher information matrix. Geometrically, this maximally shrinks the volume of the posterior uncertainty ellipsoid. See @sec-measurement.
+**D-最优设计（D-Optimal Design）**
+: 让 $\det(\mathcal{I})$（费雪信息矩阵的行列式）最大的实验设计。几何上的效果是：把后验不确定性椭球的体积压到最小。见 @sec-measurement。
 
-**Demographic Parity**
-: A group fairness criterion requiring that the probability of a positive outcome is equal across protected groups: $P(\hat{Y}=1 \mid A=a) = P(\hat{Y}=1 \mid A=b)$. See @sec-fairness-concepts.
+**人口统计均等（Demographic Parity）**
+: 一种群体公平要求：不同受保护群体拿到好结果的概率要相同，即 $P(\hat{Y}=1 \mid A=a) = P(\hat{Y}=1 \mid A=b)$。见 @sec-fairness-concepts。
 
-**Direct Preference Optimization (DPO)**
-: A method for aligning language models directly from pairwise preference data without training a separate reward model. Equivalent to Bradley-Terry MLE where the utility is $\beta \log \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)}$. See @sec-llm-example.
+**直接偏好优化（Direct Preference Optimization, DPO）**
+: 不单独训练奖励模型，直接拿成对偏好数据去调语言模型。它和 Bradley-Terry 的最大似然估计等价，只是把效用写成 $\beta \log \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)}$。见 @sec-llm-example。
 
-**Dueling Bandits**
-: A variant of the multi-armed bandit problem where feedback comes as pairwise comparisons ("which of these two options is better?") rather than absolute rewards. See Chapter 4.
+**对决老虎机（Dueling Bandits）**
+: 多臂老虎机的一个变体：反馈不是一个具体分数，而是"这两个里哪个更好"这样的两两比较。见第 4 章。
 
-**E-Optimal Design**
-: Experimental design that maximizes $\lambda_{\min}(\mathcal{I})$, the smallest eigenvalue of the Fisher information matrix. Guards against worst-case estimation error. See @sec-measurement.
+**E-最优设计（E-Optimal Design）**
+: 让 $\lambda_{\min}(\mathcal{I})$（费雪信息矩阵的最小特征值）最大的实验设计。它防的是"误差最大的那个方向上估得太离谱"。见 @sec-measurement。
 
-**Elo Rating System**
-: A rating system (originally for chess) that updates player ratings after each match. Mathematically equivalent to stochastic gradient ascent on the Bradley-Terry log-likelihood. See @sec-online.
+**Elo 等级分系统（Elo Rating System）**
+: 源于象棋打分的做法：每比完一场就更新双方分数。数学上等价于对 Bradley-Terry 的对数似然做随机梯度上升。见 @sec-online。
 
-**Equalized Odds**
-: A group fairness criterion requiring that the true positive rate and false positive rate are equal across protected groups: $P(\hat{Y}=1 \mid Y=y, A=a) = P(\hat{Y}=1 \mid Y=y, A=b)$ for $y \in \{0,1\}$. See @sec-fairness-concepts.
+**机会均等（Equalized Odds）**
+: 一种群体公平要求：各受保护群体的真正例率和假正例率都要相同，即 $P(\hat{Y}=1 \mid Y=y, A=a) = P(\hat{Y}=1 \mid Y=y, A=b)$，其中 $y \in \{0,1\}$。见 @sec-fairness-concepts。
 
-**Exploration-Exploitation Tradeoff**
-: The fundamental tension in sequential decision-making: exploit current best knowledge for immediate reward, or explore uncertain options for future information gain. See @sec-thompson-sampling.
+**探索与利用的权衡（Exploration–Exploitation Tradeoff）**
+: 连续决策里绕不开的矛盾：是照当前最好的知识去做、马上拿分，还是去试没把握的选项、换回信息以后拿更多分。见 @sec-thompson-sampling。
 
-**Fisher Information**
-: A measure of how much information an observation carries about an unknown parameter. For the Bradley-Terry model with one comparison, $\mathcal{I}(U) = p(1-p)$ where $p = \sigma(U - V_j)$. Maximized when $p \approx 0.5$. See @sec-measurement.
+**费雪信息（Fisher Information）**
+: 衡量"一条观察能提供多少关于未知参数的信息"。在 Bradley-Terry 模型里，做一场比较带来的信息是 $\mathcal{I}(U) = p(1-p)$，其中 $p = \sigma(U - V_j)$。当 $p \approx 0.5$、也就是胜负难料时，信息最大。见 @sec-measurement。
 
-**Gaussian Process (GP)**
-: A nonparametric Bayesian model that places a prior distribution over functions. In preference learning, GPs model utility functions with uncertainty, enabling principled exploration through posterior sampling. See @sec-gp-inference.
+**高斯过程（Gaussian Process, GP）**
+: 一种非参数的贝叶斯模型，直接在所有可能的函数上放一个先验。在偏好学习里，它给效用函数建模并带上不确定性，于是能靠后验采样有章法地去探索。见 @sec-gp-inference。
 
-**Gibbard-Satterthwaite Theorem**
-: Any deterministic social choice function over three or more alternatives that is strategy-proof (no voter can benefit from misreporting preferences) and onto must be dictatorial. Implies all non-dictatorial voting rules are manipulable. See @sec-aggregation.
+**Gibbard-Satterthwaite 定理（Gibbard-Satterthwaite Theorem）**
+: 只要候选项有 3 个以上，任何确定性的、满足"策略证明"（谁谎报偏好都占不到便宜）并且能取到所有可能结果的集体选择规则，都必然是独裁的。换句话说：只要不是独裁，投票规则就能被操纵。见 @sec-aggregation。
 
-**Goodhart's Law**
-: "When a measure becomes a target, it ceases to be a good measure." In preference learning: optimizing a learned reward model too aggressively can lead to reward hacking, where the model exploits the proxy rather than satisfying true human preferences. See Chapter 7.
+**Goodhart 定律（Goodhart's Law）**
+: "一个指标一旦成了目标，它就不再是个好指标。"在偏好学习里的表现是：照着学出来的奖励模型使劲优化，容易出奖励作弊（reward hacking）——模型钻了这个替代指标的空子，并没有真的满足人的偏好。见第 7 章。
 
-**Group Fairness**
-: Fairness criteria defined over protected demographic groups (e.g., requiring equal outcomes or error rates across groups). Includes demographic parity, equalized odds, and calibration. See @sec-fairness-concepts.
+**群体公平（Group Fairness）**
+: 按受保护的人口群体来定义的公平要求，比如要求各组拿到好结果的比例相同、或者犯错的比例相同。具体包括人口统计均等、机会均等、校准等。见 @sec-fairness-concepts。
 
-**Identification**
-: The property that model parameters can be uniquely recovered from observable data. In utility models, parameters are typically identified only up to location/scale transformations, requiring normalization constraints. See @sec-identification-rashomon.
+**可识别性（Identification）**
+: 指能不能从看得见的数据里唯一地把参数还原出来。效用模型通常只能识别到"差一个平移和缩放"的程度，所以必须人为加上归一化约束。见 @sec-identification-rashomon。
 
-**Independence of Irrelevant Alternatives (IIA)**
-: The property that the relative probability of choosing between two alternatives is unaffected by the presence or absence of other alternatives. Equivalent to i.i.d. Gumbel noise in random utility models. See @sec-iia.
+**无关备选独立性（Independence of Irrelevant Alternatives, IIA）**
+: 指在两个选项之间的相对选择概率，不会因为第三个选项在场还是不在场而改变。在随机效用模型里，它等价于"噪声服从独立同分布的 Gumbel 分布"。见 @sec-iia。
 
-**Individual Fairness**
-: A fairness criterion requiring that similar individuals receive similar treatment: $d(f(x), f(x')) \leq L \cdot d(x, x')$ for a Lipschitz constant $L$ and appropriate metrics. Fundamentally incompatible with group fairness in many settings. See @sec-fairness-concepts.
+**个体公平（Individual Fairness）**
+: 要求相似的个体得到相似的对待：$d(f(x), f(x')) \leq L \cdot d(x, x')$，其中 $L$ 是 Lipschitz 常数，$d$ 是事先约定的相似度度量。在很多场景下，它和群体公平根本无法同时成立。见 @sec-fairness-concepts。
 
-**Inversion Problem**
-: The challenge that preference learning pipelines can *invert* intended fairness guarantees: choices that seem fair at one stage (e.g., efficient elicitation) can produce unfair outcomes downstream. See @sec-inversion.
+**反转问题（Inversion Problem）**
+: 本书关注的一个现象：整条偏好学习流水线会把你以为的公平保证"反过来"。某个阶段看起来公平的作法（比如为了少问几个问题而做的偏好征询），到下游可能产出很不公平的结果。见 @sec-inversion。
 
-**Item Response Theory (IRT)**
-: A family of psychometric models relating a latent trait (ability) to observable responses. The Rasch model is a special case where $p(\text{correct}) = \sigma(U_i - V_j)$, with $U_i$ the person's ability and $V_j$ the item's difficulty. See @sec-measurement.
+**项目反应理论（Item Response Theory, IRT）**
+: 心理测量里的一族模型，把看不见的潜在特质（能力）和看得见的作答结果联系起来。Rasch 模型是它的一个特例：$p(\text{correct}) = \sigma(U_i - V_j)$，其中 $U_i$ 是被试的能力，$V_j$ 是题目的难度。见 @sec-measurement。
 
-**Laplace Approximation**
-: A technique that approximates a posterior distribution with a Gaussian centered at the MAP estimate, using the Hessian of the log-posterior as the precision matrix. Essential for tractable GP-based preference models. See @sec-bayesian.
+**拉普拉斯近似（Laplace Approximation）**
+: 用一个正态分布去近似后验：中心放在 MAP 估计处，精度矩阵取对数后验的黑塞矩阵。基于高斯过程的偏好模型算得动，靠的就是它。见 @sec-bayesian。
 
-**Maximum Likelihood Estimation (MLE)**
-: Point estimation by maximizing the likelihood function $\hat{\theta} = \arg\max_\theta \prod_i p(y_i \mid \theta)$. For Bradley-Terry: $\hat{V} = \arg\max \sum \log \sigma(V_{w} - V_{\ell})$. See @sec-mle.
+**最大似然估计（Maximum Likelihood Estimation, MLE）**
+: 做点估计的一种办法：选那个让已观察数据显得最可能的参数，$\hat{\theta} = \arg\max_\theta \prod_i p(y_i \mid \theta)$。在 Bradley-Terry 模型里就是 $\hat{V} = \arg\max \sum \log \sigma(V_{w} - V_{\ell})$。见 @sec-mle。
 
-**Mechanism Design**
-: The field of designing rules or institutions (mechanisms) that produce desirable outcomes even when participants act strategically in their own self-interest. Sometimes called "reverse game theory." See @sec-aggregation.
+**机制设计（Mechanism Design）**
+: 研究"规则该怎么定"：即使每个人只顾自己、会策略性地算计，规则跑出来的结果仍然是好的。有人管它叫"反着做的博弈论"。见 @sec-aggregation。
 
-**Plackett-Luce Model**
-: A ranking model that generalizes Bradley-Terry to full rankings. The probability of ranking $j_1 \succ j_2 \succ \cdots$ is $\prod_r \frac{e^{V_{j_r}}}{\sum_{s \geq r} e^{V_{j_s}}}$. Each position is chosen by softmax from the remaining alternatives. See @sec-foundations.
+**Plackett-Luce 模型（Plackett-Luce Model）**
+: 把 Bradley-Terry 从"两个比"推广到"排出完整名次"。排出 $j_1 \succ j_2 \succ \cdots$ 的概率是 $\prod_r \frac{e^{V_{j_r}}}{\sum_{s \geq r} e^{V_{j_s}}}$：先从全部候选里按 softmax 选第一名，再从剩下的选第二名，以此类推。见 @sec-foundations。
 
-**Preferential Bayesian Optimization (PBO)**
-: Bayesian optimization using pairwise preference feedback instead of scalar function evaluations. Useful when humans can compare outcomes more reliably than they can assign absolute scores. See Chapter 4.
+**偏好型贝叶斯优化（Preferential Bayesian Optimization, PBO）**
+: 做贝叶斯优化时不要求人给出具体分数，只收集"这两个哪个更好"的比较。适合那种"人能比较，但给不准绝对分"的场合。见第 4 章。
 
-**Random Utility Model (RUM)**
-: A framework where an individual's utility for item $j$ is $\tilde{V}_j = V_j + \epsilon_j$, with $V_j$ the deterministic component and $\epsilon_j$ random noise capturing unobserved factors. The individual chooses the item with highest realized utility. See @sec-foundations.
+**随机效用模型（Random Utility Model, RUM）**
+: 假设某人对物品 $j$ 的真实效用是带噪声的：$\tilde{V}_j = V_j + \epsilon_j$。$V_j$ 是能算出来的确定部分，$\epsilon_j$ 代表没被观察到的那些因素。这一次他选的是"实际实现出来的效用"最高的那个物品。见 @sec-foundations。
 
-**Rashomon Effect**
-: The phenomenon where many substantially different models explain the data equally well. Named after the Kurosawa film. In preference learning, different utility vectors may fit identical comparison data. See @sec-identification-rashomon.
+**罗生门效应（Rashomon Effect）**
+: 指差别很大的多个模型，对同一份数据的拟合程度一样好。名字来自黑泽明的电影《罗生门》。在偏好学习里，不同的效用向量可能都同样符合同一批比较数据。见 @sec-identification-rashomon。
 
-**Rasch Model**
-: A one-parameter IRT model where the probability of a correct response depends only on the difference between person ability $U_i$ and item difficulty $V_j$: $p(\text{correct}) = \sigma(U_i - V_j)$. See @sec-measurement.
+**Rasch 模型（Rasch Model）**
+: 单参数的项目反应模型：答对的概率只取决于能力 $U_i$ 和难度 $V_j$ 的差，$p(\text{correct}) = \sigma(U_i - V_j)$。见 @sec-measurement。
 
-**Regret**
-: The cumulative difference between the reward of the optimal policy and the reward actually obtained. A standard measure of sequential decision-making performance: $R_T = \sum_{t=1}^T [r^* - r_t]$. See @sec-thompson-sampling.
+**遗憾（Regret）**
+: 一路做下来，"最优策略本来能拿到的回报"与"你实际拿到的回报"之间的累计差距：$R_T = \sum_{t=1}^T [r^* - r_t]$。这是衡量连续决策好坏的标准指标。见 @sec-thompson-sampling。
 
-**Reinforcement Learning from Human Feedback (RLHF)**
-: A pipeline for aligning language models: (1) collect pairwise human preferences over model outputs, (2) train a reward model on these preferences, (3) optimize the language model against the reward model using RL (typically PPO). See @sec-llm-example.
+**人类反馈强化学习（Reinforcement Learning from Human Feedback, RLHF）**
+: 调语言模型的一条流水线：(1) 收集人对模型多个输出的两两偏好；(2) 用这些偏好训练一个奖励模型；(3) 用强化学习（通常用 PPO）让语言模型去迎合这个奖励模型。见 @sec-llm-example。
 
-**Reliability**
-: In psychometrics, the proportion of observed variance attributable to true differences rather than measurement error: $\text{Rel} = 1 - \sigma^2_{\text{error}} / \sigma^2_{\text{total}}$. Ranges from 0 (pure noise) to 1 (perfect measurement). See @sec-measurement.
+**信度（Reliability）**
+: 心理测量里的指标：观察到的分数差异中，真正由个体差异造成的比例，$\text{Rel} = 1 - \sigma^2_{\text{error}} / \sigma^2_{\text{total}}$。等于 0 表示差异全是测量噪声，等于 1 表示测得完全准。见 @sec-measurement。
 
-**Social Welfare Function**
-: A function that maps individual preference orderings to a single collective ordering over alternatives. Arrow's theorem constrains what properties such functions can simultaneously satisfy. See @sec-aggregation.
+**社会福利函数（Social Welfare Function）**
+: 把每个人的偏好排序汇总成一个集体排序的函数。阿罗定理限制的是：这样的函数最多只能同时满足哪些性质。见 @sec-aggregation。
 
-**Thompson Sampling**
-: A Bayesian decision-making algorithm: sample parameters from the posterior, then act optimally given those sampled parameters. Naturally balances exploration (sampling from uncertain posteriors) and exploitation (acting optimally). See @sec-thompson-sampling.
+**汤普森采样（Thompson Sampling）**
+: 一种贝叶斯决策算法：先从后验里抽一组参数，再把抽到的当成真的、按它做最优行动。探索和利用被它天然地揉在一起：后验还没把握时抽出来的值会散开（于是顺带探索），有把握时抽出来的值集中（于是按当前最优行动）。见 @sec-thompson-sampling。
 
-**Thurstone Model**
-: A paired comparison model (1927) where $p(j \succ k) = \Phi\left(\frac{V_j - V_k}{\sqrt{2}\sigma}\right)$, using Gaussian noise rather than Gumbel. Practically similar to Bradley-Terry for most applications. See @sec-bradley-terry.
+**Thurstone 模型（Thurstone Model）**
+: 更早的一对一比较模型（1927 年）：$p(j \succ k) = \Phi\left(\frac{V_j - V_k}{\sqrt{2}\sigma}\right)$，用高斯噪声而不是 Gumbel 噪声。在绝大多数实际用途里，它和 Bradley-Terry 差别不大。见 @sec-bradley-terry。
 
-**Unanimity (Pareto Efficiency)**
-: A fairness axiom: if every individual strictly prefers $x$ to $y$, then the social ranking should prefer $x$ to $y$. One of Arrow's three axioms. See @sec-aggregation.
+**一致同意（帕累托效率）（Unanimity, Pareto Efficiency）**
+: 一条公平公理：如果每个人都严格更喜欢 $x$ 而不是 $y$，集体排序也应当把 $x$ 排在 $y$ 前面。这是阿罗三条公理之一。见 @sec-aggregation。
 
-**Upper Confidence Bound (UCB)**
-: A decision-making strategy that selects the action with the highest optimistic estimate: $j^* = \arg\max_j [\hat{\mu}_j + \beta \hat{\sigma}_j]$, where $\beta$ controls the exploration-exploitation tradeoff. See @sec-thompson-sampling.
+**上置信界（Upper Confidence Bound, UCB）**
+: 一种乐观的决策规则：选那个"估计值加上不确定度加成"最高的选项，$j^* = \arg\max_j [\hat{\mu}_j + \beta \hat{\sigma}_j]$，其中 $\beta$ 控制你有多想去探索。见 @sec-thompson-sampling。

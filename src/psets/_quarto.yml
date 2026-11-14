@@ -1,0 +1,57 @@
+# 习题集（psets）作为嵌套项目渲染到 _book/src/psets/，
+# 做法与上游处理讲义一致（见仓库根 _quarto.yml 第 5 条说明）。
+#
+# 与上游的差异：
+#   1. 加上中文标题，并统一 lang: zh，使界面文案与主项目一致。
+#   2. execute: eval: false —— 习题里的代码单元要 GPU 和外部数据集（pset1 要下载 Gemma，
+#      pset2/pset3 要真实数据集），CI 里跑不动，网页上也不该执行；上游站点上的习题页
+#      同样只有代码、没有执行结果。
+#   3. 这里用 `resources` 软链接指回仓库根的 resources/：主题 scss 里的字体是按项目根相对路径
+#      引用的（resources/fonts/...），嵌套项目的根是本目录，不链接就会报找不到字体而渲染失败。
+#   4. 主项目不会渲染这些文件（book 类型的 project.render 只渲染 chapters 列出的页面），
+#      所以这里显式列出三份习题；pset4.qmd 在上游是 0 字节空文件，不纳入。
+#   5. 顶栏的两个链接必须写已发布页面的地址（.html），不能写 .qmd：这两个文件不在本嵌套项目里，
+#      Quarto 解析不了，会把 ../../index.qmd 原样输出到页面上，点进去就是 404。
+#      同时加上 repo-url / repo-actions，让每页都有回到仓库源码的入口（习题要在本地跑才看得到结果）。
+
+project:
+  type: website
+  output-dir: ../../_book/src/psets
+
+website:
+  title: "习题"
+  repo-url: "https://github.com/CodingPracticeGroup/mlhp"
+  repo-actions: [source]
+  back-to-top-navigation: true
+  page-navigation: true
+  navbar:
+    left:
+      - text: "首页"
+        href: ../../index.html
+      - text: "教学安排"
+        href: ../teaching.html
+
+lang: zh
+
+execute:
+  eval: false
+  freeze: auto
+
+format:
+  html:
+    theme:
+      light: [flatly, resources/scss/global.scss]
+      dark: [darkly, resources/scss/global.scss]
+    code-fold: false
+    code-overflow: scroll
+    code-line-numbers: true
+    code-tools: true
+    mathjax:
+      macros:
+        mathbbm: ["\\mathbbm{#1}", 1]
+
+crossref:
+  fig-prefix: 图
+  tbl-prefix: 表
+  eq-prefix: 式
+  sec-prefix: "§"

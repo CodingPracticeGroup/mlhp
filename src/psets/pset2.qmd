@@ -1,54 +1,32 @@
-## Exercises
-### Question 1: Uncertainty Quantification in Preference Learning (40 points) {#sec-question-1-uncertainty-quantification-in-preference-learning-40-points .unnumbered}
+---
+title: "习题 2：估计与不确定性量化"
+lang: zh
+---
 
-In this question, we will explore Bayesian approaches to logistic
-regression in the context of preference learning using the Bradley-Terry
-model. We will compare different models and inference methods, including
-parametric linear models estimated using Metropolis-Hastings, parametric
-neural network models estimated using Hamiltonian Monte Carlo, and
-non-parametric models with Gaussian Processes. Finally, we will assess
-the uncertainty quantification in these models using the Expected
-Calibration Error (ECE).
+## 习题
+### 第 1 题：偏好学习中的不确定性量化（40 分） {#sec-question-1-uncertainty-quantification-in-preference-learning-40-points .unnumbered}
 
-Assume we have a dataset of pairwise preferences
-$\mathcal{D} = \{(x_i, y_i)\}_{i=1}^N$, where $x_i \in \mathbb{R}^d$
-represents the feature difference between two items (i.e.,
-$x_i = e^{(i)}_1 - e^{(i)}_2$ for embeddings $e^{(i)}_1$ and
-$e^{(i)}_2$), and $y_i \in \{0, 1\}$ indicates the preference ($y_i = 1$
-if item 1 is preferred over item 2 in the $i$-th pair).
+本题要在用 Bradley-Terry 模型做偏好学习的背景下，探索贝叶斯方法对逻辑回归的处理。我们会比较不同的模型与推断方法，包括用 Metropolis-Hastings 估计的参数化线性模型、用哈密顿蒙特卡洛估计的参数化神经网络模型，以及使用高斯过程的非参数模型。最后，用期望标定误差（Expected Calibration Error, ECE）来评估这些模型的不确定性量化做得如何。
 
-The likelihood of observing $y_i$ given $x_i$ and model parameters
-$\theta$ is given by the logistic function:
+设我们有一份两两偏好的数据集 $\mathcal{D} = \{(x_i, y_i)\}_{i=1}^N$，其中 $x_i \in \mathbb{R}^d$ 表示两个项目的特征之差（也就是说，$x_i = e^{(i)}_1 - e^{(i)}_2$，这里的 $e^{(i)}_1$ 与 $e^{(i)}_2$ 是两个嵌入），而 $y_i \in \{0, 1\}$ 表示偏好（在第 $i$ 对中，若项目 1 比项目 2 更被偏好，则 $y_i = 1$）。
+
+在给定 $x_i$ 与模型参数 $\theta$ 时，观察到 $y_i$ 的似然由 logistic 函数给出：
 
 $$P(y_i = 1 | x_i, \theta) = \sigma(x_i^\top \theta) = \frac{1}{1 + e^{-x_i^\top \theta}}.$$
 
-We will adopt a Bayesian approach by placing priors on the model
-parameters and using Markov Chain Monte Carlo (MCMC) methods to estimate
-the posterior distributions.
+我们采用贝叶斯的做法：给模型参数设先验，再用马尔可夫链蒙特卡洛（MCMC）方法来估计后验分布。
 
-(a) **Uncertainty Quantification and Expected Calibration Error (11
-    points)**
+(a) **不确定性量化与期望标定误差（11 分）**
 
-    (i) **(Written, 2 point)**. Spend some time reading
-        <https://tinyurl.com/m77mk9c>. Explain what the Expected
-        Calibration Error (ECE) measures and why it is important for
-        assessing uncertainty quantification in probabilistic models.
+(i) **（笔答，2 分）**。先花点时间读一下 <https://tinyurl.com/m77mk9c>。说明期望标定误差（ECE）衡量的是什么，以及它为什么是评估概率模型不确定性量化质量的重要指标。
 
-    (ii) **(Coding, 6 points)**. In `uncertainty_quantification/ece.py`,
-         implement the ECE using the formula
+(ii) **（编程，6 分）**。在 `uncertainty_quantification/ece.py` 中，按下面的公式实现 ECE：
          $$\text{ECE} = \sum_{k=1}^K \frac{n_k}{N} \left| \text{acc}(B_k) - \text{conf}(B_k) \right|,$$
-         where $n_k$ is the number of samples in bin $B_k$, $N$ is the
-         total number of samples, $\text{acc}(B_k)$ is the accuracy in
-         bin $B_k$, and $\text{conf}(B_k)$ is the average confidence in
-         bin $B_k$.
+其中 $n_k$ 是分箱 $B_k$ 中的样本数，$N$ 是样本总数，$\text{acc}(B_k)$ 是分箱 $B_k$ 内的准确率，$\text{conf}(B_k)$ 是分箱 $B_k$ 内的平均置信度。
 
-    (iii) **(Written, 3 point)**. After doing parts (b), (c), and (d),
-          compare the ECE scores and reliability diagrams of the 3
-          models. Which model(s) provide the best uncertainty
-          quantification? Discuss possible reasons for the observed
-          differences.
+(iii) **（笔答，3 分）**。做完 (b)、(c)、(d) 之后，比较这三个模型的 ECE 分数与可靠性图（reliability diagram）。哪个（些）模型的不确定性量化最好？讨论造成这些差异的可能原因。
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q1-1}
 import numpy as np
 import matplotlib.pyplot as plt
@@ -169,25 +147,15 @@ if __name__ == "__main__":
 ```
 :::
 
-(b) **Parametric Linear Model Estimated Using Metropolis-Hastings (11
-    points)**
+(b) **用 Metropolis-Hastings 估计的参数化线性模型（11 分）**
 
-    (i) **(Written, 3 points)**. Assume a prior on $\theta$ such that
-        $\theta \sim \mathcal{N}(0, \sigma^2 I)$, where $\sigma^2$ is
-        the variance and $I$ is the identity matrix. Derive the
-        expression for the posterior distribution
-        $P(\theta | \mathcal{D})$ up to a normalization constant.
+(i) **（笔答，3 分）**。设 $\theta$ 的先验为 $\theta \sim \mathcal{N}(0, \sigma^2 I)$，其中 $\sigma^2$ 是方差，$I$ 是单位矩阵。请推出后验分布 $P(\theta | \mathcal{D})$ 的表达式（差一个归一化常数即可）。
 
-    (ii) **(Coding, 6 points)**. Implement the Metropolis-Hastings
-         algorithm to sample from the posterior distribution of $\theta$
-         in `uncertainty_quantification/metropolis.py`.
+(ii) **（编程，6 分）**。在 `uncertainty_quantification/metropolis.py` 中实现 Metropolis-Hastings 算法，从 $\theta$ 的后验分布中采样。
 
-    (iii) **(Written, 2 points)**. Discuss how you chose the proposal
-          variance $\tau^2$ and the number of iterations $T$ and
-          $T_{\text{burn-in}}$. How did these choices affect the
-          convergence and mixing of your MCMC chain?
+(iii) **（笔答，2 分）**。说说你是怎么选建议分布的方差 $\tau^2$、迭代次数 $T$ 以及 $T_{\text{burn-in}}$ 的。这些选择怎样影响了 MCMC 链的收敛与混合？
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q1-2}
 import torch
 import matplotlib.pyplot as plt
@@ -301,24 +269,15 @@ expected_calibration_error(torch.sigmoid(x_test @ averaged_weights).numpy(), y_t
 ```
 :::
 
-(c) **Parametric Neural Network Model Estimated Using Hamiltonian Monte
-    Carlo (11 points)**
+(c) **用哈密顿蒙特卡洛估计的参数化神经网络模型（11 分）**
 
-    (i) **(Written, 2 points)**. Explain why Hamiltonian Monte Carlo
-        (HMC) is suitable for sampling from the posterior distribution
-        of neural network parameters compared to Metropolis-Hastings.
+(i) **（笔答，2 分）**。说明与 Metropolis-Hastings 相比，哈密顿蒙特卡洛（HMC）为什么更适合从神经网络参数的后验分布中采样。
 
-    (ii) **(Coding, 7 points)**. Implement HMC to sample from the
-         posterior distribution of the parameters $\theta$ of a neural
-         network $f(x; \theta)$ used for preference prediction in
-         `uncertainty_quantification/hmc_nn.py`. This will require a GPU
-         and take around 5 minutes on it!
+(ii) **（编程，7 分）**。在 `uncertainty_quantification/hmc_nn.py` 中实现 HMC，从用于偏好预测的神经网络 $f(x; \theta)$ 的参数 $\theta$ 的后验分布中采样。这需要 GPU，在 GPU 上大约要跑 5 分钟！
 
-    (iii) **(Written, 2 points)**. Briefly describe the performance of
-          the HMC and Metropolis-Hastings models and provide the
-          accuracy numbers.
+(iii) **（笔答，2 分）**。简要说明 HMC 模型与 Metropolis-Hastings 模型的表现，并给出准确率数值。
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q1-3}
 # Use a GPU when running this file! JAX should automatically default to GPU.
 import jax.numpy as np
@@ -433,24 +392,15 @@ if __name__ == "__main__":
 ```
 :::
 
-(d) **Non-Parametric Model with Gaussian Process (GP) (7 points)**
+(d) **使用高斯过程（GP）的非参数模型（7 分）**
 
-    (i) **(Written, 2 point)**. Describe how a Gaussian Process can be
-        used for preference learning in this context (i.e., describe how
-        the latent function is used for classification).
+(i) **（笔答，2 分）**。说明在这个场景下高斯过程可以用于偏好学习的方式（也就是说，说明那个潜在函数是怎么用来做分类的）。
 
-    (ii) **(Coding, 2 points)**. Run the GP classification for
-         preference learning code in\
-         `uncertainty_quantification/gaussian_process.py` and provide
-         the accuracy numbers. This can only be run on a CPU and may
-         take around 10 minutes to complete.
+(ii) **（编程，2 分）**。运行 `uncertainty_quantification/gaussian_process.py` 中用高斯过程分类做偏好学习的代码，并给出准确率数值。这段只能在 CPU 上跑，完成大约需要 10 分钟。
 
-    (iii) **(Written, 3 point)**. Discuss the computational complexity
-          of the GP model compared to the parametric models. What are
-          the advantages and disadvantages of using a GP in this
-          setting?
+(iii) **（笔答，3 分）**。比较 GP 模型与参数化模型的计算复杂度。在这个设定下用 GP 有什么好处、又有什么坏处？
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q1-4}
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessClassifier
@@ -480,108 +430,66 @@ expected_calibration_error(y_pred_probs, y_test, model_name="Gaussian Process Cl
 ```
 :::
 
-### Question 2: Active Learning for Preference Learning (40 points) {#sec-question-2-active-learning-for-preference-learning-40-points .unnumbered}
+### 第 2 题：偏好学习中的主动学习（40 分） {#sec-question-2-active-learning-for-preference-learning-40-points .unnumbered}
 
-In this question, you will explore active learning strategies for
-preference learning using a linear model. We will use expected
-information gain as the acquisition function to select the most
-informative queries, where each query is a pair of items. Assume that we
-model the preferences using a simple linear model. Given feature vectors
-$x_1$ and $x_2$ corresponding to two items, the probability that $x_1$
-is preferred over $x_2$ is modeled using a logistic regression model,
-i.e.,
+本题要探索用线性模型做偏好学习时的主动学习策略。我们用期望信息增益作为采集函数，挑出
+最有信息量的提问——这里的"问题"是成对的项目。假设我们用一个简单的线性模型来刻画偏好。
+给定两个项目对应的特征向量 $x_1$ 与 $x_2$，"$x_1$ 更被偏好"的概率
+（相比 $x_2$）用逻辑回归建模，也就是
 
 $$P(x_1 \succ x_2 | \theta) = \sigma(\theta^\top (x_1 - x_2)),$$
 
-where $\theta \in \mathbb{R}^d$ is the model parameter vector, and
-$\sigma(z)$ is the sigmoid function $\sigma(z) = \frac{1}{1 + e^{-z}}$.
-The goal is to sequentially select pairs of items to maximize the
-information gained about $\theta$ through preference queries.
+其中 $\theta \in \mathbb{R}^d$ 是模型的参数向量，$\sigma(z)$ 是 sigmoid 函数 $\sigma(z) = \frac{1}{1 + e^{-z}}$。目标是依次挑选项目对，使通过偏好提问获得的关于 $\theta$ 的信息最多。
 
-(a) **Expected Information Gain (15 points)**
+(a) **期望信息增益（15 分）**
 
-    (i) **Derive the Expected Information Gain (Written, 3 points).**
-        Suppose that after observing a preference between two items
-        $x_1$ and $x_2$, the posterior distribution over $\theta$ is
-        updated. The information gain from this observation is the
-        reduction in uncertainty about $\theta$ measured using the
-        Kullback-Leibler (KL) divergence between the prior and posterior
-        distributions. Given the current posterior distribution
-        $P(\theta | \mathcal{D})$ and a possible observation
-        $y \in \{0, 1\}$ (where $y = 1$ if $x_1$ is preferred over
-        $x_2$, and $y = 0$ otherwise), the expected information gain is: $$\begin{aligned}
+(i) **推出期望信息增益（笔答，3 分）。** 假设在观察到两个项目
+        $x_1$ 与 $x_2$ 之间的偏好之后，关于 $\theta$ 的后验分布被更新了。这次观察带来的信息增益，
+        就是用先验与后验分布之间的库尔贝克—莱布勒（KL）散度来衡量的"关于 $\theta$ 的不确定性
+        减少了多少"。给定当前的后验分布
+        $P(\theta | \mathcal{D})$ 与一种可能的观察结果
+        $y \in \{0, 1\}$（若 $x_1$ 比 $x_2$ 更被偏好则 $y = 1$，
+        否则 $y = 0$），期望信息增益为：$$\begin{aligned}
     \mathbb{E}[\text{IG}(x_1, x_2)] = &P(y=1 | x_1, x_2, \theta) D_{\text{KL}}\left( P(\theta | y = 1, \mathcal{D}) \parallel P(\theta | \mathcal{D}) \right) \\+ 
     &P(y=0 | x_1, x_2, \theta) D_{\text{KL}}\left( P(\theta | y = 0, \mathcal{D}) \parallel P(\theta | \mathcal{D}) \right)
 \end{aligned}$$
 
-        Derive this expression for the expected information gain of
-        selecting the pair $(x_1, x_2)$ for a preference query. Start by
-        explaining how the KL divergence measures the information gain,
-        and break down the expectation over the possible outcomes of the
-        query.
+        请推出上式，也就是"选择项目对 $(x_1, x_2)$ 提问"的期望信息增益。先从说明 KL 散度如何衡量信息增益开始，再把这个期望按提问可能得到的各种结果展开。
 
-    (ii) **Simplifying the KL Divergence (Written, 4 points).** Assuming
-         the prior and posterior distributions over $\theta$ are
-         Gaussian (i.e., $P(\theta) \sim \mathcal{N}(\mu, \Sigma)$ and
-         $P(\theta | \mathcal{D}) \sim \mathcal{N}(\mu', \Sigma')$),
-         show that the KL divergence between the Gaussian posterior and
-         prior simplifies to: $$\begin{aligned}
-        D_{\text{KL}}\left( \mathcal{N}(\mu', \Sigma') \parallel \mathcal{N}(\mu, \Sigma) \right) &= \frac{1}{2} \left( \text{tr}(\Sigma^{-1} \Sigma') + (\mu' - \mu)^\top \Sigma^{-1} (\mu' - \mu)\right.\\
+(ii) **化简 KL 散度（笔答，4 分）。** 假设关于 $\theta$ 的先验与后验都是高斯的（即 $P(\theta) \sim \mathcal{N}(\mu, \Sigma)$ 且 $P(\theta | \mathcal{D}) \sim \mathcal{N}(\mu', \Sigma')$），证明高斯后验对高斯先验的 KL 散度可化简为：
+        $$\begin{aligned}
         &\left.- d + \log\left( \frac{\det(\Sigma)}{\det(\Sigma')} \right) \right).
         \end{aligned}$$
 
-    (iii) **Approximate Information Gain for a Linear Model (Written, 4
-          points).** In the case of a linear model with Gaussian priors
-          on $\theta$, assume that the posterior distribution
-          $P(\theta | \mathcal{D}) \sim \mathcal{N}(\mu, \Sigma)$ is
-          updated using Bayes' rule after each observation. The
-          likelihood of observing a preference $y$ is logistic, which
-          does not conjugate with the Gaussian prior. However, for the
-          purposes of this question, assume that after each query, the
-          posterior mean $\mu'$ and covariance $\Sigma'$ can be updated
-          using an approximation method such as Laplace's approximation.
+(iii) **线性模型的近似信息增益（笔答，4 分）。** 在线性模型、且对 $\theta$ 取高斯先验的情形下，假设后验分布 $P(\theta | \mathcal{D}) \sim \mathcal{N}(\mu, \Sigma)$ 在每次观察后按贝叶斯法则更新。观察到偏好 $y$ 的似然是 logistic 的，与高斯先验并不共轭；但本题假设：每次提问后，后验均值 $\mu'$ 与协方差 $\Sigma'$ 可用某种近似方法（例如拉普拉斯近似）更新。
 
-          Using these assumptions, compute the expected information gain
-          for a specific query $(x_1, x_2)$ in closed form. You may
-          express the information gain in terms of the updated mean
-          $\mu'$ and covariance $\Sigma'$ after observing the preference
-          outcome.
+在这些假设下，请对一次具体的提问 $(x_1, x_2)$ 以闭式算出期望信息增益。你可以把它写成观察到偏好结果之后更新得到的均值 $\mu'$ 与协方差 $\Sigma'$ 的函数。
 
-    (iv) **Laplace Approximation for Posterior (Written, 4 points).**
-         The Laplace approximation for the posterior is given by $$\begin{aligned}
+(iv) **后验的拉普拉斯近似（笔答，4 分）。** 后验的拉普拉斯近似为：
+    $$\begin{aligned}
     \mu'=\arg \min_\theta -\log P(\theta | \mathcal{D})\\
     \Sigma'^{-1}=\nabla_\theta\nabla_\theta -\log P(\theta|\mathcal{D})|_{\theta=\mu'}
 \end{aligned}$$ 
-         In our scenario with the Bradley-Terry model
-         for likelihood, simplify $-\log P(\theta | \mathcal{D})$ and
-         its Hessian ignoring the normalization constant.
+在我们这个以 Bradley-Terry 模型作为似然的场景中，请忽略归一化常数，把 $-\log P(\theta | \mathcal{D})$ 以及它的 Hessian 化简。
 
-(b) **Active Learning Algorithm (25 points)** In this section, you will
-    implement an active learning algorithm for selecting the most
-    informative queries using the expected information gain criterion.
+(b) **主动学习算法（25 分）** 本节要实现一个主动学习算法，用期望信息增益准则挑出最有信息量的提问。
 
-    (i) **(Coding, 4 points).** Implement `kl_divergence_gaussians` in
-        `active_learning/main.py`.
+    (i) **（编程，4 分）** 在 `active_learning/main.py` 中实现 `kl_divergence_gaussians`。
 
-    (ii) **(Coding, 4 points).** Following your derived Laplace
-         approximation, implement `negative_log_posterior`.
+    (ii) **（编程，4 分）** 按照你推出的拉普拉斯近似，实现 `negative_log_posterior`。
 
-    (iii) **(Coding, 4 points).** Implement `compute_hessian` that is
-          used to obtain the inverse of the covariance matrix.
+    (iii) **（编程，4 分）** 实现 `compute_hessian`，用它得到协方差矩阵的逆。
 
-    (iv) **(Coding, 3 points).** Implement `expected_information_gain`.
+    (iv) **（编程，3 分）** 实现 `expected_information_gain`。
 
-    (v) **(Coding, 4 points).** Finally, implement `active_learning`.
+    (v) **（编程，4 分）** 最后，实现 `active_learning`。
 
-    (vi) **(Coding + Written, 6 points).** Plot the $L^2$ norm of the
-         covariance matrix for each loop of the active learning loop.
-         Additionally, on the same plot, implement a random baseline and
-         plot its $L^2$ covariance matrix norm. The random baseline
-         should randomly select a point in the dataset and not use any
-         acquisition function. Interpret your plot and use it to compare
-         the two methods.
+    (vi) **（编程 + 笔答，6 分）**。画出主动学习每一轮中协方差矩阵的 $L^2$ 范数；
+         另外，在同一张图上实现并画出一个随机基线的协方差矩阵 $L^2$ 范数：
+         这个基线随机选取数据集中的一个点，不使用任何采集函数。解读这张图，
+         并借此比较两种方法。
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q2-1}
 import torch
 import torch.nn.functional as F
@@ -832,36 +740,26 @@ model.train(num_iterations=100, subset_size=50)
 ```
 :::
 
-### Question 3: Linear Performance Metric Elicitation (30 points) {#sec-question-3-linear-performance-metric-elicitation-30-points .unnumbered}
+### 第 3 题：线性性能指标的征询（30 分） {#sec-question-3-linear-performance-metric-elicitation-30-points .unnumbered}
 
-1.  **(Written, 10 points).** For background on the problem setting,
-    read <https://tinyurl.com/3b92sufm>. Suppose we have a linear
-    performance metric given by $$p(C) = 1-\alpha (FP)-\beta (FN)$$
-    where $C$ is a confusion matrix and $FP, FN$ denote false positive
-    and false negative rates. We wish to find the optimal classifier
-    w.r.t. $p$. That is, $$\phi^* = \arg \max_{\phi\in\Phi} p(C(\phi))$$
-    where $\Phi$ is the space of all probabilistic binary classifiers
-    from $X\to [0, 1]$. Note that these classifiers return probabilities
-    corresponding to the label $1$. Show that $\phi^*$ is in fact
-    deterministic and given by $$\phi(x)=\begin{cases}
+1.  **（笔答，10 分）** 关于本题的问题设定，先读一下 <https://tinyurl.com/3b92sufm>。设有一个线性性能指标
+    $$p(C) = 1-\alpha (FP)-\beta (FN)$$
+    其中 $C$ 是混淆矩阵，$FP, FN$ 分别是假正率与假负率。我们想找出关于 $p$ 最优的分类器，也就是
+    $$\phi^* = \arg \max_{\phi\in\Phi} p(C(\phi))$$
+    这里 $\Phi$ 是所有从 $X\to [0, 1]$ 的概率型二分类器的集合。注意：这些分类器返回的是标签 $1$ 对应的概率。
+    请证明 $\phi^*$ 其实是确定性的，并且形如
+    $$\phi(x)=\begin{cases}
         1 & \text{if } p(y|x) > f(\alpha,\beta) \\
         0 & \text{otherwise}.
-    \end{cases}$$ for a threshold function $f$ that you must find.
-    (Hint: For a classifier $\phi$, $FP=P(\phi=1, y=0)$ and
-    $FN=P(\phi=0, y=1)$. Marginalize these joint probabilities over $x$
-    and simplify.)
+    \end{cases}$$
+    其中的阈值函数 $f$ 需要你自己求出来。（提示：对分类器 $\phi$，有 $FP=P(\phi=1, y=0)$、
+    $FN=P(\phi=0, y=1)$。把这些联合概率对 $x$ 边际化，再化简。）
 
-2.  **(Written + Coding, 5 points).** Implement `classifier_metrics` in
-    `lpme/main.py`. After doing so, run `plot_confusion_region` and
-    attach the plot. What do you notice about the region of possible
-    confusion matrices?
+2.  **（笔答 + 编程，5 分）** 在 `lpme/main.py` 中实现 `classifier_metrics`。做完后运行 `plot_confusion_region` 并附上生成的图。关于"可能的混淆矩阵构成的区域"，你注意到了什么？
 
-3.  **(Coding, 15 points).** Implement `search_theta` in order to elicit
-    the metric used by the oracle (which is parametrized by $\theta$).
-    Play around with the oracle's theta and run `start_search` to see
-    how close you can approximate it!
+3.  **（编程，15 分）** 实现 `search_theta`，把裁判（oracle）实际在用的指标（由 $\theta$ 参数化）征询出来。多换几个裁判的 theta 试试，运行 `start_search`，看你能把它逼近到什么程度！
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q3-1}
 import torch
 import matplotlib.pyplot as plt
@@ -1031,65 +929,40 @@ def start_search():
 ```
 :::
 
-### Question 4: D-optimal Design with Logistic Model (30 points) {#sec-question-4-d-optimal-design-with-logistic-model-30-points .unnumbered}
+### 第 4 题：逻辑模型下的 D-最优设计（30 分） {#sec-question-4-d-optimal-design-with-logistic-model-30-points .unnumbered}
 
-In this question, we explore D-optimal designs in the context of the
-Bradley-Terry model. The Bradley-Terry model is a logistic regression
-model used for paired comparison data. Given two items $x_1$ and $x_2$,
-the probability that item $x_1$ is preferred over $x_2$ is modeled as:
+本题在 Bradley-Terry 模型的背景下讨论 D-最优设计。Bradley-Terry 模型是用于成对比较数据的逻辑回归模型。
+给定两个项目 $x_1$ 与 $x_2$，"项目 $x_1$ 比 $x_2$ 更被偏好"的概率建模为：
 
 $$P(x_1 \succ x_2 | \theta) = \frac{e^{\theta^\top x_1}}{e^{\theta^\top x_1} + e^{\theta^\top x_2}} = \frac{1}{1 + e^{\theta^\top (x_2 - x_1)}}$$
 
-where $\theta \in \mathbb{R}^d$ represents the unknown model parameters,
-and $x_1, x_2 \in \mathbb{R}^d$ are the feature vectors associated with
-the two items. D-optimal design aims to maximize the determinant of the
-Fisher information matrix, thus minimizing the volume of the confidence
-ellipsoid for the estimated parameters. In this exercise, you will
-analyze D-optimal designs for this model.
+其中 $\theta \in \mathbb{R}^d$ 是未知的模型参数，$x_1, x_2 \in \mathbb{R}^d$ 是两个项目对应的特征向量。
+D-最优设计要最大化 Fisher 信息矩阵的行列式，从而使所估参数的置信椭球体积最小。这道题要求你分析该模型的 D-最优设计。
 
-(a) **Fisher Information Matrix for the Bradley-Terry Model (12
-    points)**
-
-    (i) **(Written, 6 points).** Derive the Fisher information matrix
-        for the Bradley-Terry model at a design point $(x_1, x_2)$. Show
-        that the Fisher information matrix at a design point is:
+(a) **Bradley-Terry 模型的 Fisher 信息矩阵（12 分）**
+    (i) **（笔答，6 分）**。请推出 Bradley-Terry 模型在设计点 $(x_1, x_2)$ 处的 Fisher 信息矩阵，并证明它等于：
         $$I(x_1, x_2, \theta) = w(x_1, x_2, \theta) (x_1 - x_2)(x_1 - x_2)^\top,$$
-        where $w(x_1, x_2, \theta)$ is a weight function given by:
-        $$w(x_1, x_2, \theta) = \frac{e^{\theta^\top x_1} e^{\theta^\top x_2}}{\left(e^{\theta^\top x_1} + e^{\theta^\top x_2}\right)^2} =\sigma'(\theta^\top (x_1-x_2)).$$
-        $\sigma'$ is the derivative of the sigmoid function.
+        其中权重函数 $w(x_1, x_2, \theta)$ 为：
+        $$w(x_1, x_2, \theta) = \frac{e^{\theta^\top x_1} e^{\theta^\top x_2}}{\left(e^{\theta^\top x_1} + e^{\theta^\top x_2}\right)^2} = \sigma'(\theta^\top(x_1 - x_2))$$
+        这里 $\sigma'$ 是 sigmoid 函数的导数。
 
-    (ii) **(Coding, 6 points).** Implement `fisher_matrix` in
-         `d_optimal/main.py` based on the derived expression.
+    (ii) **（编程，6 分）**。根据你推出的表达式，在 `d_optimal/main.py` 中实现 `fisher_matrix`。
 
-(b) **D-optimal Design Criterion (18 points)**
+(b) **D-最优设计准则（18 分）**
 
-    (i) **(Coding, 11 points).** In the context of the Bradley-Terry
-        model, a D-optimal design maximizes the determinant of the
-        Fisher information matrix. Suppose we have a set of candidate
-        items $\{x_1, \dots, x_n\}$, and we can choose $N$ comparisons
-        to make. Formally, the D-optimal design maximizes:
-        $$\det\left( \sum_{i=1}^N w(x_{i1}, x_{i2}, \theta) (x_{i1} - x_{i2})(x_{i1} - x_{i2})^\top \right),$$
-        where $(x_{i1}, x_{i2})$ denotes a pair of compared items in the
-        design. Implement a greedy algorithm to approximate the
-        D-optimal design. Given a set of $n$ items and their feature
-        vectors $\{x_1, \dots, x_n\}$, your task is to iteratively
-        select the pair of items $(x_{i1}, x_{i2})$ that maximizes the
-        determinant of the Fisher information matrix. Please implement
-        `greedy_fisher`. Note that the setup in the code assumes we have
-        a dataset of all possible differences between pairs of items as
-        opposed to directly selecting the pairs.
+    (i) **（编程，11 分）** 在 Bradley-Terry 模型中，D-最优设计最大化 Fisher 信息矩阵的行列式。
+        假设有一批候选项目 $\{x_1, \dots, x_n\}$，我们可以选择做 $N$ 次比较。形式上，D-最优设计最大化：
+        $$\det\left( \sum_{i=1}^N w(x_{i1}, x_{i2}, \theta) (x_{i1} - x_{i2})(x_{i1} - x_{i2})^\top \right)$$
+        其中 $(x_{i1}, x_{i2})$ 是设计中实际比较的一对项目。请实现一个贪心算法来近似 D-最优设计：
+        给定 $n$ 个项目及其特征向量 $\{x_1, \dots, x_n\}$，你要反复选出能让 Fisher 信息矩阵行列式最大的那一对项目
+        $(x_{i1}, x_{i2})$。请实现 `greedy_fisher`。注意：代码里的设定是"已经有了所有项目两两之差构成的数据集"，
+        而不是直接选出项目对。
 
-    (ii) **(Written + Coding, 7 points).** Notice that
-         `posterior_inv_cov` uses a Laplace approximation for the
-         posterior centered around the ground truth weights after
-         labeling the chosen points. However, it turns out this
-         approximation doesn't actually depend on the labels when taking
-         the Hessian. Please run the file `d_optimal/main.py` and attach
-         a plot of the norm of the covariance matrix of the posterior.
-         What difference do you observe between greedy and random
-         sampling? What is the win rate of greedy?
+    (ii) **（笔答 + 编程，7 分）** 注意：`posterior_inv_cov` 在标注完所选点后，
+         用拉普拉斯近似得到以真实权重为中心的后验。但你会发现，求 Hessian 时这个近似其实不依赖标签。
+         请运行 `d_optimal/main.py`，附上后验协方差矩阵范数的图。贪心选择与随机抽样之间你观察到什么差别？贪心的胜率是多少？
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q4-1}
 import numpy as np
 import matplotlib.pyplot as plt
@@ -1248,90 +1121,46 @@ plt.show()
 ```
 :::
 
-### Question 5: Nonparametric Metric Elicitation (30 points) {#sec-question-5-nonparametric-metric-elicitation-30-points .unnumbered}
+### 第 5 题：非参数的指标征询（30 分） {#sec-question-5-nonparametric-metric-elicitation-30-points .unnumbered}
 
-In this question, we explore the problem of performance metric
-elicitation using a Gaussian Process (GP) to map the elements of the
-confusion matrix, specifically false positives (FP) and false negatives
-(FN), to an unknown performance metric. The goal is to learn a
-non-linear function that maps FP and FN to the metric, using relative
-preferences from pairwise classifier comparisons. We will use elliptical
-slice sampling for posterior inference.
+本题讨论用高斯过程（GP）来做性能指标的征询：把混淆矩阵中的元素——假正率（FP）与假负率（FN）——映射到一个未知的性能指标上。目标是用分类器两两比较得到的相对偏好，学出一个把 FP、FN 映射到该指标的非线性函数。后验推断用椭圆切片采样（elliptical slice sampling）。
 
-(a) **Gaussian Process for Metric Elicitation (10 points)**
+(a) **用高斯过程做指标征询（10 分）**
 
-    (i) **(Written, 2 points).** Assume that the performance metric
-        $\phi(C)$ is a non-linear function of the confusion matrix $C$.
-        For simplicity, assume that $\phi$ depends only on FP and FN,
-        i.e., $$\phi(\text{FP}, \text{FN}) \sim \mathcal{GP}(0, k((\text{FP}, \text{FN}), (\text{FP}', \text{FN}'))),$$ 
-        where $k$ is the covariance kernel function of
-        the Gaussian Process. Explain why using a GP allows for flexible
-        modeling of the metric $\phi$ as a non-linear function of FP and
-        FN. What are the advantages of using a GP over a linear model in
-        this context?
+    (i) **（笔答，2 分）** 假设性能指标 $\phi(C)$ 是混淆矩阵 $C$ 的非线性函数。为简单起见，设 $\phi$ 只依赖 FP 与 FN，即
+        $$\phi(\text{FP}, \text{FN}) \sim \mathcal{GP}(0, k((\text{FP}, \text{FN}), (\text{FP}, \text{FN})))$$
+        其中 $k$ 是高斯过程的协方差核函数。请说明：为什么用 GP 就能把指标 $\phi$ 灵活地建模成 FP 与 FN 的非线性函数？在这个场景里，用 GP 相比线性模型有什么好处？
 
-    (ii) **(Written, 2 points).** Suppose we observe pairwise
-         comparisons between classifiers, where a user provides feedback
-         on which classifier they prefer based on the unknown metric
-         $\phi$. Given two classifiers with confusion matrices
-         $C_1 = (\text{FP}_1, \text{FN}_1)$ and
-         $C_2 = (\text{FP}_2, \text{FN}_2)$, the user indicates their
-         relative preference. Let the observed preference be modeled by
-         Bradley-Terry as: $$\Pr(C_1 \succ C_2) = \sigma(\phi(\text{FP}_1, \text{FN}_1) - \phi(\text{FP}_2, \text{FN}_2)).$$ 
-         where we view $\phi$ as the reward function.
-         How does this likelihood affect the posterior inference in the
-         GP? Where does it introduce additional complexity?
+    (ii) **（笔答，2 分）** 假设我们观察到分类器之间的两两比较，用户根据那个未知的指标 $\phi$ 反馈他更喜欢哪个分类器。
+         给定两个分类器，其混淆矩阵为 $C_1 = (\text{FP}_1, \text{FN}_1)$ 与 $C_2 = (\text{FP}_2, \text{FN}_2)$，用户给出相对偏好。设观察到的偏好用 Bradley-Terry 建模为：
+         $$\Pr(C_1 \succ C_2) = \sigma(\phi(\text{FP}_1, \text{FN}_1) - \phi(\text{FP}_2, \text{FN}_2))$$
+         这里我们把 $\phi$ 看作奖励函数。这样的似然会怎样影响 GP 中的后验推断？它在哪些地方引入了额外的复杂度？
 
-    (iii) **(Written + Coding, 6 points).** Given a set of observed
-          pairwise comparisons, derive the posterior distribution over
-          the latent function values $\phi$ given a set of confusion
-          matrices preferences using Bayes' rule. Express the posterior
-          distribution in terms of the GP prior and the pairwise
-          likelihood function. You do not need to include the
-          normalization constant. Implement the likelihood function in
-          `loglik_from_preferences`.
+    (iii) **（笔答 + 编程，6 分）** 给定一批观察到的两两比较，用贝叶斯法则在这些混淆矩阵上
+          推出潜在函数值 $\phi$ 的后验分布。请把后验写成 GP 先验与两两比较似然的函数，不必管归一化常数。
+          这个似然函数请在 `loglik_from_preferences` 里实现。
 
-(b) **Elliptical Slice Sampling for Posterior Inference (20 points)**
+(b) **用椭圆切片采样做后验推断（20 分）**
 
-    (i) **(Written, 3 points).** Read
-        <https://proceedings.mlr.press/v9/murray10a/murray10a.pdf>.
-        Elliptical slice sampling is a sampling method used to generate
-        samples from the posterior distribution of a Gaussian Process.
-        Explain the key idea behind elliptical slice sampling and why it
-        is well-suited for sampling from the GP posterior in this
-        context.
+    (i) **（笔答，3 分）** 阅读 <https://proceedings.mlr.press/v9/murray10a/murray10a.pdf>。
+        椭圆切片采样是一种从高斯过程后验分布中采样样本的方法。请说明它的核心思想，
+        以及为什么它很适合用来从本节的 GP 后验中采样。
 
-    (ii) **(Coding, 10 points).** Implement elliptical slice sampling in
-         `npme/elliptical_sampler.py` by following Figure 2 in the
-         paper.
+    (ii) **（编程，10 分）** 参照论文中的图 2，在 `npme/elliptical_sampler.py` 中实现椭圆切片采样。
 
-    (iii) **(Written, 3 points).** Run the algorithm on a synthetic
-          preference dataset of confusion matrices with pairwise
-          preferences. The synthetic data will be constructed using the
-          metric
-          $$\phi_{\text{true}}(\text{FP}, \text{FN}) = \log(1 + \text{FP}) + \log(1 + \text{FN}),$$
-          which captures the idea that the human oracle perceives both
-          false positives and false negatives in a way that flattens out
-          as these values increase (i.e., marginal increases in FP and
-          FN have diminishing effects on the performance metric).
-          Explain the psychological motivation behind this non-linear
-          function. Why might a logarithmic form be appropriate for
-          modeling human perception of classification errors?
+    (iii) **（笔答，3 分）** 在一个由混淆矩阵的两两偏好构成的合成数据集上运行该算法。这些合成数据用下面的指标构造：
+          $$\phi_{\text{true}}(\text{FP}, \text{FN}) = \log(1 + \text{FP}) + \log(1 + \text{FN})$$
+          它表达的是一种设定：人类裁判在感知假正例与假负例时，随着这些数值增大，感受会变得平缓
+          （也就是说，FP 与 FN 的边际增加对性能指标的影响越来越小）。请说明这个非线性函数背后的心理学动机，
+          以及为什么用对数形式来刻画人类对分类错误的感知可能是合适的。
 
-          Run the file `npme/main.py` and attach the plot of
-          $\phi_{\text{true}}$ vs your elicited metric. What do you
-          notice in the plot?
+          运行 `npme/main.py`，附上 $\phi_{\text{true}}$ 与你征询到的指标之比较的图。你在图里注意到了什么？
 
-    (iv) **(Written + Coding, 4 points).** Once the GP has been trained
-         and posterior samples of the function
-         $\phi(\text{FP}, \text{FN})$ have been obtained, how can we
-         evaluate the quality of the elicited metric? Propose a method
-         to evaluate how well the elicited metric $\phi$ aligns with the
-         user's true preferences and implement it in
-         `evaluate_elicited_metric` taking into the plot you saw in part
-         (iii).
+    (iv) **（笔答 + 编程，4 分）** GP 训练好、也拿到了函数 $\phi(\text{FP}, \text{FN})$ 的后验样本之后，
+         我们该怎么评估征询到的这个指标的质量？请提出一种方法来评估征询到的指标 $\phi$ 与用户真实偏好的符合程度，
+         并在 `evaluate_elicited_metric` 中实现它（可以结合你在 (iii) 中看到的图）。
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex2-q5-1}
 import numpy as np
 import matplotlib.pyplot as plt

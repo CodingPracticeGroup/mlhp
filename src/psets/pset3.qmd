@@ -1,117 +1,70 @@
-## Exercises
-### Question 1: Preferential Bayesian Optimization (30 points) {#sec-question-1-preferential-bayesian-optimization-30-points .unnumbered}
+---
+title: "习题 3：主动征询与序贯决策"
+lang: zh
+---
 
-**Preferential Bayesian Optimization (PBO)** is a variant of Bayesian
-Optimization (BO) designed to handle scenarios where feedback is
-provided in terms of preferences between alternatives rather than
-explicit numeric evaluations. Suppose you are optimizing an unknown
-function $f$ over a space $\mathcal{X}$, but instead of receiving
-function values, you only receive pairwise comparisons between different
-points in the input space. That is, given two points
-$x_1, x_2 \in \mathcal{X}$, you receive feedback in the form of a
+## 习题
+### 第 1 题：偏好式贝叶斯优化（30 分） {#sec-question-1-preferential-bayesian-optimization-30-points .unnumbered}
+
+**偏好式贝叶斯优化（Preferential Bayesian Optimization, PBO）** 是贝叶斯优化（BO）的一个变体，用来处理"反馈是备选项之间的偏好、而不是明确的数值评分"的场景。
+设你要在空间 $\mathcal{X}$ 上优化一个未知函数 $f$，但得到的不是函数值，只是输入空间中两两点的比较结果。也就是说，给定两个点
+$x_1, x_2 \in \mathcal{X}$，你收到的反馈是"两者之中更偏好谁"这种形式：
 preference: $x_1 \succ x_2$ implies $f(x_1) > f(x_2)$.
 
-The **Gaussian Process (GP)** framework is used to model $f$, and the
-optimization is guided by this model. Let $p(x_1 \succ x_2 | f)$ be the
-probability that $x_1$ is preferred over $x_2$, which can be modeled
-using a Bradley-Terry or Thurstone model based on the GP prior.
+这里用**高斯过程（GP）**框架来给 $f$ 建模，优化就由这个模型引导。记 $p(x_1 \succ x_2 | f)$ 为"$x_1$ 比 $x_2$ 更被偏好"的概率，
+它可以基于 GP 先验用 Bradley-Terry 或 Thurstone 模型来建模。
 
-Using the paper "Preferential Bayesian Optimization"
-(<https://proceedings.mlr.press/v70/gonzalez17a/gonzalez17a.pdf>),
-answer the following:
+请借助论文 "Preferential Bayesian Optimization"（<https://proceedings.mlr.press/v70/gonzalez17a/gonzalez17a.pdf>），回答下面的问题。
 
-(a) **Modeling Preferences (6 points)**
+(a) **偏好建模（6 分）**
+        给定两个点 $x_1$ 与 $x_2$ 及其对应的潜在函数值 $f(x_1)$、$f(x_2)$，用 Bradley-Terry 模型
+        推出出现偏好 $x_1 \succ x_2$ 的似然。答案就写在这里。
 
-    (i) **Likelihood Derivation (Written, 2 points):** Given two points
-        $x_1$ and $x_2$ and their corresponding latent function values
-        $f(x_1)$ and $f(x_2)$, derive the likelihood of a preference
-        $x_1 \succ x_2$ using the Bradley-Terry model. Your solution
-        here.
+    (ii) **接入 GP（笔答，2 分）** 说明这个似然怎样并入 GP 框架，从而以概率方式刻画偏好。
+         具体请说明 GP 的协方差函数如何影响偏好的联合分布，并讨论你对 $f$ 的光滑性或结构作了哪些假定。
 
-    (ii) **Incorporating into GP (Written, 2 points):** Explain how this
-         likelihood can be incorporated into the GP framework to model
-         preferences probabilistically. Specifically, describe how the
-         covariance function of the GP affects the joint distribution of
-         preferences and discuss any assumptions made regarding the
-         smoothness or structure of $f$.
+    (iii) **后验更新（笔答，2 分）** 利用基于此前观察到的偏好的后验预测分布，写出新查询点处后验均值与方差的表达式
+          （不必化简，因为它没有解析的可处理形式）。再给出一种可以近似这两个量的方法。
 
-    (iii) **Posterior Update (Written, 2 points):** Write out an
-          expression for the posterior mean and variance at new query
-          points by using the posterior predictive distribution based on
-          previously observed preferences (no need to simplify since
-          it's intractable analytically). Suggest an approach that can
-          be used to approximate the mean and variance.
+(b) **采集函数的改造（6 分）**
+        说明在 PBO 中，期望改进（Expected Improvement, EI）采集函数怎样被改造，以便处理"偏好"而不是"绝对函数值"。这一问请阅读论文。
 
-(b) **Acquisition Function Adaptation (6 points)**
+    (ii) **两两比较下的 EI 计算（笔答，2 分）** 推出处理两两比较时的 EI 表达式，说明它与标准贝叶斯优化中的 EI 计算有何不同，
+         并讨论这里怎样用到 GP 模型的不确定性。
 
-    (i) **Expected Improvement (EI) for Preferences (Written, 2
-        points):** Explain how the Expected Improvement (EI) acquisition
-        function is adapted in the context of PBO to handle preferences
-        rather than absolute function values. Please read the paper for
-        this.
+    (iii) **选择策略（笔答，2 分）** 说明采集函数如何利用两两偏好的数据来选下一个查询点，
+          并从"最大化期望信息增益"的角度为这一选择策略给出严格的论证。
 
-    (ii) **EI Computation for Pairwise Comparisons (Written, 2
-         points):** Derive the expression for EI when dealing with
-         pairwise comparisons. Show how the computation of EI differs
-         from the standard BO setting and discuss how uncertainty in the
-         GP model is used in this context.
+(c) **PBO 中的探索—利用平衡（6 分）**
 
-    (iii) **Selection Strategy (Written, 2 points):** Describe how the
-          acquisition function uses the pairwise preference data to
-          select the next query point. Provide a rigorous justification
-          for this selection strategy in terms of maximizing expected
-          information gain.
+    (i) **探索机制（笔答，2 分）** 说明 PBO 框架里是怎么处理探索的：
+        偏好模型（也就是 GP 后验）中的不确定性，怎样影响新评估点的选择。
 
-(c) **Exploration-Exploitation Balance in PBO (6 points)**
+    (ii) **不确定性量化（笔答，2 分）** 说明 GP 后验中的方差如何表示模型的不确定性，并给出这种不确定性随新观察到的偏好怎样更新。
 
-    (i) **Exploration Mechanism (Written, 2 points):** Explain how
-        exploration is handled in the PBO framework. Describe how
-        uncertainty in the preference model (the GP posterior)
-        influences the selection of new points for evaluation.
+    (iii) **实证验证（笔答，2 分）** 设计一个实验，实证检验 PBO 中探索与利用之间的平衡。写清实验设定，
+          包括目标函数、实验条件，以及用来衡量"探索—利用平衡"好坏的评价指标。
 
-    (ii) **Uncertainty Quantification (Written, 2 points):** Define how
-         the variance in the GP posterior represents uncertainty in the
-         model and show how this uncertainty is updated as new
-         preferences are observed.
+(d) **可扩展性与实际考虑（6 分）**
+偏好反馈在现实应用中会带来哪些挑战，例如用户偏好的前后不一致、
+可能存在的各种偏差。
+        可能存在的各种偏差。
 
-    (iii) **Empirical Validation (Written, 2 points):** Design an
-          experiment to empirically validate the balance between
-          exploration and exploitation in PBO. Describe the setup,
-          including the objective function, the experimental conditions,
-          and the evaluation metric for measuring the quality of
-          exploration-exploitation balance.
+    (ii) **GP 的可扩展性（笔答，2 分）** 说明 GP 模型的可扩展性怎样影响 PBO 的表现，尤其是观察数量增加时。
+         请同时讨论计算复杂度以及可行的解决办法。
 
-(d) **Scalability and Practical Considerations (6 points)**
+    (iii) **面向大规模问题的扩展（笔答，2 分）** 提出可以改进 PBO 在大规模优化问题上适用性的扩展或改动。
+          例如，讨论稀疏 GP 或其他近似技术的可行性，并评估它们对 PBO 表现的潜在影响。
 
-    (i) **Challenges in Preference Feedback (Written, 2 points):**
-        Discuss the challenges associated with preference feedback in
-        real-world applications, such as inconsistency in user
-        preferences and potential biases.
+(e) **实证实验（6 分）**
 
-    (ii) **GP Scalability (Written, 2 points):** Explain how the
-         scalability of the GP model affects the performance of PBO,
-         especially as the number of observations increases. Include a
-         discussion on computational complexity and possible solutions.
+(i) **Copeland 分数（编程，2 分）：** 在 `pbo/forrester_duel.py` 中实现
+ `compute_max_copeland_score`。
 
-    (iii) **Extensions for Large-Scale Problems (Written, 2 points):**
-          Propose potential extensions or modifications to improve the
-          applicability of PBO to large-scale optimization problems. For
-          example, discuss the feasibility of sparse GPs or other
-          approximation techniques and evaluate their potential impact
-          on PBO performance.
+(ii) **Copeland 采集函数（编程，4 分）：**
+         实现 `copeland_acquisition`。运行 `forrester_duel.py`，并简要讨论被选中的对决（热力图上的那些黑色 X）呈现出的规律。
 
-(e) **Empirical Experimentation (6 points)**
-
-    (i) **Copeland Score (Coding, 2 points):** Implement
-        `compute_max_copeland_score` in\
-        `pbo/forrester_duel.py`.
-
-    (ii) **Copeland Acquisition (Coding, 4 points):** Implement
-         `copeland_acquisition`. Run `forrester_duel.py` and briefly
-         discuss any patterns you observe in the chosen duels (black Xs
-         on the heatmap).
-
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex3-q1}
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessClassifier
@@ -301,51 +254,41 @@ if __name__ == "__main__":
 ```
 :::
 
-### Question 2: Linear Dueling Bandit (30 points) {#sec-question-2-linear-dueling-bandit-30-points .unnumbered}
+### 第 2 题：线性对决老虎机（30 分） {#sec-question-2-linear-dueling-bandit-30-points .unnumbered}
 
-In the linear dueling bandit problem, feedback is provided through
-pairwise comparisons between actions, rather than direct rewards.
-Consider a finite set of $K$ actions, each represented by a feature
-vector $x_1, x_2, \dots, x_K \in \mathbb{R}^d$. Let the unknown
-preference scores be $f(x_i) = \theta^\top x_i$ and
-$f(x_j) = \theta^\top x_j$, where $\theta \in \mathbb{R}^d$ is an
-unknown parameter vector. The goal is to identify the best action by
-iteratively comparing pairs of actions while minimizing cumulative
-regret. Using qEUBO from <https://arxiv.org/pdf/2303.15746>, complete
+在线性对决老虎机问题中，反馈来自动作之间的两两比较，而不是直接的奖励。考虑一个有 $K$ 个动作的有限集合，每个动作用一个特征向量
+表示，$x_1, x_2, \dots, x_K \in \mathbb{R}^d$。设未知的偏好得分为 $f(x_i) = \theta^\top x_i$ 与 $f(x_j) = \theta^\top x_j$，
+其中 $\theta \in \mathbb{R}^d$ 是未知的参数向量。目标是通过反复比较动作对来找出最好的动作，同时把累计遗憾降到最低。
+请依据 qEUBO（<https://arxiv.org/pdf/2303.15746>）完成下面的问题。
 the following:
 
-(a) **Acquisition Functions for Regret Minimization (Written, 10
-    points)**: Write out the expression for the acquisition function
-    Expected Improvement discussed in Q1 and qEUBO in the context of the
-    linear dueling bandit. Discuss conditions under which each
-    acquisition function could outperform the others in minimizing
+(a) **面向遗憾最小化的采集函数（笔答，10
+    分）** 请分别写出第 1 题讨论过的期望改进采集函数，以及 qEUBO，在线性对决老虎机中的表达式。
+    讨论在什么条件下，某一种采集函数在降低累计遗憾上会优于另一种。
     cumulative regret.
 
-(b) **Experimental Evaluation of Acquisition Functions (Written +
-    Coding, 10 points)**: Benchmark the performance of the two
-    acquisition functions experimentally.
+(b) **采集函数的实验评估（笔答 +
+编程，10 分）** 对两种采集函数做基准测试：
+    采集函数做实验性的比较。
 
-    (i) Finish implementing the acquisition functions in a linear
-        dueling bandit simulation with $K = 10$ and $d = 5$, using
-        synthetic data by completing the function
-        `calculate_regret_from_gp` in `linear_dueling/run.py`.
+(i) 在线性对决老虎机中把这几个采集函数实现完整
+在 $K = 10$、$d = 5$ 的线性对决老虎机模拟上，用合成数据完成函数
+`calculate_regret_from_gp`，
+它在 `linear_dueling/run.py` 中。
 
-    (ii) Measure and compare cumulative regret over $T = 200$ rounds for
-         each acquisition function.
+(ii) 在 $T = 200$ 轮内测量并比较每种采集函数的累计遗憾。
 
-    (iii) Report and analyze the empirical regret curves, discussing any
-          notable performance differences.
+(iii) 报告并分析实测的遗憾曲线，讨论其中值得注意的表现差异。
 
-(c) **Effect of Dimensionality on Regret (Written + Coding, 10
-    points)**: Analyze how increasing feature dimensionality impacts
+(c) **维度对遗憾的影响（笔答 + 编程，10
+分）** 分析特征维度升高会怎样影响结果，以及对遗憾有什么影响。
     regret.
 
-    (i) Experimentally evaluate the regret for different values of $d$
-        (e.g., $d = 5, 10, 20$) while keeping $K$ constant.
+(i) 在保持 $K$ 不变的前提下，实验评估不同 $d$ 取值（例如 $d = 5, 10, 20$）时的遗憾。
 
-    (ii) Plot the regret against $d$ and explain any observed trends.
+(ii) 画出遗憾随 $d$ 变化的曲线，并解释你观察到的趋势。
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex3-q2}
 from __future__ import annotations
 
@@ -760,96 +703,72 @@ if __name__ == "__main__":
 :::
 
 
-### Question 3: Multi-Objective Thompson Sampling in Linear Contextual Bandits (30 points) {#sec-question-3-multi-objective-thompson-sampling-in-linear-contextual-bandits-30-points .unnumbered}
+### 第 3 题：线性情境老虎机中的多目标汤普森采样（30 分） {#sec-question-3-multi-objective-thompson-sampling-in-linear-contextual-bandits-30-points .unnumbered}
 
-Thompson Sampling (TS) is commonly used for reward maximization in
-multi-armed bandit problems, optimizing for the expected reward across
-actions. However, in many real-world scenarios, other objectives, such
-as the interpretability or reusability of learned parameters, are
-equally valuable. This is particularly relevant when modeling unknown
-reward functions with parameters that might offer insights or inform
-future experiments. A purely reward-focused Thompson Sampling approach
-may result in increased false positive rates due to aggressive
-exploitation, whereas a pure exploration approach---such as those used
-in active learning---might better suit the goal of parameter learning.
+汤普森采样（Thompson Sampling, TS）常用于多臂老虎机中的奖励最大化，优化的是各动作上的期望奖励。但在很多现实场景里，其他目标同样有价值，
+例如学到参数的可解释性或可复用性。当未知的奖励函数是用参数模型刻画、而这些参数本身能带来洞见或为后续实验提供线索时尤其如此。
+只盯着奖励的汤普森采样，会因为过于激进的利用而抬高假正率；而纯探索的做法（例如主动学习中常用的那些）也许更适合"学参数"这个目标。
+利用，而纯粹的探索做法（例如主动学习中常用的那些）也许更契合"学参数"这个目标。
 
-Assume a multi-objective setting where the goal is to not only maximize
-the cumulative reward but also to accurately learn the parameters of the
-reward function itself in a linear contextual bandit setting. Let each
-arm be represented by a feature vector $x \in \mathbb{R}^d$, with
-rewards generated by an unknown linear model
-$r = \theta^\top x + \epsilon$, where
-$\epsilon \sim \mathcal{N}(0, \sigma^2)$. Given these considerations,
-answer the following:
+设想一个多目标设定：不仅要最大化累计奖励，还要在线性情境老虎机中准确学到奖励函数本身的参数。设每个手臂用一个特征向量 $x \in \mathbb{R}^d$ 表示，
+奖励由一个未知的线性模型产生。
+$r = \theta^\top x + \epsilon$，其中
+$\epsilon \sim \mathcal{N}(0, \sigma^2)$。基于这些考虑，回答下面的问题：
 
-(a) **Theoretical Analysis of Multi-Objective Thompson Sampling (8
-    points)**
+(a) **多目标汤普森采样的理论分析（8 分）**
 
-    (i) **(Written, 3 points).** Define a cumulative regret objective
-        that balances maximizing the expected reward and minimizing the
-        parameter estimation error $\|\theta - \hat{\theta}\|_2$.
-        Explain how this multi-objective regret differs from the
-        single-objective regret typically used in linear bandits.
+(i) **（笔答，3 分）** 定义一个累计遗憾目标
+在"最大化期望奖励"与"最小化参数误差"之间做平衡。
+        参数估计误差 $\|\theta - \hat{\theta}\|_2$。
+说明这种多目标遗憾与线性老虎机中常用的单目标遗憾有何不同。
 
-    (ii) **(Written, 3 points).** Derive the expected regret bounds for
-         Thompson Sampling in the single-objective case and describe the
-         additional challenges posed when extending these bounds to the
-         multi-objective case.
+(ii) **（笔答，3 分）** 推出单目标情形下汤普森采样的期望遗憾界，
+并描述把这些界推广到多目标情形时会遇到的额外困难。
 
-    (iii) **(Written, 2 points).** Suppose you were to use a pure
-          exploration approach for parameter estimation. Provide an
-          upper bound for the parameter error
+(iii) **（笔答，2 分）** 假设改用纯粹的
+面向参数估计的探索做法。请给出参数误差
+的一个上界。
           $\|\theta - \hat{\theta}\|_2$ over $T$ rounds.
 
-(b) **Acquisition Strategies for Multi-Objective Optimization (8
-    points)**
+(b) **面向多目标优化的采集策略（8 分）**
 
-    (i) **(Written, 3 points).** Explain how to adapt the Upper
-        Confidence Bound (UCB) acquisition function to balance
-        exploration and exploitation for parameter learning alongside
-        reward maximization. Discuss the effect of tuning parameters on
+(i) **（笔答，3 分）** 说明如何改造上界
+置信界（UCB）采集函数，在参数学习与奖励最大化之间平衡探索与利用。
+讨论调节其中的参数会带来什么影响，
         exploration.
 
-    (ii) **(Written + Coding, 3 points).** Implement a Thompson Sampling
-         acquisition strategy that alternates between reward
-         maximization and parameter-focused exploration using a
-         multi-objective UCB. Implement the `select_arm` function of
-         `multi_obj_thompson/bandit.py`.
+(ii) **（笔答 + 编程，3 分）** 实现一种汤普森采样
+一种交替进行的采集策略：用多目标 UCB 在"奖励最大化"
+与"以参数为目标的探索"之间切换。请实现
+`select_arm` 函数。
+         它在 `multi_obj_thompson/bandit.py` 中。
 
-    (iii) **(Written, 2 points).** Describe the impact of this
-          alternating acquisition strategy on false positive rates and
-          regret in comparison to standard Thompson Sampling.
+(iii) **（笔答，2 分）** 说明这种
+相比标准汤普森采样，这种交替采集策略对假正率与遗憾的影响。
 
-(c) **Posterior Distribution Analysis (8 points)**
+(c) **后验分布分析（8 分）**
 
-    (i) **(Written, 2 points).** Given a prior distribution for $\theta$
-        and observed rewards, derive the posterior distribution of
-        $\theta$ at each time step in the context of multi-objective
-        Thompson Sampling. Explain any assumptions needed for
+(i) **（笔答，2 分）** 给定 $\theta$ 的先验分布
+以及观察到的奖励，推出每一步中
+$\theta$ 在多目标汤普森采样下的后验分布，并说明
+需要哪些假定。
         computational tractability.
 
-    (ii) **(Coding, 4 points).** Implement a Bayesian update for the
-         posterior of $\theta$ following each observation. Do this in
+(ii) **（编程，4 分）** 实现一次贝叶斯更新，用来得到
+每次观察后 $\theta$ 的后验。请在下面这个函数中完成：
          `update`.
 
-    (iii) **(Written, 2 points).** Explain how this posterior update
-          accommodates both exploration for parameter estimation and
-          exploitation for reward maximization.
+(iii) **（笔答，2 分）** 说明这个后验更新如何同时兼顾面向参数估计的探索与面向奖励最大化的利用。
 
-(d) **Empirical Evaluation (6 points)**
+(d) **实证评估（6 分）**
 
-    (i) **(Coding, 3 points).** Design and conduct an experiment
-        comparing standard Thompson Sampling, pure exploration, and your
-        multi-objective TS algorithm. Run this experiment on a synthetic
-        dataset with $d = 5$ features and $K = 10$ arms by executing
-        `run.py`.
+(i) **（编程，3 分）** 设计并完成一个实验，比较标准汤普森采样、纯探索以及你的多目标 TS 算法。
+        在特征维度 $d = 5$、手臂数 $K = 10$ 的合成数据集上运行这个实验，执行 `run.py` 即可。
 
-    (ii) **(Written, 3 points).** Report and interpret the results by
-         comparing the cumulative reward and parameter estimation error
-         across methods. Provide insights on the trade-offs observed and
-         any patterns in the rate of regret reduction.
+(ii) **（笔答，3 分）** 通过比较各方法的累计奖励与参数估计误差来报告并解释结果。
+         就你观察到的取舍、以及遗憾下降速度上的规律给出看法。
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex3-q3}
 import numpy as np
 import matplotlib.pyplot as plt
@@ -1021,65 +940,42 @@ if __name__ == '__main__':
 ```
 :::
 
-### Question 4: Mechanism Design in Preference Learning (30 points) {#sec-question-4-mechanism-design-in-preference-learning-30-points .unnumbered}
+### 第 4 题：偏好学习中的机制设计（30 分） {#sec-question-4-mechanism-design-in-preference-learning-30-points .unnumbered}
 
-In mechanism design, a central challenge is optimizing resource
-allocation while accounting for user preferences, which may be private
-and complex. This problem can be addressed using learning techniques to
-infer user preferences, thereby enabling the designer to make informed
-pricing and allocation decisions. Consider a scenario where a designer
-allocates a divisible resource $B$ among $N$ players, each with a
-private, continuous, concave utility function $U_i(x_i)$ over their
-allocated share $x_i$, where $x = [x_1, x_2, \dots, x_N]$ denotes the
-allocation vector. The designer aims to maximize social welfare while
-ensuring full resource utilization.
+在机制设计中，一个核心的挑战是：在考虑用户偏好的同时把资源分配好，而用户的偏好可能是私有的、也很复杂。这类问题可以用学习方法来推断用户的偏好，
+从而让设计者做出更有依据的定价与分配决定。考虑这样一个场景：设计者要把一份可分割的资源 $B$ 分给 $N$ 个参与者，每个参与者对自己分到的份额 $x_i$
+有一个私有、连续、凹的效用函数 $U_i(x_i)$；记 $x = [x_1, x_2, \dots, x_N]$ 为分配向量。设计者的目标是在把资源全部分完的前提下最大化社会福利。
 
-(a) **Modeling User Preferences (7 points)**:
+(a) **给用户的偏好建模（7 分）**：
 
-    (i) **(Written, 1 point)** Provide a realistic scenario in which we
-        estimate a utility function through eliciting preferences in the
-        context of the mechanism.
+(i) **（笔答，1 分）** 给出一个真实场景：在这个场景中，我们需要在这个机制的背景下，通过征询偏好来估计一个效用函数。
 
-    (ii) **(Written, 3 point)** Explain how elliptical slice sampling
-         can be used with a GP in order to estimate a utility function
-         through preferences.
+(ii) **（笔答，3 分）** 说明如何把椭圆切片采样与 GP 结合使用，从而通过偏好来估计效用函数。
 
-    (iii) **(Written, 3 point)** How can the elliptical slice posterior
-          samples be used to obtain the mean of the posterior predictive
-          for test points? (Hint: Read page $44$ of
-          <https://gaussianprocess.org/gpml/chapters/RW.pdf>.)
+(iii) **（笔答，3 分）** 怎样用椭圆切片采样得到的后验样本来求出测试点处后验预测的均值？
+ （提示：阅读 <https://gaussianprocess.org/gpml/chapters/RW.pdf> 的第 $44$ 页。）
 
-(b) **Optimization with Learned Preferences (10 points)**:
+(b) **在学到的偏好之上做优化（10 分）**：
 
-    (i) **(Written, 3 point)** Formulate the designer's optimization
-        problem, maximizing social welfare $\sum_{i=1}^N U_i(x_i)$
-        subject to the constraint $\sum_{i=1}^N x_i \leq B$.
+(i) **（笔答，3 分）** 把设计者的优化问题写成形式化表达式：最大化社会福利 $\sum_{i=1}^N U_i(x_i)$，
+ 约束为 $\sum_{i=1}^N x_i \leq B$。
 
-    (ii) **(Written, 4 point)** Using the Lagrange multiplier method,
-         derive the conditions that must be met for optimal allocation
-         and pricing.
+(ii) **（笔答，4 分）** 用拉格朗日乘子法推出最优分配与定价必须满足的条件。
 
-    (iii) **(Written, 3 point)** As an alternative approach to Lagrange
-          multipliers, explain how projected gradient descent (PGD) can
-          be used to solve the designer's optimization problem.
+(iii) **（笔答，3 分）** 作为拉格朗日乘子法的替代，说明如何用投影梯度下降（PGD）求解设计者的优化问题。
 
-(c) **Benchmarking Learning and Allocation Efficiency (13 points)**:
+(c) **学习与分配效率的基准测试（13 分）**：
 
-    (i) **(Coding, 3 point)** Implement `preference_loglik` in the file
-        `gp_mechanism/preference_gp.py`.
+(i) **（编程，3 分）** 在文件 `gp_mechanism/preference_gp.py` 中实现 `preference_loglik`。
 
-    (ii) **(Coding, 3 point)** Implement `predictive_function`.
+(ii) **（编程，3 分）** 实现 `predictive_function`。
 
-    (iii) **(Coding, 3 point)** Implement `optimize_allocations` inside
-          `gp_mechanism/run.py`.
+(iii) **（编程，3 分）** 在 `gp_mechanism/run.py` 中实现 `optimize_allocations`。
 
-    (iv) **(Written, 4 point)** Compare GP-approximated utility
-         allocations through PGD, exact utility allocations through PGD,
-         and the optimal Lagrange-based allocation done by hand with
-         each other for your choice of utility functions $U_i$. Make
-         sure your utilities are continuous and concave.
+(iv) **（笔答，4 分）** 就你自己选取的效用函数 $U_i$（务必保证它们连续且凹），把三种分配方案互相比较：
+ 用 PGD 得到的基于 GP 近似的效用分配、用 PGD 得到的精确效用分配，以及手算的基于拉格朗日方法的最优分配。
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex3-q4-1}
 from typing import Callable
 
@@ -1326,7 +1222,7 @@ if __name__ == "__main__":
 ```
 :::
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex3-q4-2}
 import torch
 from preference_gp import create_predictive_function

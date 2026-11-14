@@ -1,5 +1,5 @@
 ---
-title: Elicitation
+title: 偏好征询
 format:
   html:
     include-after-body:
@@ -36,110 +36,110 @@ filters:
 
 
 ::: {.callout-note}
-## Intended Learning Outcomes
+## 学习目标
 
-By the end of this chapter you will be able to:
+读完本章，你应当能够：
 
-- **Define** the measurement problem for user preference elicitation and distinguish it from the learning problem in Chapter 3.
-- **Derive** the Fisher information for Rasch/Bradley-Terry models and explain why items with $p \approx 0.5$ are most informative.
-- **Compare** A-optimal, D-optimal, and E-optimal design criteria for selecting informative queries.
-- **Apply** Laplace approximation to update posterior beliefs about user preferences in real-time.
-- **Implement** active selection policies that outperform random sampling in sample efficiency.
-- **Extend** Fisher information analysis to non-linear scoring functions via local linearization.
-- **Apply** information-theoretic acquisition functions to actively select queries for Gaussian Process preference models, building on the GP foundations from Chapters 2-3.
-- **Explain** how D-optimal design applies to Direct Preference Optimization (DPO) for LLM alignment and derive the ADPO algorithm.
-- **Analyze** active preference learning in robotics, including trajectory comparison and reward function inference.
+- **说明**用户偏好征询中的测量问题，并把它与第 2 章的学习问题区分开。
+- **推导**Rasch/Bradley-Terry 模型的 费雪信息，并解释为什么 $p \approx 0.5$ 的物品最有信息量。
+- **比较**用于挑选有价值提问的 A 最优、D 最优、E 最优三种设计准则。
+- **应用**拉普拉斯近似，实时更新对用户偏好的后验信念。
+- **实现**在样本效率上超过随机抽样的主动选题策略。
+- **推广**：通过局部线性化，把 费雪信息分析用到非线性打分函数上。
+- **应用**信息论的采集函数，为高斯过程偏好模型主动挑选要问的比较（GP 的基础见第 2 章与第 3 章）。
+- **解释**D 最优设计如何应用于语言模型对齐中的直接偏好优化（DPO），并导出 ADPO 算法。
+- **分析**机器人场景下的主动偏好学习，包括轨迹比较与奖励函数推断。
 :::
 
-## Chapter Overview
+## 本章内容安排
 
-Chapter 1 developed models for how preferences arise from latent utilities. Chapter 2 showed how to estimate these utilities from observed comparisons. This chapter addresses the complementary question: **given that human feedback is expensive, how should we choose which comparisons to request?**
+第 1 章给出了"偏好如何从隐在效用产生"的模型，第 2 章讲了怎么从观测到的比较中估计这些效用。本章要回答的是与之互补的一个问题：**既然人类的反馈很贵，那我们该挑哪些比较去问？**
 
-This is the *measurement problem* in preference elicitation. Unlike the learning problem (which assumes data is given), the measurement problem actively designs experiments to maximize information gained per query. Consider training an LLM via RLHF: collecting 100,000 human preference labels is expensive and time-consuming. If we could achieve the same alignment quality with 20,000 strategically selected comparisons, we would save 80% of annotation cost.
+这就是偏好征询中的**测量问题**。学习问题假定数据已经有了；测量问题则主动设计试验，让每一次提问带来的信息最多。设想用 RLHF 训练一个大语言模型：收集 10 万条人类偏好标注既花钱又花时间。如果只问 2 万条精心挑选的比较就能达到同样的对齐效果，标注成本就省下了 80%。
 
-The central insight is that **not all comparisons are equally informative**. Asking whether humans prefer "Hello!" to "Hi there!" reveals little about model quality. Comparing two substantively different responses to a complex prompt provides more signal. The mathematical framework of *Fisher information* and *optimal experimental design* formalizes this intuition.
+核心认识是：**并不是所有比较都一样有用**。问人"'Hello!' 和 'Hi there!' 哪个好'几乎问不出模型的优劣；而对一个复杂提示下两个实质不同的回答作比较，信号就强得多。*费雪信息*与*最优试验设计*这套数学工具，正好把这个直觉形式化。
 
-**Chapter Structure.** We build from simple to complex settings:
+**本章结构。** 我们从简单情形一步步走到复杂情形：
 
-1. **Scalar preferences** (@sec-measurement): The Rasch model and Fisher information
-2. **Multi-dimensional preferences** (@sec-factor-models-active): Factor models and optimal design criteria (A/D/E-optimal)
-3. **Preference functions** (@sec-preference-function): Linear and non-linear scoring functions
-4. **Nonparametric models** (@sec-active-learning): GP-based active learning with information-theoretic acquisition
-5. **LLM alignment** (@sec-adpo): Active DPO for large language models
-6. **Applications**: Metric elicitation (@sec-metric-elicitation) and robotics (@sec-robotics-trajectory)
+1. **标量偏好**（@sec-measurement）：Rasch 模型与 费雪信息
+2. **多维偏好**（@sec-factor-models-active）：因子模型与最优设计准则（A/D/E 最优）
+3. **偏好函数**（@sec-preference-function）：线性与非线性的打分函数
+4. **非参数模型**（@sec-active-learning）：基于高斯过程的主动学习，用信息论的采集函数
+5. **语言模型对齐**（@sec-adpo）：面向大语言模型的主动 DPO
+6. **应用**：度量征询（@sec-metric-elicitation）与机器人（@sec-robotics-trajectory）
 
-**Connections to Prior Chapters:**
+**与前面几章的衔接：**
 
-| Concept | Chapter 1-2 | This Chapter |
+| 概念 | 第 1-2 章 | 本章 |
 |---------|------------|--------------|
-| Bradley-Terry model | Likelihood, MLE (@sec-bradley-terry) | Fisher information, query selection |
-| Factor models $U^\top V$ | Parameter estimation (@sec-latent-variable) | D-optimal pair selection |
-| GP preference models | Laplace inference (@sec-gp-inference) | Information-gain acquisition |
-| DPO loss | Objective function (@sec-llm-example) | ADPO active selection |
+| Bradley-Terry 模型 | 似然、最大似然估计（@sec-bradley-terry） | 费雪信息、挑选要问的比较 |
+| 因子模型 $U^\top V$ | 参数估计（@sec-latent-variable） | 用 D 最优选比较对 |
+| 高斯过程偏好模型 | 拉普拉斯推断（@sec-gp-inference） | 信息增益采集函数 |
+| DPO 损失 | 目标函数（@sec-llm-example） | ADPO 主动挑选 |
 
-**Historical Notes.** Active learning for preferences has roots in multiple fields:
+**历史脉络。** 主动式偏好学习在好几个领域都有源头：
 
-- **Psychometrics (1960s)**: Computer-adaptive testing used Fisher information to select test items matching student ability
-- **Optimal experimental design (1970s)**: Fedorov and Kiefer developed A/D/E-optimality for linear models
-- **Bayesian experimental design (1990s)**: Chaloner & Verdinelli unified information-theoretic approaches
-- **RLHF/Active DPO (2020s)**: Applying these ideas to LLM alignment at scale
+- **心理测量学（1960 年代）**：计算机化自适应测验用 费雪信息挑选与学生水平相匹配的题目
+- **最优试验设计（1970 年代）**：Fedorov 与 Kiefer 为线性模型建立了 A/D/E 最优性理论
+- **贝叶斯试验设计（1990 年代）**：Chaloner 与 Verdinelli 把信息论方法统一起来
+- **RLHF / 主动 DPO（2020 年代）**：把这些想法用到大规模的语言模型对齐上
 
-> "The purpose of optimal design is to achieve the desired precision with minimum cost." --- V.V. Fedorov (1972)
+> "最优设计的目的，是用最小的代价达到所要求的精度。"—— V. V. Fedorov（1972）
 
-## Measurement of User Preference Vector {#sec-measurement}
+## 用户偏好向量的测量 {#sec-measurement}
 
-When items' appeals $V_j$ are known or pre-calibrated, we can learn a new user's appetite $U$ quickly by choosing informative items online. Asking only easy or only hard items gives near-deterministic responses that teach little. The key tool for quantifying "informativeness" is Fisher information.
+如果各物品的吸引力 $V_j$ 已知或早已标定好，那么只要在线挑那些有信息量的物品，就能很快学出一位新用户 $U$ 的胃口。只问太简单的或只问太难的，回答几乎总是确定的，学不到东西。用来量化"有没有信息量"的关键工具就是 费雪信息。
 
-::: {.callout-note title="Definition: Fisher Information"}
+::: {.callout-note title="定义：费雪信息"}
 ::: {#def-fisher-info}
-For a parametric model $p(Y \mid \theta)$, the **Fisher Information** about parameter $\theta$ is:
+对参数模型 $p(Y \mid \theta)$，关于参数 $\theta$ 的**费雪信息（Fisher Information）**定义为：
 $$
 \mathcal{I}(\theta) = \mathbb{E}\left[-\frac{\partial^2}{\partial \theta^2} \log p(Y \mid \theta)\right] = \mathbb{E}\left[\left(\frac{\partial}{\partial \theta} \log p(Y \mid \theta)\right)^2\right]
 $$
-Fisher Information quantifies how much a single observation reveals about $\theta$. Higher Fisher Information means more precise estimation from each observation. The Cramér-Rao bound states that the variance of any unbiased estimator is at least $\mathcal{I}(\theta)^{-1}$.
+费雪信息衡量的是：一条观测量能透露多少关于 $\theta$ 的信息。费雪信息越大，每条观测能达到的估计精度就越高。Cramér-Rao 下界指出：任何无偏估计的方差都不小于 $\mathcal{I}(\theta)^{-1}$。
 :::
 :::
 
-The Rasch model makes this precise. Recall from @sec-latent-variable that for a candidate item $j$, the Bernoulli success probability is $p_j(U) = \sigma(U + V_j).$ The Fisher information about $U$ from a single response is
+Rasch 模型把这个说法变得确切。回想 @sec-latent-variable：对某个候选物品 $j$，伯努利成功概率是 $p_j(U) = \sigma(U + V_j)$。单条回答关于 $U$ 的 费雪信息是
 $$\mathcal I_j(U) = \mathbb{E} \left[-\frac{\partial^2}{\partial U^2}\log p(Y \mid U, V_j)\right] = p_j(U) (1 - p_j(U)).$$ {#eq-rasch-fisher-info}
 
-::: {.callout-note title="Proposition: Optimal Item Difficulty"}
+::: {.callout-note title="命题：题目的最优难度"}
 ::: {#prp-fisher-max}
-For the Rasch model with $p_j(U) = \sigma(U + V_j)$, the Fisher Information $\mathcal{I}_j(U) = p_j(1-p_j)$ is **maximized when $p_j(U) = 0.5$**, which occurs when item difficulty $-V_j$ equals user ability $U$.
+对满足 $p_j(U) = \sigma(U + V_j)$ 的 Rasch 模型，费雪信息 $\mathcal{I}_j(U) = p_j(1-p_j)$ **在 $p_j(U) = 0.5$ 时最大**，也就是题目难度 $-V_j$ 恰好等于用户能力 $U$ 的时候。
 :::
 :::
 
-::: {.callout-tip title="Proof" collapse="true"}
-The function $f(p) = p(1-p)$ is a downward parabola with roots at $p=0$ and $p=1$. Taking the derivative: $f'(p) = 1 - 2p = 0 \Rightarrow p = 0.5$. At this point, $f(0.5) = 0.25$, which is the maximum. Since $p_j(U) = \sigma(U + V_j) = 0.5$ when $U + V_j = 0$, the optimal item has $V_j = -U$.
+::: {.callout-tip title="证明" collapse="true"}
+函数 $f(p) = p(1-p)$ 是一条开口向下的抛物线，根在 $p=0$ 与 $p=1$。求导：$f'(p) = 1 - 2p = 0 \Rightarrow p = 0.5$。此处 $f(0.5) = 0.25$，就是最大值。而 $p_j(U) = \sigma(U + V_j) = 0.5$ 当且仅当 $U + V_j = 0$，所以最优物品满足 $V_j = -U$。
 :::
 
-::: {.callout-caution title="Worked Example: Fisher Information for Item Selection" collapse="false"}
-A user has estimated ability $\hat{U} = 1.0$. We have three candidate items with appeals $V_1 = -2.0$ (hard), $V_2 = -1.0$ (matched), and $V_3 = 1.0$ (easy). Which item should we ask next?
+::: {.callout-caution title="完整算例：用 费雪信息挑物品" collapse="false"}
+已知某用户能力的估计是 $\hat{U} = 1.0$。手上有三个候选物品，吸引力分别为 $V_1 = -2.0$（难）、$V_2 = -1.0$（匹配）、$V_3 = 1.0$（简单）。下一个该问哪个？
 
-**Step 1.** Compute predicted success probabilities:
+**第 1 步。** 算出预测的成功概率：
 $$p_1 = \sigma(1.0 + (-2.0)) = \sigma(-1.0) \approx 0.269$$
 $$p_2 = \sigma(1.0 + (-1.0)) = \sigma(0.0) = 0.500$$
 $$p_3 = \sigma(1.0 + 1.0) = \sigma(2.0) \approx 0.881$$
 
-**Step 2.** Compute Fisher information for each item:
+**第 2 步。** 算出每个物品的 费雪信息：
 $$\mathcal{I}_1 = p_1(1-p_1) = 0.269 \times 0.731 \approx 0.197$$
 $$\mathcal{I}_2 = p_2(1-p_2) = 0.500 \times 0.500 = 0.250$$
 $$\mathcal{I}_3 = p_3(1-p_3) = 0.881 \times 0.119 \approx 0.105$$
 
-**Step 3.** Select the most informative item: $j^* = \arg\max_j \mathcal{I}_j = 2$ (the matched item).
+**第 3 步。** 选出信息量最大的物品：$j^* = \arg\max_j \mathcal{I}_j = 2$（就是难度与能力匹配的那个）。
 
-**Interpretation:** Item 2, whose difficulty $-V_2 = 1.0$ matches the user's ability $\hat{U} = 1.0$, is most informative because it produces responses closest to 50-50. The easy item ($V_3$) is least informative --- the user almost certainly succeeds, so the response tells us little about their ability. This is the principle behind *computerized adaptive testing*: the test "follows" the student, always selecting questions near their ability level.
+**解读：** 2 号物品的难度 $-V_2 = 1.0$ 正好对应用户的能力估计 $\hat{U} = 1.0$，所以它最有信息量——它的回答最接近五五开。那个简单物品（$V_3$）信息量最少：用户几乎肯定成功，这一条回答几乎告诉不了我们他的能力。这正是*计算机化自适应测验*背后的原理：测验会"跟着"学生走，始终挑难度贴近他当前水平的题。
 :::
 
-This result has a natural interpretation: items that are too easy ($p \approx 1$) or too hard ($p \approx 0$) yield near-deterministic responses that teach little about the user. Items matched to the user's ability ($p \approx 0.5$) are maximally informative. So the best next item is one whose difficulty ($-V_j$) is close to the current estimate of $U$. Active elicitation policies therefore "hover" around the user’s current location, rapidly shrinking uncertainty. Place a Gaussian prior $U \sim \mathcal N(0,\sigma_0^2)$. After observing independent items $\mathcal J$, a Laplace (or IRLS) update for $U$ uses the score and observed information
+这个结论的解释很自然：太简单（$p \approx 1$）或太难（$p \approx 0$）的物品，回答几乎总是确定的，问不出关于用户多少信息；难度与用户水平匹配（$p \approx 0.5$）的物品信息量最大。所以下一个好物品，就是难度（$-V_j$）接近当前对 $U$ 的估计的那个。因此主动征询策略会"贴着"用户当前的位置来回试探，让不确定性快速缩小。设高斯先验 $U \sim \mathcal N(0,\sigma_0^2)$。观测到若干相互独立的物品 $\mathcal J$ 之后，对 $U$ 做拉普拉斯（也就是 IRLS）更新，要用到得分函数与观测信息量
 $$S(U) = \sum_{j\in\mathcal J} (y_j - p_j(U)), \qquad \mathcal I(U) = \sum_{j\in\mathcal J}p_j(U) (1 - p_j(U)) + \tau_0, \quad \tau_0 = \sigma_0^{-2}. $$ {#eq-rasch-score-info}
-A Newton step is $\hat U \leftarrow \hat U + S(\hat U)\mathcal I(\hat U)^{-1}.$ The approximate posterior variance is $\widehat{\mathrm{Var}}(U) \approx \mathcal I(\hat U)^{-1}.$ An item-selection rule that maximizes expected \textbf{incremental} information picks $j_t = \arg\max_j \; p_j(\hat U_{t-1}) (1 - p_j(\hat U_{t-1})).$ For evaluation, we can use reliability. With population variance $\mathrm{Var}(U^\star)=\sigma_U^2$, reliability is the fraction of total variance explained by the test rather than estimation noise:
+牛顿迭代的一步是 $\hat U \leftarrow \hat U + S(\hat U)\mathcal I(\hat U)^{-1}$，近似的后验方差为 $\widehat{\mathrm{Var}}(U) \approx \mathcal I(\hat U)^{-1}$。要想让**增量**信息量的期望最大，选题规则就是取 $j_t = \arg\max_j \; p_j(\hat U_{t-1}) (1 - p_j(\hat U_{t-1}))$。评估时可以用信度（reliability）。设总体方差为 $\mathrm{Var}(U^\star)=\sigma_U^2$，信度就是"能被测验解释的那部分方差"所占的比例，剩下的则归给估计噪声：
 $$
 \text{Rel} \approx 1 - \frac{1}{N}\sum_{i=1}^N \frac{\widehat{\mathrm{Var}}(U_i)}{\sigma_U^2}.
 $$ {#eq-reliability}
-Below, the code simulates many users, a bank of calibrated items, and compares an Fisher policy to a random policy. We track reliability after each query count $t$.
+下面的代码模拟很多用户和一个已经标定好的题库，把"按 费雪信息选题"的策略与随机策略作对比，并统计提问 $t$ 次之后的信度。
 
-First, we set up the simulation with $N$ users, $M$ calibrated items, and define helper functions for Bayesian updating:
+首先搭好模拟环境：$N$ 个用户、$M$ 个已经标定好的物品，并定义几个做贝叶斯更新的辅助函数。
 
 {{< include _plt_setup.qmd >}}
 
@@ -164,7 +164,7 @@ print(f"User abilities range: [{U_true.min():.2f}, {U_true.max():.2f}]")
 print(f"Item difficulties range: [{V.min():.2f}, {V.max():.2f}]")
 ```
 
-Next, we define the Bayesian update rule and the two item selection policies—Fisher-active (maximizing information) and random:
+接下来定义贝叶斯更新规则，以及两种选题策略：一种是**按费雪信息主动选题**（每次都挑信息量最大的），另一种是**随机选题**。
 
 ```{pyodide-python}
 #| autorun: true
@@ -197,7 +197,7 @@ def choose_item_random(state, V, asked_mask):
 print("Update and selection functions defined.")
 ```
 
-Now we run the simulation, comparing both policies across all users:
+现在跑这个模拟，把两种策略在所有用户上的表现比一比：
 
 ```{pyodide-python}
 #| autorun: true
@@ -228,7 +228,7 @@ mse_rnd, rel_rnd = run_policy(choose_item_random, V, T)
 print("Simulation complete!")
 ```
 
-Finally, we visualize the results comparing Fisher-active vs random item selection:
+最后把两种策略的结果画出来对比——按费雪信息主动选题 vs 随机选题：
 
 ```{pyodide-python}
 #| autorun: true
@@ -251,54 +251,54 @@ print(f"Final MSE  | Random: {mse_rnd[-1]:.4f} | Fisher: {mse_act[-1]:.4f}")
 print(f"Final Rel. | Random: {rel_rnd[-1]:.3f}  | Fisher: {rel_act[-1]:.3f}")
 ```
 
-::: {.callout-important title="Key Takeaway: Active Beats Random"}
-Fisher-active item selection achieves higher reliability with fewer queries than random selection. The gain comes from targeting items near $p=0.5$, where each response is maximally informative. This principle---**measure where uncertainty is highest**---underlies all active learning methods in this chapter.
+::: {.callout-important title="本章要点：主动选题胜过随机"}
+按 费雪信息主动选题，用更少的提问就能达到更高的信度。好处来自盯着 $p=0.5$ 附近的物品问——那里每条回答的信息量最大。**在不确定性最高的地方去测量**这条原则，正是本章所有主动学习方法共同的内核。
 :::
 
-::: {.callout-warning title="Assumption: Known Item Parameters"}
-The Fisher information framework above assumes item parameters ($V_j$, $Z_j$) are **known or pre-calibrated** before elicitation begins. In practice, item parameters must often be estimated jointly with user preferences---this is the **cold-start problem** in recommender systems. When item parameters are uncertain, errors in item calibration propagate into suboptimal query selection: the system may ask about items it *thinks* are informative but are not. Joint estimation of user and item parameters requires different approaches, such as alternating optimization or fully Bayesian models that maintain uncertainty over both.
+::: {.callout-warning title="假设：物品参数已知"}
+上面的 费雪信息框架假定物品参数（$V_j$、$Z_j$）在开始征询之前就已**已知或已经标定好**。可现实中，物品参数往往要和用户偏好一起估计——这就是推荐系统里的**冷启动问题**。物品参数不确定时，标定误差会传导到选题决策上：系统可能去问那些它*以为*很有信息量、实际上并不一定的物品。要把用户参数和物品参数一起估计，需要另外的办法，比如交替优化，或者对两者都保持不确定性的全贝叶斯模型。
 :::
 
-### Factor Models: Multi-Dimensional Preferences {#sec-factor-models-active}
+### 因子模型：多维偏好 {#sec-factor-models-active}
 
-In practice, a single "ability" parameter may not capture the diversity of user preferences. Factor models generalize Rasch by giving each user a $K$-dimensional embedding $U_i \in \mathbb R^K$ and each item a $K$-dimensional embedding $V_j \in \mathbb R^K$, plus optional bias $Z_j$. The linear predictor is $H_{ij} = U_i^\top V_j + Z_j$ where $p(Y_{ij}=1 \mid U_i, V_j, Z_j) = \sigma(H_{ij}).$
+实际上，只靠一个"能力"参数未必能概括用户偏好的多样性。因子模型把 Rasch 模型推广开：给每位用户一个 $K$ 维向量表示 $U_i \in \mathbb R^K$，给每个物品一个 $K$ 维向量表示 $V_j \in \mathbb R^K$，还可以加一个可选的偏置 $Z_j$。线性预测量为 $H_{ij} = U_i^\top V_j + Z_j$，其中 $p(Y_{ij}=1 \mid U_i, V_j, Z_j) = \sigma(H_{ij})$。
 
-A concrete instance is **performance metric elicitation** [@pmlr-v89-hiranandani19a]. In binary classification, practitioners often have implicit preferences over classifiers that don't match standard metrics like accuracy or F1---for instance, in medical diagnosis, the cost of a false negative (missed disease) may differ greatly from a false positive (unnecessary treatment). This is a $K=2$ factor model where "items" are classifiers with known confusion matrices $V_\theta = (\text{TP}_\theta, \text{TN}_\theta)$, and the "user preference" is the unknown metric weights $\mathbf{m} = (m_{11}, m_{00})$. The utility $\mathbf{m}^\top V_\theta = m_{11} \cdot \text{TP}_\theta + m_{00} \cdot \text{TN}_\theta$ is exactly the factor model form with known item parameters.
+一个具体的例子是**性能度量征询**（performance metric elicitation）[@pmlr-v89-hiranandani19a]。做二分类时，工程师心里对分类器的偏好，常常和准确率、F1 这些标准指标对不上——比如在医学诊断中，漏诊（假阴性）的代价和误诊（假阳性，白治一场）的代价可能差得非常远。这正是一个 $K=2$ 的因子模型："物品"是混淆矩阵已知的各个分类器，$V_\theta = (\text{TP}_\theta, \text{TN}_\theta)$；"用户偏好"则是未知的指标权重 $\mathbf{m} = (m_{11}, m_{00})$。效用 $\mathbf{m}^\top V_\theta = m_{11} \cdot \text{TP}_\theta + m_{00} \cdot \text{TN}_\theta$ 恰好就是物品参数已知的因子模型形式。
 
-For a given user $U$ and an item $j$ with known parameters, the Bernoulli log-likelihood is
+给定用户 $U$ 和一个参数已知的物品 $j$，伯努利对数似然是
 $$\ell(U; y, j) = y \log \sigma(H) + (1-y)\log (1-\sigma(H))$$ {#eq-factor-loglik}
-The gradient with respect to $U$ is $\nabla_U \ell = (y - \sigma(H)) V_j.$ The expected Fisher Information per item is the negative expected Hessian:
+对 $U$ 求梯度得 $\nabla_U \ell = (y - \sigma(H)) V_j$。每个物品的期望 费雪信息就是负的期望 Hessian：
 $$
 \mathcal I_j(U) = \mathbb E[\nabla_U \ell \nabla_U \ell^\top ] = \sigma(H)(1-\sigma(H)) V_j V_j^\top.
 $$ {#eq-factor-fisher-info}
-So each queried item contributes a rank-1 matrix in the direction of $V_j$, scaled by the variance term $\sigma(H)(1-\sigma(H))$. For a sequence of items ${j_t}$, the cumulative information is
+所以每问一个物品，就沿 $V_j$ 这个方向贡献一个秩为 1 的矩阵，再按方差项 $\sigma(H)(1-\sigma(H))$ 缩放。依次询问一列物品 ${j_t}$，累积信息量为
 $$\mathcal I(U) = \sum_t \sigma(H_{j_t})(1-\sigma(H_{j_t})) V_{j_t} V_{j_t}^\top.$$ {#eq-cumulative-fisher-info}
 
-::: {.callout-warning title="Assumption: Correct Model Specification"}
-Fisher information quantifies the informativeness of a query **under the assumed model**. If the model is misspecified---for example, if preferences are not logistic, or if the factor structure has the wrong dimensionality $K$---then queries optimized for the Fisher criterion may not be optimal for learning the true preference structure. Under misspecification, information-theoretic criteria such as mutual information or Bayesian approaches that integrate over model uncertainty can be more robust. In practice, it is worth checking sensitivity to the assumed model by comparing active learning performance across different model specifications.
+::: {.callout-warning title="假设：模型设定正确"}
+费雪信息衡量一次提问的信息量，是**在假定的模型之下**说的。如果模型设定错了——比如偏好并不是逻辑斯蒂形式，或者因子结构取的维度 $K$ 不对——那么按费雪信息准则挑出的问题，对学到真实偏好结构未必最优。设定错误时，互信息这类信息论准则、或者对模型不确定性作积分的贝叶斯方法会更稳健。实践中值得做一下模型敏感性检查：换几种不同的模型设定，比较主动学习的表现差多少。
 :::
 
-In multiple dimensions, information is a matrix. Classical optimal design offers various criteria for selecting informative queries:
+到了多维情形，"信息"就成了一個矩阵。经典的最优试验设计给出了若干准则，用来挑出有信息量的提问：
 
-::: {.callout-note title="Definition: Optimal Design Criteria"}
+::: {.callout-note title="定义：最优设计准则"}
 ::: {#def-optimal-design}
-Given a Fisher Information matrix $\mathcal{I}(U)$, the classical **optimal experimental design** criteria are:
+给定 费雪信息矩阵 $\mathcal{I}(U)$，经典的**最优试验设计（optimal experimental design）**准则有以下几种：
 
-- **A-Optimal (Average)**: Minimize $\text{tr}(\mathcal{I}^{-1})$---the average variance of parameter estimates
-- **D-Optimal (Determinant)**: Maximize $\det(\mathcal{I})$---the volume shrinkage of the posterior ellipsoid
-- **E-Optimal (Eigenvalue)**: Maximize $\lambda_{\min}(\mathcal{I})$---the precision in the worst-case direction
+- **A 最优（Average，平均）**：最小化 $\text{tr}(\mathcal{I}^{-1})$——也就是参数估计的平均方差
+- **D 最优（Determinant，行列式）**：最大化 $\det(\mathcal{I})$——也就是后验椭球体积的缩小程度
+- **E 最优（Eigenvalue，特征值）**：最大化 $\lambda_{\min}(\mathcal{I})$——也就是最坏方向上的精度
 
-All three reduce uncertainty, but emphasize different aspects: A-optimal targets average precision, D-optimal targets overall information volume, and E-optimal targets the least-informed direction.
+三者都是在减少不确定性，只是侧重点不同：A 最优追求平均精度，D 最优追求总的信息量，E 最优则专门补信息最少的那个方向。
 :::
 :::
 
-::: {.callout-warning title="Common Pitfall: Confusing A-Optimal, D-Optimal, and E-Optimal"}
-These three criteria **optimize different objectives** and can select different queries. A-optimal minimizes average variance (good when all parameters matter equally), D-optimal maximizes the determinant of the information matrix (shrinks the posterior ellipsoid volume — good for overall uncertainty), and E-optimal maximizes the minimum eigenvalue (guards against worst-case directions). A common mistake is to treat them as interchangeable. In practice: D-optimal naturally encourages **diversity** in selected items (redundant items give diminishing information), while E-optimal is **conservative** (focuses all effort on the least-informed direction). Choose the criterion based on your downstream task — if you need accurate *ranking* of all items, A-optimal is natural; if you need a single *best* decision, E-optimal may be preferable.
+::: {.callout-warning title="常见坑：把 A 最优、D 最优、E 最优混为一谈"}
+这三个准则**优化的目标并不相同**，选出来的比较也可能不同。A 最优最小化平均方差（每个参数都一样重要时合适）；D 最优最大化信息矩阵的行列式（缩小后验椭球的体积——适合控制整体的不确定性）；E 最优最大化最小特征值（盯住最坏的那个方向）。常见的错误是把三者当成可以互换的东西。实践中：D 最优天然会让选出的物品更**多样**（重复的物品带来的信息越来越少），而 E 最优很**保守**（把全部力气花在信息最少的那个方向上）。选哪个准则要看你的下游任务——如果你需要把所有物品*排序*排准，A 最优更自然；如果你只做一次*最优*决策，E 最优也许更合适。
 :::
 
-Adaptive measurement picks the next item $j$ to maximize an acquisition function such as $\det(\mathcal I+\mathcal I_j)$. We also use reliability as the evaluation metric here. If $\Sigma_U$ is the population covariance and $\widehat{\Sigma}_{\text{err}}$ the average posterior covariance, then $\text{Reliability} = 1 - \mathrm{tr}(\widehat{\Sigma}_{\text{err}}) \mathrm{tr}(\Sigma_U)^{-1}.$ This generalizes the Rasch reliability to multi-dimensional latent traits. Below is a toy simulation with 2-dimensional users and items, comparing random item selection vs D-optimal Fisher active selection:
+自适应测量会这样选下一个物品 $j$：让某个采集函数最大，例如 $\det(\mathcal I+\mathcal I_j)$。这里的评估指标同样用信度。记 $\Sigma_U$ 为总体协方差、$\widehat{\Sigma}_{\text{err}}$ 为平均后验协方差，则 $\text{Reliability} = 1 - \mathrm{tr}(\widehat{\Sigma}_{\text{err}}) \mathrm{tr}(\Sigma_U)^{-1}$。这正是把 Rasch 模型的信度推广到多维潜在特质。下面是一个玩具模拟：用户和物品都是 2 维，比较"随机选物品"和"按 D 最优 费雪信息主动选物品"：
 
-First, set up the factor model simulation with K-dimensional user and item embeddings:
+先来搭好因子模型的模拟环境，用户和物品都用 K 维向量表示：
 
 ```{pyodide-python}
 #| autorun: true
@@ -319,7 +319,7 @@ def new_user_state():
 print(f"Factor model: {N} users, {M} items, K={K} dimensions")
 ```
 
-Define the Bayesian update and D-optimal selection:
+定义贝叶斯更新与 D 最优选题：
 
 ```{pyodide-python}
 #| autorun: true
@@ -349,7 +349,7 @@ def choose_random(state, asked_mask, V, Z):
 print("Update and selection functions defined.")
 ```
 
-Run simulation comparing D-optimal vs random selection:
+跑模拟，把 D 最优选题和随机选题比一比：
 
 ```{pyodide-python}
 #| autorun: true
@@ -394,50 +394,50 @@ axes[1].set_title("Reliability"); axes[1].legend(); axes[1].grid(True, alpha=0.3
 plt.tight_layout(); plt.show()
 ```
 
-### Pairwise Preferences {#sec-pairwise-active}
+### 两两偏好 {#sec-pairwise-active}
 
-We next discuss the measurement problem with pairwise data. Recall from @sec-bradley-terry that the Bradley-Terry model specifies the probability that user $i$ prefers item $j$ over item $k$ as $p_{i}(j \succ k)=\sigma (U^\top(V_j-V_k) + Z_j-Z_k)$ with feature $x_{jk}= V_j - V_k \in \mathbb R^K$ and offset $b_{jk}=Z_j-Z_k$.
+接着来看两两比较数据下的测量问题。回想 @sec-bradley-terry：Bradley-Terry 模型规定用户 $i$ 认为物品 $j$ 好于物品 $k$ 的概率为 $p_{i}(j \succ k)=\sigma (U^\top(V_j-V_k) + Z_j-Z_k)$，其中特征为 $x_{jk}= V_j - V_k \in \mathbb R^K$，偏移为 $b_{jk}=Z_j-Z_k$。
 
-In metric elicitation, each oracle query asks: "Which classifier is better, $h_\theta$ or $h_{\theta'}$?" The oracle's answer is deterministic: $\Omega(C_\theta, C_{\theta'}) = \mathbf{1}[\mathbf{m}^\top (V_\theta - V_{\theta'}) > 0]$, which is exactly a pairwise comparison with feature difference $x = V_\theta - V_{\theta'}$. The deterministic oracle corresponds to the $\sigma \to \text{step function}$ limit of Bradley-Terry.
+在度量征询里，每次问的是："这两个分类器 $h_\theta$ 和 $h_{\theta'}$，哪个更好？" 回答是确定的：$\Omega(C_\theta, C_{\theta'}) = \mathbf{1}[\mathbf{m}^\top (V_\theta - V_{\theta'}) > 0]$，这恰好就是特征差为 $x = V_\theta - V_{\theta'}$ 的一次两两比较。把 $\sigma \to \text{step function}$（阶跃函数）取到极限，得到的正是这种"确定的回答"。
 
-For a single observation $y \in \{0,1\}$ of $j \succ k$ the per-pair log-likelihood is
+只观测到一次 $j \succ k$（记作 $y \in \{0,1\}$）时，这一对的配对数对数似然是
 $$\ell(U; y, i, j, k)= y \log p + (1-y) \log (1-p_i).$$ {#eq-pairwise-loglik}
 
-Score and expected Fisher information for (U):
+关于 $U$ 的得分与期望费雪信息：
 $$\nabla_U \ell=(y-p),x_{jk}, \qquad \mathcal I_{jk}(U)=\mathbb E[-\nabla^2_U \ell] = w x_{jk} x_{jk}^\top,$$ {#eq-pairwise-score-fisher}
-where $w = p(1-p)$. For a sequence of queried pairs ${(j_t,k_t)}$ the cumulative information is $\mathcal I(U)=\sum_t w_t,x_t x_t^\top.$ With a Gaussian prior $U \sim \mathcal N(0, \Sigma_0)$ and a Laplace approximation, the posterior precision updates additively:
+其中 $w = p(1-p)$。依次询问一列配对 ${(j_t,k_t)}$，累积信息量为 $\mathcal I(U)=\sum_t w_t,x_t x_t^\top.$。设高斯先验 $U \sim \mathcal N(0, \Sigma_0)$ 并做拉普拉斯近似，后验精度矩阵就是逐条相加：
 $$
 \Lambda_{t}=\Sigma_t^{-1}=\Sigma_{0}^{-1}+\sum_{s\le t} w_s,x_s x_s^\top.
 $$ {#eq-pairwise-precision-update}
-A single Newton step for the posterior mean after observing ((x,y)) is
+观测到一对 $(x,y)$ 之后，对后验均值做一步牛顿迭代：
 $$
 \hat U \leftarrow \hat U + \Sigma_{t}^{\ }(y-p),x,\qquad p=\sigma(\hat U^\top x+b),\quad
 \Sigma_t = \left(\Lambda_{t-1}+w,xx^\top\right)^{-1}.
 $$ {#eq-pairwise-newton-step}
-This is the logistic-regression one-step IRLS update specialized to one new example. We evaluate candidates at the current $(\hat U,\Sigma)$. Write $x$ for $x_{jk}$ and $w=\sigma(\hat U^\top x+b)\big(1-\sigma(\hat U^\top x+b)\big)$. Let $\Lambda=\Sigma^{-1}$. Using the Sherman–Morrison formula, we obtain closed forms for all three design criteria:
+这就是逻辑回归的一步 IRLS 更新用到"只新增一条样本"的情形。我们在当前的 $(\hat U,\Sigma)$ 处评估各个候选：把 $x_{jk}$ 简记为 $x$，记 $w=\sigma(\hat U^\top x+b)\big(1-\sigma(\hat U^\top x+b)\big)$，并令 $\Lambda=\Sigma^{-1}$。借助 Sherman-Morrison 公式，三个设计准则都能写成闭式：
 
-::: {.callout-note title="Proposition: D-Optimal Acquisition via Sherman-Morrison"}
+::: {.callout-note title="命题：用 Sherman-Morrison 公式写出 D 最优采集函数"}
 ::: {#prp-sherman-morrison}
-For a current precision matrix $\Lambda = \Sigma^{-1}$ and a candidate pair $(j,k)$ with feature difference $x = V_j - V_k$ and variance weight $w = p(1-p)$, the D-optimal acquisition function has closed form:
+设当前的精度矩阵为 $\Lambda = \Sigma^{-1}$，候选的一对物品 $(j,k)$ 的特征差为 $x = V_j - V_k$、方差权重为 $w = p(1-p)$，那么 D 最优的采集函数有闭式解：
 $$
 \Delta_D(j,k) = \log\det(\Lambda + w xx^\top) - \log\det(\Lambda) = \log(1 + w x^\top \Sigma x)
 $$
-This follows from the matrix determinant lemma: $\det(A + uv^\top) = (1 + v^\top A^{-1} u)\det(A)$.
+这一步用的是矩阵行列式引理：$\det(A + uv^\top) = (1 + v^\top A^{-1} u)\det(A)$。
 :::
 :::
 
-Pick the pair that maximizes $\log(1 + w x^\top\Sigma x)$. This requires only a vector-matrix-vector product, making it efficient for online selection.
+选出使 $\log(1 + w x^\top\Sigma x)$ 最大的那一对。这一步只需要一次"向量—矩阵—向量"乘法，所以在线挑选时开销很小。
 
-::: {.callout-warning title="Myopic vs. Non-Myopic Query Selection"}
-The D-optimal (and A/E-optimal) criteria above are **greedy**: they select each query to maximize the *immediate* information gain, without considering how the current query affects future query opportunities. The optimal policy would look ahead over a budget of $T$ queries and select the sequence that maximizes total information. In practice, the greedy approach works well when queries are roughly exchangeable, but it can perform poorly in **batch selection** settings (selecting multiple queries simultaneously) because it ignores redundancy---two individually informative queries may provide overlapping information. Batch extensions typically add diversity mechanisms, such as penalizing queries whose feature vectors $V_j - V_k$ are correlated with already-selected pairs.
+::: {.callout-warning title="短视与非短视的选题策略"}
+上面这些 D 最优（以及 A/E 最优）准则都是**贪心**的：每次只让*眼前这一次*提问的信息增益最大，并不考虑当前这一问会怎样影响后面的提问机会。真正最优的策略应当往前多看 $T$ 次提问，挑出总信息量最大的那一串问题。实践中，只要各次提问大致可以互换，贪心就够用了；但在**批量选题**（一次同时挑好几问）的场合它可能表现很差，因为它忽略了重复——两问单看都很有信息量，合起来却可能提供同样的信息。批量选题的扩展做法一般是加上"保证多样性"的机制，比如给那些特征向量 $V_j - V_k$ 与已选问题高度相关的问题扣分。
 :::
 
-* A-optimal (trace drop of covariance): $\Delta_A(j,k);=;\mathrm{tr}(\Sigma)-\mathrm{tr}\big((\Lambda+w,xx^\top)^{-1}\big)
-  = \frac{w,x^\top\Sigma^2 x}{1+w,x^\top\Sigma x}.$
+* A 最优（让协方差的迹下降）：$\Delta_A(j,k);=;\mathrm{tr}(\Sigma)-\mathrm{tr}\big((\Lambda+w,xx^\top)^{-1}\big)
+  = \frac{w,x^\top\Sigma^2 x}{1+w,x^\top\Sigma x}$。
 
-* E-optimal (raise the worst-direction information): Exact update of $\lambda_{\min}(\mathcal I)$ needs an eigen update. A practical proxy is to maximize $\Delta_E^{\text{proxy}}(j,k)= w,x^\top\Sigma x,$ which targets directions where current uncertainty $x^\top\Sigma x$ is large.
+* E 最优（补上最坏方向上的信息）：要精确更新 $\lambda_{\min}(\mathcal I)$ 就得做一次特征值更新。实践中常用一个替代量：最大化 $\Delta_E^{\text{proxy}}(j,k)= w,x^\top\Sigma x$，它盯的是当前不确定性 $x^\top\Sigma x$ 大的那些方向。
 
-End-to-end toy pipeline (rank 2, known items, active D-opt vs random). First, define helper functions for D-optimal gain and Bayesian updates:
+下面是完整的玩具流程（秩为 2、物品参数已知，比较主动 D 最优与随机选题）。先定义两个辅助函数：算 D 最优增益、做贝叶斯更新。
 
 ```{pyodide-python}
 #| autorun: true
@@ -462,7 +462,7 @@ def one_step_update(U_hat, Sigma, x, b, y):
 print("Helper functions defined.")
 ```
 
-Set up simulation parameters and precompute candidate pairs:
+设定模拟参数，并预先算好所有候选配对：
 
 ```{pyodide-python}
 #| autorun: true
@@ -481,7 +481,7 @@ B = Z[pairs[:,0]] - Z[pairs[:,1]]  # pairwise bias differences
 print(f"Setup: {N} users, {M} items, {len(pairs)} candidate pairs, {T} queries each")
 ```
 
-Define selection policies and run the simulation:
+定义选题策略并运行模拟：
 
 ```{pyodide-python}
 #| autorun: true
@@ -514,7 +514,7 @@ mse_r, rel_r = run_policy(active=False)
 print("Simulation complete!")
 ```
 
-Visualize the results:
+把结果画出来：
 
 ```{pyodide-python}
 #| autorun: true
@@ -536,78 +536,78 @@ print(f"Final MSE  | Random: {mse_r[-1]:.3f} | D-opt: {mse_d[-1]:.3f}")
 print(f"Final Rel. | Random: {rel_r[-1]:.3f} | D-opt: {rel_d[-1]:.3f}")
 ```
 
-::: {.callout-important title="Key Takeaway: D-Optimal Design"}
-For multi-dimensional preference vectors, D-optimal selection maximizes $\log\det(\mathcal{I})$, shrinking the posterior ellipsoid in all directions. The Sherman-Morrison formula enables efficient computation: each candidate pair requires only a vector-matrix-vector product $x^\top \Sigma x$. D-optimal design naturally encourages diversity---selecting pairs with redundant information directions provides diminishing log-det gain.
+::: {.callout-important title="本章要点：D 最优设计"}
+对多维的偏好向量，D 最优选题最大化 $\log\det(\mathcal{I})$，让后验椭球在每个方向上都缩小。Sherman-Morrison 公式让这一步算得很快：每一对候选只需要一次"向量—矩阵—向量"乘法 $x^\top \Sigma x$。D 最优设计天然会促使所选问题彼此**不重复**——信息方向重复的那些配对，带来的行列式对数增益会越来越小。
 :::
 
-### Metric Elicitation: Exploiting Quasiconcavity {#sec-metric-elicitation}
+### 度量征询：利用拟凹性 {#sec-metric-elicitation}
 
-The metric elicitation problem has special structure that enables even more efficient elicitation than general D-optimal design. A *Linear Performance Metric (LPM)* has the form:
+度量征询这个问题带有特殊结构，比一般的 D 最优设计还能更省提问。一个*线性性能度量（Linear Performance Metric, LPM）*长这样：
 $$
 \phi(C) = m_{11} \cdot \text{TP} + m_{00} \cdot \text{TN} + m_0
 $$ {#eq-lpm}
-where the weights $(m_{11}, m_{00})$ encode tradeoffs between true positives and true negatives. Since only the ratio matters, we can parametrize as $\mathbf{m} = (\cos\theta, \sin\theta)$ for $\theta \in [0, 2\pi]$.
+其中权重 $(m_{11}, m_{00})$ 表示真阳性与真阴性之间怎么权衡。由于只有两者的比值有意义，可以参数化为 $\mathbf{m} = (\cos\theta, \sin\theta)$，取 $\theta \in [0, 2\pi]$。
 
-For medical diagnosis, $m_{11} > m_{00}$ weights sensitivity (catching disease) over specificity (avoiding false alarms). For spam filtering, the reverse may hold. The key is that the practitioner's implicit metric $\mathbf{m}^*$ is unknown---we must learn it from pairwise comparisons.
+在医学诊断中，$m_{11} > m_{00}$ 表示更看重"查到病"（灵敏度）而不是"不误报"（特异度）；换到垃圾邮件过滤，可能正好相反。要点在于：工程师心里那把隐含的尺子 $\mathbf{m}^*$ 我们并不知道，必须从两两比较里把它学出来。
 
-::: {.callout-note title="Proposition: Quasiconcavity of LPM Composition"}
+::: {.callout-note title="命题：LPM 复合函数的拟凹性"}
 ::: {#prp-quasiconcave}
-For a quasiconcave LPM $\phi$ that is monotonically increasing in TP and TN, and a parametrization $\rho^+(\theta)$ of the upper boundary of the confusion matrix space $\mathcal{C}$, the composition $\phi \circ \rho^+$ is **quasiconcave and unimodal** on $[0, \pi/2]$.
+设 LPM $\phi$ 拟凹、且关于 TP 与 TN 单调递增；又设 $\rho^+(\theta)$ 是混淆矩阵空间 $\mathcal{C}$ 上边界的参数化，那么复合函数 $\phi \circ \rho^+$ 在 $[0, \pi/2]$ 上**拟凹且单峰**。
 :::
 :::
 
-Quasiconcavity means the function has a single peak---no local maxima to trap us. This enables binary search rather than gradient-based optimization:
+拟凹意味着函数只有一个峰——不存在会让人卡住的局部极大值。于是可以用二分搜索，不必用梯度法去优化：
 
-::: {.callout-tip title="Algorithm: LPM Elicitation via Binary Search"}
-**Input:** Tolerance $\epsilon > 0$, oracle $\Omega$
-
-**Initialize:** $\theta_a = 0$, $\theta_b = \pi/2$
-
-**While** $|\theta_b - \theta_a| > \epsilon$:
-
-1. Divide $[\theta_a, \theta_b]$ into four equal intervals with boundaries $A, B, C, D, E$
-2. Compute confusion matrices $C_A, C_B, C_C, C_D, C_E$ for classifiers at each $\theta$
-3. Query oracle: compare all adjacent pairs to find which interval contains the maximum
-4. Update $[\theta_a, \theta_b]$ to the interval containing the maximum
-
-**Return:** $\hat{\mathbf{m}} = (\cos\hat\theta, \sin\hat\theta)$ where $\hat\theta = (\theta_a + \theta_b)/2$
+::: {.callout-tip title="算法：用二分搜索做 LPM 征询"}
+**输入：** 容差 $\epsilon > 0$、神谕 $\Omega$
 :::
 
-Each iteration uses 4 queries and shrinks the search interval by factor of 2, giving **$O(\log(1/\epsilon))$ query complexity**---exponentially better than the $O(1/\epsilon^2)$ rate for general 2D estimation.
+**初始化：** $\theta_a = 0$，$\theta_b = \pi/2$
 
-::: {.callout-note title="Proposition: Bayes Optimal Classifier from LPM"}
+**当** $|\theta_b - \theta_a| > \epsilon$ 时重复：
+
+1. 把 $[\theta_a, \theta_b]$ 四等分，分界点记为 $A, B, C, D, E$
+2. 算出各 $\theta$ 处分类器的混淆矩阵 $C_A, C_B, C_C, C_D, C_E$
+3. 问神谕：把所有相邻的一对拿来比，找出最大值落在哪个小区间
+4. 把 $[\theta_a, \theta_b]$ 更新为含最大值的那个区间
+
+**返回：** $\hat{\mathbf{m}} = (\cos\hat\theta, \sin\hat\theta)$，其中 $\hat\theta = (\theta_a + \theta_b)/2$
+
+每一轮只需要 4 次提问，却能把搜索区间缩小一半，因此提问复杂度是 **$O(\log(1/\epsilon))$**——比在二维上做一般估计所需的 $O(1/\epsilon^2)$ 好得多。
+
+::: {.callout-note title="命题：由 LPM 得到贝叶斯最优分类器"}
 ::: {#prp-bayes-classifier}
-Given learned metric weights $\mathbf{m} = (m_{11}, m_{00})$ with $m_{11} + m_{00} > 0$, the Bayes optimal classifier is:
+已知学到的度量权重 $\mathbf{m} = (m_{11}, m_{00})$ 且 $m_{11} + m_{00} > 0$，贝叶斯最优分类器就是：
 $$
 \bar{h}(x) = \mathbf{1}\left[\eta(x) \geq \frac{m_{00}}{m_{11} + m_{00}}\right]
 $$
-where $\eta(x) = P(Y=1 \mid X=x)$ is the conditional class probability.
+其中 $\eta(x) = P(Y=1 \mid X=x)$ 表示给定特征时该样本属于正类的条件概率。
 :::
 :::
 
-This connects metric elicitation to decision theory: learning the metric $\mathbf{m}$ is equivalent to learning the optimal classification threshold.
+这就把度量征询和决策论接上了：学会度量 $\mathbf{m}$，等价于学会最优的分类阈值。
 
-**Extension to Linear-Fractional Metrics.** The $F_\beta$ score and Jaccard similarity are not linear but *linear-fractional*:
+**推广到线性分式度量。** $F_\beta$ 分数和 Jaccard 相似度不是线性的，而是*线性分式*的：
 $$
 \phi(C) = \frac{p_{11} \cdot \text{TP} + p_{00} \cdot \text{TN} + p_0}{q_{11} \cdot \text{TP} + q_{00} \cdot \text{TN} + q_0}
 $$
-These can be elicited by first finding both the maximizer and minimizer of the implicit linear numerator (two binary searches), then solving for the fractional parameters. The query complexity remains $O(\log(1/\epsilon))$.
+这类度量可以先分别求出隐含线性分子的最大值点和最小值点（各做一次二分搜索），再据此解出分式的参数。提问复杂度仍是 $O(\log(1/\epsilon))$。
 
-**Multiclass Extension.** For $K$-class problems, diagonal linear performance metrics (DLPMs) weight correct predictions: $\psi(\mathbf{d}) = \sum_k a_k d_k$ where $d_k$ is the rate of correctly predicting class $k$. Binary search over each pair of classes $(k_1, k_2)$ recovers the relative weights $a_{k_2}/a_{k_1}$, with total complexity $O(K^2 \log(1/\epsilon))$.
+**推广到多分类。** 对于 $K$ 分类问题，可以用对角线性性能度量（diagonal linear performance metric, DLPM）给"预测正确的样本"赋权：$\psi(\mathbf{d}) = \sum_k a_k d_k$，其中 $d_k$ 是把第 $k$ 类预测正确的比例。对每一对类别 $(k_1, k_2)$ 各做一次二分搜索，就能恢复出相对权重 $a_{k_2}/a_{k_1}$，总提问复杂度为 $O(K^2 \log(1/\epsilon))$。
 
-## Measurement of User Preference Function {#sec-preference-function}
-Suppose items $j$ have feature vectors $X_j \in \mathbb R^d$. Instead of learning a free scalar parameter $V_j$ for each item, we assume $V_j = W^\top X_j,$ where $W \in \mathbb R^d$ is shared across items. The probability that item $j$ beats item $k$ is $p(j \succ k) = \sigma(V_j - V_k) = \sigma (W^\top(X_j - X_k)).$ This is simply logistic regression on pairwise feature differences. Given one comparison outcome $y \in \{0,1\}$ for pair $(j,k)$ with difference $x_{jk} = X_j - X_k$,
+## 用户偏好函数的测量 {#sec-preference-function}
+设物品 $j$ 有特征向量 $X_j \in \mathbb R^d$。我们不再给每个物品单独学一个自由的标量参数 $V_j$，而是假定 $V_j = W^\top X_j$，其中 $W \in \mathbb R^d$ 由所有物品共用。物品 $j$ 胜过物品 $k$ 的概率为 $p(j \succ k) = \sigma(V_j - V_k) = \sigma (W^\top(X_j - X_k))$。这就是在配对的特征差上做逻辑回归。给定一对 $(j,k)$（特征差为 $x_{jk} = X_j - X_k$）的一次比较结果 $y \in \{0,1\}$，
 $$\ell(W) = y\log \sigma(W^\top x_{jk}) + (1-y)\log(1-\sigma(W^\top x_{jk})).
 $$ {#eq-logistic-loglik}
-Gradient: $\nabla_W \ell = (y - p) x_{jk}, \quad p = \sigma( W^\top x_{jk} ).$ Fisher Information (expected negative Hessian): $\mathcal I(W) = \mathbb E\big[(y-p)^2 x_{jk}x_{jk}^\top\big] = p(1-p),x_{jk}x_{jk}^\top.$
+梯度：$\nabla_W \ell = (y - p) x_{jk}, \quad p = \sigma( W^\top x_{jk} ).$ 费雪信息（即负的期望 Hessian）：$\mathcal I(W) = \mathbb E\big[(y-p)^2 x_{jk}x_{jk}^\top\big] = p(1-p),x_{jk}x_{jk}^\top.$
 
-With Gaussian prior $W \sim \mathcal N(0,\sigma_0^2 I)$, a Laplace approximation yields posterior covariance $\Sigma \approx (\sigma_0^{-2}I + \sum_t p_t(1-p_t) x_t x_t^\top)^{-1}.$ So, as in the Rasch case, Fisher information accumulates to form posterior precision. At each step, pick a candidate pair $(j,k)$ and compute
+取高斯先验 $W \sim \mathcal N(0,\sigma_0^2 I)$，用拉普拉斯近似可得到后验协方差 $\Sigma \approx (\sigma_0^{-2}I + \sum_t p_t(1-p_t) x_t x_t^\top)^{-1}$。所以，和 Rasch 模型的情形一样，费雪信息是一条条累加成后验精度的。每一步先取一个候选配对 $(j,k)$，算出
 $$
 \Delta_D(j,k) = \log \det(\Lambda + w x_{jk} x_{jk}^\top) - \log\det(\Lambda), \quad w = p(1-p),
 $$ {#eq-d-optimal-criterion}
-where $\Lambda = \Sigma^{-1}$. This is the D-optimal criterion, maximizing the expected log-determinant gain in information. A-optimal or E-optimal criteria are similarly defined. We’ll simulate item features, a ground-truth $W$, and comparisons. Then we compare active D-optimal elicitation vs random pair selection for estimating $W$. Performance metrics are MSE of $\hat W$ vs true $W$, and reliability.
+其中 $\Lambda = \Sigma^{-1}$。这就是 D 最优准则：让信息量的对数行列式增益的期望最大。A 最优、E 最优准则也可以类似地写出来。接下来我们会模拟物品特征、一个真实的 $W$，以及由此产生的比较结果，然后比较"主动按 D 最优征询"和"随机选配对"在估计 $W$ 上的差别。用的指标是 $\hat W$ 与真实 $W$ 之间的均方误差，以及信度。
 
-First, set up the simulation with item features and ground-truth weights:
+先搭好模拟环境：生成物品特征和真实的权重：
 
 ::: {.callout-note title="Code"}
 ```{pyodide-python}
@@ -629,7 +629,7 @@ print(f"Setup: {M} items, {d}-dim features, {T} queries")
 ```
 :::
 
-Define the Fisher gain and Bayesian update functions:
+定义费雪信息增益与贝叶斯更新这两个函数：
 
 ::: {.callout-note title="Code"}
 ```{pyodide-python}
@@ -657,7 +657,7 @@ print(f"Functions defined. {len(pairs)} candidate pairs.")
 ```
 :::
 
-Run the simulation comparing D-optimal vs random selection:
+跑模拟，把 D 最优选题与随机选配对做个比较：
 
 ::: {.callout-note title="Code"}
 ```{pyodide-python}
@@ -688,7 +688,7 @@ print("Simulation complete!")
 ```
 :::
 
-Visualize the results:
+把结果画出来看看：
 
 ::: {.callout-note title="Code"}
 ```{pyodide-python}
@@ -709,73 +709,73 @@ plt.tight_layout(); plt.show()
 ```
 :::
 
-### Robotic Trajectory Learning {#sec-robotics-trajectory}
+### 机器人轨迹学习 {#sec-robotics-trajectory}
 
-The linear preference framework applies directly to robotic trajectory learning [@pmlr-v87-biyik18a]. Consider a robot choosing between trajectories $\xi_A$ and $\xi_B$. The human evaluates them via a reward function:
+线性偏好框架可以直接用到机器人轨迹学习上 [@pmlr-v87-biyik18a]。设想一台机器人要在两条轨迹 $\xi_A$ 和 $\xi_B$ 之间做选择，人通过一个奖励函数来评价它们：
 $$
 R(\xi) = w^\top \phi(\xi)
 $$ {#eq-trajectory-reward}
-where $w \in \mathbb{R}^N$ are unknown weights and $\phi(\xi) \in \mathbb{R}^N$ extracts features (e.g., distance to lane boundaries, proximity to obstacles, heading, speed). This is exactly our linear model with "items" being trajectories and "features" being $\phi(\xi)$.
+其中 $w \in \mathbb{R}^N$ 是未知的权重，$\phi(\xi) \in \mathbb{R}^N$ 负责抽取特征（例如到车道边线的距离、与障碍物的接近程度、朝向、速度）。这正是我们的线性模型，只是"物品"换成了轨迹，"特征"换成了 $\phi(\xi)$。
 
-**Geometric Interpretation.** Each pairwise comparison "prefer $\xi_A$ over $\xi_B$" yields a constraint:
+**几何解释。** 每一次两两比较"认为 $\xi_A$ 好于 $\xi_B$"都给出一个约束：
 $$
 w^\top (\phi(\xi_A) - \phi(\xi_B)) > 0
 $$
-This defines a **half-space** in the weight space. The feasible region for $w$ is the intersection of all half-spaces consistent with observed preferences. Each query splits this region---orthogonal queries reduce volume by approximately half.
+这就是权重空间里的一个**半空间**。所有与已观测偏好相容的半空间取交集，就是 $w$ 的可行区域。每次提问都会把这个区域切一刀——方向相互正交的提问大约每次能切掉一半体积。
 
-The optimal query selection criterion maximizes the minimum volume removed regardless of the oracle's answer. For query feature difference $\Phi = \phi(\xi_A) - \phi(\xi_B)$, this is $\max_\Phi \min\{\mathbb{E}[1 - f_\Phi(w)], \mathbb{E}[1 - f_{-\Phi}(w)]\}$ where $f_\Phi(w) = \min(1, \exp(w^\top \Phi))$ soft-weights consistency with the preference. This selects balanced queries where either response is informative.
+最优的选题准则是：不管神谕怎么回答，都要保证"至少能切掉"的区域体积最大。设这次提问的特征差为 $\Phi = \phi(\xi_A) - \phi(\xi_B)$，准则就是 $\max_\Phi \min\{\mathbb{E}[1 - f_\Phi(w)], \mathbb{E}[1 - f_{-\Phi}(w)]\}$，其中 $f_\Phi(w) = \min(1, \exp(w^\top \Phi))$ 用来对"与偏好一致的程度"做软加权。这样选出的是"两边都均衡"的问题——无论回答哪一边都很有信息量。
 
-**Driving Simulator Example.** In a 2D driving simulator, trajectory features include:
+**驾驶仿真器示例。** 在一个二维驾驶仿真环境里，轨迹特征包括：
 
-- Distance to lane boundaries
-- Distance to other vehicles
-- Heading angle
-- Speed
+- 到车道边线的距离
+- 到其他车辆的距离
+- 车头朝向角度
+- 车速
 
-With no learned preferences, the simulated car moves erratically. After 30 comparison queries, it learns to follow the lane direction. After 70 queries, it additionally learns to avoid collisions while staying in lane. The features with highest learned weights correspond to collision avoidance and lane-keeping.
+不学任何偏好时，仿真中的汽车开得歪歪扭扭。做了 30 次比较之后，它学会了顺着车道方向开；到 70 次之后，它还学会了在保持车道的同时避让碰撞。学到的权重最大的那几个特征，正对应"避撞"和"保持车道"。
 
-**Why Active Selection Matters.** Both active and random query selection eventually converge to the true reward weights. However, active selection achieves target performance **faster**---critical in time-sensitive applications. For exoskeleton rehabilitation [@Li_2021], the robot must adapt to individual patients quickly; waiting for asymptotic convergence is not acceptable. Active learning provides crucial early-stage advantages.
+**为什么主动选题重要。** 主动选题和随机选题最后都能收敛到真实的奖励权重。区别在于主动选题**更快**达到目标性能——这在时间敏感的场合非常关键。外骨骼康复 [@Li_2021] 就是如此：机器人必须很快适应每位患者，等它慢慢渐近收敛是不能接受的。主动学习的价值恰恰体现在前期。
 
-**Imitation Learning with Compatibility.** When learning from multiple human demonstrators, *multimodality* arises: different people use different strategies for the same task (e.g., picking up an object from the left vs. right). Naive imitation learning fails on contradictory demonstrations.
+**带相容性判断的模仿学习。** 从多位人类示范者那里学习时会出现*多模式*现象：同一个任务，不同的人做法不同（比如从左边还是右边去拿物体）。朴素的模仿学习碰到互相矛盾的示范就会失效。
 
-The solution is to measure **compatibility** of new demonstrations with the base policy:
+解决办法是衡量新示范与基础策略之间的**相容性**：
 
-- **Likelihood**: How close is the demonstrated action to the base policy's prediction?
-- **Novelty**: How uncertain is the base policy at this state?
+- **似然度**：示范给出的动作，与基础策略预测的动作差得远吗？
+- **新颖度**：基础策略在这个状态下有多不确定？
 
-Demonstrations with low likelihood in low-novelty states indicate conflicting modes and should be filtered. This compatibility-based filtering improves success rates while using less data than naive aggregation [@gandhi2022eliciting].
+那些"似然低、可新颖度也低"的示范，说明它和已有的模式相冲突，应当滤掉。这种基于相容性的筛选，比把所有示范一股脑合在一起用的数据更少，成功率却更高 [@gandhi2022eliciting]。
 
-**Foundation Models for Representations.** Recent work leverages foundation models pretrained on human video (R3M [@nair2022r3m], Voltron [@karamcheti2023voltron]) to provide better trajectory features $\phi(\xi)$. These models learn that human hands are similar to robotic end-effectors, enabling 2-3x higher success rates with 5-10x fewer demonstrations. For preference learning, better representations mean each comparison is more informative.
+**用基础模型提供特征。** 近期工作会借助在人类视频上预训练的基础模型（R3M [@nair2022r3m]、Voltron [@karamcheti2023voltron]）来给出更好的轨迹特征 $\phi(\xi)$。这类模型能学到人手和机器人末端执行器的相似之处，从而用少 5 到 10 倍的示范就把成功率提高 2 到 3 倍。对偏好学习来说，特征表示更好，意味着每一次比较都更有信息量。
 
-### Non-Linear Scoring Functions {#sec-nonlinear-scoring}
+### 非线性打分函数 {#sec-nonlinear-scoring}
 
-So far we set $V_j=W^\top X_j$. Suppose instead that items are scored by a non-linear function
+到这里我们都设 $V_j=W^\top X_j$。现在换一种设法：物品由一个非线性函数打分
 $$V_j = f_\theta(X_j),\qquad \theta\in\mathbb{R}^p, \qquad p(j \succ k) = \sigma (f_\theta(X_j) - f_\theta(X_k))$$ {#eq-nonlinear-scoring}
-We want an online procedure that chooses the next comparison $(j,k)$ to learn $\theta$ quickly. Exact Bayesian design is intractable for general $f_\theta$. There is a simple and effective approximation that keeps all the math and code lightweight: local Gaussian posterior over $\theta$ via Laplace + first-order model. Work at the current estimate $\hat\theta$. Linearize the non-linear scorer around $\hat\theta$:
+我们希望有一个在线过程：每次自己挑下一次比较 $(j,k)$，好尽快学会 $\theta$。对一般的 $f_\theta$ 来说，精确的贝叶斯设计算不动。有一个简单又好用的近似，能把数学和代码都保持得很轻：用拉普拉斯近似加一阶模型，把 $\theta$ 的后验看成一个局部高斯分布。具体做法是在当前的 $\hat\theta$ 处工作，把非线性打分函数在 $\hat\theta$ 附近线性化：
 $$
 f_\theta(X_j) \approx f_{\hat\theta}(X_j) + J_j\Delta\theta, \qquad
 J_j \equiv \left.\frac{\partial f_\theta(X_j)}{\partial \theta}\right| _{\theta = \hat\theta} \in \mathbb{R}^{1\times p}.
 $$ {#eq-linearization}
-The pairwise logit for $(j,k)$ becomes
+于是配对 $(j,k)$ 的逻辑斯蒂线性预测值就变成
 $$\underbrace{f_\theta(X_j)-f_\theta(X_k)}_{\text{logit}} \approx \underbrace{f_{\hat\theta}(X_j)-f_{\hat\theta}(X_k)}_{\text{offset}} + \underbrace{(J_j-J_k)}_{\phi_{jk}}\Delta\theta.$$ {#eq-pairwise-logit-approx}
 
-Define the local "design vector" $\phi_{jk}\in\mathbb{R}^{1\times p}$. With a Gaussian prior $\theta\sim\mathcal N(0,\sigma_0^2 I)$ and Bernoulli likelihood, the Laplace posterior around $\hat\theta$ is
+把 $\phi_{jk}\in\mathbb{R}^{1\times p}$ 定义为局部的"设计向量"。设高斯先验 $\theta\sim\mathcal N(0,\sigma_0^2 I)$、似然为伯努利分布，那么 $\hat\theta$ 附近的拉普拉斯后验是
 $$
 \theta \mid \mathcal D \approx \mathcal N(\hat\theta,;\Sigma),\qquad
 \Sigma^{-1} = \sigma_0^{-2} I + \sum_{t} w_t \phi_t^\top \phi_t
 $$ {#eq-laplace-posterior}
-where $w_t = p_t(1-p_t)$ with $p_t = \sigma\big(f_{\hat\theta}(X_{j_t})-f_{\hat\theta}(X_{k_t})\big)$.
-This is exactly the same structure as the linear case, with (x_{jk}) replaced by $\phi_{jk}=J_j-J_k$. You only need Jacobian rows $J_j$. At the current $(\hat\theta \Sigma)$ and for a candidate $(j,k)$, compute $p=\sigma\big(f_{\hat\theta}(X_j)-f_{\hat\theta}(X_k)\big)$ and $w = p(1-p)$.Compute $\phi = J_j-J_k$ at $\hat \theta$. Then use any standard optimal design score with Sherman–Morrison:
+其中 $w_t = p_t(1-p_t)$，而 $p_t = \sigma\big(f_{\hat\theta}(X_{j_t})-f_{\hat\theta}(X_{k_t})\big)$。
+这和线性情形结构完全一样，只是把 $x_{jk}$ 换成了 $\phi_{jk}=J_j-J_k$，而你需要准备的只有雅可比的每一行 $J_j$。在当前的 $(\hat\theta, \Sigma)$ 处，对一个候选配对 $(j,k)$，先算 $p=\sigma\big(f_{\hat\theta}(X_j)-f_{\hat\theta}(X_k)\big)$ 与 $w = p(1-p)$，再在 $\hat \theta$ 处算出 $\phi = J_j-J_k$。之后套用任意一个标准的最优设计得分，用 Sherman-Morrison 公式即可：
 
-* D-optimal (log-det gain): $\Delta_D(j,k) = \log ( 1 + w\phi \Sigma \phi^\top )$.
-* A-optimal (trace drop): $\Delta_A(j,k) = \dfrac{w \phi \Sigma^2 \phi^\top }{ 1+w \phi \Sigma \phi^\top}$.
-* E-optimal proxy: $\Delta_E^{\text{proxy}}(j,k) = w \phi \Sigma \phi^\top$.
+* D-最优（对数行列式增益）：$\Delta_D(j,k) = \log ( 1 + w\phi \Sigma \phi^\top )$.
+* A-最优（迹的下降量）：$\Delta_A(j,k) = \dfrac{w \phi \Sigma^2 \phi^\top }{ 1+w \phi \Sigma \phi^\top}$.
+* E-最优的替代量：$\Delta_E^{\text{proxy}}(j,k) = w \phi \Sigma \phi^\top$.
 
-Pick the pair with the largest gain. This is tractable because it only needs a vector–matrix–vector product with $\Sigma$ and a Jacobian row. Mutual-information acquisition like BALD reduces to the same formulas under the Laplace Gaussian approximation. Maximizing (\Delta_D) is a good default.
+选出增益最大的那一对。这么做算得起，因为它只需要一次与 $\Sigma$ 的"向量—矩阵—向量"乘法，再加一行雅可比。像 BALD 那样基于互信息的采集函数，在拉普拉斯高斯近似下会化成同样的式子。拿不准时，最大化 $\Delta_D$ 是个不错的默认选择。
 
 <!-- Note to work more on this expansion -->
 
-We use a tiny two-layer network $f_\theta(x)=a^\top \tanh(Bx)$ with $\theta=(a,B)$. We derive $J_j$ analytically. First, define the network and its Jacobian:
+下面用一个很小的两层网络 $f_\theta(x)=a^\top \tanh(Bx)$ 来演示，其中 $\theta=(a,B)$。$J_j$ 可以解析地求出来。先定义这个网络以及它的雅可比：
 
 ```{pyodide-python}
 #| autorun: true
@@ -813,7 +813,7 @@ V_star = f_batch(a_star, B_star, X)  # true scores
 print(f"Network: {d}→{h}→1, {h + h*d} parameters, {M} items")
 ```
 
-Set up Laplace approximation state and update functions:
+搭好拉普拉斯近似的状态与更新函数：
 
 ```{pyodide-python}
 #| autorun: true
@@ -842,7 +842,7 @@ pairs = np.array([(j, k) for j in range(M) for k in range(M) if j < k])
 print(f"Setup complete: {len(pairs)} candidate pairs")
 ```
 
-Run the active learning loop comparing D-optimal vs random selection:
+跑主动学习的循环，把 D 最优与随机选题对比：
 
 ```{pyodide-python}
 #| autorun: true
@@ -897,44 +897,44 @@ axes[1].set_title("Reliability Proxy"); axes[1].legend(); axes[1].grid(True, alp
 plt.tight_layout(); plt.show()
 ```
 
-## Active Query Selection for Gaussian Process Models {#sec-active-learning}
+## 高斯过程模型的主动选题 {#sec-active-learning}
 
-The previous sections developed Fisher information for optimal query selection in *parametric* preference models—the Rasch model (Section 1) and linear scoring functions (Section 2). However, Chapter 2 introduced Gaussian Processes (GPs) as a flexible nonparametric alternative for reward modeling, and Chapter 3 covered GP inference via Laplace approximation. Here we address the natural question: **how do we actively select queries when using GPs?**
+前面几节讲的是在*参数化*偏好模型里如何用费雪信息挑最优的问题：先是 Rasch 模型，再是线性打分函数。而第 2 章介绍过高斯过程（GP），把它当作一种灵活的非参数奖励建模方法，也讲过怎么用拉普拉斯近似做高斯过程推断。这里要回答的是那个顺理成章的问题：**改用高斯过程之后，怎么主动挑问题？**
 
-The key insight is that GP uncertainty—quantified by the posterior variance—naturally guides query selection. Unlike parametric models where Fisher information depends only on the current parameter estimate, GP uncertainty varies across the input space, being higher far from observed data and lower near it.
+关键的洞见是：高斯过程的不确定性由后验方差刻画，它本身就能告诉我们去哪里提问。和参数模型不同——那里的费雪信息只取决于当前的参数估计——高斯过程的不确定性在整个输入空间上是变化的：离已观测数据远的地方高，近的地方低。
 
-### Information-Theoretic Acquisition Function
+### 信息论式的采集函数
 
-For GP preference learning, we seek queries that maximize information gain about the reward function. Given a dataset $\mathcal{D}$ and a candidate query $Q = (x_A, x_B)$, the acquisition function measures the expected reduction in uncertainty about $r$:
+做高斯过程偏好学习时，我们想找的是关于奖励函数信息增益最大的问题。给定数据集 $\mathcal{D}$ 和一个候选问题 $Q = (x_A, x_B)$，采集函数衡量的是"问完之后，关于 $r$ 的不确定性期望能减少多少"：
 $$
 a(Q) = I(r; y \mid \mathcal{D}, Q) = H(y \mid \mathcal{D}, Q) - \mathbb{E}_{r \sim p(r \mid \mathcal{D})}[H(y \mid r, Q)]
 $$ {#eq-gp-acquisition}
 
-**Interpretation of the two terms:**
+**这两项分别是什么意思：**
 
-1. **$H(y \mid \mathcal{D}, Q)$**: Predictive entropy—how uncertain is the query outcome under our current model? High when $p(A \succ B) \approx 0.5$.
+1. **$H(y \mid \mathcal{D}, Q)$**：预测熵——按当前的模型，这个问题的结果有多难猜？当 $p(A \succ B) \approx 0.5$ 时这一项很高。
 
-2. **$\mathbb{E}_r[H(y \mid r, Q)]$**: Expected conditional entropy—how uncertain would the query be if we knew the true reward function? Low for "easy" comparisons, high for inherently noisy comparisons.
+2. **$\mathbb{E}_r[H(y \mid r, Q)]$**：期望条件熵——假如我们真的知道了真实的奖励函数，这个问题的答案还会有多不确定？"显而易见"的比较这一项很低，本身就含糊不清的比较才高。
 
-The acquisition function trades off these two terms: we want queries where the *model* is uncertain (high predictive entropy) but a *human* could provide a clear answer (low expected conditional entropy).
+采集函数要在这两项之间做权衡：我们想要的是这样一些问题——*模型*对它没把握（预测熵高），但*人*能给出明确的回答（期望条件熵低）。
 
-### Practical Computation
+### 实际怎么算
 
-Using the Laplace approximation from Chapter 3 (@sec-gp-inference), the acquisition function can be computed as:
+借助第 2 章 @sec-gp-inference 一节的拉普拉斯近似，这个采集函数可以写成：
 $$
 a(x_A, x_B) = h\left(\Phi\left(\frac{\mu_A - \mu_B}{\sqrt{2\sigma_{\text{noise}}^2 + g(x_A, x_B)}}\right)\right) - m(x_A, x_B)
 $$ {#eq-gp-acquisition-practical}
 
-where:
-- $\mu_A, \mu_B$ are the GP posterior means at $x_A, x_B$
-- $g(x_A, x_B) = \sigma_A^2 + \sigma_B^2 - 2\text{Cov}(r(x_A), r(x_B))$ captures uncertainty from both points
-- $h(p) = -p\log_2 p - (1-p)\log_2(1-p)$ is binary entropy
-- $\Phi$ is the standard normal CDF
-- $m(x_A, x_B)$ is a correction term for human noise
+其中：
+- $\mu_A, \mu_B$ 是高斯过程后验均值在 $x_A, x_B$ 处的取值
+- $g(x_A, x_B) = \sigma_A^2 + \sigma_B^2 - 2\text{Cov}(r(x_A), r(x_B))$ 把两个点上的不确定性都算进来
+- $h(p) = -p\log_2 p - (1-p)\log_2(1-p)$ 是二元熵
+- $\Phi$ 是标准正态分布的分布函数
+- $m(x_A, x_B)$ 是给人回答带噪声用的修正项
 
-**Key property:** The trivial query $Q = (x, x)$ (comparing an item to itself) is a *global minimizer*, not maximizer, of this acquisition function. This contrasts with some other methods that can get stuck on uninformative queries.
+**一个关键性质：** 那个"什么也不问"的提问 $Q = (x, x)$（拿一个物品和它自己比）在这个采集函数上取得的是*全局最小值*，而不是最大值。这一点和一些会卡在无信息问题上的方法不同。
 
-First, we define the RBF kernel and helper functions for the simulation:
+先定义 RBF 核函数和模拟要用的辅助函数：
 
 ```{pyodide-python}
 #| autorun: true
@@ -964,7 +964,7 @@ plt.grid(True, alpha=0.3)
 plt.show()
 ```
 
-Next, we implement a GP model for active preference learning. The `fit` method uses Laplace approximation (Newton's method) to find the posterior mode, and `acquisition` computes the information gain for a candidate query:
+接着实现一个用于主动偏好学习的高斯过程模型。`fit` 方法用拉普拉斯近似（牛顿法）求后验众数，`acquisition` 方法给出下一轮该选哪个输入点（下面只实现 D 最优）。
 
 ```{pyodide-python}
 #| autorun: true
@@ -1028,7 +1028,7 @@ class GPActivePreference:
 print("GPActivePreference class defined successfully.")
 ```
 
-Now we run the simulation, comparing active (information-theoretic) query selection against random selection:
+现在跑模拟，把主动选题（按信息论准则挑）与随机选题放在一起比较：
 
 ```{pyodide-python}
 #| autorun: true
@@ -1060,7 +1060,7 @@ for t in range(n_queries):
 print(f"Simulation complete: {n_queries} queries collected for each method.")
 ```
 
-Finally, we visualize the results. The left panel shows how estimation error decreases with more comparisons; the right panel shows the learned reward functions:
+最后把结果画出来。左图展示估计误差如何随比较次数增多而下降；右图展示学到的奖励函数：
 
 ```{pyodide-python}
 #| autorun: true
@@ -1093,218 +1093,218 @@ print(f"Final MSE - Active: {mse_active[-1]:.4f}, Random: {mse_random[-1]:.4f}")
 print(f"Active achieves {mse_random[-1]/mse_active[-1]:.1f}x lower error")
 ```
 
-### When to Use GP Active Learning
+### 什么时候该用高斯过程主动学习
 
-| Scenario | Recommendation |
+| 场景 | 建议 |
 |----------|----------------|
-| Nonlinear reward structure | GP strongly preferred |
-| Low-to-moderate dimensions ($d \lesssim 10$) | GP works well |
-| Expensive human feedback | Active learning essential |
-| Need uncertainty quantification | GP provides this naturally |
-| Large datasets ($n > 1000$) | Consider sparse GP approximations |
-| Very high dimensions | Linear models may be more practical |
+| 奖励结构是非线性的 | 强烈建议用高斯过程 |
+| 维度较低到中等（$d \lesssim 10$） | 高斯过程效果很好 |
+| 人工反馈很贵 | 必须用主动学习 |
+| 需要给出不确定性 | 高斯过程天生就能给 |
+| 数据量大（$n > 1000$） | 考虑稀疏高斯过程近似 |
+| 维度非常高 | 线性模型也许更实际 |
 
-## Active Learning for Direct Preference Optimization {#sec-adpo}
+## 面向直接偏好优化的主动学习 {#sec-adpo}
 
-We now turn to a specific, important application: **active learning for DPO (Direct Preference Optimization)** in large language model alignment. Chapter 2 introduced DPO and its connection to Bradley-Terry; here we show how to apply active learning principles to reduce the number of human comparisons needed.
+下面看一个具体而重要的应用：**大语言模型对齐中对 DPO（直接偏好优化，Direct Preference Optimization）做主动学习**。第 2 章介绍过 DPO 以及它和 Bradley-Terry 模型的关系，这里说明怎样把主动学习的原则用上去，减少所需的人工比较。
 
-### The DPO Setting
+### DPO 的设定
 
-Recall from @sec-llm-example that DPO directly optimizes a policy $\pi_\theta$ on preference data without learning an explicit reward model. The key insight is that DPO implicitly assumes Bradley-Terry preferences:
+还记得 @sec-llm-example 里说的：DPO 直接在偏好数据上优化策略 $\pi_\theta$，并不去学一个显式的奖励模型。关键在于，DPO 隐含地假定偏好服从 Bradley-Terry 形式：
 $$
 p(y_w \succ y_l \mid x) = \sigma\left(\beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}\right)
 $$ {#eq-dpo-bradley-terry}
 
-**Challenge:** Large language models have billions of parameters, making exact Fisher information computation intractable. How can we apply the D-optimal design principles from Sections 1-2?
+**困难在于：** 大语言模型动辄上十亿参数，精确计算费雪信息根本算不动。前面讲的那些 D 最优设计原则，在这里怎么用？
 
-### The Log-Linear Policy Assumption
+### 对数线性策略假设
 
-The key insight is to approximate the policy as **log-linear** in the last-layer features:
+关键的思路是把策略近似成**关于最后一层特征对数线性**的形式：
 $$
 \pi(y \mid x; \theta) \propto \exp(\phi(x, y)^\top \theta)
 $$ {#eq-log-linear-policy}
 
-where $\phi(x, y)$ is the feature representation from the model's last layer. This assumption is justified by the **neural tangent kernel** perspective: for sufficiently large networks, the dynamics during training are approximately linear in the parameters.
+这里 $\phi(x, y)$ 是模型最后一层给出的特征表示。这个假设有**神经正切核（neural tangent kernel）**的观点作为依据：网络足够大时，训练过程中的动力学近似对参数是线性的。
 
-Under this assumption, the DPO loss Hessian takes the form:
+在这个假设下，DPO 损失的 Hessian 呈如下形式：
 $$
 H(\theta) = \sum_{i=1}^n p_i(1-p_i) \cdot \Delta\phi_i \Delta\phi_i^\top
 $$ {#eq-dpo-hessian}
 
-where $\Delta\phi_i = \phi(x_i, y_{w,i}) - \phi(x_i, y_{l,i})$ is the feature difference between winning and losing responses, and $p_i$ is the predicted preference probability.
+其中 $\Delta\phi_i = \phi(x_i, y_{w,i}) - \phi(x_i, y_{l,i})$ 是"被选中回答"与"落选回答"之间的特征差，$p_i$ 是模型预测的偏好概率。
 
-**Key observation:** This Hessian is exactly the **Fisher information matrix** for the DPO model! The D-optimal criterion becomes:
+**关键观察：** 这个 Hessian 恰好就是 DPO 模型的**费雪信息矩阵**！于是 D 最优准则变成：
 $$
 \max_S \log\det\left(\sum_{i \in S} p_i(1-p_i) \cdot \Delta\phi_i \Delta\phi_i^\top\right)
 $$ {#eq-dpo-d-optimal}
 
-### The ADPO Algorithm
+### ADPO 算法
 
-The **Active DPO (ADPO)** algorithm applies D-optimal design to select preference comparisons:
+**主动 DPO（Active DPO, ADPO）** 算法把 D 最优设计用来挑要问的比较：
 
-::: {.callout-note title="Algorithm: Active DPO (ADPO)"}
-**Input:** Reference policy $\pi_{\text{ref}}$, prompt set $\{x_i\}$, response pairs $\{(y_{i,1}, y_{i,2})\}$, budget $T$
+::: {.callout-note title="算法：主动 DPO（ADPO）"}
+**输入：** 参考策略 $\pi_{\text{ref}}$、提示集合 $\{x_i\}$、成对的回答 $\{(y_{i,1}, y_{i,2})\}$、提问预算 $T$
 
-**Initialize:** $\theta_0 = \theta_{\text{ref}}$, $S_0 = \emptyset$
+**初始化：** $\theta_0 = \theta_{\text{ref}}$，$S_0 = \emptyset$
 
-**For** $t = 1, \ldots, T$:
+**对** $t = 1, \ldots, T$ 依次执行：
 
-1. **Compute features:** For each candidate pair $(x_i, y_{i,1}, y_{i,2})$:
+1. **算特征：** 对每个候选三元组 $(x_i, y_{i,1}, y_{i,2})$：
    - $\Delta\phi_i = \phi(x_i, y_{i,1}) - \phi(x_i, y_{i,2})$
    - $p_i = \sigma(\beta(\log\pi_{\theta_{t-1}}(y_{i,1}|x_i) - \log\pi_{\theta_{t-1}}(y_{i,2}|x_i)))$
 
-2. **D-optimal selection:** Select query maximizing:
+2. **D 最优挑选：** 选出使下式最大的问题：
    $$i^* = \arg\max_i \log\det\left(I + p_i(1-p_i) H_t^{-1} \Delta\phi_i \Delta\phi_i^\top\right)$$ {#eq-adpo-selection}
-   where $H_t$ is the current Fisher information matrix
+   其中 $H_t$ 是当前的费雪信息矩阵
 
-3. **Query oracle:** Obtain human preference $y_t$ for pair $(x_{i^*}, y_{i^*,1}, y_{i^*,2})$
+3. **问人：** 就 $(x_{i^*}, y_{i^*,1}, y_{i^*,2})$ 取得人类的偏好 $y_t$
 
-4. **Update:** $S_t = S_{t-1} \cup \{(i^*, y_t)\}$, retrain $\theta_t$ on $S_t$ using DPO loss
+4. **更新：** 令 $S_t = S_{t-1} \cup \{(i^*, y_t)\}$，用 DPO 损失在 $S_t$ 上重新训练出 $\theta_t$
 
-**Return:** Final policy $\pi_{\theta_T}$
+**返回：** 最终的策略 $\pi_{\theta_T}$
 :::
 
-::: {.callout-warning title="When the Log-Linear Policy Assumption Fails"}
-ADPO's theoretical guarantees rely on the **log-linear policy assumption**: that $\log \pi_\theta(y \mid x)$ is approximately linear in $\theta$, which holds in the neural tangent kernel (NTK) regime near the reference policy. This approximation degrades when: (1) the policy is fine-tuned **far from the reference** (large $\|\theta - \theta_{\text{ref}}\|$), (2) the model is **small** relative to the data complexity so the NTK regime does not hold, or (3) the loss landscape is **highly non-convex** with multiple basins. In these settings, the Fisher information computed under the log-linear assumption may poorly reflect the actual curvature of the loss, leading to suboptimal query selection. Practitioners should monitor whether the D-optimal gains predicted by the linear model correlate with actual improvements in policy quality.
+::: {.callout-warning title="对数线性策略假设什么时候不成立"}
+ADPO 的理论保证依赖**对数线性策略假设**：$\log \pi_\theta(y \mid x)$ 对 $\theta$ 近似线性，在参考策略附近、神经正切核（NTK）适用的范围内这个假设成立。以下情况它会失效：(1) 策略被微调得**离参考策略很远**（$\|\theta - \theta_{\text{ref}}\|$ 很大）；(2) 模型相对于数据的复杂度来说**太小**，不在 NTK 适用的范围内；(3) 损失面**高度非凸**、存在多个谷。这些情形下，按对数线性假设算出的费雪信息可能很不符合损失真正的弯曲程度，选题因此不够好。实践中应当盯着一点：线性模型预测的 D 最优增益，是否真的和政策质量的提升同步。
 :::
 
-### Theoretical Guarantees
+### 理论保证
 
-Under standard regularity conditions, ADPO achieves the following convergence rate:
+在常规的正则性条件下，ADPO 有如下收敛速率：
 
-::: {.callout-note title="Theorem: ADPO Convergence Rate"}
+::: {.callout-note title="定理：ADPO 的收敛速率"}
 ::: {#thm-adpo-convergence}
-Let $\theta^*$ be the optimal policy parameters. Under the log-linear policy assumption and standard regularity conditions, ADPO with $n$ actively selected comparisons achieves:
+记 $\theta^*$ 为最优策略的参数。在对数线性策略假设和常规的正则性条件下，用 ADPO 主动挑选 $n$ 次比较可达到：
 $$
 \|\hat\theta_n - \theta^*\| = O\left(\frac{d}{\sqrt{n}}\right)
 $$ {#eq-adpo-convergence}
-where $d$ is the effective dimension (rank of the Fisher information matrix). This matches the **minimax optimal rate** for $d$-dimensional estimation.
+其中 $d$ 是有效维度（即费雪信息矩阵的秩）。这个速度与 $d$ 维估计的**极小极大最优速率（minimax optimal rate）**一致。
 :::
-:::
 
-The key insight is that D-optimal design ensures the Fisher information grows proportionally to $n$, leading to $O(1/\sqrt{n})$ estimation error.
+关键在于：D 最优设计能保证费雪信息随 $n$ 成比例增长，于是估计误差是 $O(1/\sqrt{n})$。
 
-### ADPO+ for Offline Settings
+### 面向离线设定的 ADPO+
 
-In many practical settings, we have access to a fixed pool of unlabeled preference pairs (e.g., model outputs) but cannot generate new queries. **ADPO+** adapts the algorithm for this offline setting:
+实际中常常是这样：手头有一批没有标签的配对样本（比如模型生成的输出），但没法再造新的问题。**ADPO+** 把算法改造成这种离线设定：
 
-1. **Pool-based selection:** Instead of synthesizing queries, select from the existing pool
-2. **Batch selection:** Select $b$ queries at once to enable parallel annotation
-3. **Diversity regularization:** Add penalty for selecting similar queries
+1. **从池子里挑：** 不去新造问题，只在已有的池子里选
+2. **批量挑选：** 一次挑 $b$ 个问题，方便并行标注
+3. **加多样性惩罚：** 选出的问题彼此太像就扣分
 
-The D-optimal criterion naturally encourages diversity: selecting redundant queries provides diminishing information gain.
+D 最优准则本身就会促使所选问题各不相同：重复的问题带来的信息增量越来越少。
 
-### Empirical Guidance: When Does Active Learning Help?
+### 经验之谈：主动学习什么时候真有用
 
-| Factor | Active Learning Beneficial? |
+| 因素 | 主动学习有用吗？ |
 |--------|---------------------------|
-| **Annotation cost** | High cost → Active learning essential |
-| **Data heterogeneity** | Diverse prompts → More room for strategic selection |
-| **Budget constraints** | Limited budget → Active learning shows larger gains |
-| **Model capacity** | Larger models → Active learning helps reduce overfitting |
-| **Query pool size** | Large pool → More room for intelligent selection |
+| **标注成本** | 成本高 → 主动学习很有必要 |
+| **数据差异大** | 提示五花八门 → 有更多可以挑的余地 |
+| **预算受限制** | 预算越少 → 主动学习的提升越明显 |
+| **模型容量** | 模型越大 → 主动学习能帮着减轻过拟合 |
+| **候选问题池规模** | 池子越大 → 智能挑选的余地越大 |
 
-**Practical recommendation:** Active learning for DPO provides the largest gains when:
-- Annotation budget is limited (< 10K comparisons)
-- Prompts cover diverse topics or difficulty levels
-- The goal is sample efficiency over raw performance
+**实践建议：** 下面这些情形里，给 DPO 加主动学习收益最大：
+- 标注预算有限（少于 1 万次比较）
+- 提示涵盖的主题或难度比较分散
+- 目标是"用更少的样本学会"，而不是单纯刷高分
 
-::: {.callout-tip title="Comparison: GP Active Learning vs. ADPO"}
-| Aspect | GP Active Learning | ADPO |
+:::
+::: {.callout-tip title="对照：高斯过程主动学习 vs. ADPO"}
+| 方面 | 高斯过程主动学习 | ADPO |
 |--------|-------------------|------|
-| Model | Nonparametric (GP) | Parametric (neural network) |
-| Scalability | $O(n^3)$ | $O(d^2 n)$ with approximations |
-| Use case | Small datasets, need uncertainty | LLM alignment, large models |
-| Acquisition | Information gain | D-optimal design |
-| Theoretical basis | Mutual information | Fisher information |
+| 模型 | 非参数（高斯过程） | 参数化（神经网络） |
+| 可扩展性 | $O(n^3)$ | 近似后可到 $O(d^2 n)$ |
+| 适合做什么 | 数据量小、需要给出不确定性 | 语言模型对齐、模型很大 |
+| 采集函数 | 信息增益 | D 最优设计 |
+| 理论依据 | 互信息 | 费雪信息 |
 
-Both approaches share the core insight: **use model uncertainty to guide query selection**.
+两条路共用的内核是同一个：**用模型的不确定性来指导选题**。
 :::
 
-## Summary
+## 小结
 
-- When human feedback is expensive, **which comparisons to request** matters as much as how to learn from them. This chapter develops the theory of optimal query selection for preference learning.
-- **Fisher information** $\mathcal{I}_j(U) = p(1-p)$ quantifies how much a single comparison reveals about user preferences. Items with predicted win probability $p \approx 0.5$ are most informative---close competitions reveal more than blowouts.
-- Three **optimal design criteria** guide query selection: **A-optimal** (minimize average variance), **D-optimal** (maximize the determinant of the information matrix, shrinking the posterior ellipsoid's volume), and **E-optimal** (minimize the worst-case variance).
-- For multi-dimensional preferences, the **Sherman-Morrison update** enables efficient $O(K^2)$ covariance updates after each query, making real-time active selection practical.
-- **Gaussian Process active learning** extends these ideas to nonparametric models using information-theoretic acquisition functions---selecting queries that maximize mutual information between the response and the latent preference function.
-- **Active DPO (ADPO)** applies D-optimal design to language model alignment, using a log-linear approximation to make Fisher information computation tractable for billion-parameter models. ADPO achieves the minimax-optimal convergence rate $O(d/\sqrt{n})$.
-- Across all settings---scalar preferences, factor models, GPs, and LLMs---the core insight is the same: **use model uncertainty to guide query selection**, focusing annotation effort where it reduces uncertainty most.
+- 人工反馈昂贵时，**该问哪些比较**和"怎么从回答里学"一样重要。本章讲的就是偏好学习中最优选题的理论。
+- **费雪信息** $\mathcal{I}_j(U) = p(1-p)$ 量化了一次比较能透露多少关于用户偏好的信息。预测胜率 $p \approx 0.5$ 的物品最有信息量——势均力敌的比赛比一边倒的比赛更能说明问题。
+- 三个**最优设计准则**指导选题：**A 最优**（最小化平均方差）、**D 最优**（最大化信息矩阵的行列式，也就是把后验椭球的体积压到最小）、**E 最优**（最小化最坏方向的方差）。
+- 多维偏好下，**Sherman-Morrison 更新**让每次提问后的协方差更新只需 $O(K^2)$，实时主动选题因此变得可行。
+- **高斯过程主动学习**把这些想法推广到非参数模型：用信息论的采集函数选题，让回答与潜在偏好函数之间的互信息最大。
+- **主动 DPO（ADPO）** 把 D 最优设计用到语言模型对齐上，靠对数线性近似让上十亿参数模型的费雪信息也算得动。ADPO 达到了极小极大最优的收敛速率 $O(d/\sqrt{n})$。
+- 在所有这些设定里——标量偏好、因子模型、高斯过程、语言模型——内核的想法都一样：**用模型的不确定性来指导选题**，把标注的力气花在最能减少不确定性的地方。
 
-## Quick Check
+## 快问快答
 
-Test your understanding before proceeding to the exercises.
+做练习之前，先测测自己是不是懂了。
 
-1. An item has predicted success probability $p = 0.95$. What is its Fisher information $\mathcal{I} = p(1-p)$? Would you select this item for active learning? Why or why not?
+1. 某个物品的预测成功概率是 $p = 0.95$，它的费雪信息 $\mathcal{I} = p(1-p)$ 是多少？主动学习你会不会选它？为什么？
 
-2. A-optimal design minimizes the average posterior variance; D-optimal minimizes the volume of the confidence ellipsoid. In what situation would these select different items?
+2. A 最优最小化平均后验方差，D 最优最小化置信椭球的体积。什么情形下两者会选出不同的物品？
 
-3. In ADPO, why is the log-linear policy assumption ($\pi(y|x;\theta) \propto \exp(\phi(x,y)^\top \theta)$) important? What would happen without it?
+3. ADPO 里为什么一定要有对数线性策略假设（$\pi(y|x;\theta) \propto \exp(\phi(x,y)^\top \theta)$）？没有它会怎样？
 
 ::: {.callout-tip title="Essential Reading" collapse="true"}
-If you read only five papers from this chapter's references, make them these:
+本章参考文献如果只读五篇，就读这五篇：
 
-1. **@rasch1960probabilistic** — The Rasch model: foundational psychometric model connecting item difficulty to person ability
-2. **@fedorov1972theory** — The theory of optimal experimental design (A/D/E-optimality)
-3. **@chu2005preference** — Gaussian process preference learning: nonparametric Bayesian approach to utility functions
-4. **@houlsby2011bayesian** — Bayesian active learning by disagreement (BALD), connecting information gain to query selection
-5. **@christiano2017deep** — Deep RL from human preferences: the original active elicitation pipeline for reward learning
+1. **@rasch1960probabilistic**——Rasch 模型：心理测量学的奠基工作，把题目难度与人的能力联系起来
+2. **@fedorov1972theory**——最优试验设计理论（A/D/E 最优性）
+3. **@chu2005preference**——高斯过程偏好学习：用非参数贝叶斯方法学效用函数
+4. **@houlsby2011bayesian**——用"分歧"做贝叶斯主动学习（BALD），把信息增益和选题连起来
+5. **@christiano2017deep**——从人类偏好做深度强化学习：奖励学习中最早的主动征询流程
 :::
 
-## Discussion Questions
+## 讨论题
 
-1. How does the reliability metric defined in this chapter relate to classical test theory in psychometrics? What assumptions underlie this correspondence?
+1. 本章定义的"信度"和经典测量理论里的对应概念是什么关系？这种对应背后依赖哪些假设？
 
-2. Why does D-optimal design maximize the log-determinant of the information matrix rather than the trace? In what situations might A-optimal (trace-based) selection be preferable?
+2. D 最优设计为什么最大化信息矩阵的对数行列式，而不是迹？什么情况下按迹来选的 A 最优反而更合适？
 
-3. The local linearization approach for non-linear scoring functions trades off accuracy for tractability. What are the conditions under which this approximation is most accurate? When might it fail?
+3. 非线性打分函数的局部线性化是用精度换可算性。这个近似在什么条件下最准？什么时候会失效？
 
-4. Active preference learning assumes that items' appeals are known or pre-calibrated. How might estimation errors in item parameters affect the efficiency of active selection strategies?
+4. 主动偏好学习假定物品的吸引力已知或事先标定好了。物品参数的估计误差会怎样影响主动选题策略的效率？
 
-5. The metric elicitation framework assumes an oracle with a consistent underlying preference. How would you modify the approach to handle an oracle whose preferences evolve over time or exhibit inconsistencies?
+5. 度量征询框架假定神谕有一个前后一致的偏好。如果神谕的偏好会随时间变化、或者本身自相矛盾，这套方法要怎么改？
 
-6. In the robotics case studies, pairwise comparisons are used to learn reward functions. What are the advantages and disadvantages of pairwise comparisons versus direct reward labeling for robotic learning?
+6. 机器人案例里用的是两两比较来学奖励函数。与直接给人工标注的奖励值相比，两两比较在机器人学习中有什么好处和坏处？
 
-7. Foundation models like R3M and Voltron leverage pretraining on human video data. What types of robotic tasks might benefit most from this approach? What tasks might still require substantial robot-specific data?
+7. R3M、Voltron 这类基础模型靠人类视频预训练得到特征。哪些机器人任务最能从中受益？哪些任务仍然需要大量机器人自己的数据？
 
-8. The active elicitation framework for imitation learning identifies "compatible" demonstrations. How might this concept of compatibility be extended to multi-agent settings where different agents have legitimately different optimal behaviors?
+8. 模仿学习里的主动征询框架会挑出"相容"的示范。如果换到多智能体场景——不同智能体的最优行为本来就合理不同——这个"相容"的概念要怎么推广？
 
-## Further Reading
+## 延伸阅读
 
-For readers who want to go deeper into the topics introduced in this chapter, we recommend the following:
+想在本章内容上再往深里走，可以读下面这些：
 
-- **@fedorov1972theory**, *Theory of Optimal Experiments* — The classical reference on A/D/E-optimal experimental design, providing the mathematical foundations for the Fisher information-based query selection methods used throughout this chapter.
-- **@chaloner1995bayesian**, "Bayesian Experimental Design: A Review" — A unified information-theoretic approach to experimental design that extends the Fisher information framework to Bayesian settings, including mutual information-based criteria that are robust to model misspecification.
-- **@settles2012active**, *Active Learning* — A comprehensive survey of active learning, covering pool-based, stream-based, and query-synthesis approaches. Places the preference elicitation methods in this chapter within the broader active learning literature.
-- **@van2010elements**, *Elements of Adaptive Testing* — How Fisher information drives modern standardized testing (GRE, GMAT), providing the practical context for the Rasch model-based elicitation methods discussed in this chapter.
-- **@houlsby2011bayesian**, "Bayesian Active Learning for Classification and Preference Learning" — Introduces the BALD (Bayesian Active Learning by Disagreement) acquisition function, an information-theoretic alternative to D-optimal design that works well with GP models.
-- **@sadigh2017active**, "Active Preference-Based Learning of Reward Functions" — Active query selection for robot trajectory preferences, demonstrating how the Fisher information framework applies to continuous, high-dimensional preference learning in robotics.
-- **@pmlr-v89-hiranandani19a**, "Multiclass Performance Metric Elicitation" — The paper behind the metric elicitation case study, showing how active preference queries can recover a practitioner's implicit loss function for classifier evaluation.
+- **@fedorov1972theory**，*Theory of Optimal Experiments*——A/D/E 最优试验设计的经典著作，本章整套"按费雪信息选题"的数学基础都出自这里。
+- **@chaloner1995bayesian**，"Bayesian Experimental Design: A Review"——把试验设计统一到信息论的框架下，把费雪信息推广到贝叶斯设定，包括对模型设定错误更稳健的互信息准则。
+- **@settles2012active**，*Active Learning*——主动学习的综述，涵盖从池子里挑、流式、以及合成问题三条路线，可以把本章的偏好征询放到更大的主动学习脉络里看。
+- **@van2010elements**，*Elements of Adaptive Testing*——费雪信息如何驱动现代标准化考试（GRE、GMAT），正好给本章基于 Rasch 模型的征询方法提供了实际背景。
+- **@houlsby2011bayesian**，"Bayesian Active Learning for Classification and Preference Learning"——提出 BALD（Bayesian Active Learning by Disagreement）采集函数，是 D 最优之外的信息论替代方案，和高斯过程配合得很好。
+- **@sadigh2017active**，"Active Preference-Based Learning of Reward Functions"——机器人轨迹偏好的主动选题，演示费雪信息框架怎么用到机器人这种连续、高维的偏好学习上。
+- **@pmlr-v89-hiranandani19a**，"Multiclass Performance Metric Elicitation"——本章度量征询案例背后的论文，说明用主动的偏好提问就能把工程师心里那把评估分类器的尺子问出来。
 
-## Exercises
+## 练习
 
-We place (\*), (\*\*), and (\*\*\*) for exercises we deem relatively easy, medium, and hard.
+我们用 (\*)、(\*\*)、(\*\*\*) 标注我们认为较易、中等、较难的练习。
 
-### Fisher Information Maximum (\*)
-Show that for the Rasch model with $p = \sigma(U + V_j)$, the Fisher information $\mathcal{I}_j(U) = p(1-p)$ is maximized when $p = 0.5$. What does this imply about the optimal difficulty of items for measuring a user's ability?
+### 让费雪信息最大
+证明：对满足 $p = \sigma(U + V_j)$ 的 Rasch 模型，费雪信息 $\mathcal{I}_j(U) = p(1-p)$ 在 $p = 0.5$ 时最大。这对"测用户能力时题目该出多难"说明了什么？
 
-### Sherman-Morrison Update (\*\*)
-Derive the Sherman-Morrison formula for efficiently updating the posterior covariance when adding a single rank-1 observation. Specifically, show that if $\Sigma^{-1} \gets \Sigma^{-1} + w \cdot vv^\top$, then $\Sigma \gets \Sigma - \frac{w \cdot \Sigma vv^\top \Sigma}{1 + w \cdot v^\top \Sigma v}$.
+### Sherman-Morrison 更新
+推出 Sherman-Morrison 公式，说明新增一条秩为 1 的观测时怎么高效更新后验协方差。具体地，证明若 $\Sigma^{-1} \gets \Sigma^{-1} + w \cdot vv^\top$，则 $\Sigma \gets \Sigma - \frac{w \cdot \Sigma vv^\top \Sigma}{1 + w \cdot v^\top \Sigma v}$。
 
-### D-Optimal vs A-Optimal (\*\*)
-Construct a 2D example where D-optimal and A-optimal criteria select different items for the next query. Interpret the difference geometrically in terms of the posterior ellipsoid.
+### D 最优与 A 最优
+构造一个二维的例子，使 D 最优与 A 最优准则在下一次提问上选出不同的物品。再从后验椭球的角度解释两者的差别。
 
-### Pairwise Fisher Information (\*\*)
-For the Bradley-Terry model $p(j \succ k | U) = \sigma(U^\top(V_j - V_k))$, derive the Fisher information matrix for $U$ given a single pairwise comparison. How does this relate to the single-item case?
+### 两两比较的费雪信息
+对 Bradley-Terry 模型 $p(j \succ k | U) = \sigma(U^\top(V_j - V_k))$，推出一条两两比较关于 $U$ 的费雪信息矩阵。这与单个物品的情形有什么关系？
 
-### Active Selection Implementation (\*\*\*)
-Extend the D-optimal pairwise selection simulation to include all three optimality criteria (A, D, E). Compare their sample efficiency on a synthetic dataset of 50 items with 3-dimensional user preferences. Which criterion performs best under different prior uncertainty structures?
+### 实现主动选题
+把 D 最优的配对选题模拟扩展成三个最优准则（A、D、E）都能用。在"50 个物品、3 维用户偏好"的合成数据上比较三者的样本效率。先验不确定性结构不同时，哪个准则表现最好？
 
-### Noisy Oracle Elicitation (\*\*\*)
-Extend the LPM elicitation algorithm to handle noisy oracle responses where the oracle flips its answer with probability $\epsilon < 0.5$. How does the query complexity scale with $\epsilon$?
+### 神谕会答错时的征询
+把 LPM 征询算法改成能处理会答错的神谕：它以概率 $\epsilon < 0.5$ 翻转自己的回答。提问复杂度随 $\epsilon$ 怎样变化？
 
-### Local Linearization Analysis (\*\*\*)
-Consider a scoring function $f_\theta(x) = a^\top \tanh(Bx)$ with $\theta = (a, B)$. Analytically derive the Jacobian $J_j = \partial f_\theta(X_j) / \partial \theta$. Under what conditions on the hidden activations $\tanh(BX_j)$ is the local Gaussian approximation most accurate?
+### 分析局部线性化
+设打分函数 $f_\theta(x) = a^\top \tanh(Bx)$，$\theta = (a, B)$。解析地推出雅可比 $J_j = \partial f_\theta(X_j) / \partial \theta$。隐层激活 $\tanh(BX_j)$ 满足什么条件时，这个局部高斯近似最准？
 
-### Compatibility Metric Design (\*\*)
-In the active elicitation framework for imitation learning, the compatibility metric depends on thresholds $\lambda$ and $\eta$. Design an algorithm that automatically selects these thresholds from a held-out validation set of demonstrations. What objective should the algorithm optimize?
+### 设计相容性指标
+模仿学习的主动征询框架里，相容性指标取决于阈值 $\lambda$ 和 $\eta$。请设计一个算法，从留出的验证示范集上自动选出这两个阈值。这个算法该优化什么目标？

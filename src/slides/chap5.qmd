@@ -1,67 +1,67 @@
 ---
-title: "Machine Learning from Human Preferences"
-subtitle: "Chapter 5: Aggregation"
-footer: "Chapter 5: Aggregation"
+title: "人类偏好机器学习"
+subtitle: "第 5 章：聚合"
+footer: "第 5 章：聚合"
 ---
 
-## Chapter Overview
+## 本章概览
 
-Chapters 1–4 focused on preferences of a *single* decision-maker. This chapter asks: how do we aggregate preferences across **multiple** individuals?
+第 1–4 章关心的都是*单个*决策者的偏好。这一章要问的是：怎么把**多个**人的偏好合到一起？
 
 . . .
 
-**Motivating examples:**
+** 驱动这个问题例子：**
 
-- **RLHF**: Annotators disagree about which response is better
-- **Recommender systems**: Must balance diverse tastes across millions of users
-- **Content moderation**: Whose preferences should govern what is shown?
-- **AI alignment**: How to combine human values into a single objective?
+- **RLHF**：标注员对"哪个回答更好"意见不一致
+- **推荐系统**：要在几百万用户之间平衡多样的口味
+- **内容审核**：该按谁的偏好来决定展示什么？
+- **AI 对齐**：怎么把人类的价值观合成一个目标？
 
-## Chapter Structure
+## 本章结构
 
-1. **Social Choice Theory**: Arrow's and Gibbard–Satterthwaite's impossibility theorems
-2. **Escaping Impossibility**: Single-peaked preferences, Borda count, DPO connection
-3. **Beyond Classical Voting**: Multi-issue voting, nosy preferences, Community Notes
-4. **Challenges in Practice**: Inversion problem, privacy, paternalism
-5. **Mechanism Design**: Auctions, VCG, peer prediction, incentive-compatible learning
+1. **社会选择理论**：阿罗定理与吉巴德—萨特斯维特不可能定理
+2. **绕开不可能性**：单峰偏好、博尔达计分法、与 DPO 的联系
+3. **超出传统投票的范围**：多议题投票、"管得宽"的偏好、Community Notes
+4. **实践中的难题**：反演问题、隐私、家长主义
+5. **机制设计**：拍卖、VCG、同伴预测、激励相容的学习
 
-## Notation
+## 记号
 
 ::: {.smaller}
 
-| Symbol | Meaning |
+| 符号 | 含义 |
 |--------|---------|
-| $N = \{1, \ldots, n\}$ | Set of $n$ voters (agents) |
-| $A = \{a_1, \ldots, a_m\}$ | Set of $m$ alternatives |
-| $\succ_i$ | Voter $i$'s strict preference ordering over $A$ |
-| $\mathcal{L}(A)$ | Set of all strict linear orders over $A$ |
-| $f: \mathcal{L}(A)^n \to A$ | **Social choice function** (SCF): profile $\to$ winner |
-| $F: \mathcal{L}(A)^n \to \mathcal{L}(A)$ | **Social welfare function** (SWF): profile $\to$ ranking |
-| $\text{SP}(Y)$ | Single-peaked preferences on totally ordered set $Y$ |
-| $p(\succ_i)$ | Peak (ideal point) of voter $i$'s preferences |
+| $N = \{1, \ldots, n\}$ | $n$ 位投票人（参与者）的集合 |
+| $A = \{a_1, \ldots, a_m\}$ | $m$ 个备选方案的集合 |
+| $\succ_i$ | 投票人 $i$ 在 $A$ 上的严格偏好排序 |
+| $\mathcal{L}(A)$ | $A$ 上所有严格线性序的集合 |
+| $f: \mathcal{L}(A)^n \to A$ | **社会选择函数**（SCF）：偏好组合 $\to$ 胜者 |
+| $F: \mathcal{L}(A)^n \to \mathcal{L}(A)$ | **社会福利函数**（SWF）：偏好组合 $\to$ 排序 |
+| $\text{SP}(Y)$ | 在全序集 $Y$ 上的单峰偏好 |
+| $p(\succ_i)$ | 投票人 $i$ 偏好的峰值（理想点） |
 
 :::
 
 ---
 
-## Social Choice Theory
+## 社会选择理论
 
-The central question: **Can we design an aggregation rule that faithfully represents individual preferences while satisfying fairness axioms?**
+核心问题是：**能不能设计一条聚合规则，既如实反映个人偏好，又满足公平性公理？**
 
 . . .
 
-**Common voting rules:**
+**常见的投票规则：**
 
-- **Plurality**: Each voter names their top choice; most votes wins
-- **Borda Count**: Points based on ranking position ($m-1$ for top, $m-2$ for second, etc.)
-- **STV**: Iterative elimination of lowest-vote alternative, transferring votes
-- **Condorcet methods**: Winner must beat all others in pairwise majority contests
+- **得票最多者胜（plurality）**：每人只写首选，票最多者当选
+- **博尔达计分法**：按名次给分（第一名 $m-1$ 分，第二名 $m-2$ 分，依此类推）
+- **可转移单票制（STV）**：一轮轮淘汰得票最低的方案，把它的票转移出去
+- **孔多塞方法**：胜者必须在两两多数对比中赢过所有其他方案
 
-## The Condorcet Paradox
+## 孔多塞悖论
 
-Majority preferences can be **cyclic** — even when individual preferences are transitive:
+多数偏好可能出现**循环**——哪怕每个人的偏好都是传递的：
 
-| Voter | Ranking |
+| 投票人 | 排序 |
 |-------|---------|
 | Voter 1 | $A \succ B \succ C$ |
 | Voter 2 | $B \succ C \succ A$ |
@@ -69,151 +69,151 @@ Majority preferences can be **cyclic** — even when individual preferences are 
 
 . . .
 
-- Majority prefers $A$ to $B$ (voters 1, 3)
-- Majority prefers $B$ to $C$ (voters 1, 2)
-- Majority prefers $C$ to $A$ (voters 2, 3)
+- 多数人认为 $A$ 优于 $B$（投票人 1、3）
+- 多数人认为 $B$ 优于 $C$（投票人 1、2）
+- 多数人认为 $C$ 优于 $A$（投票人 2、3）
 
-**No Condorcet winner exists!** — a rock-paper-scissors cycle
+**不存在孔多塞胜者！**——一个石头剪刀布式的循环
 
-## Classical Fairness Axioms
+## 经典的公平性公理
 
-Three desirable properties for any social welfare function:
-
-. . .
-
-1. **Unanimity (Pareto efficiency)**: If every voter prefers $x$ to $y$, then society ranks $x$ above $y$
+任何社会福利函数都希望满足的三条性质：
 
 . . .
 
-2. **Independence of Irrelevant Alternatives (IIA)**: The social ranking of $x$ vs. $y$ depends only on individual rankings of $x$ vs. $y$ — not on other alternatives
+1. **一致同意（帕累托效率）**：如果所有投票人都认为 $x$ 优于 $y$，那么社会排序也应把 $x$ 排在 $y$ 前面
 
 . . .
 
-3. **Non-dictatorship**: No single voter always determines the social ranking
+2. **无关备选独立性（IIA）**：社会对 $x$ 与 $y$ 的排序只取决于个人对 $x$ 与 $y$ 的排序——不受其他方案影响
 
 . . .
 
-Additionally, we assume **unrestricted domain**: any transitive preference ordering is admissible.
+3. **非独裁**：不存在某一位投票人总能决定社会排序
+
+. . .
+
+此外还假设**定义域不受限制**：任何传递的偏好排序都允许出现。
 
 ---
 
-## Arrow's Impossibility Theorem {.auto-animate}
+## 阿罗不可能定理 {.auto-animate}
 
 ::: {.callout-important}
-**Theorem (Arrow, 1951)**: For $m \geq 3$ alternatives, no social welfare function can simultaneously satisfy:
+**定理（阿罗，1951）**：当方案数 $m \geq 3$ 时，不存在任何社会福利函数能同时满足：
 
 1. Unanimity
-2. Independence of Irrelevant Alternatives
+2. 无关备选独立性
 3. Non-dictatorship
 
-under unrestricted domain.
+且在定义域不受限制的前提下。
 :::
 
 . . .
 
-Every practical voting system must sacrifice **at least one** fairness criterion.
+任何实际使用的投票系统，都至少要让出**一条**公平性准则。
 
 [@arrow1951]{.citation}
 
-## Arrow's Theorem: Proof Sketch {.auto-animate}
+## 阿罗定理：证明思路 {.auto-animate}
 
-The proof proceeds by contradiction:
+证明用反证法：
 
-1. Assume a SWF satisfies Unanimity, IIA, and Non-dictatorship
-2. Show that the social ranking between any pair $x, y$ must agree with some **pivotal voter**
-3. By IIA, the pivotal voter must be the **same** for all pairs of alternatives
+1. 假设存在一个满足一致同意、IIA、非独裁的社会福利函数
+2. 说明任意一对 $x, y$ 的社会排序，必然与某位**关键选民**一致
+3. 由 IIA 可知，对所有方案对来说，这位关键选民必须是**同一个人**
 
 . . .
 
-4. This single pivotal voter dictates the entire social order — **contradiction** with Non-dictatorship
+4. 这位关键选民决定了整个社会排序——与**非独裁**矛盾
 
-**Key driver**: Condorcet cycles force the aggregation to "break ties" by deferring to one voter.
+**关键推动力**：孔多塞式的循环迫使聚合规则必须靠"听某一位投票人的"来打破僵局。
 
-## Arrow's Theorem: Which Axiom Does Each Rule Violate?
+## 阿罗定理：各种规则各违反了哪条公理？
 
 ::: {.smaller}
 
-| Voting Rule | Violates | Why |
+| 投票规则 | 违反的公理 | 原因 |
 |-------------|----------|-----|
-| Dictatorship | Non-dictatorship | One voter decides everything |
-| Plurality | IIA | Adding a "spoiler" changes the winner |
-| Borda Count | IIA | Removing an alternative changes point totals |
-| Pairwise Majority | Transitivity | Condorcet cycles |
+| 独裁 | 非独裁 | 一切由一个人说了算 |
+| 得票最多者胜 | IIA | 加入一个"分票者"就会改变胜者 |
+| 博尔达计分法 | IIA | 拿走一个方案就会改变各方案的得分 |
+| 两两多数表决 | 传递性 | 会出现孔多塞循环 |
 
 :::
 
 . . .
 
-**Takeaway**: There is no free lunch — every voting rule makes trade-offs.
+**要点**：没有免费的午餐——每条投票规则都要做取舍。
 
-## Gibbard–Satterthwaite Theorem {.auto-animate}
+## 吉巴德—萨特斯维特定理 {.auto-animate}
 
 ::: {.callout-important}
-**Theorem (Gibbard, 1973; Satterthwaite, 1975)**: For $m \geq 3$ alternatives, any social choice function $f$ that is:
+**定理（吉巴德，1973；萨特斯维特，1975）**：当方案数 $m \geq 3$ 时，任何社会选择函数 $f$，只要它：
 
-- **Strategy-proof** (no voter benefits from misreporting preferences), and
-- **Onto** (every alternative can possibly win)
+- **策略免疫**（没有投票人能靠谎报偏好获益），且
+- **满射**（每个方案都有可能胜出）
 
-must be **dictatorial**.
+就必然是**独裁的**。
 :::
 
 . . .
 
-Every non-dictatorial voting rule is **manipulable**: some voter can gain by voting insincerely.
+任何非独裁的投票规则都是**可操纵的**：总有投票人能靠不诚实地投票占到便宜。
 
 [@gibbard1973; @satterthwaite1975]{.citation}
 
-## Strategic Voting Examples
+## 策略性投票的例子
 
-**Plurality** — "Lesser of two evils":
+**得票最多者胜**——"两害相权取其轻"：
 
-- True preference: $C \succ A \succ B$, but $C$ has no chance
-- Strategic vote: $A$ (to prevent $B$ from winning)
-
-. . .
-
-**Borda Count** — Strategic ranking:
-
-- Artificially rank a strong competitor last to reduce their Borda score
+- 真实偏好是 $C \succ A \succ B$，但 $C$ 根本赢不了
+- 于是有策略地投给 $A$（为了不让 $B$ 当选）
 
 . . .
 
-**Practical deterrence**: While STV can always be manipulated in theory, finding a beneficial strategic vote can be **NP-hard** in worst cases.
+**博尔达计分法**——策略性地排列名次：
 
-## Implications for AI Alignment
-
-Arrow's and Gibbard–Satterthwaite's theorems apply to **any** preference aggregation:
-
-- Aggregating RLHF annotator feedback faces the same impossibilities
-- A simple majority vote may yield unstable outcomes if annotators are diverse
-- Weighting votes by expertise risks creating dictator-like influence
+- 故意把一个强劲对手排到最后，压低他的博尔达得分
 
 . . .
 
-**Modern approaches:**
+**实践中的抑制作用**：理论上可转移单票制总能被操纵，但在最坏情形下，要找出一张有利的策略票本身可能是 **NP 难**的。
 
-- **Jury learning**: Panel of models/subgroups whose aggregated judgment guides learning
-- **Pluralistic alignment**: Preserve diversity of values rather than collapsing to a single objective
-- **DPO**: Implicitly aggregates pairwise preferences (more on this soon)
+## 对 AI 对齐的含义
+
+阿罗定理与吉巴德—萨特斯维特定理适用于**任何**偏好聚合：
+
+- 汇总 RLHF 标注员的反馈，会遇到同样的不可能性
+- 如果标注员之间观点分散，简单多数表决的结果可能很不稳定
+- 按专业能力给票加权，又有制造出"类独裁"影响力的风险
+
+. . .
+
+**现代的做法：**
+
+- **评审团学习（jury learning）**：让一组模型或子群体各自判断，再把判断合起来指导学习
+- **多元对齐（pluralistic alignment）**：保留价值观的多样性，而不是压成一个目标
+- **DPO**：隐式地在聚合成对偏好（后面会详细讲）
 
 [@gordon2022jury]{.citation}
 
 ---
 
-## Escaping Impossibility: Domain Restrictions
+## 绕开不可能性：限制定义域
 
-Arrow's and Gibbard–Satterthwaite assume **unrestricted domain**: any transitive ordering is admissible.
+阿罗定理与吉巴德—萨特斯维特定理都假设**定义域不受限制**：任何传递的排序都允许出现。
 
 . . .
 
-**Key idea**: If we restrict which preferences can occur, we can escape impossibility!
+**关键思路**：如果我们限制可能出现哪些偏好，就能绕开不可能性！
 
-In many real-world settings, preferences have natural structure we can exploit.
+很多真实场景里的偏好本身就有天然结构，可以利用。
 
-## Single-Peaked Preferences {.auto-animate}
+## 单峰偏好 {.auto-animate}
 
 ::: {.callout-note}
-**Definition**: A preference ordering $\succ$ over a totally ordered set $Y$ is **single-peaked** if there exists a peak $p(\succ) \in Y$ such that:
+**定义**：在全序集 $Y$ 上的一个偏好排序 $\succ$ 是**单峰**的，如果存在一个峰值 $p(\succ) \in Y$，使得：
 
 - If $y \lt y' \leq p(\succ)$, then $y' \succ y$
 - If $p(\succ) \leq y' \lt y$, then $y' \succ y$
@@ -221,28 +221,28 @@ In many real-world settings, preferences have natural structure we can exploit.
 
 . . .
 
-**Intuition**: Each voter has an "ideal point" (peak), and utility decreases as alternatives move away from the peak in either direction.
+**直观理解**：每位投票人有一个"理想点"（峰值），方案离峰值越远（无论往哪边），效用越低。
 
-This rules out "I prefer the extremes to the middle" — which creates cycles.
+这就排除了"我更喜欢两个极端，不喜欢中间"——正是这种偏好会造成循环。
 
-## Single-Peaked: Temperature Example {.auto-animate}
+## 单峰偏好：空调温度的例子 {.auto-animate}
 
-Three colleagues choosing the office thermostat (65°F to 75°F):
+三位同事要定办公室的恒温器（65°F 到 75°F）：
 
-- **Alice**: peak at 68°F — utility decreases away from 68
-- **Bob**: peak at 72°F — utility decreases away from 72
-- **Carol**: peak at 70°F — utility decreases away from 70
+- **Alice**：峰值在 68°F——离 68 越远越不满意
+- **Bob**：峰值在 72°F——离 72 越远越不满意
+- **Carol**：峰值在 70°F——离 70 越远越不满意
 
 . . .
 
-All three have single-peaked preferences on the temperature line.
+三位在温度这条线上的偏好都是单峰的。
 
-**Median voter outcome**: 70°F (Carol's peak) — and no one can profitably manipulate!
+**中位投票人的结果**：70°F（Carol 的峰值）——而且没有人能靠改票获利！
 
-## Generalized Median Voter Scheme {.auto-animate}
+## 广义中位数规则 {.auto-animate}
 
 ::: {.callout-note}
-**Definition**: Fix *phantom votes* $a_1, \ldots, a_{n-1} \in \mathbb{R} \cup \{\pm\infty\}$. The **generalized median voter scheme** is:
+**定义**：固定 *幻影票* $a_1, \ldots, a_{n-1} \in \mathbb{R} \cup \{\pm\infty\}$。**广义中位数规则**定义为：
 
 $$
 f(\succ_1, \ldots, \succ_n) = \text{median}\big(p(\succ_1), \ldots, p(\succ_n), a_1, \ldots, a_{n-1}\big)
@@ -251,104 +251,104 @@ $$
 
 . . .
 
-The $n-1$ phantom votes act as **anchor points** that shift the median:
+那 $n-1$ 张幻影票就像**锚点**，把中位数往某个方向挪：
 
-- With $n$ voter peaks + $n-1$ phantoms = $2n-1$ total values $\Rightarrow$ median is well-defined
+- $n$ 个投票峰值 加上 $n-1$ 张幻影票 一共 $2n-1$ 个值 $\Rightarrow$ 中位数有明确定义
 
-## Phantom Vote Examples {.auto-animate}
+## 幻影票的例子 {.auto-animate}
 
-Different phantom choices yield different rules:
+不同的幻影票选取方式，就得到不同的规则：
 
-| Rule | Phantom Votes | Effect |
+| 规则 | 幻影票 | 效果 |
 |------|--------------|--------|
-| Pure median | All $\pm\infty$ | Outcome = median of voter peaks |
-| Dictatorial | All equal to voter $i$'s peak | Voter $i$ always wins |
-| Status quo | All equal to status quo $q$ | Change requires consensus |
+| 纯中位数 | 全取 $\pm\infty$ | 结果 = 各投票峰值的中位数 |
+| 独裁 | 全等于投票人 $i$ 的峰值 | 永远按 $i$ 的意思定 |
+| 维持现状 | 全都等于现状 $q$ | 想改变就得达成一致 |
 
 . . .
 
-The phantom votes allow **tuning** the rule between fully responsive and highly conservative.
+通过幻影票，可以在"完全顺应民意"和"高度保守"之间**调节**这条规则。
 
-## Moulin's Characterization Theorem {.auto-animate}
+## 穆兰的刻画定理 {.auto-animate}
 
 ::: {.callout-important}
-**Theorem (Moulin, 1980)**: On the domain of single-peaked preferences $\text{SP}(Y)$, a social choice function $f$ satisfies:
+**定理（穆兰，1980）**：在单峰偏好定义域 $\text{SP}(Y)$ 上，一个社会选择函数 $f$ 满足：
 
-1. **Strategy-proofness**: No voter benefits by misreporting their peak
-2. **Pareto efficiency**: Outcome is never unanimously dispreferred
-3. **Peaks-only**: Outcome depends only on the set of reported peaks
+1. **策略免疫**：没有投票人能靠谎报峰值获益
+2. **帕累托有效**：结果不会是所有人都不要的那个
+3. **只看峰值**：结果只取决于大家报出的峰值
 
-if and only if $f$ is a **generalized median voter scheme**.
+当且仅当这个 $f$ 是**广义中位数规则**。
 :::
 
 . . .
 
-By restricting to single-peaked preferences, we **escape Arrow's impossibility** and achieve both strategy-proofness and efficiency!
+把范围限制在单峰偏好上，我们就**绕开了阿罗不可能性**，同时做到策略免疫和有效率！
 
 [@moulin1980strategy]{.citation}
 
-## Strategy-Proofness: Intuition
+## 策略免疫：直观理解
 
-**Why can't voters manipulate the median?**
+**为什么投票人操纵不了中位数？**
 
-- Suppose voter $i$ has true peak $p_i = 5$ and outcome is median $= 6$
-- Voter $i$ wants to pull outcome **left** toward 5
-- They can misreport $p_i' = 0$ (exaggerate leftward preference)
-
-. . .
-
-- But the median of $\{0, p_2, \ldots, p_n, a_1, \ldots, a_{n-1}\}$ is the **same** as with $p_i = 5$
-- The voter's peak is already on the left side of the median — moving it further left doesn't change the median!
+- 假设投票人 $i$ 的真实峰值是 $p_i = 5$，而结果（中位数）$= 6$
+- $i$ 想把结果往**左**拉到 5
+- 他可以谎报 $p_i' = 0$（把自己的偏好往左夸大）
 
 . . .
 
-**Key insight**: You can only move the median if your peak crosses it — but then the outcome moves *away* from your true peak.
+- 但 $\{0, p_2, \ldots, p_n, a_1, \ldots, a_{n-1}\}$ 的中位数和用 $p_i = 5$ 时**一样**
+- 他的峰值本来就在中位数的左侧——再往左挪也改变不了中位数！
+
+. . .
+
+**关键洞见**：只有当你的峰值跨过中位数时，你才可能推动它——可一旦跨过，结果反而*离你的真实峰值更远*了。
 
 ---
 
-## Scoring Rules and the Borda Count {.auto-animate}
+## 计分规则与博尔达计分法 {.auto-animate}
 
-Another escape from Arrow: **relax IIA** instead of restricting the domain.
+绕开阿罗的另一条路：**放宽 IIA**，而不是限制定义域。
 
 . . .
 
 ::: {.callout-note}
-**Definition (Borda Count)**: The Borda score of alternative $y$ counts pairwise wins:
+**定义（博尔达计分法）**：方案 $y$ 的博尔达得分，数的是它在两两对比中赢了多少次：
 
 $$
 \text{Borda}(y) = \sum_{i=1}^{n} |\{y' \neq y : y \succ_i y'\}|
 $$
 
-The **Borda winner** is the alternative with the maximum Borda score.
+**博尔达胜者**就是得分最高的那个方案。
 :::
 
-Equivalently: with $m$ alternatives, voter gives $m-1$ points to top, $m-2$ to second, ..., 0 to last.
+等价的说法：$m$ 个方案时，一位投票人给第一名 $m-1$ 分，第二名 $m-2$ 分，……，最后一名 0 分。
 
-## Modified IIA (IIA') {.auto-animate}
+## 放宽后的 IIA（IIA′） {.auto-animate}
 
-Borda violates IIA but satisfies a weaker version:
+博尔达计分法违反 IIA，但满足一个更弱的版本：
 
 ::: {.callout-note}
-**Definition (IIA')**: If two profiles have, for every voter:
+**定义（IIA′）**：如果两个偏好组合，对每一位投票人都满足：
 
-1. The same pairwise ordering of $y$ vs. $y'$, **AND**
-2. The same *number* of alternatives strictly between $y$ and $y'$
+1. $y$ 与 $y'$ 的两两排序相同，**并且**
+2. 严格排在 $y$ 与 $y'$ *之间*的方案**个数**也相同
 
-then the social choice should not flip between $y$ and $y'$.
+那么社会在 $y$ 与 $y'$ 之间的选择就不该翻转。
 :::
 
 . . .
 
 ::: {.callout-important}
-**Theorem**: Borda satisfies Unrestricted Domain, Pareto Efficiency, Non-dictatorship, and IIA'. By relaxing IIA to IIA', we escape Arrow's impossibility.
+**定理**：博尔达计分法满足定义域无限制、帕累托有效、非独裁，以及 IIA′。把 IIA 放宽成 IIA′，就绕开了阿罗不可能性。
 :::
 
-## Connection to DPO {.auto-animate}
+## 与 DPO 的联系 {.auto-animate}
 
-A remarkable result connects Borda to modern RLHF:
+有一个出色的结果把博尔达计分法与现代的 RLHF 连了起来：
 
 ::: {.callout-important}
-**Theorem (DPO-Borda Equivalence)**: Assume responses $y, y'$ are drawn from $\pi_{\text{ref}}(\cdot \mid x)$. The DPO-optimal policy satisfies:
+**定理（DPO 与博尔达等价）**：假设回答 $y, y'$ 取自 $\pi_{\text{ref}}(\cdot \mid x)$。那么 DPO 的最优策略满足：
 
 $$
 \frac{\pi_{\text{DPO}}(y \mid x)}{\pi_{\text{ref}}(y \mid x)} \propto \text{(weighted Borda score of } y \text{)}
@@ -357,135 +357,135 @@ $$
 
 . . .
 
-**DPO upweights responses proportionally to their Borda scores** — it finds the response that wins the most head-to-head matchups.
+**DPO 按博尔达分数的大小来提升回答的概率**——它找的是在两两对决中赢面最大的那个回答。
 
 [@rafailov2023direct]{.citation}
 
-## DPO-Borda: Proof Sketch {.auto-animate}
+## DPO 与博尔达：证明思路 {.auto-animate}
 
-The DPO loss is:
+DPO 的损失是：
 $$
 \mathcal{L}_{\text{DPO}}(\pi) = -\mathbb{E}_{x,y,y'}\Big[\bar{\sigma}(\Delta r^*) \cdot \log \sigma\big(\beta \log \tfrac{\hat{\pi}(y' \mid x)}{\hat{\pi}(y \mid x)}\big) + \cdots\Big]
 $$
 
 . . .
 
-Taking the gradient and setting to zero:
+求梯度并令其为零：
 $$
 \mathbb{E}_{y' \sim \hat{\pi}}\Big[\sigma\big(\beta \log \tfrac{\pi(y \mid x)}{\pi(y' \mid x)}\big)\Big] = \underbrace{\mathbb{E}_{y' \sim \mathcal{D}}\big[\bar{\sigma}(\Delta r^*(x, y', y))\big]}_{\text{Borda score of } y}
 $$
 
 . . .
 
-The RHS is the **expected win rate** of $y$ against a random alternative — exactly its Borda score.
+右式正是 $y$ 对阵一个随机备选方案的**期望胜率**——也就是它的博尔达分数。
 
-## DPO-Borda: What It Means
+## DPO 与博尔达：这意味着什么
 
-**Social choice interpretation of DPO:**
+**DPO 的社会选择解读：**
 
-- DPO aggregates pairwise human preferences using the **Borda count**
-- It finds the policy that upweights responses by how often they would win head-to-head
+- DPO 用的是**博尔达计分法**来聚合成对的人类偏好
+- 它找到的策略，会按各回答在两两对决中的胜率来加权提升
 
 . . .
 
 **Implications:**
 
-- DPO inherits Borda's strengths: Pareto efficient, non-dictatorial, satisfies IIA'
-- DPO inherits Borda's weakness: violates IIA — adding a new response candidate can change rankings
-- The reference policy $\pi_{\text{ref}}$ determines the weighting of comparisons
+- DPO 继承了博尔达计分法的优点：帕累托有效、非独裁、满足 IIA′
+- DPO 也继承了它的缺点：违反 IIA——多加入一个候选回答，就可能改变排序
+- 参考策略 $\pi_{\text{ref}}$ 决定了各个比较被赋予的权重
 
 ---
 
-## Multi-Issue Voting
+## 多议题投票
 
-Real-world decisions often involve **multiple independent issues**.
+现实中的决定往往牵涉**多个彼此独立的议题**。
 
-**Example in RLHF**: Optimize for helpfulness, harmlessness, *and* honesty simultaneously.
+**RLHF 里的例子**：同时优化有用性、无害性和诚实性。
 
 . . .
 
-**Question**: Can we aggregate each criterion independently?
+**问题**：能不能对每一条标准分别做聚合？
 
-## Voting by Committees {.auto-animate}
+## 委员会投票 {.auto-animate}
 
 ::: {.callout-note}
-**Definition**: A voting scheme is **voting by committees** if for each object $x \in K$, there exists a committee $C_x$ with winning coalitions $W_x$ such that:
+**定义**：如果对一个方案 $x \in K$，都存在一个委员会 $C_x$ 及其获胜联盟 $W_x$，使得：
 
-The outcome includes $x$ $\iff$ $\{i : x \in B(\succ_i)\} \in W_x$
+结果包含 $x$ $\iff$ $\{i : x \in B(\succ_i)\} \in W_x$
 
-where $B(\succ_i)$ is voter $i$'s top-ranked subset.
+其中 $B(\succ_i)$ 是投票人 $i$ 排在最前的那个子集。
 :::
 
 . . .
 
-Each issue is decided **independently** by its own committee — a natural decomposition.
+每个议题都由自己的委员会**独立**决定——这是一种很自然的分解。
 
-## Separable Preferences {.auto-animate}
+## 可分偏好 {.auto-animate}
 
 ::: {.callout-note}
-**Definition**: A preference $\succ$ on $2^K$ is **separable** if for all $A \subseteq K$ and $x \notin A$:
+**定义**：$2^K$ 上的偏好 $\succ$ 是**可分**的，如果对一切 $A \subseteq K$ 和 $x \notin A$ 都有：
 
 $$
 A \cup \{x\} \succ A \quad \Longleftrightarrow \quad x \in G(\succ)
 $$
 
-where $G(\succ) = \{x \in K : \{x\} \succ \emptyset\}$ is the set of "good" objects.
+其中 $G(\succ) = \{x \in K : \{x\} \succ \emptyset\}$ 就是"好东西"的集合。
 :::
 
 . . .
 
-**Separability** means: whether you want to add $x$ to a bundle doesn't depend on what's already there.
+**可分**的意思是：要不要往一堆东西里加上 $x$，跟这堆里已经有什么无关。
 
-## Characterization and Limits {.auto-animate}
+## 刻画定理与其限度 {.auto-animate}
 
 ::: {.callout-important}
-**Theorem**: A voting scheme satisfies surjectivity, strategy-proofness, and separability if and only if it is **voting by committees**.
+**定理**：一条投票方案同时满足满射性、策略免疫、可分性，当且仅当它是**委员会投票**。
 :::
 
 . . .
 
-**Caveat**: Voting by committees generally does **not** satisfy Pareto efficiency.
+**注意**：委员会投票一般**不**满足帕累托有效。
 
 . . .
 
-**Application to RLHF**: Preferences over "helpful" and "harmless" are often **not** separable — a highly helpful response may necessarily involve some risk of harm, creating dependencies.
+**在 RLHF 中的应用**：对"有用"和"无害"的偏好往往**不是**可分的——很有用的回答可能必然带一些风险，这就把两个议题绑在了一起。
 
 ---
 
-## Nosy Preferences
+## "管得宽"的偏好
 
 ::: {.callout-note}
-**Definition**: A preference is **nosy** if the individual cares about outcomes affecting *others*, not just themselves. A preference is **private** if the individual only cares about their own allocation.
+**定义**：一个人如果关心的不只是*自己*的结果，还包括影响*他人*的结果，他的偏好就是**管得宽**的；如果只关心自己的结果，就是**私人**的。
 :::
 
 . . .
 
-**Examples of nosy preferences:**
+**"管得宽"偏好的例子：**
 
-- **Safety**: Not wanting others to see dangerous instructions
-- **Privacy**: Wanting to prevent disclosure of others' data
-- **Content moderation**: Preferring certain content not be shown to *anyone*
-- **Fairness**: Caring that others receive equitable treatment
+- **安全**：不希望别人看到危险的指令
+- **隐私**：希望不公开别人的数据
+- **内容审核**：希望某些内容对*任何人*都不展示
+- **公平**：在意别人是否得到了公正的对待
 
-## Sen's Liberal Paradox {.auto-animate}
+## 森的自由悖论 {.auto-animate}
 
 ::: {.callout-important}
-**Theorem (Sen, 1970)**: The following three properties are **inconsistent**:
+**定理（森，1970）**：下面这三条是**互相矛盾**的：
 
-1. **Minimal Liberalism**: Each individual is decisive over at least one pair in their personal sphere
-2. **Pareto Efficiency**: If everyone prefers $x$ to $y$, society chooses $x$
-3. **Unrestricted Domain**: Any preference profile is admissible
+1. **最小自由主义**：每个人在自己的私人范围内，至少对某一对结果有决定权
+2. **帕累托有效**：如果所有人都认为 $x$ 优于 $y$，社会就选 $x$
+3. **定义域无限制**：任何偏好组合都允许出现
 :::
 
 . . .
 
-When preferences are nosy, even weak requirements conflict!
+当偏好是"管得宽"的时候，哪怕要求很弱也会冲突！
 
 [@sen1970impossibility]{.citation}
 
-## The Prude and the Book {.auto-animate}
+## 清道夫与那本书 {.auto-animate}
 
-Two individuals and a controversial book. Alternatives: $a$ (Prude reads), $b$ (Lewd reads), $c$ (no one reads).
+两个人和一本有争议的书。可选结果：$a$（清道夫读）、$b$（放浪者读）、$c$（谁都不读）。
 
 . . .
 
@@ -493,20 +493,20 @@ Two individuals and a controversial book. Alternatives: $a$ (Prude reads), $b$ (
 ::: {.column width="50%"}
 **Prude**: $c \succ_P a \succ_P b$
 
-Prefers no one reads it, but would rather read it themselves than let Lewd read it (**nosy!**)
+他宁可谁都不读，但如果非要有人读，他宁愿自己读，也不让放浪者读（**管得宽！**）
 :::
 ::: {.column width="50%"}
 **Lewd**: $a \succ_L b \succ_L c$
 
-Wants Prude to read it most of all (**also nosy!**)
+他最希望的是清道夫来读（**也管得宽！**）
 :::
 ::::
 
-## The Prude and the Book: The Cycle {.auto-animate}
+## 清道夫与那本书：循环 {.auto-animate}
 
-- **Prude's liberty** (personal reading choice): $c$ beats $a$
-- **Lewd's liberty** (personal reading choice): $b$ beats $c$
-- **Pareto** (both prefer $a$ to $b$): $a$ beats $b$
+- **清道夫的自由**（自己读不读的选择）：$c$ 胜过 $a$
+- **放浪者的自由**（自己读不读的选择）：$b$ 胜过 $c$
+- **帕累托**（两人都认为 $a$ 优于 $b$）：$a$ 胜过 $b$
 
 . . .
 
@@ -516,21 +516,21 @@ $$
 
 . . .
 
-**Implication for AI**: Content moderation involves exactly this tension — one user's preference for free expression conflicts with another's preference for a safe environment.
+**对 AI 的启示**：内容审核恰好就是这种张力——一位用户想要表达自由，另一位想要安全的环境。
 
 ---
 
-## Case Study: Community Notes
+## 案例：Community Notes
 
-**Community Notes** (formerly Birdwatch) aggregates ratings about content helpfulness across ideological divides.
+**Community Notes**（前身是 Birdwatch）要在跨越立场分歧的评分中，聚合大家对内容"有没有帮助"的判断。
 
 . . .
 
-**Problem with majority voting**: The largest ideological group would dominate.
+**多数表决的问题**：人数最多的那个立场群体会说了算。
 
-**Solution**: Find **bridging** notes — rated positively by users who *disagree* ideologically.
+**解决办法**：找那些能**架桥**的笔记——被立场上*互相反对*的用户都评为有用。
 
-## Community Notes: Factor Model {.auto-animate}
+## Community Notes：因子模型 {.auto-animate}
 
 $$
 u(y; \alpha, p, \varepsilon) = \mu + \alpha_j + \beta_j + p^\top q_j + \varepsilon_j
@@ -538,274 +538,274 @@ $$
 
 . . .
 
-| Term | Interpretation |
+| 各项 | 含义 |
 |------|---------------|
-| $\mu$ | Global intercept |
-| $\alpha_j$ | Rater intercept (some raters more positive) |
-| $\beta_j$ | **Note intercept** (note quality) |
-| $p^\top q_j$ | Ideological alignment factor |
-| $\varepsilon_j$ | Residual noise |
+| $\mu$ | 全局截距 |
+| $\alpha_j$ | 评分者截距（有的人就是更倾向给好评） |
+| $\beta_j$ | **笔记截距**（笔记本身的质量） |
+| $p^\top q_j$ | 立场契合度因子 |
+| $\varepsilon_j$ | 残差噪声 |
 
-## Community Notes: Bridging Mechanism {.auto-animate}
+## Community Notes：架桥机制 {.auto-animate}
 
-**Key insight**: $\beta_j$ captures note quality **after controlling for ideology**.
+**关键洞见**：$\beta_j$ 是在**控制了立场之后**的笔记质量。
 
 . . .
 
-- A note is selected if $\beta_j \geq c$ for some threshold $c$
-- This means it must be rated positively by users who **disagree** ideologically
+- 当 $\beta_j \geq c$ 成立（$c$ 是某个阈值）时，这条笔记被选中
+- 这意味着它必须得到立场上**相对立**的用户的好评
 
 . . .
 
 **Connections:**
 
-- **Collaborative filtering**: The $p^\top q_j$ term $\approx$ matrix factorization
-- **Item response theory**: Resembles the Rasch model (Ch. 2) extended with latent factors
-- **Jury theorems**: Diverse juries aggregate to correct answers better than homogeneous majorities
+- **协同过滤**：$p^\top q_j$ 这一项 $\approx$ 矩阵分解
+- **项目反应理论**：形式上像 Rasch 模型（第 2 章），再加上了隐因子
+- **陪审团定理**：背景多样的评审团比同质的多数更容易聚合出正确答案
 
 ---
 
-## The Inversion Problem
+## 反演问题
 
 ::: {.callout-important}
-**Core insight**: Observed behavior $\neq$ underlying preferences or utility.
+**核心洞见**：观察到的行为 $\neq$ 背后的偏好或效用。
 
-Standard revealed preference assumes choices reveal preferences. This can fail due to:
+传统的显示偏好理论假定选择会揭示偏好。但以下情况会让它失效：
 
-1. **Habit formation**: Repeated behavior persists even when preferences change
-2. **Cognitive limitations**: Fatigue, distraction, bounded rationality
-3. **Context effects**: Same preference $\to$ different behaviors in different contexts
-4. **Strategic behavior**: People choose strategically, not according to true preferences
+1. **习惯养成**：偏好已经变了，重复的行为还在继续
+2. **认知局限**：疲劳、分心、有限理性
+3. **情境效应**：同一种偏好 $\to$ 在不同情境下做出不同行为
+4. **策略性行为**：人是按策略来选的，不是按真实偏好选的
 :::
 
-## The Doritos Problem
+## Doritos 问题
 
-A smart pantry observes eating behavior:
+一个智能食品柜观察人的进食行为：
 
-- User consistently chooses Doritos when offered
-- System infers: "User prefers Doritos"
-
-. . .
-
-**But**: The user might prefer healthier options — they just succumb to availability and habit.
+- 只要有薯片，用户每次都选它
+- 系统据此推断："用户偏好薯片"
 
 . . .
 
-**Lesson**: Optimizing for observed "preferences" (engagement) may not optimize for **true welfare**.
-
-This is the engagement vs. satisfaction problem in recommender systems.
-
-## Implications for RLHF
-
-The inversion problem directly affects AI training from human feedback:
-
-1. **Annotator fatigue**: Label quality degrades over long sessions
-2. **Engagement $\neq$ satisfaction**: Clicks and watch time $\neq$ user welfare
-3. **Context-dependent feedback**: Same annotator gives different feedback based on mood, prior examples
-4. **Strategic annotation**: Annotators may label strategically if they believe it affects outcomes
+**但是**：他可能更想吃健康的东西——只是抵挡不了"就在手边"和习惯。
 
 . . .
 
-**Potential solutions:**
+**教训**：按观察到的"偏好"（互动量）做优化，未必优化了**真实的福祉**。
 
-- Weight annotations by estimated quality/consistency
-- Use deliberation before labeling to reduce noise
-- Model annotator state (fatigue, expertise) as **latent variables**
-- Collect meta-feedback about label confidence
+这就是推荐系统里"互动量 对上 满意度"的那个老问题。
+
+## 对 RLHF 的含义
+
+反演问题直接影响"用人类反馈训练 AI"这件事：
+
+1. **标注员疲劳**：连续标注久了，标注质量会下降
+2. **互动量 $\neq$ 满意度**：点击与观看时长 $\neq$ 用户福祉
+3. **反馈依赖情境**：同一个标注员，情绪不同、前面看过的样本不同，给出的反馈就不同
+4. **策略性标注**：如果标注员认为自己的标注会影响结果，他们可能策略性地打标
+
+. . .
+
+**可能的办法：**
+
+- 按估计出的质量与一致性给标注加权
+- 标注前先让标注员斟酌一下，减少噪声
+- 把标注员的状态（疲劳、专业程度）当作**隐变量**来建模
+- 额外收集关于标注置信度的元反馈
 
 ---
 
-## Privacy and Personalization
+## 隐私与个性化
 
-Preference learning inherently involves collecting personal data.
+偏好学习天生就要收集个人数据。
 
-**Tension**: Better personalization requires more data, but privacy demands less.
+**张力**：个性化越好，需要的数据越多；而隐私要求少收集。
 
-## Contextual Integrity Framework {.auto-animate}
+## 情境完整性框架 {.auto-animate}
 
 ::: {.callout-note}
-**Contextual Integrity** (Nissenbaum): Privacy is preserved when information flows match **context-specific norms**. Five parameters:
+**情境完整性**（Nissenbaum）：当信息的流动符合**这个情境应有的规范**时，隐私才得到保护。五个要素：
 
-1. **Sender**: Who is sharing the information
-2. **Subject**: Whose information is being shared
-3. **Recipient**: Who receives the information
-4. **Data Type**: What kind of information
-5. **Transmission Principle**: What rules govern further use
+1. **发送者**：是谁在提供信息
+2. **主体**：这些信息是关于谁的
+3. **接收者**：谁来接收
+4. **数据类型**：是哪一类信息
+5. **传递原则**：后续使用受什么规则约束
 :::
 
 . . .
 
-A privacy violation occurs when information flows **against contextual norms**, even with consent.
+当信息流动**违背了情境规范**时，就构成隐私侵犯——即使已经取得同意。
 
 [@nissenbaum2009privacy]{.citation}
 
-## Example: Heart Rate Data {.auto-animate}
+## 例子：心率数据 {.auto-animate}
 
-A fitness tracker collects heart rate data:
+一块运动手环在收集心率数据：
 
-| Flow | Recipient | Transmission Principle | Appropriate? |
+| 信息流向 | 接收者 | 传递原则 | 合适吗？ |
 |------|-----------|----------------------|-------------|
-| To running coach | Coach | Training optimization | Yes |
-| To advertiser | Ad network | Targeted advertising | **No** |
+| 给跑步教练 | 教练 | 用于训练优化 | 合适 |
+| 给广告商 | 广告网络 | 用于定向广告 | **不合适** |
 
 . . .
 
-Same data, same consent — but different **transmission principles** violate expectations about the fitness context.
+同样的数据、同样的同意，但**传递原则**不同，就违背了人们对"运动健康"这个情境的预期。
 
-## Differential Privacy: Limitations {.auto-animate}
+## 差分隐私的局限 {.auto-animate}
 
-Differential privacy (DP) provides formal guarantees, but has fundamental limits for preference learning:
+差分隐私（DP）能给出形式化的保证，但用在偏好学习上有根本的限度：
 
-1. **Personalization requires individual data** — by definition, DP prevents this
-2. **Trade-off is inherent**: Stronger privacy $\Rightarrow$ less accurate models
-3. **"Persuasive" DP**: Some systems claim protection with parameters so weak they provide little actual privacy
+1. **个性化本来就需要个体数据**——从定义上讲，DP 恰恰不允许这样
+2. **这种取舍是固有的**：隐私保护越强 $\Rightarrow$ 模型精度越低
+3. **"说辞式"的 DP**：有些系统号称有保护，但参数松到几乎不提供任何实际隐私
 
 . . .
 
-**Contextual Integrity as middle ground**: Allow data use that matches expectations (personalization within a service) while preventing unexpected flows (selling to third parties).
+**把情境完整性作为中间路线**：允许符合预期的数据使用（在服务内部做个性化），同时挡住意外的流转（卖给第三方）。
 
 ---
 
-## Paternalism in AI Systems
+## AI 系统中的家长主义
 
-**When should an AI system override a user's stated preferences?**
-
-. . .
-
-Key distinction:
-
-- **Nosy preferences**: Caring about others' choices for *your own* sake
-- **Paternalism**: Overriding others' choices for *their* sake
-
-## When is Paternalism Justified?
-
-Four conditions that might justify intervention:
+**AI 系统什么时候该覆盖用户说出来的偏好？**
 
 . . .
 
-1. **Information asymmetry**: The system has information the user lacks (e.g., long-term health effects)
+这里要区分两件事：
+
+- **"管得宽"的偏好**：为了*我自己*的在乎，去在意别人的选择
+- **家长主义**：为了*对方自己*好，去覆盖别人的选择
+
+## 家长主义什么时候是正当的？
+
+四种可能为干预提供理由的情形：
 
 . . .
 
-2. **Cognitive limitations**: The user is impaired (fatigue, addiction, cognitive decline)
+1. **信息不对称**：系统知道用户不知道的事（例如长期的健康影响）
 
 . . .
 
-3. **Protection of future self**: Current choice harms their future self (e.g., saving for retirement)
+2. **认知受限**：用户当时状态不佳（疲劳、上瘾、认知衰退）
 
 . . .
 
-4. **Irreversible harm**: Consequences are severe and irreversible
-
-## Design Principles for Paternalistic AI
-
-AI systems that exercise paternalism should:
-
-1. **Be transparent**: Users know when preferences are overridden
-2. **Allow override**: Users can insist on their original choice
-3. **Minimize interference**: Use the lightest intervention that achieves the goal
-4. **Justify interventions**: Provide clear rationale for each override
-5. **Update based on feedback**: Learn when interventions are welcomed vs. resented
+3. **保护未来的自己**：眼下的选择会伤害将来的他（例如养老储蓄）
 
 . . .
 
-**Example**: When an AI assistant refuses a request — is it paternalism (protecting the user) or nosy (protecting others)? Often both.
+4. **伤害不可逆**：后果严重而且无法挽回
+
+## 有家长主义的 AI 该怎么设计
+
+一个会替用户做主的 AI 系统应当：
+
+1. **透明**：让用户知道什么时候自己的偏好被覆盖了
+2. **可以推翻**：用户坚持，就按他原本的选择来
+3. **干预最轻**：用能达到目的的最小干预
+4. **给出理由**：每一次覆盖都说清楚为什么
+5. **根据反馈更新**：学会哪些干预是受欢迎的、哪些是招人烦的
+
+. . .
+
+**例子**：AI 助手拒绝了一个请求——这算家长主义（保护用户本人）还是"管得宽"（保护其他人）？常常两者都是。
 
 ---
 
-## Mechanism Design: Overview
+## 机制设计概述
 
-While voting aggregates **ordinal** preferences, mechanism design aggregates **cardinal valuations** (with money).
-
-. . .
-
-**Central concept**: **Incentive compatibility** — design rules so that rational agents reveal true preferences.
-
-**Key question**: Can we align individual self-interest with social welfare?
-
-## Single-Item Auction Setup
-
-- One item for sale, $n$ bidders
-- Bidder $i$ has **private valuation** $v_i$ (how much the item is worth to them)
-- Utility: $v_i - p_i$ if they win and pay $p_i$; otherwise $0$
+投票聚合的是**序数**偏好，而机制设计聚合的是**基数**估值（可以涉及钱）。
 
 . . .
 
-**Two objectives:**
+**核心概念**：**激励相容**——把规则设计成让理性的参与者愿意如实报告自己的偏好。
 
-- **Social welfare**: Allocate to the highest valuer
-- **Revenue**: Maximize the seller's expected payment
+**关键问题**：能不能让个人利益与社会福利方向一致？
 
-## Vickrey Second-Price Auction {.auto-animate}
+## 单件物品的拍卖设定
+
+- 一件物品出售，$n$ 个竞标者
+- 竞标者 $i$ 有**私人估值** $v_i$（这件东西对他值多少）
+- 效用：中标并支付 $p_i$ 时是 $v_i - p_i$；否则是 $0$
+
+. . .
+
+**两个目标：**
+
+- **社会福利**：把物品给估值最高的人
+- **收入**：让卖家收到的钱尽可能多
+
+## Vickrey 二价拍卖 {.auto-animate}
 
 **Mechanism:**
 
-1. All bidders submit sealed bids $b_1, \ldots, b_n$
-2. Highest bidder wins
-3. Winner pays the **second-highest** bid
+1. 所有竞标者密封出价 $b_1, \ldots, b_n$
+2. 出价最高者中标
+3. 中标者支付**第二高**的出价
 
 . . .
 
-**Example**: Bids = $(2, 6, 4, 1)$
+**例子**：出价 = $(2, 6, 4, 1)$
 
-- Bidder 2 wins (bid = 6)
-- Pays 4 (second-highest bid)
+- 竞标者 2 中标（出价 6）
+- 支付 4（第二高的出价）
 - Utility = $v_2 - 4$
 
 [@vickrey1961]{.citation}
 
-## Why Truth-Telling is Dominant {.auto-animate}
+## 为什么如实出价是占优策略 {.auto-animate}
 
-Bidding $b_i = v_i$ is a **dominant strategy** (DSIC):
-
-. . .
-
-- **Bid too low** ($b_i \lt v_i$): Risk losing when $v_i \gt$ second-highest bid — missed positive utility
+按 $b_i = v_i$ 出价是**占优策略**（DSIC）：
 
 . . .
 
-- **Bid too high** ($b_i \gt v_i$): Win even when second-highest bid $\gt v_i$ — negative utility!
+- **出低了**（$b_i \lt v_i$）：明明 $v_i \gt$ 第二高的出价却可能没中标——错过了正收益
 
 . . .
 
-- **Bid truthfully** ($b_i = v_i$): Win $\iff$ $v_i$ is highest; pay $\leq v_i$ — guaranteed non-negative utility
+- **出高了**（$b_i \gt v_i$）：在第二高出价 $\gt v_i$ 时也中标——效用为负！
 
 . . .
 
-**Result**: Allocates to highest valuer $\Rightarrow$ welfare-maximizing.
+- **如实出价**（$b_i = v_i$）：当且仅当 $v_i$ 最高时 $\iff$ 中标；支付 $\leq v_i$——效用一定不为负
 
-## First-Price vs. Second-Price
+. . .
+
+**结论**：物品给了估值最高的人 $\Rightarrow$ 社会福利最大。
+
+## 一价拍卖与二价拍卖
 
 :::: {.columns}
 ::: {.column width="50%"}
-**First-Price Auction**
+**一价拍卖**
 
-- Winner pays own bid
-- Incentive to **shade** bids below $v_i$
-- Nash equilibrium involves strategic behavior
-- Not DSIC
+- 中标者支付自己的出价
+- 有把出价**压低**到 $v_i$ 以下的动机
+- 纳什均衡里有策略性行为
+- 不是占优策略激励相容（DSIC）
 :::
 ::: {.column width="50%"}
-**Second-Price (Vickrey)**
+**二价（Vickrey）拍卖**
 
-- Winner pays second-highest bid
-- Truth-telling is dominant
+- 中标者支付第二高的出价
+- 如实出价是占优策略
 - DSIC
-- Same efficiency in equilibrium
+- 在均衡中的配置效率相同
 :::
 ::::
 
 . . .
 
-By decoupling the price from the winner's bid, Vickrey removes the incentive to shade.
+把价格与中标者自己的出价解耦，Vickrey 拍卖就消除了压价的动机。
 
-## Myerson's Optimal Auction {.auto-animate}
+## Myerson 最优拍卖 {.auto-animate}
 
-**Goal**: Maximize **seller's expected revenue** (not welfare).
+**目标**：让**卖家的期望收入**最大（而不是社会福利）。
 
 . . .
 
-**Setup**: Bidders' values $v_i \sim F$ i.i.d. Define the **virtual valuation**:
+**设定**：各竞标者的估值 $v_i \sim F$ 独立同分布。定义**虚拟价值**：
 
 $$
 \varphi(v) = v - \frac{1 - F(v)}{f(v)}
@@ -813,42 +813,42 @@ $$
 
 . . .
 
-**Myerson's theorem**: Allocate to the bidder with the highest **non-negative** virtual value. If all virtual values are negative, don't sell.
+**Myerson 定理**：把物品给虚拟价值**最高且非负**的竞标者。如果虚拟价值全为负，就不卖。
 
-For i.i.d. regular distributions: this is a **second-price auction with an optimal reserve price** $r$.
+对于独立同分布且正则的情形：这就是**带最优保留价的二价拍卖**，保留价记作 $r$。
 
 [@myerson1981]{.citation}
 
-## Example: Uniform[0,1] Bidders {.auto-animate}
+## 例子：估值服从均匀分布 {.auto-animate}
 
 For $v \sim \text{Uniform}[0,1]$: $\varphi(v) = 2v - 1$
 
 . . .
 
-Setting $\varphi(v) \geq 0$: optimal reserve price $r = 0.5$
+令 $\varphi(v) \geq 0$：最优保留价 $r = 0.5$
 
 . . .
 
-**Revenue comparison** (two bidders):
+**收入对比**（两个竞标者）：
 
 ::: {.smaller}
 
-| Scenario | Probability | Revenue |
+| 情形 | 概率 | 收入 |
 |----------|------------|---------|
-| Both below 0.5 | $1/4$ | $0$ (no sale) |
-| Both above 0.5 | $1/4$ | $\approx 2/3$ (second-highest value) |
-| One above, one below | $1/2$ | $0.5$ (reserve price) |
+| 两人都低于 0.5 | $1/4$ | $0$（不成交） |
+| 两人都高于 0.5 | $1/4$ | $\approx 2/3$（第二高的估值） |
+| 一个高于、一个低于 | $1/2$ | $0.5$（保留价） |
 
 :::
 
 . . .
 
-Expected revenue: $0 + \tfrac{1}{6} + \tfrac{1}{4} = \tfrac{5}{12} \approx 0.417$ vs. $\tfrac{1}{3} \approx 0.333$ without reserve.
+期望收入：$0 + \tfrac{1}{6} + \tfrac{1}{4} = \tfrac{5}{12} \approx 0.417$，不设保留价时只有 $\tfrac{1}{3} \approx 0.333$。
 
-## Bulow–Klemperer Theorem {.auto-animate}
+## Bulow–Klemperer 定理 {.auto-animate}
 
 ::: {.callout-important}
-**Theorem (Bulow & Klemperer, 1996)**: For i.i.d. regular $F$:
+**定理（Bulow 与 Klemperer，1996）**：对独立同分布且正则的 $F$：
 
 $$
 \mathbb{E}[\text{Rev}^{\text{(second-price)}}(n+1)] \geq \mathbb{E}[\text{Rev}^{\text{(optimal)}}(n)]
@@ -857,33 +857,33 @@ $$
 
 . . .
 
-A simple second-price auction with **one extra bidder** outperforms the optimal auction with fewer bidders!
+多来**一个竞标者**的二价拍卖，收入比竞标者更少时的最优拍卖还要高！
 
 . . .
 
-**Practical takeaway**: Use **simple, transparent** mechanisms and focus on **attracting more participants** rather than complex optimal designs.
+**实践启示**：用**简单、透明**的机制，把力气花在**吸引更多参与者**上，而不是去设计复杂的最优机制。
 
 [@bulow-klemperer1996]{.citation}
 
 ---
 
-## The VCG Mechanism {.auto-animate}
+## VCG 机制 {.auto-animate}
 
-**Generalization** of Vickrey's auction to multiple items and complex outcomes.
+把 Vickrey 拍卖**推广**到多件物品和更复杂的结果。
 
-**Setting**: Outcomes $\omega \in \Omega$; agent $i$ has valuation $v_i(\omega)$; quasilinear utility.
+**设定**：结果 $\omega \in \Omega$；参与者 $i$ 对结果的估值是 $v_i(\omega)$；效用是拟线性的。
 
 . . .
 
-**Allocation rule** — maximize total reported value:
+**配置规则**——让报告的总价值最大：
 
 $$
 \omega^* = \arg\max_{\omega \in \Omega} \sum_{i=1}^n b_i(\omega)
 $$
 
-## VCG: Payment Rule {.auto-animate}
+## VCG 的支付规则 {.auto-animate}
 
-Each agent pays the **externality** they impose on others:
+每个参与者支付的，是他**给别人带来的外部性**：
 
 $$
 p_i(b) = \underbrace{\max_{\omega \in \Omega} \sum_{j \neq i} b_j(\omega)}_{\text{Others' welfare without } i} - \underbrace{\sum_{j \neq i} b_j(\omega^*)}_{\text{Others' welfare with } i}
@@ -891,83 +891,83 @@ $$
 
 . . .
 
-**Intuition**: You pay the "damage" your presence causes to everyone else.
+**直观理解**：你为自己给其他人造成的"损失"买单。
 
-- Reduces to second-price logic for single items
-- Truth-telling is a **dominant strategy** (DSIC)
-- Outcome maximizes social welfare $\sum_i v_i(\omega)$
+- 单件物品时退化就是二价拍卖的逻辑
+- 如实报告是**占优策略**（DSIC）
+- 结果使社会福利 $\sum_i v_i(\omega)$ 最大
 
-## VCG: Challenges in Practice {.auto-animate}
+## VCG 在实践中的困难 {.auto-animate}
 
-Despite theoretical elegance, VCG faces practical hurdles:
+理论很漂亮，但 VCG 落地有几个坎：
 
-1. **Computational**: Finding $\arg\max_\omega \sum_i b_i(\omega)$ can be **NP-hard** (combinatorial auctions)
-
-. . .
-
-2. **Budget balance**: VCG payments may require subsidies in some settings
+1. **计算**：求 $\arg\max_\omega \sum_i b_i(\omega)$ 可能是 **NP 难**的（组合拍卖）
 
 . . .
 
-3. **Collusion and sybil attacks**: If one bidder splits into two identities, they can game the outcome
+2. **预算平衡**：某些场景下 VCG 的支付需要外部补贴
 
 . . .
 
-**Application**: Spectrum auctions — billions of dollars at stake; multi-round simultaneous auctions used in practice.
+3. **合谋与分身攻击**：一个竞标者拆成两个身份，就能操纵结果
+
+. . .
+
+**应用**：频谱拍卖——涉及数十亿美元；实际使用的是多轮同时竞价的方式。
 
 ---
 
-## Case Study: Peer Grading
+## 案例：同伴互评
 
-**Setting**: Students grade each other's work. Design a mechanism that incentivizes careful grading.
-
-. . .
-
-**The lazy grader problem**: Always giving 80% can yield 96% accuracy under naive scoring rules — the grader "cheats" by predicting the class average.
+**设定**：学生互相批改作业。要设计一种机制，让大家认真批改。
 
 . . .
 
-**Solution**: Optimize the scoring rule to **maximize the gap** between diligent grading and lazy strategies.
+**懒批改者的问题**：一律给 80% 的人，在朴素的计分规则下反而能拿到 96% 的分——他靠"猜全班平均"蒙混过关。
 
 . . .
 
-Result: Incentive compatibility aligns grader incentives with accurate assessment — "payments" are grade points.
+**解决办法**：设计计分规则，使**认真批改**与敷衍策略之间的分差尽可能大。
+
+. . .
+
+结果是：激励相容把批改者的利益与评价的准确性对齐了——这里的"报酬"就是分数。
 
 [@jasonH2020]{.citation}
 
 ---
 
-## Incentive-Compatible Online Learning {.auto-animate}
+## 激励相容的在线学习 {.auto-animate}
 
-**Setting**: A planner (system) interacts with strategic agents (users) who arrive sequentially.
+**设定**：一个规划者（系统）与陆续到来的策略性参与者（用户）交互。
 
-- $K$ possible actions, each with mean reward $\mu_i \in [0,1]$
-- Agents want to maximize **their own** reward
-- Planner wants to learn the best alternative and maximize **overall** welfare
-
-. . .
-
-**Challenge**: Without monetary transfers, how can the planner induce **exploration**?
-
-**Key tool**: **Information asymmetry** — users only see their own recommendations.
-
-## The Guinea Pig Strategy {.auto-animate}
-
-**Idea**: Hide exploration in a pool of exploitation.
+- 有 $K$ 个可选动作，每个的期望奖励是 $\mu_i \in [0,1]$
+- 参与者想最大化**自己**的奖励
+- 规划者想学出最好的那个方案，并最大化**总体**福利
 
 . . .
 
-1. Deterministically recommend the best-known action ($A_1$) to most users
-2. Pick one **guinea pig** uniformly at random from the next $L$ users
-3. Recommend the exploratory action ($A_2$) to the guinea pig
+**难点**：没有货币转移，规划者怎么让人愿意去**探索**？
+
+**关键工具**：**信息不对称**——用户只能看到自己收到的推荐。
+
+## 豚鼠策略（guinea pig） {.auto-animate}
+
+**思路**：把探索藏在利用里。
 
 . . .
 
-Users don't know if they're the guinea pig, so following the recommendation is optimal!
+1. 对大多数用户确定性地推荐目前已知最好的动作（$A_1$）
+2. 在接下来的 $L$ 个用户里**均匀随机**挑一个当"豚鼠"
+3. 给这只豚鼠推荐用来探索的动作（$A_2$）
 
-## Guinea Pig: Why It Works {.auto-animate}
+. . .
 
-The expected gain from **deviating** (ignoring the recommendation):
+用户不知道的是不是自己，所以照着推荐做是最优的！
+
+## 豚鼠策略为什么有效 {.auto-animate}
+
+**偏离推荐**（不听建议自己选）的期望收益：
 
 $$
 \mathbb{E}[\mu_1 - \mu_2 \mid I_t = 2] \leq \tfrac{1}{L}(\mu_1 - \mu_2) + (1 - \tfrac{1}{L})\mathbb{E}[\mu_1 - \mu_2 \mid \mu_1 \lt \mu_2] \cdot P[\mu_1 \lt \mu_2]
@@ -975,118 +975,118 @@ $$
 
 . . .
 
-This is $\leq 0$ when $L \geq 12$.
+当 $L \geq 12$ 时，这个量 $\leq 0$。
 
-**Interpretation**: The small chance of being the guinea pig is outweighed by the chance that the exploration action is actually better.
+**解释**：成为豚鼠的那点小损失，被"探索动作其实更好"的可能性抵掉了。
 
-## Black-Box Reduction {.auto-animate}
+## 黑盒归约 {.auto-animate}
 
-**General algorithm**: Turn **any** bandit algorithm into an incentive-compatible one.
-
-. . .
-
-**Recipe**: Wrap every decision that the bandit algorithm $A$ makes with $L-1$ recommendations of the best-known arm.
+**通用算法**：把**任何**老虎机算法变成激励相容的算法。
 
 . . .
 
-**Result**: Simulates $T$ steps of $A$ in $cT$ steps, achieving **$O(\sqrt{T})$ regret** — the same rate as non-strategic settings!
+**做法**：老虎机算法 $A$ 每做一个决定，就用 $L-1$ 次"推荐已知最好的臂"把它包起来。
 
 . . .
 
-Incentive compatibility comes "for free" (up to a constant factor).
+**结果**：用 $cT$ 步模拟出 $A$ 的 $T$ 步，达到 **$O(\sqrt{T})$ 的遗憾**——和非策略性场景下的速率一样！
+
+. . .
+
+激励相容几乎是"免费"得到的（只差一个常数因子）。
 
 [@mansour2019bayesianincentivecompatiblebanditexploration]{.citation}
 
 ---
 
-## Mutual Information Paradigm {.auto-animate}
+## 互信息范式 {.auto-animate}
 
-**Problem**: How to incentivize truthful reporting when there's **no verifiable ground truth**?
+**问题**：当**没有可验证的真值**时，怎么激励人说真话？
 
 . . .
 
-**MIP** (Kong & Schoenebeck, 2019): Reward agents based on **mutual information** between their report and a reference agent's report:
+**MIP**（Kong 与 Schoenebeck，2019）：按某个参与者的报告与参照参与者报告之间的**互信息**给他报酬：
 
 $$
 \text{Payment}_i = MI(\hat{\Psi}_i;\; \hat{\Psi}_j)
 $$
 
-where $j \neq i$ is randomly selected.
+其中 $j \neq i$ 是随机选的。
 
 [@kongschoenebeck2019]{.citation}
 
-## MIP: Properties of Information-Monotone MI {.auto-animate}
+## MIP：信息单调的互信息有哪些性质 {.auto-animate}
 
-An information-monotone MI measure satisfies:
+一种信息单调的互信息度量满足：
 
 1. **Symmetry**: $MI(X; Y) = MI(Y; X)$
-2. **Non-negativity**: $MI(X; Y) \geq 0$, with equality iff $X \perp Y$
-3. **Data processing inequality**: For any channel $M$, $MI(M(X); Y) \leq MI(X; Y)$
+2. **非负性**：$MI(X; Y) \geq 0$，当且仅当 $X \perp Y$ 时取等
+3. **数据处理不等式**：对任意信道 $M$，都有 $MI(M(X); Y) \leq MI(X; Y)$
 
 . . .
 
-Two important families:
+两个重要的家族：
 
-- **$f$-mutual information**: Based on $f$-divergence between joint and product of marginals
-- **Bregman mutual information**: Based on proper scoring rules
+- **$f$-互信息**：基于联合分布与边缘乘积分布之间的 $f$-散度
+- **Bregman 互信息**：基于真评分规则
 
-## MIP: Key Result {.auto-animate}
+## MIP：主要结论 {.auto-animate}
 
 ::: {.callout-important}
-**Theorem**: When the MI measure is **strictly information-monotone**, the resulting mechanism is:
+**定理**：当所用的互信息度量是**严格信息单调**的时，得到的机制满足：
 
-- **Dominantly truthful**: Truth-telling is a dominant strategy
-- **Strongly truthful**: Truth-telling equilibrium yields strictly higher payoffs than any non-permutation strategy
+- **占优说真话**：如实报告是占优策略
+- **强说真话**：如实报告的均衡收益，严格高于任何非置换策略
 :::
 
 . . .
 
-**Why it works**: Any manipulation (noise, partial reporting) can only **decrease** mutual information with the reference agent — so truthful reporting maximizes payment.
+**为什么成立**：任何加工（加噪声、只报一部分）都只会**降低**与参照者的互信息——所以如实报告能让报酬最大。
 
 ---
 
-## Summary (1)
+## 小结（一）
 
-**Social Choice Theory:**
+**社会选择理论：**
 
-- Arrow's theorem: No SWF satisfies Unanimity + IIA + Non-dictatorship for $m \geq 3$
-- Gibbard–Satterthwaite: Every non-dictatorial SCF is manipulable
-- **Single-peaked preferences** + Moulin's theorem $\Rightarrow$ strategy-proof median voter schemes
-- **Borda count** relaxes IIA to IIA'; **DPO-Borda**: DPO aggregates as weighted Borda count
+- 阿罗定理：$m \geq 3$ 时，没有社会福利函数能同时满足一致同意 + IIA + 非独裁
+- 吉巴德—萨特斯维特：任何非独裁的社会选择函数都是可操纵的
+- **单峰偏好** + 穆兰定理 $\Rightarrow$ 策略免疫的中位数类规则
+- **博尔达计分法**把 IIA 放宽为 IIA′；**DPO 与博尔达**：DPO 就是在按加权博尔达分数做聚合
 
-## Summary (2)
+## 小结（二）
 
-**Beyond Classical Voting:**
+**超出传统投票的范围：**
 
-- Multi-issue voting with separable preferences $\Rightarrow$ voting by committees
-- **Nosy preferences** create tensions (Sen's Liberal Paradox)
-- **Community Notes**: Factor model identifies bridging content across ideological divides
-
-. . .
-
-**Challenges in Practice:**
-
-- **Inversion problem**: Behavior $\neq$ preferences (habits, fatigue, strategy)
-- **Privacy**: Contextual Integrity $\gt$ simple consent models
-- **Paternalism**: Justified under info asymmetry, cognitive limits, irreversible harm
-
-## Summary (3)
-
-**Mechanism Design:**
-
-- **Vickrey auction**: Second-price $\Rightarrow$ truth-telling is dominant; welfare-maximizing
-- **Myerson**: Virtual valuations + reserve price $\Rightarrow$ optimal revenue
-- **Bulow–Klemperer**: One more bidder $\gt$ optimal mechanism
-- **VCG**: General externality-based payments for multi-item settings
+- 多议题投票 + 可分偏好 $\Rightarrow$ 委员会投票
+- **"管得宽"的偏好**会带来冲突（森的自由悖论）
+- **Community Notes**：用因子模型找出能跨越立场分歧的架桥内容
 
 . . .
 
-**Incentives Without Money:**
+**实践中的难题：**
 
-- **Guinea pig strategy**: Hide exploration in exploitation; $O(\sqrt{T})$ regret
-- **MIP**: Mutual information rewards $\Rightarrow$ dominant truthfulness in peer prediction
+- **反演问题**：行为 $\neq$ 偏好（习惯、疲劳、策略性）
+- **隐私**：情境完整性 $\gt$ 简单的同意机制
+- **家长主义**：在信息不对称、认知受限、伤害不可逆时才是正当的
 
-## References
+## 小结（三）
+
+**机制设计：**
+
+- **Vickrey 拍卖**：二价 $\Rightarrow$ 如实出价是占优策略；社会福利最大
+- **Myerson**：虚拟价值 + 保留价 $\Rightarrow$ 收入最优
+- **Bulow–Klemperer**：多一个竞标者 $\gt$ 最优机制
+- **VCG**：把基于外部性的支付推广到多物品场景
+
+. . .
+
+**不用钱的激励：**
+
+- **豚鼠策略**：把探索藏进利用里；$O(\sqrt{T})$ 的遗憾
+- **MIP**：用互信息作为报酬 $\Rightarrow$ 同伴预测（peer prediction）中的占优说真话
+
+## 参考文献
 
 ::: {.smaller}
 - [@arrow1951]{.citation}

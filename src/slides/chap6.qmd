@@ -1,546 +1,546 @@
 ---
-title: "Machine Learning from Human Preferences"
-subtitle: "Chapter 6: Whose Preferences?"
-footer: "Chapter 6: Whose Preferences?"
+title: "人类偏好机器学习"
+subtitle: "第 6 章：谁的偏好？"
+footer: "第 6 章：谁的偏好？"
 ---
 
-## Overview
+## 本讲概览
 
-- Previous chapters: *how* to learn from preferences (models, estimation, elicitation, decisions, aggregation)
-- This chapter: **whose** preferences should we learn from, and how should we weigh them?
-- Central thesis: **Every technical choice in the preference learning pipeline is a value choice about fairness**
-- You cannot avoid these choices — only choose whether to make them *consciously*
+- 前面几章讲的是**怎么**从偏好中学习（模型、估计、征询、决策、聚合）
+- 本章要问的是：该听**谁的**偏好，各自的权重又该怎么定？
+- 核心论点：**偏好学习流水线上的每一个技术选择，都是关于公平的价值选择**
+- 这些选择躲不开——你能选的只是要不要*有意识地*去做
 
-## The Central Question
+## 中心问题
 
-- Choosing an active learning strategy determines **who gets asked**
-- Assuming IIA imposes structure on **what preferences are valid**
-- Selecting DPO's reference policy $\pi_{\text{ref}}$ determines **whose preferences count more**
-- Deciding when to override stated preferences determines **what preferences are respected**
+- 选哪种主动学习策略，就决定了**该问谁**
+- 假设 IIA，就规定了**什么样的偏好算有效**
+- 选定 DPO 的参考策略 $\pi_{\text{ref}}$，就决定了**谁的偏好更被看重**
+- 决定什么时候覆盖被说出来的偏好，就决定了**哪些偏好被尊重**
 
-These are not merely technical decisions — they are **fairness decisions** with real consequences.
+这些不只是技术决定——它们是会带来真实后果的**公平性决定**。
 
-## The Four-Stage Pipeline
+## 四个阶段的流水线
 
-Every preference learning system follows four stages, each embedding values:
+每个偏好学习系统都会经过四个阶段，每个阶段都嵌着价值判断：
 
-1. **Elicitation** ($\mathcal{E}$): How do we collect data? Who do we query?
-2. **Learning** ($\mathcal{L}$): What model structure do we assume? What patterns are valid?
-3. **Aggregation** ($\mathcal{A}$): How do we combine preferences? Whose are weighted more?
-4. **Decision** ($\mathcal{D}$): When do we defer to preferences vs. override them?
+1. **征询**（$\mathcal{E}$）：数据怎么收集？去问谁？
+2. **学习**（$\mathcal{L}$）：假设什么样的模型结构？哪些模式算有效？
+3. **聚合**（$\mathcal{A}$）：偏好怎么合并？谁的权重大？
+4. **决策**（$\mathcal{D}$）：什么时候顺着偏好，什么时候覆盖它？
 
-Bias at each stage **compounds** through feedback loops.
+每个阶段的偏差都会通过反馈回路**不断叠加**。
 
-## Running Example: AI Review Assistant
+## 贯穿全章的例子：AI 审稿助手
 
-**Setting**: Large ML conference, 10,000 papers, 5,000 reviewers. AI assistant learns from past reviews to help write better reviews.
+**设定**：一个大型机器学习会议，1 万篇投稿、5 千位审稿人。AI 助手从过往审稿中学习，帮人写出更好的审稿意见。
 
-- **Elicitation**: Which reviewers to query for training data?
-- **Learning**: Should we assume context-free preferences (IIA)?
-- **Aggregation**: Weight all reviewers equally, or by volume?
-- **Decision**: Help reviewers be *consistently harsh* or nudge toward *constructive feedback*?
+- **征询**：训练数据该向哪些审稿人收集？
+- **学习**：要不要假设偏好与上下文无关（IIA）？
+- **聚合**：所有审稿人权重相同，还是按审稿量加权？
+- **决策**：帮审稿人做到*一贯严格*，还是往*建设性的反馈*上推一把？
 
-Clear stakeholders, measurable outcomes, real fairness concerns.
+相关方清楚、结果可度量、公平问题也实实在在。
 
 ---
 
-## Design Decisions as Value Choices {.center}
+## 设计决定就是价值选择 {.center}
 
-Tracing the pipeline stage by stage
+按流水线的阶段逐条来看
 
-## Stage 1 — Elicitation: Who Gets Queried?
+## 第 1 阶段 征询：去问谁？
 
-Three design options for elicitation policy $\mathcal{E}$:
+征询策略 $\mathcal{E}$ 有三种设计选项：
 
-1. **Universal querying**: Observe all reviewers equally
-2. **Productivity-based**: Query "productive" reviewers more (detailed, timely reviews)
-3. **Active learning**: Use Fisher information to query where model is most uncertain
+1. **普遍征询**：对所有审稿人一视同仁地观察
+2. **按产出量**：多问"高产"的审稿人（写得详细、交得及时）
+3. **主动学习**：用费雪信息，去问模型最不确定的地方
 
-**Value embedded**: Options 2 & 3 prioritize *efficiency* over *representation*
+**嵌在里面的价值**：选项 2 和 3 把*效率*放在*代表性*之前
 
-This seems purely technical — but has profound fairness consequences.
+看起来纯是技术问题——但公平后果很深。
 
-## The Inversion Problem
+## 反演问题
 
-Observable behavior $\neq$ underlying mental state:
+可观察的行为 $\neq$ 内心的真实状态：
 
 $$
 P(B \mid M, C) \neq P(B \mid M)
 $$
 
-- $B$: observed behavior (e.g., detailed review)
-- $M$: mental state (true expertise and preferences)
-- $C$: context (time availability, fatigue, language proficiency)
+- $B$：观察到的行为（例如写得详细的审稿）
+- $M$：内心状态（真正的水平和偏好）
+- $C$：所处情境（时间宽裕度、疲劳、语言熟练度）
 
-A detailed review could reflect **expertise** ($M$) *or* **available time** ($C$).
+一份详细的审稿，可能反映的是**专业水平**（$M$），也可能只是**有时间**（$C$）。
 
-## The Inversion Problem in Practice
+## 反演问题在现实中
 
-**Naive interpretation**: Reviewer A writes 800-word reviews, B writes 400-word reviews $\Rightarrow$ A is more thorough $\Rightarrow$ query A more
+**朴素的解读**：审稿人 A 写 800 字的审稿，B 只写 400 字 $\Rightarrow$ A 更认真 $\Rightarrow$ 多问 A
 
-**Reality**: A is a senior professor with a light teaching load. B is a postdoc with 60-hour weeks, writing reviews at midnight.
+**实际情况**：A 是教学任务很轻的资深教授；B 是每周工作 60 小时的博士后，只能在凌晨写审稿。
 
-**Result**: Active learning queries A more $\rightarrow$ model learns A's style $\rightarrow$ assists A well $\rightarrow$ A uses it more $\rightarrow$ more data. B gets poor assistance $\rightarrow$ disengages $\rightarrow$ less data. **The gap widens.**
+**结果**：主动学习更常问 A $\rightarrow$ 模型学到 A 的风格 $\rightarrow$ 对 A 帮助很大 $\rightarrow$ A 用得更勤 $\rightarrow$ 数据更多。B 得到的帮助很差 $\rightarrow$ 渐渐不用了 $\rightarrow$ 数据更少。**差距就这样被拉开。**
 
-Optimizing for revealed behavior systematically misunderstands groups whose context differs.
+按显示出来的行为做优化，会系统性误读那些情境不同的人。
 
-## Who Gets Undersampled?
+## 谁被采样不足？
 
-If we query productive reviewers more, we systematically undersample:
+如果多问高产的审稿人，我们就会系统性漏掉：
 
-- **Junior reviewers** (less time, heavier teaching loads)
-- **Non-native English speakers** (writing reviews takes longer)
-- **Reviewers with caregiving responsibilities** (less flexible time)
-- **Reviewers in disadvantageous time zones**
+- **资历浅的审稿人**（时间更少、教学任务更重）
+- **非英语母语的审稿人**（写审稿更花时间）
+- **有照护责任的审稿人**（时间不灵活）
+- **处在不利时区的审稿人**
 
-The AI assistant becomes good at helping *senior, privileged* reviewers and poor at helping those already disadvantaged — this is **disparate impact**.
+结果 AI 助手很会帮*资历深、处境好*的审稿人，而对本来就处境不利的人帮助很差——这就是**差别性影响（disparate impact）**。
 
-## Alternative: Stratified Sampling
+## 另一种做法：分层抽样
 
-Ensure representation from diverse reviewer populations:
+保证各类审稿人群体都能被覆盖到：
 
-- Divide reviewers into strata (junior/senior, institution type, language background)
-- Ensure minimum sampling from each stratum
-- Within each stratum, can still use active learning
+- 把审稿人分成若干层（资历深浅、所在单位类型、语言背景）
+- 保证每一层都有最低限度的采样量
+- 在每一层内部，仍然可以用主动学习
 
-**The tradeoff**: Efficiency vs. fairness
+**这里的取舍**：效率 与 公平
 
-- Pure active learning: maximizes information gain, may exacerbate disparities
-- Stratified sampling: ensures fairness, uses more queries for same overall quality
+- 纯主动学习：信息增益最大，但可能加大差距
+- 分层抽样：保证了公平，但达到同样的整体质量要多花提问
 
-There is no "right" answer — but you must choose **consciously and transparently**.
+没有"标准答案"——但你必须**有意识、透明地**做出选择。
 
-## Stage 2 — Learning: What Preferences Are Valid?
+## 第 2 阶段 学习：什么样的偏好算有效？
 
-Bradley-Terry assumes **Independence of Irrelevant Alternatives (IIA)**:
+Bradley-Terry 假设**无关备选独立性（IIA）**：
 
 $$
 \frac{P(\text{choose } j \mid \{j, k\})}{P(\text{choose } k \mid \{j, k\})} = \frac{P(\text{choose } j \mid \{j, k, \ell\})}{P(\text{choose } k \mid \{j, k, \ell\})}
 $$
 
-Reduces model from $M!$ parameters to $M$ item utilities — makes learning tractable.
+它把模型从 $M!$ 个参数降到 $M$ 个物品效用——让学习变得可行。
 
-But IIA is violated in peer review — and these violations have **fairness consequences**.
+但在同行评审中 IIA 是被违反的——而这些违反会带来**公平后果**。
 
-## When IIA Fails: Three Violations
+## IIA 失效的三种情形
 
-**Complementarity**: Already reviewed 2 similar papers $\rightarrow$ less interested in a third. Preference changes with choice set.
+**互补性**：已经审了 2 篇相似的论文 $\rightarrow$ 对第三篇的兴趣下降。偏好随备选项集合改变。
 
-**Framing effects**: Paper C is exceptional quality $\rightarrow$ Paper A now looks mediocre by comparison. Reference point shifts preference.
+**框架效应**：论文 C 质量特别高 $\rightarrow$ 论文 A 相比之下就显得平庸了。参照点改变了偏好。
 
-**Reviewer load**: Heavy assignment load $\rightarrow$ tolerance for marginal papers decreases. Preferences reflect current state, not intrinsic quality.
+**审稿任务量**：分到的稿件很多 $\rightarrow$ 对边缘论文的容忍度下降。偏好反映的是当前状态，不是论文本身的质量。
 
-By assuming IIA, we say: these are "irrational" and we'll ignore them.
+一旦假设 IIA，就等于说：这些都是"不理性的"，我们不管它们。
 
-## IIA Has Fairness Implications
+## IIA 会影响公平
 
-Who is disadvantaged by assuming IIA?
+假设 IIA，谁会吃亏？
 
-Groups with **context-dependent preferences**:
+那些偏好**随上下文变化**的群体：
 
-- **Overburdened** reviewers (preferences change with load)
-- **Fatigued** reviewers (late-night reviews differ from fresh morning reviews)
-- Those with **complementarity effects** (similar papers $\rightarrow$ diminishing interest)
+- **任务量大**的审稿人（偏好会随负担变化）
+- **疲劳**的审稿人（凌晨写的审稿和早晨清醒时写的不一样）
+- 有明显**互补性效应**的人（相似论文 $\rightarrow$ 兴趣递减）
 
-These groups overlap with disadvantaged demographics: junior reviewers, non-Western reviewers, caregivers.
+这些群体和处境不利的群体高度重合：资历浅的审稿人、非西方地区的审稿人、有照护责任的人。
 
-IIA works well for **low-load senior reviewers**. It works poorly for **overburdened reviewers** — this is **individual unfairness**.
+IIA 对**任务量小的资深审稿人**很合适，对**负担很重的审稿人**很不合适——这就是**个体不公平**。
 
-## Alternative: Contextual Bradley-Terry
+## 另一种做法：带上下文的 Bradley-Terry
 
-Model **context-dependent preferences** explicitly:
+把**随上下文变化的偏好**明确写进模型：
 
 $$
 H_{ij} = U_i^\top V_j + f(C_i)
 $$
 
-Example with reviewer load $n_i$:
+再把审稿工作量 $n_i$ 也放进来：
 
 $$
 H_{ij} = U_i^\top V_j - \lambda n_i
 $$
 
-- $-\lambda n_i$ captures diminishing willingness as load increases
-- Doesn't satisfy IIA, but more accurately captures real behavior
+- $-\lambda n_i$ 刻画"任务越多、意愿越低"
+- 它不满足 IIA，但更接近真实行为
 
-**Tradeoff**: More data needed (additional parameters) vs. fairer model for all groups.
+**取舍**：需要更多数据（参数变多） 对比 对各群体都更公平的模型。
 
-## Stage 3 — Aggregation: How to Weigh Preferences?
+## 第 3 阶段 聚合：偏好怎么加权？
 
-DPO (Chapter 3) maximizes:
+DPO（第 3 章）最大化的是：
 
 $$
 \mathcal{L}_{\text{DPO}} = -\mathbb{E}\!\left[\log \sigma\!\left(\beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}\right)\right]
 $$
 
-Key question: **Who contributes to $\pi_{\text{ref}}$?**
+关键问题是：**谁进入了 $\pi_{\text{ref}}$？**
 
-If trained on all past reviews, reviewers who write **more reviews get more weight** — volume-weighted aggregation.
+如果用全部历史审稿来训练，那么写得**多**的审稿人权重就大——这是按数量加权。
 
-## Who Dominates the Reference Policy?
+## 谁主导了参考策略？
 
-High-volume reviewers tend to be:
+写得多的审稿人往往是：
 
-- **Senior researchers**: Invited to review more, higher accept rates
-- **Researchers at top institutions**: Editors preferentially invite them
-- **Native English speakers**: Writing reviews is faster, lower burden per review
+- **资深研究者**：受邀审稿更多，本身接收率也更高
+- **顶尖单位的研究者**：编辑更倾向于邀请他们
+- **英语母语者**：写审稿更快，单篇的负担更轻
 
-Volume-weighting encodes **status quo bias** — the system learns to reproduce existing inequities.
+按数量加权其实编码了**现状偏见**——系统学到的是照搬现有的不平等。
 
-**Value embedded**: Past data reflects "true" preferences worth replicating. But past data also reflects historical inequalities.
+**嵌在里面的价值**：认为历史数据反映了值得复刻的"真"偏好。可历史数据同时也反映了历史上的不平等。
 
-## Alternative: Equal-Weight Aggregation
+## 另一种做法：等权聚合
 
-Instead of volume-weighted:
+不用按数量加权，而是：
 
-- Per-reviewer reference policies: $\pi_{\text{ref}}^{(i)}$ for each reviewer $i$
-- Equal weights: $\pi_{\text{ref}} = \frac{1}{N} \sum_{i=1}^N \pi_{\text{ref}}^{(i)}$
-- Or: stratified by group to ensure proportional representation
+- 给每位审稿人一个参考策略：$\pi_{\text{ref}}^{(i)}$ 对应审稿人 $i$
+- 等权：$\pi_{\text{ref}} = \frac{1}{N} \sum_{i=1}^N \pi_{\text{ref}}^{(i)}$
+- 或者：按群体分层，保证各群体的比例适当
 
 **Tradeoff**:
 
-| Strategy | Variance | Bias | Fairness |
+| 做法 | 方差 | 偏差 | 公平性 |
 |----------|----------|------|----------|
-| Volume-weighted | Low | High (status quo) | Poor |
-| Equal-weighted | Higher | Low | Better |
-| Group-stratified | Medium | Low | Best |
+| 按数量加权 | 低 | 高（固化现状） | 差 |
+| 等权 | 较高 | 低 | 较好 |
+| 按群体分层 | 中 | 低 | 最好 |
 
-## Stage 4 — Decision: Liberal vs. Illiberal Assistance
+## 第 4 阶段 决策：自由主义式还是非自由主义式的协助
 
-Should the AI respect stated preferences or sometimes override them?
+AI 该尊重说出来的偏好，还是有时替人做主？
 
-Drawing on **Amartya Sen's framework**:
+这里借用**阿马蒂亚·森（Amartya Sen）**的框架：
 
-- **Non-nosy preferences**: About your own outcomes ("I want to review ML papers")
-- **Nosy preferences**: About others' choices ("Junior reviewers should handle tedious papers")
+- **"只管自己"的偏好**：关于自己的结果（"我想审机器学习方向的稿"）
+- **"管得宽"的偏好**：关于别人的选择（"打杂的稿子该交给资历浅的人审"）
 
-**Liberal assistance**: Respects non-nosy preferences — helps each reviewer follow their own style
+**自由主义式的协助**：尊重"只管自己"的偏好——帮每位审稿人按自己的风格写
 
-**Illiberal assistance**: Enforces community standards — nudges toward constructive feedback
+**非自由主义式的协助**：维护共同体标准——把人往建设性的反馈上推
 
-## Liberal vs. Illiberal in Practice
+## 两种做法在现实中
 
-**Liberal**: Reviewer A writes harsh reviews $\rightarrow$ assistant helps them write *consistently harsh* reviews
+**自由主义式**：审稿人 A 一贯写得严厉 $\rightarrow$ 助手帮他把审稿写得*一贯严厉*
 
-**Illiberal**: Assistant nudges Reviewer A toward constructive feedback per community norms
+**非自由主义式**：助手按共同体规范，把 A 往建设性的反馈上引导
 
 ::: {.fragment}
-**When is illiberal justified?** (Sen's framework)
+**什么时候可以让 AI 替人做主？**（森的框架）
 
-1. Preferences **harm third parties** (harsh reviews harm authors)
-2. Preferences formed under **poor conditions** (fatigue $\rightarrow$ inversion problem)
-3. Individual preferences aggregate to **collective harm** (all harsh $\rightarrow$ authors leave)
+1. 偏好**伤害到第三方**（过于严厉的审稿会伤害作者）
+2. 偏好是在**很不利的条件下**形成的（疲劳 $\rightarrow$ 反演问题）
+3. 个人偏好加总后造成**集体的损害**（人人都严厉 $\rightarrow$ 作者不再来投稿）
 :::
 
-## Both Approaches Have Fairness Problems
+## 两种做法都有公平问题
 
-**Liberal assistance may be unfair if**:
+**自由主义式可能不公平，如果**：
 
-- Some reviewers have biased preferences (harsher on certain institutions)
-- System amplifies biases by helping reviewers be "consistently" biased
-- $\Rightarrow$ Individual autonomy respected, but **group fairness violated**
+- 有些审稿人的偏好本身带偏见（对某些单位更苛刻）
+- 系统帮他们"一贯地"带偏见，反而把偏见放大了
+- $\Rightarrow$ 尊重了个人自主，但**违反了群体公平**
 
-**Illiberal assistance may be unfair if**:
+**非自由主义式可能不公平，如果**：
 
-- "Community standards" reflect dominant group's norms
-- Diverse reviewing styles are "corrected" toward homogeneity
-- $\Rightarrow$ Group fairness pursued, but **individual autonomy violated**
+- "共同体标准"其实反映的是主流群体的习惯
+- 多样的审稿风格都被"纠正"成同一种
+- $\Rightarrow$ 追求了群体公平，但**违反了个人自主**
 
-**No easy answer** — this is the core tension in fairness.
+**没有轻松的解法**——这正是公平问题里的核心张力。
 
 ---
 
-## Compounding Unfairness {.center}
+## 不公平的叠加 {.center}
 
-How small biases multiply through feedback loops
+小偏差如何在反馈回路中被成倍放大
 
-## The Feedback Loop
+## 反馈回路
 
-Each pipeline stage introduces bias — and they **compound**:
+每个阶段都会引入偏差——而且它们会**叠加**：
 
-1. **Elicitation**: Queries productive reviewers more (undersamples juniors)
-2. **Learning**: IIA mismodels overburdened reviewers (juniors fit poorly)
-3. **Aggregation**: Volume-weighting privileges seniors (juniors downweighted)
-4. **Decision**: Assistant trained on senior style (poor suggestions for juniors)
+1. **征询**：多问高产的审稿人（资历浅的被采样不足）
+2. **学习**：IIA 把负担重的审稿人建模错了（资历浅的拟合得差）
+3. **聚合**：按数量加权偏袒资深者（资历浅的被压低权重）
+4. **决策**：助手是按资深者的风格训练的（给资历浅的人提的建议很差）
 
-**Feedback**: Juniors find assistant unhelpful $\rightarrow$ use less $\rightarrow$ less data $\rightarrow$ even worse assistance $\rightarrow$ the gap widens **exponentially**
+**反馈**：资历浅的人觉得助手没用 $\rightarrow$ 少用 $\rightarrow$ 数据更少 $\rightarrow$ 帮助更差 $\rightarrow$ 差距以**指数**方式拉大
 
-## Mathematical Model of Compounding
+## 叠加效应的数学模型
 
-Let $q_t^{(g)}$ = queries to group $g$ at time $t$, $a_t^{(g)}$ = assistant quality for group $g$
+记 $q_t^{(g)}$ 为第 $t$ 轮向群体 $g$ 发出的提问数，$a_t^{(g)}$ 为助手对群体 $g$ 的质量
 
-**Elicitation**: Queries proportional to past usage:
+**征询**：提问数与历史使用量成正比：
 $$q_{t+1}^{(g)} \propto a_t^{(g)}$$
 
-**Learning + Aggregation**: Quality depends on data:
+**学习 + 聚合**：质量取决于数据量：
 $$a_{t+1}^{(g)} = f\!\left(q_{t+1}^{(g)}\right)$$
 
 **Combined**: $a_{t+1}^{(g)} = f(a_t^{(g)})$
 
-- If $f$ is **superlinear**: small advantages $\rightarrow$ exponential divergence
-- A 10% initial advantage becomes **40% after 15 rounds**
+- 若 $f$ 是**超线性**的：微小的优势 $\rightarrow$ 指数级分化
+- 一开始 10% 的优势，15 轮之后会变成 **40%**
 
-## Breaking the Feedback Loop
+## 打断反馈回路
 
-No single-stage fix prevents compounding — need interventions at multiple stages:
+只在一个阶段动手挡不住叠加——要在多个阶段同时干预：
 
-1. **Stratified elicitation**: Minimum queries from each group (breaks Stage 1)
-2. **Fairness-constrained learning**: Minimize *maximum per-group error* (fixes Stage 2)
-3. **Equal-weight aggregation**: Weight by population, not volume (fixes Stage 3)
-4. **Illiberal assistance with equity goals**: Cap advantages until gap closes (fixes Stage 4)
-5. **Regular re-initialization**: Periodically reset to equal assistance
+1. **分层征询**：保证每个群体都有最低提问量（针对第 1 阶段）
+2. **带公平约束的学习**：最小化*各群体中最大的那个误差*（针对第 2 阶段）
+3. **等权聚合**：按人数加权，而不是按数量（针对第 3 阶段）
+4. **以公平为目标的替人做主**：在差距缩小之前给优势设上限（针对第 4 阶段）
+5. **定期重新初始化**：周期性地把各群体的待遇拉回同一起点
 
-**The tradeoff**: All interventions sacrifice some efficiency for fairness. You cannot optimize both simultaneously.
+**这里的取舍**：所有干预都是拿一部分效率去换公平。两者不可能同时最优。
 
 ---
 
-## Fairness Concepts and Impossibilities {.center}
+## 公平概念与不可能性 {.center}
 
-Fundamental tensions with no perfect resolution
+一些没有完美解法的根本张力
 
-## Individual Fairness
+## 个体公平
 
-**Definition** (Dwork et al., 2012): Similar individuals should be treated similarly.
+**定义**（Dwork 等，2012）：相似的个体应得到相似的对待。
 
 $$
 d(x_i, x_j) \leq \epsilon \implies d(f(x_i), f(x_j)) \leq \delta(\epsilon)
 $$
 
-- $d$: distance metric on individuals and outcomes
-- $\delta$: non-decreasing function
+- $d$：定义在个体与结果上的距离度量
+- $\delta$：一个非减函数
 
-**In peer review**: Papers with similar topics and quality should get similar-quality reviewers. If Papers A and B both study transformers on low-resource languages, they should get comparable reviewers.
+**在同行评审中**：主题相近、质量相近的论文，应当得到水平相近的审稿人。如果论文 A 和 B 都在做低资源语言上的 transformer，它们就该得到水平相当的审稿人。
 
-## Group Fairness
+## 群体公平
 
-**Definition** (Demographic parity): Protected groups should have equal average outcomes.
+**定义**（人口均等，demographic parity）：各受保护群体的平均结果应当相等。
 
 $$
 \mathbb{E}[f(x) \mid G = g_1] = \mathbb{E}[f(x) \mid G = g_2]
 $$
 
-- $G$: group membership variable
-- $g_1, g_2 \in \mathcal{G}$: protected groups
+- $G$：群体归属变量
+- $g_1, g_2 \in \mathcal{G}$：受保护的群体
 
-**In peer review**: Papers from mainstream ML subfields vs. small subfields should receive equally qualified reviewers *on average*.
+**在同行评审中**：来自主流机器学习方向的论文和来自小众方向的论文，*平均而言*应当得到同样称职的审稿人。
 
-## The Fundamental Incompatibility
+## 根本上的不相容
 
-**Dwork et al. (2012)**: Individual and group fairness are often **mutually incompatible**.
+**Dwork 等（2012）**：个体公平与群体公平常常**互相冲突**。
 
 :::: {.columns}
 ::: {.column width="50%"}
-**Individual fairness says:**
+**个体公平主张：**
 
-Similar topics $\rightarrow$ similar reviewers. Small subfield papers get less-expert reviewers (few experts exist).
+主题相近 $\rightarrow$ 审稿人相近。小众方向的论文只能得到没那么对口的审稿人（因为对口的人本来就少）。
 :::
 ::: {.column width="50%"}
-**Group fairness says:**
+**群体公平主张：**
 
-Both groups get equally expert reviewers on average. Must assign small subfield papers to less-matched (but expert) reviewers.
+两组平均都应得到同样称职的审稿人。那就得把小众方向的论文分给匹配度较低（但确实专业）的审稿人。
 :::
 ::::
 
 ::: {.fragment}
-**These conflict**: To satisfy group fairness, must violate individual fairness (similar topics $\rightarrow$ different review quality based on group). **This is a mathematical impossibility**, not an implementation failure.
+**这两条会冲突**：要满足群体公平，就必须违反个体公平（主题相近的论文 $\rightarrow$ 却因所属群体不同而得到不同水平的评审）
 :::
 
-## Process vs. Outcome Fairness
+## 过程公平 与 结果公平
 
-Another fundamental tension:
+另一组根本性的张力：
 
-| | Process Fairness | Outcome Fairness |
+|  | 过程公平 | 结果公平 |
 |--|-----------------|-----------------|
-| **Definition** | Same rules for all | Equitable results |
-| **In review** | All bids weighted equally | Adjust weights for junior reviewers |
-| **Philosophy** | Procedural justice | Distributive justice |
-| **Connection** | Liberal assistance | Illiberal assistance |
+| **定义** | 对所有规则一样 | 结果上的公平 |
+| **在评审中** | 所有竞标权重相同 | 为资历浅的审稿人调整权重 |
+| **理念** | 程序正义 | 分配正义 |
+| **对应** | 自由主义式的协助 | 非自由主义式的协助 |
 
-**The tension**: Equal treatment of unequal groups perpetuates inequality. But adjusting for demographics means unequal treatment.
+**张力所在**：对处境不同的群体一视同仁，会把不平等延续下去；而按人口特征调整，又意味着差别对待。
 
-## Process vs. Outcome: The Tradeoff
+## 过程与结果的取舍
 
-**Process-fair allocation**: Senior reviewers bid strategically on high-quality papers $\rightarrow$ get better assignments. Juniors bid less strategically $\rightarrow$ worse papers.
+**过程公平的分配**：资深审稿人会策略性地去竞标高质量论文 $\rightarrow$ 拿到更好的分稿。资历浅的没那么会策略性出价 $\rightarrow$ 拿到的稿子更差。
 
-- Same rules for all, but **unequal outcomes**
+- 规则对所有人一样，但**结果不平等**
 
-**Outcome-fair allocation**: Boost junior bids to compensate for less strategic bidding $\rightarrow$ equalized outcomes.
+**结果公平的分配**：提高资历浅者的竞标权重，补偿他们不擅长策略性出价 $\rightarrow$ 结果被拉平。
 
-- Different treatment by group, but **equal results**
+- 按群体差别对待，但**结果相等**
 
 ::: {.fragment}
-**Key insight**: Process and outcome fairness are **fundamentally in tension** when groups have unequal starting positions or differential access to strategic information.
+**关键洞见**：当各群体的起点不同、对策略性信息的获取也不均等时，过程公平与结果公平就会**从根本上互相牵扯**。
 :::
 
-## Summary of Impossibilities
+## 不可能性小结
 
-Two proven incompatibilities constrain every system:
+两条已被证明的不相容性，约束着任何系统：
 
-1. **Individual vs. Group Fairness** (Dwork et al., 2012)
-    - Cannot treat similar individuals similarly *and* ensure equal group outcomes
-2. **Process vs. Outcome Fairness**
-    - Cannot use equal procedures *and* get equal results from unequal starting positions
+1. **个体公平 与 群体公平**（Dwork 等，2012）
+    - 既要相似个体得到相似对待，又要各群体结果相等——做不到
+2. **过程公平 与 结果公平**
+    - 既要用相同的程序，又要从不平等的起点得到平等的结果——做不到
 
-These aren't engineering failures — they are **impossibility results**. No system satisfies all fairness criteria. You must **choose which to prioritize**.
+这不是工程上没做好，而是**不可能性结果**。没有任何系统能满足所有公平准则。你必须**选择优先满足哪一条**。
 
 ---
 
-## Design Principles {.center}
+## 设计原则 {.center}
 
-Eight actionable guidelines for fairer systems
+八条可以落地的建议
 
-## Principle 1: Make Value Tradeoffs Explicit
+## 原则 1：把价值取舍写明白
 
-Document what values are prioritized, what's sacrificed, who benefits, who is harmed.
+记录下优先了什么价值、牺牲了什么、谁受益、谁受损。
 
-**Example template**:
+**示例模板**：
 
 | | |
 |---|---|
-| **Decision** | DPO with volume-weighted $\pi_{\text{ref}}$ |
-| **Value prioritized** | Statistical efficiency |
-| **Value sacrificed** | Group fairness (equal influence) |
-| **Who benefits** | High-volume annotators |
-| **Who is harmed** | Low-volume annotators |
-| **Mitigation** | Minimum sampling quotas |
+| **决定** | 采用按数量加权的 $\pi_{\text{ref}}$ 做 DPO |
+| **优先的价值** | 统计效率 |
+| **牺牲的价值** | 群体公平（影响力均等） |
+| **谁受益** | 标注量大的标注者 |
+| **谁受损** | 标注量小的标注者 |
+| **缓解办法** | 设置最低采样配额 |
 
-Claiming "technical neutrality" hides choices and prevents accountability.
+声称"技术上中立"，只会把选择藏起来，让人无从追责。
 
-## Principle 2: Distinguish Behavior from Mental State
+## 原则 2：把行为与内心状态分开
 
-Don't optimize for clicks, bids, or engagement without asking if they reflect true preferences.
+在优化点击、竞标、互动量之前，先问它们是否真的反映了偏好。
 
 $$P(B \mid M, C) \neq P(B \mid M)$$
 
-- Don't query reviewers proportional to review length — use stratified sampling
-- If using engagement metrics, adjust for accessibility and context
-- Collect explicit preference signals in addition to implicit behavior
+- 不要按审稿长度来分配提问——改用分层抽样
+- 如果一定要用互动指标，就要对可及性和情境做校正
+- 除了隐式行为，还要主动收集明确的偏好信号
 
-**Red flag**: Using revealed preferences (clicks, purchases) as ground truth without modeling context = **inversion fallacy**
+**危险信号**：把显示出来的偏好（点击、购买）直接当成真值，又不去为情境建模 = **反演谬误**
 
-## Principle 3: Audit for Compounding Unfairness
+## 原则 3：检查不公平是否在叠加
 
-Map the full pipeline. Simulate over time. Does disparity grow or shrink?
+把整条流水线画出来，按时间模拟。差距是在扩大还是在缩小？
 
-**Audit checklist**:
+**检查清单**：
 
-- Have you mapped all feedback paths from decision $\rightarrow$ elicitation?
-- Do you track per-group metrics, not just averages?
-- Have you simulated 10+ rounds to check for compounding?
-- Is there a process for emergency intervention if disparities explode?
+- 从决策 $\rightarrow$ 征询的所有反馈路径都画出来了吗？
+- 指标是分群体跟踪的，还是只看平均值？
+- 有没有模拟 10 轮以上，看会不会叠加？
+- 如果差距突然失控，有没有应急处理的流程？
 
-**Set circuit breakers**: If disparity exceeds threshold (e.g., 2x gap in quality), trigger automatic review.
+**设置熔断机制**：一旦差距超过阈值（例如质量相差 2 倍），自动触发复核。
 
-## Principle 4: Choose Fairness Definition Consciously
+## 原则 4：有意识地选择公平定义
 
-Accept impossibilities. Choose based on domain and stakes:
+接受那些不可能性，按领域和后果轻重来选：
 
-| Context | Prioritize | Rationale |
+| 场景 | 优先满足 | 理由 |
 |---------|-----------|-----------|
-| High-stakes (hiring, healthcare) | Outcome fairness | Must correct systemic disparities |
-| Well-defined merit (expertise matching) | Individual fairness | Similar entities $\rightarrow$ similar treatment |
-| Requiring diversity (research) | Group fairness | All perspectives represented |
-| Low-stakes personal (shopping) | Process fairness | Autonomy paramount |
+| 后果严重（招聘、医疗） | 结果公平 | 必须纠正系统性的差距 |
+| 优劣标准明确（专业匹配） | 个体公平 | 相似的对象 $\rightarrow$ 相似的对待 |
+| 需要多样性（研究选题） | 群体公平 | 各种立场都要有代表 |
+| 后果轻微的私人场景（购物） | 过程公平 | 自主最重要 |
 
-Make the choice, document it, and measure violations of non-prioritized criteria.
+做出选择、记录下来，并且去测量那些没被优先满足的准则被违反到什么程度。
 
-## Principle 5: Use Stratification, Not Just Optimization
+## 原则 5：用分层，而不是只做优化
 
-Report performance **per subgroup**, not just average. Set minimum thresholds:
+要**按子群体**报告表现，不能只报平均值。并设最低门槛：
 
 $$
 \max_{\theta} \text{Utility}(\theta) \quad \text{s.t.} \quad \min_{g \in \mathcal{G}} \text{Quality}_g(\theta) \geq \tau
 $$
 
-- Don't report "95% accuracy" — report "98% for Group A, 87% for Group B"
-- Set constraints: "No group below 90%" rather than "average 95%"
-- Small subgroups have high variance — use confidence intervals
+- 不要只报"准确率 95%"——要报"A 组 98%，B 组 87%"
+- 把约束写成："任何群体都不低于 90%"，而不是"平均 95%"
+- 小的子群体方差很大——要给出置信区间
 
-Optimization on average hides disparities. Stratified reporting reveals them.
+按平均值做优化会把差距藏起来；分层报告才会把差距显出来。
 
-## Principle 6: When in Doubt, Ask
+## 原则 6：拿不准就去问
 
-Involve affected communities early and throughout:
+让受影响的群体早早参与、全程参与：
 
-- Form advisory boards with junior reviewers, underrepresented subfields, international scholars
-- Show them stratified metrics — ask: "Is this disparity acceptable?"
-- Iterate: Design $\rightarrow$ Deploy to subset $\rightarrow$ Gather feedback $\rightarrow$ Redesign
-- Provide **recourse mechanisms**: report unfairness, flag bad suggestions, opt out
+- 成立咨询小组，成员包括资历浅的审稿人、小众方向的研究者、国际学者
+- 把分群体的指标给他们看，问："这样的差距可以接受吗？"
+- 反复迭代：设计 $\rightarrow$ 先给一部分人用 $\rightarrow$ 收集反馈 $\rightarrow$ 重新设计
+- 提供**救济渠道**：可以举报不公平、标记糟糕的建议、选择退出
 
-Designers often lack lived experience of disadvantaged groups. **Participatory design** surfaces invisible issues.
+设计者往往没有处境不利群体的亲身经历。**参与式设计**能把看不见的问题带到台面上。
 
-## Principle 7: Build for Observability & Accountability
+## 原则 7：为可观测与可追责而设计
 
-Log decisions and context for auditing. Enable external verification.
+把决策和当时的情境记录下来以备审计，让外部也能核查。
 
-- **Logging**: Record queries, predictions, suggestions with demographics and context
-- **Dashboards**: Real-time stratified metrics visible to stakeholders
-- **Feedback channels**: "Report unfairness" button that triggers review
-- **Rapid response**: Freeze rollout when disparities detected, investigate, fix
+- **留日志**：记录提问、预测、给出的建议，连同人口特征和情境
+- **看板**：让相关方能实时看到分群体的指标
+- **反馈通道**：设一个"举报不公平"的入口，触发即复核
+- **快速响应**：发现差距就暂停推广，查清原因，再修复
 
-**Privacy note**: Logging demographics raises concerns — use differential privacy, aggregate before sharing.
+**隐私提醒**：记录人口特征会带来隐私问题——可以用差分隐私，或先汇总再共享。
 
-Without observability, fairness claims are unverifiable.
+没有可观测性，公平性的说法就无从验证。
 
-## Principle 8: Recognize Limits of Liberal Assistance
+## 原则 8：认清自由主义式协助的限度
 
-Default to respecting preferences. Override with **structured paternalism**:
+默认尊重用户的偏好；要替人做主时，用**结构化的家长主义**：
 
-**Override (illiberal) when**:
+**可以替人做主（非自由主义式），当**：
 
-- Third-party harm is severe (hate speech, bias harming others)
-- Preferences formed under poor conditions (fatigue, manipulation)
-- Collective action problem (all harsh reviews harm science)
+- 对第三方的伤害很严重（仇恨言论、影响他人的偏见）
+- 偏好是在很不利的条件下形成的（疲劳、被引导）
+- 存在集体行动问题（人人都写得严厉，会伤害整个学术共同体）
 
-**Respect (liberal) when**:
+**应当尊重（自由主义式），当**：
 
-- No third-party harm (personal preferences about own outcomes)
-- User has expertise and autonomy
-- Diversity of perspectives is valuable
+- 不涉及对第三方的伤害（只关乎自己结果的私人偏好）
+- 用户既有专业能力也有自主判断
+- 观点的多样性本身有价值
 
-Always: **transparency** (explain overrides), **justification** (document harm), **recourse** (allow appeals).
-
----
-
-## Red Flags {.center}
-
-Warning signs that indicate fairness problems
-
-## Eight Red Flags
-
-1. **Feedback loops**: Average improves, but some subgroup worsens
-2. **Optimization-fairness divergence**: Metrics $\neq$ what stakeholders care about
-3. **Invisibility of harm**: Affected parties can't see how they're harmed
-4. **Post-hoc rationalization**: Justifying disparity as "technically correct"
-5. **Ignoring context**: Assuming context-free preferences when they're not
-6. **Revealed preference fallacy**: Behavior = true preferences without modeling context
-7. **Homogenization**: System converges to one group's style; diversity decreases
-8. **Privilege escalation**: Initial advantages compound into permanent disparities
-
-**Monitoring**: Fairness audits before deployment, at launch, and **monthly** ongoing.
+任何时候都要做到：**透明**（说明为什么替他做主）、**有据**（把伤害写清楚）、**可救济**（允许申诉）。
 
 ---
 
-## Summary {.center}
+## 危险信号 {.center}
 
-## Key Takeaways
+说明公平出了问题的那些征兆
 
-1. **Every technical choice is a value choice** about whose preferences matter
-2. **The inversion problem**: Behavior $\neq$ mental state — optimizing revealed preferences can systematically disadvantage groups
-3. **Unfairness compounds**: Small biases at each pipeline stage multiply through feedback loops
-4. **Impossibility results**: Individual vs. group fairness, process vs. outcome fairness — cannot satisfy all
-5. **Eight design principles**: Make tradeoffs explicit, audit for compounding, stratify, involve affected communities
-6. **Neither liberal nor illiberal assistance is always right** — use structured paternalism
+## 八个危险信号
 
-## The Central Thesis
+1. **反馈回路**：平均指标在变好，但某个子群体在变差
+2. **优化目标与公平脱节**：指标 $\neq$ 相关方真正关心的东西
+3. **损害看不见**：受影响的人说不清自己是怎么受损的
+4. **事后找理由**：把差距解释成"技术上是对的"
+5. **无视情境**：偏好明明随情境变化，却当成与上下文无关
+6. **显示偏好谬误**：不建模情境，就把行为等同于真实偏好
+7. **趋同化**：系统越来越像某一个群体的风格，多样性下降
+8. **优势滚雪球**：最初的一点优势叠加成永久的差距
+
+**监控安排**：上线前做公平性审计，上线时再做一次，之后**每月**一次。
+
+---
+
+## 小结 {.center}
+
+## 本章要点
+
+1. **每一个技术选择都是价值选择**：决定谁的偏好被看重
+2. **反演问题**：行为 $\neq$ 内心状态——按显示出来的偏好做优化，会系统性地让某些群体更不利
+3. **不公平会叠加**：每个阶段的小偏差，通过反馈回路成倍放大
+4. **不可能性结果**：个体公平与群体公平、过程公平与结果公平——无法同时满足
+5. **八条设计原则**：把取舍说明白、按叠加情况做审计、分层报告、让受影响的人参与……
+6. **自由主义式与非自由主义式的协助都不是永远正确**——用结构化的家长主义
+
+## 核心论点
 
 ::: {.callout-important}
-**Every technical choice in the preference learning pipeline is a value choice about whose preferences matter and how they should be weighted.**
+**偏好学习流水线上的每一个技术选择，都是关于"谁的偏好重要、以什么方式重要"的价值选择。**
 
-You cannot avoid making these choices. You can only choose whether to make them **consciously and transparently**.
+你躲不开这些选择。你能选的，只是要不要**有意识、透明地**去做。
 :::
 
-## References
+## 参考文献
 
 ::: {.smaller}
 - Dwork, C., Hardt, M., Pitassi, T., Reingold, O., & Zemel, R. (2012). Fairness through awareness. *ITCS*.

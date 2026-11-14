@@ -3,7 +3,7 @@ project:
   output-dir: ../../_book/slides
 
 website:
-  title: "CS329H Slides"
+  title: "CS329H 讲义"
 
 bibliography: ../references.bib
 link-citations: false

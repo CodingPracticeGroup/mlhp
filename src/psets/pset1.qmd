@@ -1,109 +1,56 @@
-## Exercises
+---
+title: "习题 1：偏好模型与直接偏好优化"
+lang: zh
+---
 
-### Question 4: Direct Preference Optimization (40 points) {#question-4-direct-preference-optimization-40-points .unnumbered}
+## 习题
 
-Note this question requires a GPU which is provided for free on Google
-Colab (T4 instance) or through the course cloud credits provided on Ed.\
-Direct Preference Optimization (DPO) allows for policy alignment on a
-preference dataset without the need to train a separate reward model.
-The preference dataset is constructed by sampling generations
-$(y_1, y_2)\sim \pi_{\text{ref}}(\cdot\mid x)$ where $\pi_\text{ref}$ is
-the base policy to be aligned, and $x$ comes from a set of previously
-collected prompts. The pairs of generations are then labeled by an
-annotator for which of the generations is preferred. Denote the
-preference dataset by
-$\mathcal{D}=\left\{\left(x^{(i)}, y_+^{(i)}, y_-^{(i)}\right)\right\}_{i=1}^N$,
-where $y_+$ and $y_-$ are the preferred and non-preferred generations,
-respectively. DPO aims to solve the following:
+### 第 4 题：直接偏好优化（40 分） {#question-4-direct-preference-optimization-40-points .unnumbered}
+
+注意：本题需要 GPU。Google Colab 提供免费实例（T4），课程也会在 Ed 上发放云计算额度。\
+直接偏好优化（Direct Preference Optimization, DPO）可以在偏好数据集上做策略对齐，
+而不必另外训练一个奖励模型。偏好数据集是这样构造的：先采样成对的生成结果
+$(y_1, y_2)\sim \pi_{\text{ref}}(\cdot\mid x)$，其中 $\pi_\text{ref}$ 是
+待对齐的基础策略，$x$ 来自此前收集好的一批提示词。再把这些成对的生成结果交给标注员，
+由他标出每一对中哪个更被偏好。把偏好数据集记作
+$\mathcal{D}=\left\{\left(x^{(i)}, y_+^{(i)}, y_-^{(i)}\right)\right\}_{i=1}^N$，
+其中 $y_+$ 与 $y_-$ 分别是被偏好和未被偏好的生成结果。DPO 要求解的是：
 $$\hat{\pi}=\arg \min_{\pi\in\Pi}\mathbb{E}_{(x, y_+, y_-)\sim\mathcal{D}}\left[-\log\sigma\left(
 \beta\log\left(\frac{\pi(y_+ | x)}{\pi_{\text{ref}}(y_+ | x)}\right)-\beta\log\left(\frac{\pi(y_- | x)}{\pi_{\text{ref}}(y_- | x)}\right)\right)\right]$$
-where $\Pi$ is the space of possible polices $\pi$ can take on. $\pi$ is
-typically parametrized.
+其中 $\Pi$ 是策略 $\pi$ 允许取到的策略空间。$\pi$ 通常会被参数化。
 
-(a) **(Written, 6 points)**. Consider the setting where
-    $\pi_{\text{ref}}$ has no conditioning features and randomly outputs
-    one of two possible values, $\mathbf{A}$ or $\mathbf{B}$ (also known
-    as the "Bandit" setting). Suppose that
-    $\pi_{\text{ref}}(\mathbf{A})=p_0$ and
-    $\pi_{\text{ref}}(\mathbf{B})=1-p_0$. Furthermore, assume that the
-    preference dataset $\mathcal{D}$ is infinitely large, sampled from
-    $\pi_{\text{ref}}$, and that the preferred response is selected
-    through a Bradley-Terry reward model where $\mathbf{A}$ has reward
-    score $r_A$ and $\mathbf{B}$ has reward score $r_B$. Set
-    $\Pi=\{\pi_p\mid 0<p<1\}$ where $\pi_p$ is the policy defined by
-    $\pi_p(\mathbf{A})=p$ and $\pi_p(\mathbf{B})=1-p$. The DPO objective
-    is to compute:
+(a) **（笔答，6 分）**。考虑这样的情形：$\pi_{\text{ref}}$ 不依赖任何条件特征，随机输出两个可能取值之一，$\mathbf{A}$ 或 $\mathbf{B}$（也就是所谓的"老虎机"设定）。设 $\pi_{\text{ref}}(\mathbf{A})=p_0$、$\pi_{\text{ref}}(\mathbf{B})=1-p_0$。再假设偏好数据集 $\mathcal{D}$ 无穷大、由 $\pi_{\text{ref}}$ 采样得到，并且"哪个回答被偏好"是由一个 Bradley-Terry 奖励模型决定的：$\mathbf{A}$ 的奖励分为 $r_A$、$\mathbf{B}$ 的奖励分为 $r_B$。取 $\Pi=\{\pi_p\mid 0<p<1\}$，其中 $\pi_p$ 定义为 $\pi_p(\mathbf{A})=p$、$\pi_p(\mathbf{B})=1-p$。DPO 的目标是求：
     $$\pi_{\hat{p}}=\arg \min_{\pi_p\in \Pi} f(p, p_0, \beta, r_A, r_B),$$
-    for a function $f$. Find $f$ by explicitly computing the relevant
-    expectation.
+    其中的 $f$ 是某个函数。请把相关的期望显式算出来，从而求出 $f$。
 
-(b) **(Written, 8 points)**. Assume that a solution to the optimization
-    problem in part (a) exists. Find an expression for $\hat{p}$. (Hint:
-    Make sure to know your sigmoid derivative properties! Everything
-    should simplify nicely. You may use the [*logit function*](https://en.wikipedia.org/wiki/Logit) denoted by $\sigma^{-1}$ in
-    your final expression.)
+(b) **（笔答，8 分）**。假设 (a) 中的优化问题有解，请给出 $\hat{p}$ 的表达式。（提示：把 sigmoid 的导数性质记熟！结果会化简得很干净。最终表达式里可以用[*logit 函数*](https://en.wikipedia.org/wiki/Logit)，记作 $\sigma^{-1}$。）
 
-(c) **(Written, 3 points)**. Show that
-    $\lim_{\beta\to\infty}\hat{p}=p_0.$ (Very) briefly explain why this
-    makes sense intuitively based on the role of $\beta$ in
-    KL-constrained reward optimization (we suggest two sentences).
+(c) **（笔答，3 分）**。证明 $\lim_{\beta\to\infty}\hat{p}=p_0.$ 并（非常简短地）说明为什么这在直觉上说得通——可以从 $\beta$ 在带 KL 约束的奖励优化中扮演的角色入手（建议两句话）。
 
-(d) **(Written, 3 points)**. Assume $r_A=r_B$ and $\beta>0$. Notice that
-    $\hat{p}=p_0$. Briefly explain why this makes sense intuitively (we
-    suggest two sentences).
+(d) **（笔答，3 分）**。设 $r_A=r_B$ 且 $\beta>0$，此时可以注意到 $\hat{p}=p_0$。请简要说明为什么这在直觉上说得通（建议两句话）。
 
-Next, you will fine-tune the lightweight 2 billion parameter Gemma 2
-model on the DPO objective. We will use the instruction fine-tuned
-variant of the model (i.e., designed for chat-based interactions).
+接下来，你要在 DPO 目标上微调 20 亿参数的轻量模型 Gemma 2。我们用的是它的指令微调版本（即面向对话场景的版本）。
 
-1.  **(Coding, 4 points)**. Open the `dpo/dpo.ipynb` file of the PSET's
-    codebase. Execute the first few cells of the notebook until you see
-    the `sample_chat_tokens` and their IDs printed out. The next cell
-    requires you to implement the `get_response_idxs` function in
-    `dpo/dpo.py`.
+1.  **（编程，4 分）**。打开本次习题代码库中的 `dpo/dpo.ipynb`。依次执行笔记本前面的几个单元，直到看到 `sample_chat_tokens` 及其对应的 ID 被打印出来。下一个单元要求你在 `dpo/dpo.py` 中实现 `get_response_idxs` 函数。
 
-    To implement it, you must find the indices of the first and last
-    token of the model's response in `sample_chat_tokens`. In the
-    notebook's example, this corresponds to the tokens "As" and "."
+要实现它，你需要在 `sample_chat_tokens` 中找到模型回答的第一个和最后一个 token 的下标。在笔记本的例子里，对应的就是 "As" 和 "." 这两个 token。
 
-2.  **(Coding, 4 points)**. The following cell asks you to implement the
-    `get_response_next_token_probs` function. The next token logits for
-    each token of the chat prompt are provided. Pass them through the
-    softmax function and appropriately index the next token IDs.
+2.  **（编程，4 分）**。接下来的单元要求你实现 `get_response_next_token_probs` 函数。它会给出对话提示中每个 token 的下一个 token 的 logits。请把它们过一遍 softmax，并按正确的方式索引下一个 token 的 ID。
 
         <bos><start_of_turn>user
         Where are you?<end_of_turn>
         <start_of_turn>model
         I am here.<end_of_turn>
 
-    In the example above, we look for the next-token probabilities of
-    "I", "am", "here", and "." To do so, you must extract the logits for
-    "\\n", "I", "am", and "here" because the probability of generating a
-    given token comes from the prediction of the token before. Use the
-    return value of `get_response_idxs` as anchor points for indexing.
-    Be careful of off-by-one indexing mistakes!
+在上面的例子里，我们要找 "I"、"am"、"here"、"." 这几个 token 的下一个 token 概率。为此，你要取的是 "\n"、"I"、"am"、"here" 的 logits——因为生成某个 token 的概率，来自它前一个 token 的预测。请以 `get_response_idxs` 的返回值作为索引的锚点。小心差一（off-by-one）错误！
 
-3.  **(Coding, 6 points)**. The training and reference LLM policies are
-    loaded for you. We load the training policy in with LoRA for
-    computational efficiency during fine-tuning in the next part.
-    Implement `compute_dpo_objective` with the objective provided in the
-    theory portion for your favorite positive value of $\beta$. Does
-    $\beta$ affect the loss printed out? Why or why not? You do not need
-    to write why in your submission, but this line of thinking will help
-    debug any issues with your DPO loss function.
+3.  **（编程，6 分）**。训练用的策略与参考策略（两个 LLM）已经帮你加载好了。为了在下一部分的微调中省一些算力，训练策略是用 LoRA 加载的。请用理论部分给出的目标实现 `compute_dpo_objective`，$\beta$ 取你喜欢的任意正值。$\beta$ 会影响打印出来的损失吗？为什么？这一点不需要写进作业，但顺着想下去，有助于你排查 DPO 损失函数的问题。
 
-4.  **(Written + Coding, 6 points)**. Finally, you will fine-tune the
-    Gemma model on the DPO loss function with batch size (and dataset
-    size) of $1$ by implementing `finetune`. The prompt and completions
-    are provided in the notebook. The optimizer, $\beta$, and the number
-    of fine-tuning steps have also been provided. Make sure to use
-    `torch.no_grad()` on the reference model to prevent unnecessary
-    gradients!
+4.  **（笔答 + 编程，6 分）**。最后，请实现 `finetune`，在 DPO 损失上微调 Gemma 模型；批大小（以及数据集大小）为 $1$。提示词与补全内容都在笔记本里，优化器、$\beta$ 和微调步数也已经给定。记得对参考模型使用 `torch.no_grad()`，免得算不必要的梯度！
 
-    Report the proportion of "because of" occurences before and after
-    fine-tuning. Additionally, include a plot of the DPO loss curve.
+请报告微调前后 "because of" 出现的比例，并附上一张 DPO 损失曲线图。
 
-::: {.callout-note title="code"}
+::: {.callout-note title="代码"}
 ```{python ex1-q4}
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, set_seed

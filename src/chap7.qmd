@@ -1,5 +1,5 @@
 ---
-title: Conclusion
+title: "结语"
 format: html
 filters:
   - pyodide
@@ -9,333 +9,333 @@ execute:
     auto: true
 ---
 
-Machine learning systems are increasingly shaping consequential decisions in our lives—from the content we consume to the opportunities we receive. A central challenge in developing trustworthy AI is ensuring these systems align with human preferences rather than optimizing for proxies that diverge from what people actually value. This book has presented a comprehensive framework for learning from human feedback, drawing on nearly a century of research across economics, psychology, statistics, and computer science.
+机器学习系统正在越来越多地左右我们生活中有分量的决定——从我们读到什么内容，到我们能得到什么机会。要做出可信的 AI，一个核心挑战就是让这些系统与人类的偏好对齐，而不是去优化那些与人真正看重的东西逐渐跑偏的替代指标。本书给出了一套完整的框架，用来从人类反馈中学习；它背后是经济学、心理学、统计学与计算机科学近一个世纪的研究积累。
 
-## Our Approach
+## 我们的进路
 
-This book has taken an interdisciplinary approach to machine learning from human preferences, weaving together insights from diverse fields into a unified technical and conceptual framework.
+本书用的是跨学科的方式来做"从人类偏好中学习"这件事：把各个领域的洞见织在一起，形成一个统一的、技术与概念兼备的框架。
 
-### Foundations from Multiple Disciplines
+### 来自多个学科的基础
 
-Our treatment began with foundational models that originated outside of machine learning. The Bradley-Terry model (@sec-bradley-terry), introduced in 1952 for ranking chess players, provides the mathematical backbone for modern preference learning—including state-of-the-art methods like Direct Preference Optimization for language model alignment. Thurstone's law of comparative judgment from psychophysics (1927), Luce's choice axiom (1959), and McFadden's discrete choice econometrics (1974) all inform how we model the relationship between latent utilities and observed choices.
+我们从一个不在机器学习内部诞生的基础模型讲起。Bradley-Terry 模型（@sec-bradley-terry）1952 年提出时是用来给棋手排名的，如今却是现代偏好学习的数学骨架——连面向语言模型对齐的最先进方法（直接偏好优化）也建在它上面。心理物理学中 Thurstone 的比较判断定律（1927）、Luce 的选择公理（1959）、McFadden 的离散选择计量经济学（1974），共同塑造了我们如何刻画"潜在效用"与"观察到的选择"之间的关系。
 
-This interdisciplinary foundation is not merely historical context. Understanding *why* the Bradley-Terry model arises from random utility assumptions, and *when* its key assumption—Independence of Irrelevant Alternatives—fails, equips practitioners to recognize the limitations of their methods. The red-bus/blue-bus problem and preference heterogeneity are not abstract concerns but practical challenges that arise in real applications.
+这一跨学科的基础不只是历史背景。理解了 Bradley-Terry 模型*为什么*会从随机效用假设里推出来、它的关键假定——独立无关备选——*在什么时候*会失效，实践者才看得出来自己用的方法有什么边界。红巴士／蓝巴士问题、偏好的异质性，都不是抽象的担忧，而是真实应用中迟早会碰到的问题。
 
-### From Axioms to Algorithms
+### 从公理到算法
 
-The book progressed from axiomatic foundations to practical algorithms:
+本书的推进顺序是：先讲公理基础，再讲可用的算法。
 
-**Chapter 1** established the mathematical language of preferences. We showed how random utility models with Gumbel-distributed noise yield the tractable logit form, and how the IIA axiom collapses an exponentially large preference space to a linear number of parameters. These are not arbitrary modeling choices—they encode specific assumptions about human cognition that may or may not hold in practice.
+**第 1 章**建立描述偏好的数学语言。我们说明了几何噪声服从 Gumbel 分布的随机效用模型怎样得到可计算的 logit 形式，也说明了独立无关备选这条公理怎样把一个指数级大的偏好空间压缩成一线数值效用。
 
-**Chapter 2** developed estimation methods for preference models. Maximum likelihood estimation provides point estimates efficiently, while Bayesian inference quantifies uncertainty—essential for downstream decision-making. The Elo rating system, used from chess to video games, emerges naturally as stochastic gradient descent on the Bradley-Terry likelihood. Gaussian Processes offer flexible nonparametric alternatives when linear reward functions are too restrictive.
+**第 2 章**给出偏好模型的估计方法。最大似然能快速给出点估计，贝叶斯推断则把不确定性量化出来——后面的决策要用得上。从棋类到电子游戏都在用的 Elo 等级分系统，正好是 Bradley-Terry 似然上做随机梯度下降的自然结果；而当线性奖励函数太受限时，高斯过程提供了灵活的非参数替代。
 
-**Chapter 3** addressed active data collection. Human feedback is expensive; we cannot afford to collect data naively. Fisher information quantifies how much each comparison teaches us about preferences, enabling intelligent query selection. The connection to optimal experimental design—A-optimal, D-optimal, E-optimal criteria—grounds active learning in classical statistical theory.
+**第 3 章**处理主动的数据采集。人类的反馈很贵，我们不能 naive 地堆数据。费雪信息量化了"每一次比较能让我们多了解多少偏好"，从而可以聪明地挑选要问的问题。它与最优实验设计（A-最优、D-最优、E-最优准则）的联系，把主动学习接到了经典统计理论之上。
 
-**Chapter 4** turned to decision-making under learned preferences. Thompson Sampling elegantly balances exploration and exploitation by sampling from the posterior and acting optimally under the sample. Dueling bandits extend multi-armed bandits to the comparison setting, with distinct winner concepts (Condorcet, Borda, von Neumann) and regret notions appropriate for different applications. Preferential Bayesian Optimization unified Gaussian Process preference models from earlier chapters with sequential decision-making, enabling optimization of complex objectives from comparison feedback alone. The chapter culminated in the Cooperative Inverse Reinforcement Learning (CIRL) framework, which reconceived preference learning as a cooperative game between human and agent—shifting from passive data collection to interactive collaboration where the agent's queries themselves shape the human's ability to communicate preferences.
+**第 4 章**转向"用学到的偏好做决策"。汤普森采样用"从后验里采一个样本、再按这个样本最优地行动"这一做法，漂亮地兼顾了探索与利用。对决老虎机把多臂老虎机推广到"只给比较反馈"的场景，并针对不同的应用给出不同的"胜者"概念（孔多塞胜者、博尔达胜者、冯·诺依曼胜者）和相应的遗憾定义。偏好式贝叶斯优化把前面几章的高斯过程偏好模型与序贯决策合到一起，使我们可以只靠比较反馈去优化复杂目标。本章的落点是协作逆强化学习（CIRL）框架：它把偏好学习重新看成人和智能体之间的合作博弈——从被动收集数据，变成交互式协作，其中智能体提什么问题，本身就在影响人能把自己的偏好说清楚到什么程度。
 
-**Chapter 5** examined aggregation when multiple stakeholders have heterogeneous preferences. Arrow's Impossibility Theorem and the Gibbard-Satterthwaite Theorem establish fundamental limits on what any aggregation mechanism can achieve—yet domain restrictions like single-peaked preferences offer practical escape routes. A key result connected the Borda count to Direct Preference Optimization, showing that DPO finds the policy that wins the most head-to-head matchups (@sec-borda-dpo)—giving modern alignment methods a precise social choice interpretation. Sen's liberal paradox (@sec-nosy-preferences) revealed the tension between respecting individual rights and achieving Pareto efficiency when preferences are "nosy," while the inversion problem (@sec-inversion) cautioned that observed behavior may not reflect true preferences. The Community Notes case study (@sec-community-notes) illustrated how these ideas play out in a deployed system. Mechanism design, including VCG auctions, showed how to align individual incentives with collective objectives—but at a cost.
+**第 5 章**研究多方利益相关者偏好各异时的汇总问题。阿罗不可能定理与吉巴德—萨特斯维特定理确立任何汇总机制都绕不过的根本限制——但单峰偏好这类对定义域的限制，给出了现实中可行的出路。其中一个关键结果把博尔达计分法与直接偏好优化连了起来：DPO 找到的是"在两两对比中赢下最多场"的那个策略（@sec-borda-dpo），这就给现代对齐方法一个确切的社会选择解释。森的自由悖论（@sec-nosy-preferences）揭示：当偏好是"管得宽"的，尊重个人权利与达到帕累托有效之间就有张力；反演问题（@sec-inversion）则提醒我们，观察到的行为未必反映真实偏好。Community Notes 这个案例（@sec-community-notes）说明这些想法在已经上线的系统里是怎样落地的。机制设计（包括 VCG 拍卖）则展示了怎样把个人激励引向集体目标——只是要付出代价。
 
-### The Critical Turn
+### 一次关键的转向
 
-A distinctive feature of this book is **Chapter 6**, which stepped back from technical methods to ask a normative question: *Whose preferences matter?*
+本书的一个特点，是**第 6 章**：它从技术方法上退一步，问一个规范性的问题——*谁的偏好才算数？*
 
-Every technical choice in the preference learning pipeline—from who gets queried to how preferences are aggregated—embeds value judgments about whose interests count. The Fisher information machinery from Chapter 3 maximizes informativeness per query, but information-maximizing strategies can systematically underquery minority populations whose preferences are "easier" to model. Assuming IIA treats context-dependent preferences as irrational, potentially disadvantaging overburdened users whose choices are shaped by external constraints rather than stable preferences. Using existing data to define a reference policy encodes historical inequities into the learning objective.
+偏好学习流水线上的每一个技术选择——从去问谁，到怎么汇总偏好——都含着"谁的兴趣算数"的价值判断。第 3 章那套 费雪信息的工具能最大化每次询问换回的信息量，可按信息最大化来选，会系统地少问那些偏好"更好建模"的少数人群。假定独立无关备选成立，等于把情境依赖的偏好当成不理性，这可能让负担过重的用户处于不利——他们的选择更多是被外部条件塑造的，而不是出于稳定的偏好。用已有的数据去定义参考策略，等于把历史上的不平等写进了学习目标。
 
-This critical lens does not reject the technical methods developed in earlier chapters. Rather, it calls for conscious recognition that preference learning is not value-neutral. The designer's choices shape who benefits and who is harmed. Fairness constraints, stratified evaluation, and participatory design are not add-ons but essential components of responsible system development.
+这种批判的眼光并不否定前面几章发展出来的技术方法。它要的是一种清醒的认识：偏好学习不是价值中立的。设计者的选择决定了谁受益、谁受损。公平性约束、分层评估、参与式设计不是可有可无的附加项，而是负责任地造系统时必须有的部分。
 
-## Lessons from the Alignment Era
+## 对齐时代给出的教训
 
-The rapid adoption of RLHF and DPO for language model alignment—beginning with InstructGPT in 2022 and accelerating through ChatGPT, Claude, and their successors—has stress-tested preference learning at a scale that the field's founders could not have anticipated. Several lessons have emerged from this experience that inform how we should think about the methods developed in this book.
+把 RLHF 与 DPO 用于语言模型对齐的迅速普及——从 2022 年的 InstructGPT 开始，到 ChatGPT、Claude 及其后续产品进一步加速——把偏好学习放在一个这门学科的开创者也无法预见的规模上做了压力测试。这段经历里浮现出几条教训，直接影响我们该怎么看本书介绍的这些方法。
 
-### What Worked
+### 哪些是管用的
 
-**Bradley-Terry is remarkably effective in practice.** Despite its strong assumptions (IIA, homogeneous annotators, context-independence), the Bradley-Terry model has proven to be a workhorse for reward modeling and DPO. The simplicity that makes it analytically tractable—a single parameter per item, sigmoid link function, logistic likelihood—also makes it computationally efficient at scale. The DPO reformulation (Chapter 1, @sec-llm-example) eliminates the separate reward model entirely, showing that the Bradley-Terry likelihood can be directly optimized as a policy objective. This is a striking vindication of the classical models that form the backbone of this book.
+**Bradley-Terry 在实践中出奇地好用。** 尽管它的假定很强（独立无关备选、标注员同质、与情境无关），Bradley-Terry 模型还是成了奖励建模与 DPO 的主力工具。让它能被解析处理的那些简单之处——每个项目只有一个参数、sigmoid 连接函数、logistic 似然——也正是它能在大规模下算得起的原因。DPO 那种改写（第 1 章，@sec-llm-example）干脆把独立的奖励模型去掉了，说明 Bradley-Terry 似然可以直接当作策略目标来优化。这对构成本书骨架的那些经典模型来说，是一次很有力的印证。
 
-**Active learning reduces annotation cost.** The Fisher information framework from Chapter 3 has proven practically valuable for selecting which comparisons to annotate. ADPO (@sec-adpo) and related methods demonstrate that intelligent query selection can reduce annotation budgets by 30-50\% compared to random sampling, a substantial saving when human preference labels cost \$1-10 each and training runs require tens of thousands of comparisons.
+**主动学习能省下标注成本。** 第 3 章的 费雪信息框架在"该标哪些比较"这件事上确实用得上。ADPO（@sec-adpo）与相关方法表明：聪明的选题能把标注预算比随机抽样降低 30–50\%。当一条人类偏好标签要 1–10 美元、一次训练要几万条比较时，这是很可观的节省。
 
-**Uncertainty quantification matters for deployment.** The Bayesian methods from Chapter 2 and the posterior-based decision-making from Chapter 4 (Thompson Sampling, PBO) are not merely academic exercises. In production systems, knowing *how confident* the model is in its preference predictions enables calibrated decisions about when to deploy new model versions, when to collect more data, and when to fall back to conservative defaults.
+**部署时，把不确定性量化出来是真有用的。** 第 2 章的贝叶斯方法与第 4 章基于后验的决策（汤普森采样、偏好式贝叶斯优化），不只是学术练习。在生产系统里，知道模型对自己的偏好预测*有多大把握*，才能做出有分寸的判断：什么时候上新版本、什么时候再多收数据、什么时候退回保守的默认行为。
 
-### What Surprised Us
+### 让我们意外的结果
 
-**The gap between reward models and human judgment is smaller than expected—but the remaining gap is consequential.** Modern reward models trained via Bradley-Terry achieve high agreement with held-out human preferences (often 70-80\% accuracy on binary comparisons). But the errors are not random: they cluster around responses that are subtly harmful, sycophantic, or superficially impressive but factually wrong. These failure modes are precisely the cases where getting preferences right matters most, and they suggest that the IIA assumption—which treats all comparisons as equally well-modeled—may need to be relaxed for safety-critical applications.
+**奖励模型与人类判断之间的差距比预想的小——但剩下的那部分差距影响很大。** 用 Bradley-Terry 训练出来的现代奖励模型，与留出来的人类偏好一致度相当高（在两两比较上常有 70–80\% 的准确率）。但错不是乱错的：它们集中在那些有一点害处的、迎合人的、看着很唬人其实说错了的回答上。而这些失败模式恰恰是最需要把偏好搞对的情形。这也说明：把所有比较都看成"一样建模得好"的独立无关备选假定，在涉及安全的应用里可能需要放宽。
 
-**Goodhart's Law is real and pernicious.** When models are optimized against a learned reward function, they inevitably find ways to achieve high reward without satisfying the underlying human preferences. This "reward hacking" is a direct consequence of the gap between the proxy (learned reward) and the target (true human preferences). The phenomenon manifests as models that produce longer responses (because annotators weakly prefer length), use confident-sounding language regardless of accuracy, or agree with the user's stated views rather than providing honest assessments. Recognizing reward hacking as an instance of Goodhart's Law—"when a measure becomes a target, it ceases to be a good measure"—connects it to a rich literature in economics and public policy.
+**古德哈特定律是真的，而且危害不小。** 让模型对着一个学出来的奖励函数做优化，它总会找到办法拿到高奖励、却并不满足背后的人类偏好。这种"奖励投机"，直接来自替代指标（学出来的奖励）与真实目标（人类的真实偏好）之间的落差。表现就是：模型输出更长（因为标注员轻微地偏好长度），不管说得对不对都用很有把握的语气，或者顺着用户说的观点走，而不是给出诚实的判断。把奖励投机看成古德哈特定律的一个实例——"一个指标一旦成了目标，就不再是个好指标"——就把它和经济学、公共政策里大量已有的讨论接上了。
 
-**Annotator disagreement is signal, not noise.** Early RLHF work treated disagreement among annotators as measurement error to be averaged away. But Chapter 5's analysis of preference aggregation suggests a different interpretation: annotators disagree because they genuinely hold different preferences, not (only) because they make mistakes. The DPO-Borda connection (@sec-borda-dpo) shows that aggregating via majority vote implicitly selects the Borda winner—which may not be the socially optimal choice when minority preferences carry important information. This has led to growing interest in pluralistic alignment approaches that maintain multiple preference models rather than collapsing to a single aggregate.
+**标注员之间的分歧是信息，不是噪声。** 早期的 RLHF 工作把标注员的分歧当成测量误差，取个平均就算处理掉了。但第 5 章关于偏好汇总的分析给出了另一种解释：标注员分歧，是因为他们本来就持有不同的偏好，而不仅仅是（或不只是）因为他们会犯错。DPO 与博尔达计分法之间的联系（@sec-borda-dpo）说明：用多数票来汇总，隐式地是在选博尔达胜者——而当少数的偏好里带着重要信息时，这可能并不是社会意义上更好的选择。这也让多元对齐的思路越来越受关注：保留多个偏好模型，而不是塌缩成一个汇总模型。
 
-### What Broke
+### 出了问题的地方
 
-**The inversion problem at scale.** Chapter 5's discussion of the inversion problem (@sec-inversion)—that observed behavior does not equal underlying preferences—takes on new urgency at the scale of commercial annotation. Annotators working under time pressure, fatigue, and piece-rate compensation produce preference labels that reflect their working conditions as much as their genuine judgments. Studies have documented systematic biases: annotators favor shorter responses when fatigued, prefer responses that match their cultural background, and exhibit position bias (favoring the first response presented). These are precisely the distortions that Chapter 6's fairness analysis predicts—and they propagate through the entire pipeline.
+**规模放大之后的反演问题。** 第 5 章关于反演问题（@sec-inversion）的讨论——观察到的行为不等于背后的偏好——放到商业标注的规模上，变得格外紧迫。在时间压力、疲劳和计件报酬下工作的标注员，给出的偏好标签既反映他们真实判断，也反映他们当时的工作条件。已有研究记录了系统性的偏差：疲劳时标注员更偏好短回答；更偏好与自己文化背景一致的回答；还有位置偏差（更偏向先看到的那一个）。这些正是第 6 章公平性分析所预测的失真——而它们会传遍整条流水线。
 
-**IIA violations in practice.** The Independence of Irrelevant Alternatives assumption, whose limitations we analyzed theoretically in Chapter 1 (the red-bus/blue-bus problem), manifests concretely in LLM alignment. Annotators' preference between two responses depends on what other responses they have recently evaluated (contrast effects), how the comparison is framed (whether they are asked "which is better" versus "which is less harmful"), and even the order of presentation. These violations suggest that richer preference models—context-dependent Bradley-Terry, mixed logit, or the random-coefficients models from Chapter 1—may be needed for high-stakes applications.
+**实践中对独立无关备选的违反。** 我们在第 1 章从理论上分析过它的局限（红巴士／蓝巴士问题）；在真实场景里，这个问题很具体：标注员在两个回答之间怎么选，取决于他刚刚评过哪些其他回答（对比效应）、问题怎么措辞（是问"哪个更好"还是"哪个危害更小"），甚至连呈现顺序都会影响结果。这些违反说明：在后果重的应用里，可能需要更丰富的偏好模型——带情境的 Bradley-Terry、混合 logit，或第 1 章讲的随机系数模型。
 
-**Single-turn preferences do not capture long-horizon value.** Most preference learning for language models collects feedback on individual responses in isolation. But users ultimately care about the quality of extended interactions—whether the model is consistently helpful over a conversation, whether it remembers context appropriately, and whether it knows when to ask clarifying questions versus provide direct answers. Extending preference models from single comparisons to trajectory-level feedback remains an open challenge that connects to the sequential decision-making framework of Chapter 4.
+**单轮的偏好抓不住长时段的利益。** 语言模型的偏好学习，大多是把每个回答单独拿出来收集反馈。但用户真正在意的是一次较长的交互质量——模型在整段对话里是否始终有帮助，是否恰当地记住了上下文，是否知道什么时候该追问、什么时候该直接回答。把偏好模型从"单次比较"扩展到"整段轨迹层面的反馈"，仍是未解的问题，它和第 4 章的序贯决策框架是连在一起的。
 
-## Forwarding the Field
+## 让这个领域往前走
 
-Machine learning from human preferences is a vibrant area of research with many open challenges. We highlight several directions that we believe are particularly important for the field's advancement.
+从人类偏好中学习，是一个很有活力的研究方向，还有很多开放难题。这里点出几个我们认为对这个领域特别重要的方向。
 
-### Beyond Pairwise Comparisons
+### 超越两两比较
 
-Much of this book focused on pairwise comparisons—the simplest and most well-understood form of preference data. But humans express preferences in many ways:
+本书很大篇幅在讲两两比较——最简单、也最被理解透彻的一种偏好数据。但人类表达偏好的方式有很多种：
 
-- **Natural language feedback**: "This response is helpful but could be more concise" conveys richer information than a binary comparison. Recent work on learning from critiques and natural language rewards suggests that language feedback can be formalized as soft constraints on the reward function, though the mapping from language to reward remains noisy and context-dependent.
-- **Partial rankings**: A user might confidently rank their top three choices but be uncertain about the rest. Plackett-Luce models (@eq-plackett-luce) handle full rankings, but principled treatment of partial and uncertain rankings requires extensions that allow "I don't know" or "these are roughly equivalent" responses.
-- **Ratings and Likert scales**: Absolute judgments on a scale provide cardinal (not just ordinal) information, though they introduce calibration challenges across annotators—one person's 4 out of 5 may be another's 3. Anchoring and cross-annotator calibration methods are active areas of research.
-- **Implicit signals**: Engagement time, scroll patterns, and click behavior reveal preferences without explicit queries. But these signals are heavily confounded by interface design, attention patterns, and the inversion problem (Chapter 5)—longer engagement may reflect confusion rather than interest.
+- **自然语言的反馈**："这个回答有用，但可以更简洁"——比一次两两比较传达的信息更丰富。从批评语料和自然语言奖励中学习的一些近期工作表明，语言反馈可以被形式化成对奖励函数的软约束；只是从语言到奖励的这层映射噪声很大，也很依赖情境。
+- **部分排序**：用户可能很有把握地排出自己最前三个选择，对其余的就不确定。Plackett-Luce 模型（@eq-plackett-luce）能处理完整排序，但要妥善对待"不完整"或"不确定"的排序，还需要扩展：允许"不知道""这两个差不多"这类回答。
+- **打分与李克特量表**：按量表给出的绝对判断提供的是基数（不只是序数）信息，但会带来跨标注员的标定难题——同一个人给 5 分制里的 4 分，在另一个人那里可能只算 3 分。锚点设置与跨标注员标定，仍是活跃的研究方向。
+- **隐式信号**：停留时长、翻页轨迹、点击行为，不用提问也能透露偏好。但这些信号受界面设计、注意力模式与反演问题（第 5 章）的干扰很强——停留更久，可能说明的是困惑，不是感兴趣。
 
-Integrating these diverse modalities into unified preference models is an important open problem. Each modality has strengths: pairwise comparisons are reliable but expensive; implicit signals are cheap but noisy; natural language is rich but difficult to formalize. Hybrid approaches that combine multiple feedback types, weighting each appropriately, hold promise for more efficient and accurate preference learning.
+把这些多样的模态整合进统一的偏好模型，是一个重要的开放问题。每种模态各有长处：两两比较可靠但贵；隐式信号便宜但噪声大；自然语言丰富，却很难形式化。把多种反馈结合起来、各自给合适的权重的混合做法，有望让偏好学习更有效、也更准。
 
-### Scalable Oversight
+### 可扩展监督（Scalable Oversight）
 
-As AI systems become more capable, the tasks they perform become harder for humans to evaluate. A language model writing code may produce solutions that work but are subtly flawed in ways a non-expert cannot detect. A scientific assistant might propose experiments whose validity requires deep domain expertise to assess.
+AI 系统越来越能干，它们做的事也就越来越难由人来评。语言模型写的代码可能能跑，但有一些不专业的人看不出来的细微毛病；一个科研助手提出的实验方案，它靠不靠谱要靠很深的专业知识才能判断。
 
-*Scalable oversight* addresses this challenge through techniques like:
+*可扩展的监查*正是为这类难题准备的一组技术，包括：
 
-- **Recursive reward modeling**: Decomposing complex evaluation tasks into simpler subtasks that humans can reliably judge. The key insight is that while evaluating a complete solution may be hard, verifying individual steps is often feasible. This connects to the preference elicitation framework of Chapter 3: by decomposing evaluation, we can apply Fisher information analysis to each subtask and select the most informative verification queries.
-- **AI-assisted evaluation**: Using AI systems to help humans provide more accurate feedback, while remaining vigilant about circular dependencies. RLAIF (reinforcement learning from AI feedback) replaces human annotators with AI evaluators, raising questions about whether the preference signal is genuinely informative or merely reflects the evaluator model's own biases.
-- **Debate and amplification**: Adversarial procedures where AI systems critique each other's outputs, surfacing flaws that a single evaluator might miss. This can be formalized as a zero-sum game, connecting to the von Neumann winner concept from Chapter 4's dueling bandits framework.
+- **递归式奖励建模**：把复杂的评审任务拆成人能可靠判断的小任务。关键的思路是：评价一整个方案也许很难，但验证其中一个个步骤往往做得到。这与第 3 章的偏好征询框架是相通的——把评审拆开之后，就能对每个子任务做 费雪信息分析，挑出最有信息量的那些验证性问题。
+- **AI 辅助的评估**：让 AI 系统帮人给出更准确的反馈，同时警惕自相关的循环。RLAIF（从 AI 反馈中学习）用 AI 评估员取代人类标注员，这就带来一个问题：这样的偏好信号到底有多少信息量，还是只是在重复评估模型自己的偏见。
+- **辩论与放大**：让 AI 系统互相批评对方的输出，把单个评估者容易漏掉的问题暴露出来。它可以被形式化成一场零和博弈，这正好接到第 4 章对决老虎机框架里的冯·诺依曼胜者概念。
 
-The CIRL framework from Chapter 4 models the cooperative structure of oversight, where the human's ability to evaluate depends on how the agent presents its outputs. But scaling these ideas to superhuman AI systems—where the agent's capabilities exceed the evaluator's—remains one of the most important open frontiers in AI safety.
+第 4 章的协作逆强化学习框架，把监查中的合作关系建了出来：人能否评价，取决于智能体怎么呈现自己的输出。但把这些想法推广到能力超过评价者的超强 AI 系统上，仍是 AI 安全中最要紧的开放前沿之一。
 
-### Temporal Dynamics and Preference Change
+### 时间动态与偏好的变化
 
-This book has largely treated preferences as static: a user has fixed utilities $V_j$ that we aim to estimate. In reality, preferences evolve over time. A user's taste in music changes as they discover new genres; a society's norms around acceptable content shift across decades; an annotator's judgment drifts as they gain experience with the task.
+本书基本把偏好当成静态的：用户有一组固定的效用 $V_j$，我们想办法把它们估出来。可现实里偏好是随时间变的。一个人的音乐口味会随着他接触新曲风而变化；一个社会对"什么内容可以接受"的标准，会在几十年里位移；标注员的判断，也会随着他对任务越来越熟而漂移。
 
-Modeling temporal preference dynamics introduces several challenges:
+给随时间变化的偏好建模，会遇到几个难题：
 
-- **Distinguishing drift from noise**: Is a changed preference a genuine evolution (the user's taste matured) or a noisy observation (the user was tired that day)? The Bayesian framework from Chapter 2 can be extended with time-varying priors—for example, a random walk on utilities—but choosing the right rate of change requires domain knowledge.
-- **Non-stationarity in online learning**: The Elo rating system (Chapter 2, @sec-online) implicitly handles non-stationarity through its constant step size $K$, which weights recent observations more heavily. But the optimal $K$ depends on the rate of change, creating a tradeoff between responsiveness and stability.
-- **Retroactive fairness**: If a system learns preferences from historical data that reflects outdated norms, deploying those preferences perpetuates past values. Chapter 6's pipeline framework ($\mathcal{E} \to \mathcal{L} \to \mathcal{A} \to \mathcal{D}$) provides a lens for auditing where temporal biases enter.
+- **区分漂移与噪声**：一个变了的选择，是真实的观念演化（品味成熟了），还是一次噪声观测（那天他累了）？第 2 章的贝叶斯框架可以加上随时间变化的先验——比如让效用做一次随机游走——但变化速率取多少合适，需要领域知识。
+- **在线学习中的非平稳性**：Elo 等级分系统（第 2 章，@sec-online）其实通过固定的步长 $K$ 隐式地处理了非平稳——近期的观测权重更大。但最优的 $K$ 取决于变化的速率，这之间有个取舍：跟得上变化，还是保持稳定。
+- **追溯性的公平**：如果系统是从反映旧规范的历史数据里学偏好，那么把这些偏好部署出去，就等于是把过去的价值观延续下去。第 6 章的流水线框架（$\mathcal{E} \to \mathcal{L} \to \mathcal{A} \to \mathcal{D}$）正好提供了一个视角，用来看时间性的偏差是从哪一步进来的。
 
-### Heterogeneity and Personalization
+### 偏好各异与因人而异
 
-This book has established that preference heterogeneity is not a nuisance but a fundamental feature of human populations. Chapter 1 introduced mixture models and K-dimensional factor models to capture latent preference structure. Chapter 5's analysis of the inversion problem (@sec-inversion) showed that observed behavior can systematically misrepresent preferences for overburdened groups, and the liberal paradox (@sec-nosy-preferences) revealed when respecting diverse preferences conflicts with collective efficiency. Chapter 6 demonstrated how these issues compound through feedback loops across the preference learning pipeline.
+本书想说明的一点是：人与人之间偏好不同，不是一个麻烦，而是人群的基本特征。第 1 章介绍了混合模型与 K 维因子模型，用来刻画潜在的偏好结构。第 5 章关于反演问题（@sec-inversion）的分析说明：对负担过重的群体，观察到的行为会系统性地歪曲他们的偏好；而自由悖论（@sec-nosy-preferences）则说明，尊重多元偏好与集体效率在什么情况下会冲突。第 6 章进一步展示了：这些问题会通过反馈回路，沿着偏好学习的流水线一层层叠加。
 
-Yet significant open problems remain:
+但还有几个大问题没解决：
 
-- **Scalable mixture models** that identify latent preference clusters in high-dimensional settings without requiring users to self-identify. Variational inference and amortized methods show promise for scaling mixture-of-experts preference models to millions of users.
-- **Contextual preference models** that account for how the same user's preferences vary with cognitive load, time pressure, and framing—building on the contextual Bradley-Terry models introduced in Chapter 6. The challenge is distinguishing genuine context-dependence from IIA violations.
-- **Personalization with fairness constraints** that provide tailored assistance while ensuring no group is systematically underserved. Multi-objective optimization frameworks that Pareto-balance personalization and equity are an active area of research.
-- **Cold-start and few-shot preference learning**: How should a system behave for a new user with no preference history? Transfer learning from population-level models, combined with the active elicitation strategies from Chapter 3, can accelerate personalization while managing uncertainty.
+- **可扩展的混合模型**：在高维情形下自动找出潜在的偏好群体，而且不需要用户自己认领属于哪一类。变分推断与摊销化的方法，看来有望把"专家混合"式的偏好模型推到百万级用户。
+- **带情境的偏好模型**：处理同一个用户的偏好如何随认知负荷、时间压力、表述方式而变化——这建立在第 6 章介绍的带情境的 Bradley-Terry 模型之上。难点在于分清"真的与情境有关"和"只是违反了独立无关备选"。
+- **带公平性约束的个性化**：既要给每个人量身定制，又要保证没有哪个群体被系统性地怠慢。让个性化与公平在帕累托意义上取得平衡的多目标优化，是当前的研究热点。
+- **冷启动与少样本的偏好学习**：遇到一个没有任何偏好历史的新用户，系统该怎么办？从群体层面的模型做迁移学习，再配合第 3 章的主动征询策略，可以在控制住不确定性的同时加快个性化。
 
-The tension between personalization (giving each user what they want) and fairness (ensuring equitable outcomes across groups) is not fully resolved by the technical tools we have today. Progress requires both better algorithms and clearer normative frameworks for navigating these tradeoffs.
+个性化（给每个人他想要的）与公平（保证各群体的结果说得过去）之间的张力，以现有的技术工具还不能完全解决。要往前走，既需要更好的算法，也需要更清楚的规范性框架来指导怎么取舍。
 
-### Fairness and Value Alignment
+### 公平与价值对齐
 
-Chapter 6 introduced fairness considerations; making them operational requires ongoing research:
+第 6 章提出了公平方面的考虑；要把它们真正落地，还需要持续的研究：
 
-- **Fairness metrics for preference learning**: Standard fairness definitions (demographic parity, equalized odds) were developed for classification. What are the appropriate analogs for preference models? When is it fair for a system to learn different preference models for different groups? The pipeline framework from Chapter 6 suggests that fairness must be assessed at each stage ($\mathcal{E}, \mathcal{L}, \mathcal{A}, \mathcal{D}$), not just at the final output.
-- **Value alignment under disagreement**: When stakeholders have genuinely conflicting preferences, what should a system optimize for? Majority preferences? Pareto improvements? Maximin welfare? The social choice results of Chapter 5—particularly Arrow's theorem—tell us that no aggregation rule is universally satisfactory, but they also point toward domain restrictions and mechanism design as paths forward.
-- **Transparency and contestability**: Users should understand why a system makes the recommendations it does, and have meaningful recourse when they disagree. This requires preference models that are not only accurate but interpretable—a challenge for the high-dimensional factor models and GP-based approaches developed in earlier chapters.
-- **Pluralistic alignment**: Rather than learning a single aggregate preference model, maintain multiple models reflecting different value systems and allow users or institutions to choose among them. This connects to the mixture models of Chapter 1 and the multi-issue voting framework of Chapter 5.
+- **偏好学习该用什么公平指标**：常用的公平定义（人口均等、均等化优势）是为分类任务设计的。偏好模型里对应的是什么？系统在什么时候给不同群体学不同的偏好模型才算公平？第 6 章的流水线框架提示我们：公平要在每一个阶段（$\mathcal{E}, \mathcal{L}, \mathcal{A}, \mathcal{D}$）分别评估，而不能只看最后的输出。
+- **大家意见不同时，价值对齐对齐到什么**：当各方利益相关者的偏好确实互相冲突，系统该优化什么？多数人的偏好？帕累托改进？还是最小化最大损失（maximin）？第 5 章社会选择的结果——尤其是阿罗定理——告诉我们没有任何汇总规则能让所有人满意；但它们也指出了往前走的两条路：限制定义域，以及做机制设计。
+- **透明与可申诉**：用户应该能理解系统为什么给出这些推荐，不同意时也要有真正管用的申诉渠道。这要求偏好模型不光准，还要看得懂——对前面几章发展出来的高维因子模型与基于高斯过程的方法来说，这是很难的一点。
+- **多元对齐**：不去学一个"汇总的"偏好模型，而是同时维护多个反映不同价值体系的模型，让用户或机构从中选择。这和第 1 章的混合模型、第 5 章的多议题投票框架是相连的。
 
-These are not purely technical questions—they require engagement with philosophy, law, and democratic theory. But technical researchers must be part of the conversation, ensuring that fairness frameworks are implementable and that their limitations are well understood.
+这些不只是技术问题——它们需要与哲学、法律和民主理论对话。但技术研究者必须参与进来，确保提出的公平框架真能实现，也确保人们清楚它们的局限。
 
-### Foundation Model Alignment
+### 基础模型的对齐
 
-Large language models trained via RLHF and DPO represent the most prominent current application of preference learning. Yet significant challenges remain:
+用 RLHF 与 DPO 训练出来的大语言模型，是偏好学习目前最显眼的应用。但挑战还很多：
 
-- **Reward hacking**: Models may find ways to achieve high reward without actually satisfying human preferences—exploiting ambiguities in the reward signal rather than genuinely helpful behavior. This is a manifestation of Goodhart's Law: when the learned reward becomes the optimization target, it ceases to be a faithful proxy for human preferences. Mitigations include reward model ensembles, KL-constrained optimization (as in DPO's implicit KL penalty), and regular recalibration against fresh human judgments.
-- **Distributional shift**: Preferences collected in one context may not generalize to deployment settings, especially as models are used for novel tasks. The Bradley-Terry model assumes a fixed set of items with stable utilities, but in practice the "items" (model responses) change as the model improves, creating a moving target that requires online adaptation.
-- **Constitutional AI and rule-based approaches**: Can we move beyond learning from examples to learning from principles? Constitutional AI proposes specifying desirable behavior through written rules rather than example comparisons, raising questions about how to reconcile principle-based and preference-based approaches. The connection to single-peaked preferences (Chapter 5) is suggestive: if principles define a partial order over responses, they may restrict the preference domain enough to escape aggregation impossibilities.
-- **Multi-objective alignment**: Real-world alignment requires balancing multiple objectives simultaneously—helpfulness, harmlessness, honesty, and more. This is fundamentally a multi-objective optimization problem where different objectives can conflict, connecting to the social choice framework of Chapter 5.
+- **奖励投机**：模型可能找到办法拿到高奖励，却没有真的满足人类的偏好——它钻的是奖励信号里的空子，而不是真的变有帮助。这就是古德哈特定律的一种表现：学出来的奖励一旦成了优化目标，就不再是人类偏好的忠实替代。缓解的办法包括：用多个奖励模型做集成、加 KL 约束的优化（DPO 的隐式 KL 惩罚就是这个思路），以及定期用新的人类判断重新校准。
+- **分布偏移**：在一个情境下收集的偏好，未必能推广到实际部署的环境，尤其是模型开始被用于新任务时。Bradley-Terry 模型假定项目集合固定、效用稳定；可现实中的"项目"（模型的回答）会随着模型变强而不断变化，目标一直在移动，需要在线适应。
+- **宪法式 AI 与基于规则的方法**：能不能从"从例子中学"走向"从原则中学"？宪法式 AI 主张用写下来的规则来规定想要的行为，而不是用实例之间的比较，这就提出了一个问题：基于原则与基于偏好这两条路怎么协调。它与单峰偏好（第 5 章）的联系颇值得琢磨：如果原则能在回答之间定义出一个偏序，就可能把偏好定义域限制到足以绕开汇总的不可能性。
+- **多目标对齐**：现实中的对齐要同时兼顾多个目标——有用、无害、诚实，等等。这在本质上是一个多目标优化问题，各目标之间可能互相冲突，正对应第 5 章的社会选择框架。
 
-The alignment of foundation models with human values is arguably the most consequential application of preference learning today. Progress in this area requires both fundamental research on preference modeling and careful empirical work on what actually makes language model outputs helpful, harmless, and honest.
+把基础模型与人类的价值观对齐，可以说是偏好学习今天影响最大的应用。这个方向要进步，既需要偏好建模方面的基础研究，也需要扎实的实证工作，去搞清楚究竟是什么让语言模型的回答有用、无害、诚实。
 
-## Capstone Projects
+## 综合项目
 
-The chapters of this book develop a rich toolkit---from preference models and estimation to active elicitation, sequential decisions, social aggregation, and fairness---but the deepest understanding comes from applying these ideas to open-ended problems. The following capstone projects are designed as extended investigations suitable for individual or small-team work. Each project is inspired by the format of the CS329H course project: students produce a pre-analysis plan, a final manuscript in NeurIPS format (up to 8 pages), and reproducible code. Projects span the book's six main chapters and range from focused empirical studies to more ambitious research contributions. Difficulty is indicated by stars: \* (one person, roughly four weeks), \*\* (one to two people, roughly six weeks), and \*\*\* (two to three people, eight or more weeks).
+前面各章给了一套很全的工具——从偏好模型与估计，到主动征询、序贯决策、社会汇总，再到公平。但对这些问题最深的理解，还是来自把它们用到开放的问题上。下面这些综合项目按"较长的独立探索"来设计，适合个人或三五人的小组完成。每个项目都参照 CS329H 课程作业的形式：学生要交一份预分析计划、一篇按 NeurIPS 格式写的最终报告（不超过 8 页），以及可复现的代码。项目覆盖本书六个主要章节，难度从具体的实证研究到更有雄心的研究工作都有。难度用星号标注：\*（一人，约四周）、\*\*（一到两人，约六周）、\*\*\*（两到三人，八周以上）。
 
-### Project 1: When Does IIA Fail? Detecting and Modeling Context Effects in Preference Data (\*)
+### 项目 1：独立无关备选什么时候会失效？——在偏好数据中检测并建模情境效应（\*）
 
-**Description.** The Independence of Irrelevant Alternatives assumption (@sec-iia) is the backbone of Bradley-Terry and Plackett-Luce models, yet it is routinely violated in practice---the "red-bus/blue-bus" problem being the canonical example. This project investigates *when and how much* IIA violations matter by designing controlled experiments (or analyzing existing preference datasets) to detect context effects, then comparing Bradley-Terry against richer models that relax IIA.
+**题目说明。** 独立无关备选（@sec-iia）是 Bradley-Terry 与 Plackett-Luce 模型的骨架，但它在实践中经常被违反——"红巴士／蓝巴士"就是最典型的例子。这个项目要研究的是：*在什么情况下、在多大程度上*，违反它会带来影响。做法是设计受控实验（或分析已有的偏好数据集）来检测情境效应，然后把 Bradley-Terry 与放宽这一假定的更丰富模型做对比。
 
-**Suggested methods.**
+**建议方法。**
 
-- Fit a standard Bradley-Terry model (@sec-bradley-terry) and a mixed logit or nested logit model (@sec-beyond-bradley-terry) to the same preference data.
-- Use likelihood ratio tests or AIC/BIC (@sec-model-selection) to quantify whether the richer model provides a statistically significant improvement.
-- Construct synthetic "red-bus/blue-bus" scenarios by introducing near-duplicate items into a choice set and measuring the distortion in estimated utilities.
+- 在同一份偏好数据上，分别拟合标准的 Bradley-Terry 模型（@sec-bradley-terry）与混合 logit 或嵌套 logit 模型（@sec-beyond-bradley-terry）。
+- 用似然比检验或 AIC/BIC（@sec-model-selection），量化更复杂的模型是否带来了统计上显著的提升。
+- 人造一些"红巴士／蓝巴士"情景：往一组选择里加入近似重复的项目，测量估计出来的效用被扭曲了多少。
 
-**Expected deliverables.** A manuscript reporting (1) a dataset with documented IIA violations, (2) a quantitative comparison of Bradley-Terry vs. at least one IIA-relaxing model, and (3) practical guidelines for when practitioners should move beyond Bradley-Terry. Code for all experiments with reproducible results.
+**预期成果。** 一篇报告，内容包括：(1) 一份已证实存在独立无关备选违反的数据集；(2) Bradley-Terry 与至少一个放宽该假定的模型的定量对比；(3) 给实践者的建议：什么时候不该继续用 Bradley-Terry。所有实验的代码与可复现的结果。
 
-### Project 2: Bayesian vs. Frequentist Preference Learning on Real Annotation Data (\*)
+### 项目 2：在真实标注数据上比较贝叶斯与频率学派的偏好学习（\*）
 
-**Description.** Chapter 2 presents three estimation paradigms---maximum likelihood (@sec-mle), Bayesian inference via MCMC (@sec-bayesian), and online learning via the Elo system (@sec-online). How do these approaches compare on real-world human preference data, especially in low-data regimes where uncertainty quantification matters most? This project conducts a systematic comparison using publicly available LLM preference datasets.
+**题目说明。** 第 2 章给出了三种估计范式——最大似然（@sec-mle）、用 MCMC 做贝叶斯推断（@sec-bayesian）、用 Elo 系统做在线学习（@sec-online）。在真实的人类偏好数据上，这几种方法各表现如何？特别是在最需要对不确定性做量化的低数据场景里。这个项目用公开的 LLM 偏好数据集做一次系统的对比。
 
-**Suggested methods.**
+**建议方法。**
 
-- Implement MLE with L2 regularization (@sec-regularization), Bayesian inference with the Laplace approximation (@sec-gp-inference), and Elo updates (@sec-online) for the same Bradley-Terry model.
-- Evaluate predictive accuracy (AUC), calibration, and posterior coverage as a function of dataset size by subsampling.
-- Assess computational cost and convergence diagnostics (@sec-optimization).
+- 分别实现带 L2 正则的最大似然（@sec-regularization）、用拉普拉斯近似做的贝叶斯推断（@sec-gp-inference），以及 Elo 更新（@sec-online）。
+- 通过对数据做子采样，测出预测准确率（AUC）、标定程度与后验覆盖率各自随数据量的变化。
+- 评估计算开销与收敛的诊断指标（@sec-optimization）。
 
-**Expected deliverables.** A manuscript with learning curves showing accuracy and calibration vs. sample size for each method, a discussion of when Bayesian uncertainty is worth the computational overhead, and fully documented code including data preprocessing scripts.
+**预期成果。** 一篇报告，给出各方法的准确率与标定程度随样本量变化的学习曲线，讨论贝叶斯的不确定性量化在什么情况下值回它的计算开销，并附上完整文档化的代码，包括数据预处理的脚本。
 
-### Project 3: Active Preference Elicitation for Personalized Recommendation (\*\*)
+### 项目 3：面向个性化推荐的主动偏好征询（\*\*）
 
-**Description.** When human feedback is expensive, active query selection can dramatically reduce annotation cost. This project builds an end-to-end active preference elicitation system for a concrete domain---such as food preferences, music taste, or movie recommendations---and measures how much the Fisher information framework improves over random querying.
+**题目说明。** 人类的反馈很贵时，主动挑选要问的问题能大幅降低标注成本。这个项目要在一个具体的领域里（比如食物偏好、音乐口味、电影推荐）搭一套端到端的主动偏好征询系统，实测 费雪信息框架比随机提问能好多少。
 
-**Suggested methods.**
+**建议方法。**
 
-- Implement a Rasch or factor model (@sec-factor-models) with Fisher-information-based query selection (@sec-measurement, @sec-fisher-information).
-- Compare A-optimal, D-optimal, and E-optimal criteria (@sec-factor-models-active) for selecting the next comparison to present.
-- Collect real preference data from at least 10 participants (or use a realistic simulator) and measure the reduction in queries needed to reach a target prediction accuracy.
-- Optionally extend to the pairwise setting using the active pair selection framework from @sec-pairwise-active.
+- 实现一个 Rasch 模型或因子模型（@sec-factor-models），配上基于 费雪信息的选题（@sec-measurement、@sec-fisher-information）。
+- 在选下一个要呈现的比较时，对比 A-最优、D-最优、E-最优这几种准则（@sec-factor-models-active）。
+- 从至少 10 位参与者那里收集真实的偏好数据（或者用一个贴近实际的模拟器），测出达到同样预测精度需要少问多少问题。
+- 可选的扩展：用 @sec-pairwise-active. 里讲的主动配对选择框架，推广到两两比较的场景。
 
-**Expected deliverables.** A working interactive system (command-line or web-based) that adaptively selects queries, an empirical evaluation showing query savings relative to random selection, and a manuscript discussing the practical benefits and limitations of active elicitation.
+**预期成果。** 一个能跑的交互系统（命令行或网页都行），能自适应地挑选要问的问题；一份实证评估，给出相对于随机选择的提问节省；以及一篇讨论主动征询的实际收益与局限的报告。
 
-### Project 4: Dueling Bandits for A/B Testing with Preference Feedback (\*\*)
+### 项目 4：用对决老虎机做基于偏好反馈的 A/B 测试（\*\*）
 
-**Description.** Traditional A/B testing compares treatments using scalar metrics (click-through rate, revenue), but in many settings the outcome of interest is a human preference judgment---e.g., "Which UI layout do you prefer?" This project formulates A/B testing as a dueling bandit problem and evaluates whether dueling bandit algorithms can identify the best variant faster than naive round-robin comparisons.
+**题目说明。** 传统的 A/B 测试用标量指标（点击率、收入）来比较不同方案，但很多场景里真正关心的是人类的偏好判断——比如"你更喜欢哪个界面布局？"这个项目把 A/B 测试表述成一个对决老虎机问题，并评估：与"两两轮转"这种朴素的比较方式相比，对决老虎机的算法能不能更快找出最好的那个方案。
 
-**Suggested methods.**
+**建议方法。**
 
-- Implement at least two dueling bandit algorithms from Chapter 4, such as RUCB or Double Thompson Sampling, targeting different winner concepts (Condorcet vs. Borda, @sec-borda).
-- Define appropriate regret metrics for the A/B testing setting and track cumulative regret over time.
-- Simulate a realistic A/B testing scenario with 5--10 variants and heterogeneous user preferences (using mixture models from @sec-factor-models to generate synthetic users).
-- Compare sample efficiency against uniform random pairing and standard Thompson Sampling (@sec-thompson-sampling) on scalar proxy metrics.
+- 至少实现第 4 章里的两种对决老虎机算法，例如 RUCB 或双重汤普森采样，分别针对不同种"胜者"概念（孔多塞与博尔达，@sec-borda）。
+- 为 A/B 测试这个场景定义合适的遗憾指标，并跟踪累计遗憾随时间的变化。
+- 模拟一个贴近实际的 A/B 测试场景，包含 5–10 个方案与偏好各异的（用 @sec-factor-models 的混合模型来生成合成的）。
+- 与"均匀随机配对"以及标量替代指标上的标准汤普森采样（@sec-thompson-sampling）比较样本效率。
 
-**Expected deliverables.** A manuscript presenting regret curves and sample complexity comparisons, a discussion of which winner concept is most appropriate for A/B testing, and modular code that could be adapted to other dueling bandit applications.
+**预期成果。** 一篇报告，给出遗憾曲线与样本复杂度的对比，讨论在 A/B 测试里哪种"胜者"概念最合适，并给出模块化的代码，便于用到其他对决老虎机的应用里。
 
-### Project 5: Preferential Bayesian Optimization for Human-in-the-Loop Design (\*\*)
+### 项目 5：面向人机协同设计的偏好式贝叶斯优化（\*\*）
 
-**Description.** Preferential Bayesian Optimization (PBO) enables optimization of complex objectives---such as the taste of a recipe, the aesthetics of a generated image, or the comfort of a robot trajectory---from pairwise human feedback alone. This project applies PBO to a concrete design problem where scalar evaluation is difficult but pairwise comparison is natural.
+**题目说明。** 偏好式贝叶斯优化（PBO）可以只靠人类的两两比较反馈，去优化那些很难给出分数的目标——比如一道菜的味道、一张生成图像的美观程度、一条机器人轨迹的舒适度。这个项目把 PBO 用到一个具体的设计问题上：那里给不出标量的评价，但做两两比较很自然。
 
-**Suggested methods.**
+**建议方法。**
 
-- Implement the GP-based PBO framework from Chapter 4, including a Gaussian Process preference model with Laplace approximation (@sec-gp-inference) and an acquisition function (Expected Improvement of the Copeland score or Thompson Sampling).
-- Choose a design domain with a continuous parameter space (e.g., color palettes, font configurations, audio equalization settings, or procedurally generated environments).
-- Collect preference feedback from at least 5 participants and track convergence to their preferred design.
-- Compare PBO against random search and, if a scalar proxy is available, against standard Bayesian Optimization.
+- 实现第 4 章基于高斯过程的偏好式贝叶斯优化框架，包括带拉普拉斯近似的高斯过程偏好模型（@sec-gp-inference），以及一个采集函数（对 Copeland 得分的期望改进，或者汤普森采样）。
+- 选一个参数空间是连续的设计领域（例如配色方案、字体排版、音频均衡设置，或者程序生成的场景）。
+- 从至少 5 位参与者那里收集偏好反馈，跟踪他们是否逐渐收敛到自己喜欢的设计。
+- 把 PBO 与随机搜索比较；如果有标量的替代指标，再与标准的贝叶斯优化比较。
 
-**Expected deliverables.** A manuscript reporting convergence rates and user satisfaction, a working PBO system with a human-facing interface, and an analysis of how posterior uncertainty evolves with the number of comparisons.
+**预期成果。** 一篇报告，给出收敛速度与用户满意度；一个有面向用户界面的、能跑的 PBO 系统；以及一份分析：后验的不确定性怎样随着比较次数变化。
 
-### Project 6: The DPO-Borda Connection: Empirical Validation on Multi-Annotator Data (\*\*)
+### 项目 6：DPO 与博尔达计分法的联系：在多标注员数据上的实证检验（\*\*）
 
-**Description.** Chapter 5 establishes a theoretical connection between Direct Preference Optimization and the Borda count (@sec-borda-dpo): DPO finds the policy that maximizes pairwise win rate, i.e., the Borda winner. But does this hold empirically when annotators are heterogeneous and preferences are noisy? This project tests the DPO-Borda connection on real multi-annotator preference data and investigates when the Borda winner diverges from other social choice solutions.
+**题目说明。** 第 5 章在理论上打通了直接偏好优化与博尔达计分法（@sec-borda-dpo）：DPO 找的是"两两对比胜率最高"的策略，也就是博尔达胜者。但当标注员各不相同、偏好又带噪声时，事上真的如此吗？这个项目要在真实的多标注员偏好数据上检验这条联系，并研究博尔达胜者会在什么时候偏离其他的社会选择结果。
 
-**Suggested methods.**
+**建议方法。**
 
-- Use a publicly available multi-annotator preference dataset (e.g., from Chatbot Arena or similar).
-- Compute the Borda ranking, Condorcet ranking (if it exists), and plurality ranking from raw annotations.
-- Train a DPO model and compare its implicit ranking to each social choice solution.
-- Analyze cases where the rankings diverge: are these cases where annotators have genuinely heterogeneous preferences, or where the data is simply noisy? Use the mixture model framework from @sec-factor-models to test for latent preference clusters.
+- 使用一份公开可得的多标注员偏好数据集（例如 Chatbot Arena 或类似的数据集）。
+- 从原始标注出发，分别算出博尔达排名、孔多塞排名（如果存在）、以及多数票排名。
+- 训练一个 DPO 模型，把它隐含的排名与每一种社会选择结果作比较。
+- 分析几种排名出现分歧的情形：这些情形里，标注员的偏好是真的各不相同，还是数据只是噪声大？可以用 @sec-factor-models 的混合模型框架来检验是否存在潜在的偏好群体。
 
-**Expected deliverables.** A manuscript quantifying the agreement between DPO-implied rankings and classical social choice rankings, an analysis of when and why they diverge, and reproducible code for all experiments.
+**预期成果。** 一篇报告，量化 DPO 隐含的排名与经典社会选择排名的一致程度，分析它们在什么时候、因为什么而分开，并给出所有实验的可复现代码。
 
-### Project 7: Auditing a Preference Learning Pipeline for Compounding Bias (\*\*)
+### 项目 7：审计一条偏好学习流水线中的叠加偏差（\*\*）
 
-**Description.** Chapter 6 demonstrates that small biases at each stage of the preference learning pipeline---elicitation, learning, aggregation, decision---can compound into large disparities (@sec-compounding-unfairness). This project operationalizes that insight by constructing a complete pipeline simulation, injecting realistic biases at each stage, and measuring how they interact.
+**题目说明。** 第 6 章说明：偏好学习流水线各阶段（征询、学习、汇总、决策）的小偏差，会叠加成很大的差距（@sec-compounding-unfairness）。这个项目要把这个洞见真正用起来：搭一条完整的流水线模拟，在每个阶段注入贴近现实的偏差，再测量它们怎样相互影响。
 
-**Suggested methods.**
+**建议方法。**
 
-- Build a simulated preference learning pipeline following the four-stage framework ($\mathcal{E} \to \mathcal{L} \to \mathcal{A} \to \mathcal{D}$) from @sec-pipeline.
-- Model two or more user groups with different base rates of participation, different noise levels, and different preference distributions.
-- At each pipeline stage, introduce a specific bias mechanism: (1) undersampling a group in elicitation (@sec-elicitation-fairness), (2) IIA misspecification for context-dependent preferences (@sec-learning-assumptions), (3) volume-weighted aggregation (@sec-aggregation-fairness), and (4) liberal vs. illiberal decision-making (@sec-liberal-illiberal).
-- Measure group-level disparities in recommendation quality at the pipeline output, and decompose total disparity into contributions from each stage.
+- 按 @sec-pipeline. 的四阶段框架（$\mathcal{E} \to \mathcal{L} \to \mathcal{A} \to \mathcal{D}$）搭一条模拟的偏好学习流水线。
+- 建模两个或更多用户群体，让它们的基础参与率、噪声水平、偏好分布各不相同。
+- 在每个阶段各引入一种具体的偏差机制：(1) 征询阶段对某个群体采样不足（@sec-elicitation-fairness）；(2) 对情境依赖的偏好误用了独立无关备选（@sec-learning-assumptions）；(3) 按数量加权的汇总（@sec-aggregation-fairness）；(4) 自由主义式与非自由主义式的决策（@sec-liberal-illiberal）。
+- 在流水线的输出端测量各组在推荐质量上的差距，并把总差距分解到各个阶段的贡献上。
 
-**Expected deliverables.** A manuscript with a bias decomposition showing how much each pipeline stage contributes to overall unfairness, concrete recommendations for which stage to prioritize when mitigating bias, and a reusable simulation framework.
+**预期成果。** 一篇报告，给出一份偏差分解：说明每个阶段对总体不公平的贡献有多大；给出具体建议：要减轻偏差，该优先处理哪一个阶段；外加一个可复用的模拟框架。
 
-### Project 8: Mechanism Design for Incentive-Compatible Preference Elicitation (\*\*\*)
+### 项目 8：策略免疫的偏好征询机制设计（\*\*\*）
 
-**Description.** When users have strategic incentives---e.g., inflating ratings to influence recommendations, or misreporting preferences in a voting system---naive preference elicitation produces biased data. This project designs and evaluates an incentive-compatible mechanism for a specific preference learning application, drawing on the mechanism design framework from Chapter 5 (@sec-mechanism-design).
+**题目说明。** 当用户有策略性的动机时——比如为了让推荐更符合自己的意思而把分打高，或者在投票系统里谎报偏好——朴素的偏好征询得到的数据就是有偏的。这个项目要针对一个具体的偏好学习应用，设计并评估一个策略免疫的机制，用到第 5 章的机制设计框架（@sec-mechanism-design）。
 
-**Suggested methods.**
+**建议方法。**
 
-- Choose a concrete setting where strategic misreporting is plausible (e.g., peer review, course evaluation, or collaborative filtering).
-- Design a mechanism that incentivizes truthful reporting, building on VCG mechanisms or peer prediction from @sec-mechanism-design.
-- Prove or empirically demonstrate the mechanism's incentive compatibility properties.
-- Simulate strategic agents using a mixture of truthful and strategic types, and compare preference estimation quality under your mechanism vs. naive elicitation.
-- Analyze the mechanism's efficiency cost (the "price of incentive compatibility") relative to a setting with truthful agents.
+- 选一个"策略性谎报"确实可能发生的场景（例如同行评审、课程评价，或者协同过滤）。
+- 设计一个能激励人说真话的机制，可以参考 @sec-mechanism-design. 里的 VCG 机制或同行预测。
+- 从理论上证明、或用实验说明这个机制的策略免疫性质。
+- 用"说真话的类型"与"策略型的类型"混合来模拟智能体，比较在你的机制下与朴素征询下偏好估计的质量。
+- 分析这个机制的效率代价（"策略免疫的代价"），与所有参与者都说真话的情形作对照。
 
-**Expected deliverables.** A manuscript with a formal mechanism description, theoretical analysis of incentive properties, simulation results comparing truthful vs. strategic settings, and implementation code. If applicable, include a discussion of how the mechanism interacts with the fairness considerations from Chapter 6 (@sec-design-principles).
+**预期成果。** 一篇报告，包含机制的正式描述、对其激励性质的理论分析、真实情形与策略情形对比的模拟结果，以及实现代码。如果相关，还应讨论这个机制与第 6 章的公平性考虑（@sec-design-principles）会怎样相互作用。
 
-### Project 9: Cooperative Inverse Reinforcement Learning for Interactive Preference Learning (\*\*\*)
+### 项目 9：用于交互式偏好学习的协作逆强化学习（\*\*\*）
 
-**Description.** The CIRL framework from Chapter 4 models preference learning as a cooperative game between a human and an agent, where the agent's actions serve both to accomplish tasks and to elicit information about the human's reward function. This project implements a CIRL-style agent in a simplified domain and studies how cooperative interaction compares to passive preference observation.
+**题目说明。** 第 4 章的协作逆强化学习框架，把偏好学习建模成人与智能体之间的合作博弈：智能体的行动既要完成任务，也要顺带问出关于人的奖励函数的信息。这个项目要在一个简化的领域里实现一个这样风格的智能体，研究"合作式的交互"与"被动地观察偏好"相比有什么不同。
 
-**Suggested methods.**
+**建议方法。**
 
-- Define a gridworld or simple continuous environment where a human has a latent reward function over outcomes.
-- Implement a CIRL agent that maintains a belief over reward functions and selects actions to jointly maximize expected reward and information gain, following the framework from Chapter 4.
-- Compare against (1) a passive agent that observes demonstrations and infers preferences via inverse reinforcement learning, and (2) an active agent that can ask explicit comparison queries (@sec-active-learning).
-- Measure convergence rate to the true reward function, cumulative regret, and the human's perceived interaction quality (if using human participants) or simulated interaction cost.
+- 定义一个网格世界或简单的连续环境，其中人对结果有一个潜在的奖励函数。
+- 按第 4 章的框架，实现一个协作逆强化学习的智能体：它对奖励函数维护一个信念，选择动作时同时最大化期望奖励与信息增益。
+- 与两种基线比较：(1) 只观察演示、用逆强化学习推断偏好的被动智能体；(2) 能明确提出比较问题的主动智能体（@sec-active-learning）。
+- 测量收敛到真实奖励函数的速度、累计遗憾，以及（如果用了真人）人主观感受到的交互质量，或用模拟的交互代价来代替。
 
-**Expected deliverables.** A manuscript presenting the CIRL formulation for your domain, regret comparisons across the three approaches, an analysis of when cooperative interaction provides the most benefit (e.g., ambiguous rewards, high-dimensional preference spaces), and well-documented code.
+**预期成果。** 一篇报告，给出你选的场景下协作逆强化学习的建模、三种做法的遗憾对比，以及一份分析：在什么情况下合作式交互带来的好处最大（例如奖励含义模糊、偏好空间维度高）。代码要有完善的文档。
 
-### Project 10: Pluralistic Alignment---Learning and Serving Multiple Preference Models (\*\*\*)
+### 项目 10：多元对齐——学习并服务多个偏好模型（\*\*\*）
 
-**Description.** Most preference learning systems collapse diverse human preferences into a single aggregate model. Drawing on Arrow's Impossibility Theorem (@sec-aggregation), the DPO-Borda connection (@sec-borda-dpo), and the fairness framework of Chapter 6, this project explores an alternative: learning *multiple* preference models that represent distinct value systems, and allowing users or institutions to choose among them.
+**题目说明。** 大多数偏好学习系统，会把各不相同的人类偏好压成一个汇总模型。这个项目以阿罗不可能定理（@sec-aggregation）、DPO 与博尔达计分法的联系（@sec-borda-dpo）以及第 6 章的公平性框架为基础，去探索另一种做法：*学多个*偏好模型，分别代表不同的价值体系，让用户或机构从中选择。
 
-**Suggested methods.**
+**建议方法。**
 
-- Start with a multi-annotator preference dataset and fit a mixture model to discover latent preference clusters (@sec-factor-models, @sec-bayesian).
-- Train separate DPO or reward models for each cluster and evaluate whether cluster-specific models outperform a single aggregate model on within-cluster prediction accuracy.
-- Investigate the social choice properties of the cluster-level approach: does serving cluster-specific models avoid Arrow-style impossibilities? Under what conditions does it introduce new fairness concerns (e.g., stereotype reinforcement)?
-- Design a user-facing mechanism for selecting among preference models, and evaluate whether users can meaningfully choose the model that best represents their values.
+- 从一份多标注员的偏好数据集出发，拟合一个混合模型来发现潜在的偏好群体（@sec-factor-models、@sec-bayesian）。
+- 为每个群体分别训练 DPO 或奖励模型，评估在群体内部的预测精度上，分群体的模型是否胜过一个统一的汇总模型。
+- 考察这种"按群体分别服务"的做法在社会选择上的性质：它能不能绕开阿罗式的不可能性？在什么条件下，它反而会引入新的公平问题（例如把刻板印象固化下来）？
+- 设计一个面向用户的机制，让人能在多个偏好模型之间选择，并评估：用户是否真的能选出最代表自己价值观的那个模型。
 
-**Expected deliverables.** A manuscript with (1) evidence that latent preference clusters exist in real data, (2) a comparison of pluralistic vs. aggregate alignment, (3) a discussion of the fairness trade-offs involved, and (4) code for cluster discovery, model training, and evaluation. This project connects nearly every chapter of the book and is suitable for an ambitious team.
+**预期成果。** 一篇报告，包含：(1) 真实数据中确实存在潜在偏好群体的证据；(2) 多元对齐与汇总对齐的对比；(3) 对其中公平性取舍的讨论；(4) 群体发现、模型训练与评估的代码。这个项目几乎串起了本书每一章，适合一支有雄心的团队。
 
-## A Practitioner's Checklist
+## 给实践者的一份清单
 
-For readers building preference learning systems in practice, we distill the book's lessons into a checklist of questions to address at each stage of system development.
+如果你要在实际中造偏好学习系统，这里把全书的要点归成一份清单：在系统开发的每个阶段，都该回答这些问题。
 
-**Data Collection (Chapters 1, 3)**
+**数据采集（第 1、3 章）**
 
-- What type of preference data will you collect? Pairwise comparisons, rankings, ratings, or natural language? Each carries different assumptions and failure modes.
-- Who are your annotators, and how are they incentivized? Piece-rate compensation can introduce the fatigue and speed-accuracy tradeoffs that create the inversion problem (Chapter 5, @sec-inversion).
-- Are you using active query selection? If human feedback is expensive, the Fisher information framework (Chapter 3) can substantially reduce the number of comparisons needed.
-- Have you considered position bias, framing effects, and other presentation artifacts that violate IIA?
+- 你要收集哪一类偏好数据？两两比较、排序、打分，还是自然语言？每一类对应的假设和会出问题的方式都不一样。
+- 你的标注员是谁，你给他们什么样的激励？按件计酬会带来疲劳和"快与准的取舍"，而这正是反演问题的来源（第 5 章，@sec-inversion）。
+- 你有没有用主动选题？如果人类的反馈很贵，第 3 章的 费雪信息框架能显著减少需要的比较数量。
+- 你想过位置偏差、措辞效应以及其他会违反独立无关备选的呈现方式问题吗？
 
-**Modeling (Chapters 1, 2)**
+**建模（第 1、2 章）**
 
-- Is Bradley-Terry appropriate for your setting, or do you need richer models? If your population is heterogeneous, consider mixture models or factor models from Chapter 1.
-- Are you quantifying uncertainty? Point estimates (MLE) are fast but miss the posterior information needed for downstream decision-making. The Laplace approximation provides a practical middle ground.
-- How are you evaluating your model? Use multiple metrics—AUC for ranking, calibration error for probabilistic predictions, and subgroup analysis for fairness (Chapter 6).
-- Is your model regularized appropriately? Too little regularization overfits to noisy preferences; too much shrinks all utilities toward zero.
+- Bradley-Terry 适不适合你的场景，还是需要用更丰富的模型？如果你的人群本身差异很大，可以考虑第 1 章的混合模型或因子模型。
+- 你有没有把不确定性量化出来？点估计（最大似然）很快，但丢掉了后面做决策要用的后验信息。拉普拉斯近似是一个务实的折中。
+- 你怎么评估自己的模型？要用多个指标——排序看 AUC，概率预测看标定误差，公平性看分组分析（第 6 章）。
+- 正则化的程度合适吗？正则化不够，会过拟合到带噪声的偏好上；过头，又会把所有效用都压向 0。
 
-**Decision-Making (Chapter 4)**
+**决策（第 4 章）**
 
-- Are you in a measurement setting (reduce uncertainty) or a reward maximization setting (manage uncertainty)? The choice determines whether elicitation (Chapter 3) or bandit/optimization methods (Chapter 4) are appropriate.
-- If optimizing sequentially, how are you balancing exploration and exploitation? Thompson Sampling provides a principled default.
-- What is your winner concept? Condorcet, Borda, and von Neumann winners can diverge—the choice encodes assumptions about what "best" means.
+- 你是在"测量"的场景里（目标是降低不确定性），还是在"最大化奖励"的场景里（目标是管理不确定性）？这决定了你该用征询（第 3 章）还是老虎机／优化的方法（第 4 章）。
+- 如果是序贯地优化，你怎么平衡探索与利用？汤普森采样是一个有原理的默认选择。
+- 你用的"胜者"概念是什么？孔多塞胜者、博尔达胜者、冯·诺依曼胜者可能各不相同——选哪一种，就等于对"最好"意味着什么做了假设。
 
-**Aggregation and Fairness (Chapters 5, 6)**
+**汇总与公平（第 5、6 章）**
 
-- Whose preferences are included, and whose are excluded? Convenience sampling overrepresents easily-reached populations.
-- How are you aggregating across annotators? Majority vote selects the Borda winner (Chapter 5, @sec-borda-dpo)—is that what you want?
-- Have you audited for compounding unfairness? Small biases at each pipeline stage can multiply through feedback loops (Chapter 6).
-- Are your value tradeoffs explicit and documented? If not, they are implicit and unaccountable.
+- 你把谁的偏好纳进来了，又把谁的排除在外？图省事的抽样，会让容易被触达的人群被高估。
+- 多个标注员之间你怎么汇总？多数票选出来的是博尔达胜者（第 5 章，@sec-borda-dpo）——这正是你想要的吗？
+- 你有没有审计过不公平的叠加？流水线各阶段的小偏差，会通过反馈回路相互乘起来（第 6 章）。
+- 你的价值取舍是明说的、有记录的吗？如果没有，那它就是隐含的、也没人负责。
 
-**Deployment and Monitoring**
+**部署与监控**
 
-- Are you monitoring subgroup performance over time, not just aggregate metrics?
-- Do you have a plan for preference drift? User preferences and societal norms change; static models decay.
-- Is there a mechanism for users to contest or correct the system's preference model?
-- Have you considered the system's role as a choice architect—how the options you present shape the preferences you observe?
+- 你是不是按时间监控各子群的表现，而不只看总体指标？
+- 偏好会漂移，你有应对方案吗？用户的偏好和社会的规范都会变，静态的模型会失效。
+- 有没有渠道让用户质疑或纠正系统的偏好模型？
+- 你想过系统本身也是"选择的设计者"吗？你给出哪些选项，会反过来塑造你观察到的偏好。
 
-## Scope and Limitations
+## 范围与局限
 
-This book has deliberately focused on the mathematical and algorithmic foundations of preference learning, and several important topics lie outside its scope.
+本书有意把重点放在偏好学习的数学与算法基础上，因此有几个重要主题没有写进来。
 
-**Cognitive science of preference formation.** We model preferences as given—either as fixed utilities or as draws from a distribution—without deeply examining how humans form preferences in the first place. The rich literature on bounded rationality, heuristics and biases, and constructed preferences suggests that human choice is more complex than any random utility model captures. Readers interested in these foundations should consult the work of Kahneman, Tversky, Slovic, and their successors.
+**偏好形成的认知科学。** 我们把偏好当作给定的——要么是固定的效用，要么是从某个分布里抽出来的——而没有深入追问人在一开始是怎么形成偏好的。关于有限理性、启发式与偏差、被建构出来的偏好，已有大量文献说明：人的选择比任何随机效用模型所能刻画的都更复杂。对这部分基础感兴趣的读者，可以去读 Kahneman、Tversky、Slovic 以及后继者的工作。
 
-**Large-scale systems engineering.** The algorithms in this book are presented at a scale suitable for understanding and experimentation. Production preference learning systems at major technology companies handle billions of data points, thousands of annotators, and models with billions of parameters. The engineering challenges of distributed training, data pipeline management, annotation quality control, and real-time serving are substantial but largely orthogonal to the algorithmic questions we address.
+**大规模系统工程。** 本书介绍算法时，用的是便于理解和做实验的规模。而大型科技公司生产环境里的偏好学习系统，要处理数十亿条数据、上千名标注员、数十亿参数的模型。分布式训练、数据流水线管理、标注质量控制、实时服务这些工程问题分量很重，但和我们讨论的算法问题基本是两个方向。
 
-**Legal and regulatory frameworks.** The deployment of preference learning systems increasingly intersects with privacy regulation (GDPR's right to explanation, data minimization), anti-discrimination law, and sector-specific oversight (healthcare, finance, education). These legal dimensions shape what data can be collected, how it can be used, and what accountability mechanisms must be in place. We have touched on related ethical considerations in Chapter 6, but a thorough treatment of the regulatory landscape is beyond our scope.
+**法律与监管框架。** 偏好学习系统的部署，越来越与隐私法规（GDPR 的解释权、数据最小化）、反歧视法律，以及分行业的监管（医疗、金融、教育）交织在一起。这些法律层面决定了：哪些数据可以收集、可以怎么用，以及必须建立哪些问责机制。第 6 章我们谈过相关的伦理考量，但对监管格局的完整讨论超出了本书的范围。
 
-**Multi-modal and embodied preferences.** This book focuses primarily on preferences over discrete items or text responses. Preferences in robotics (over trajectories), in design (over visual layouts), and in multi-modal settings (over combinations of text, images, and audio) raise additional challenges that we have only briefly touched upon.
+**多模态与具身的偏好。** 本书主要讨论对离散项目或文本回答的偏好。而机器人领域的偏好（对轨迹）、设计领域的偏好（对视觉版式），以及多模态场景下的偏好（对文本、图像、声音的组合）会带来更多挑战，我们只是略有涉及。
 
-## Final Thought
+## 最后的话
 
-At its core, this book has been about a simple idea: rather than specifying objectives by hand, we can learn them from human feedback. This idea is powerful because it promises AI systems that serve human values rather than proxy metrics—systems that improve as we better understand what we want.
+说到底，本书讲的其实是一个朴素的念头：目标不必由人手工写定，我们可以从人类的反馈里把它学出来。这个念头之所以有力，在于它许诺了这样一种 AI 系统——它服务于人的价值，而不是服务于替代指标；随着我们更清楚自己想要什么，它就变得更好。
 
-But the idea is also subtle. Human preferences are noisy, inconsistent, context-dependent, and heterogeneous. They can be manipulated, and they evolve over time. Learning from preferences does not automatically solve the alignment problem; it transforms it into questions about whose preferences to learn from, how to aggregate them, and when to defer to them versus override them.
+但这个念头也很微妙。人类的偏好带着噪声、前后不一致、依赖情境，人与人之间又各不相同；它们会被引导，也会随时间改变。从偏好中学习，并不自动解决对齐问题；它把对齐问题变成了另一组问题：该向谁的偏好学习、怎么把它们汇总起来、什么时候该听从、什么时候该替人做主。
 
-The technical methods in this book—Bradley-Terry models, Bayesian inference, Fisher information, Thompson Sampling, preferential Bayesian optimization, the DPO-Borda connection, CIRL, mechanism design—are tools, and they are more deeply connected than a chapter-by-chapter reading might suggest. The Elo system is stochastic gradient descent on Bradley-Terry; DPO finds the Borda winner; Fisher information drives both active elicitation and fairness auditing; CIRL reframes passive data collection as cooperative interaction. These connections form a coherent framework, not merely a collection of techniques. But like all tools, their value depends on how they are used. The same algorithms that personalize recommendations to delight users can personalize manipulation to exploit them.
+本书里的技术方法——Bradley-Terry 模型、贝叶斯推断、费雪信息、汤普森采样、偏好式贝叶斯优化、DPO 与博尔达计分法的联系、协作逆强化学习、机制设计——都是工具；而它们之间的联系，比按章来读时看到的要深得多。Elo 等级分就是在 Bradley-Terry 上做随机梯度下降；DPO 找的是博尔达胜者；费雪信息既驱动主动征询，也驱动公平性审计；协作逆强化学习则把被动的数据收集改写成了合作式的交互。这些联系构成的是一个自洽的框架，不只是一堆技术。但工具和人用的一切工具一样，价值取决于怎么用。同样的算法，可以用来做因人而异的推荐让人高兴，也可以用来做因人而异的"诱导"来利用人。
 
-We hope this book has equipped you not only with technical skills but also with the conceptual frameworks to use them wisely. The field of machine learning from human preferences is young and evolving rapidly. The researchers and practitioners who engage with it today will shape how AI systems learn from and serve humanity in the decades to come.
+我们希望本书带给你的，不只是技术能力，还有能明智地使用这些技术的概念框架。从人类偏好中学习机器学习，是一门年轻的学科，变化很快。今天参与进来的人和团队，将决定未来几十年里 AI 系统怎样向人类学习、怎样服务人类。
 
-We invite you to contribute—to develop new methods, to apply existing ones thoughtfully, to critique approaches that fall short, and to engage with the broader societal implications of this work. The challenge of building AI systems that truly align with human values is too important to be left to any single discipline or community. It requires the collective effort of computer scientists, economists, psychologists, philosophers, policymakers, and the public.
+我们也邀请你加入进来——去发展新的方法，去审慎地应用已有的方法，去批评那些做得不够好的做法，去认真对待这项工作对整个社会的影响。要让 AI 系统真正与人类的价值观对齐，这个挑战太大、太重要，不能交给某一个学科或某一个群体。它需要计算机科学家、经济学家、心理学家、哲学家、政策制定者和公众一起出力。
 
-The journey from this book's mathematical foundations to AI systems that reliably serve human flourishing is long. But every improvement in how we learn from human preferences brings us closer to that goal. We hope you will join us on this path.
+从本书的数学基础，走到能稳定服务于人类福祉的 AI 系统，路还很长。但在"怎样从人类偏好中学习"这件事上每前进一步，我们就离那个目标更近一步。希望在这条路上，能与你同行。

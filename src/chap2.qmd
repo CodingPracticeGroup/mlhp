@@ -1,5 +1,5 @@
 ---
-title: Learning
+title: 学习
 format:
   html:
     include-after-body:
@@ -36,78 +36,78 @@ filters:
 
 
 ::: {.callout-note}
-## Intended Learning Outcomes
+## 学习目标
 
-By the end of this chapter you will be able to:
+读完本章，你应当能够：
 
-- **Identify** appropriate train/test splitting strategies for preference data and understand their implications for model evaluation.
-- **Implement** maximum likelihood estimation via gradient descent for the Bradley-Terry model, deriving and computing gradients efficiently.
-- **Apply** Bayesian inference using Markov Chain Monte Carlo (MCMC) to quantify parameter uncertainty and obtain posterior distributions.
-- **Apply** Laplace approximation to perform inference for Gaussian Process preference models, understanding why non-Gaussian likelihoods require approximation.
-- **Derive** online learning algorithms (Elo ratings) as stochastic gradient ascent and explain when online methods are preferred over batch learning.
-- **Compare** batch maximum likelihood, Bayesian inference, and online learning approaches in terms of computational cost, statistical efficiency, and practical applicability.
-- **Evaluate** learned preference models using multiple metrics including AUC, log-likelihood, and calibration error.
-- **Apply** regularization techniques (L2 penalty, early stopping) to prevent overfitting and improve generalization.
-- **Conduct** k-fold cross-validation for model selection and hyperparameter tuning in preference learning settings.
-- **Implement** modern optimization methods (Adam, learning rate schedules) and diagnose convergence through loss curves and gradient norms.
-- **Analyze** real-world preference data from language model alignment, addressing practical challenges such as noise, sparsity, and cold-start problems.
+- **判断**偏好数据合适的训练/测试划分方式，并理解它对模型评估的影响。
+- **实现**用梯度下降做 Bradley-Terry 模型的最大似然估计，会推导并高效计算梯度。
+- **应用**基于马尔可夫链蒙特卡洛（Markov Chain Monte Carlo, MCMC）的贝叶斯推断，量化参数不确定性、得到后验分布。
+- **应用**拉普拉斯近似（Laplace approximation）对高斯过程偏好模型做推断，理解为什么非高斯似然必须靠近似。
+- **推导**在线学习算法（Elo 等级分）就是随机梯度上升，并说明什么时候该用在线方法而不是批量学习。
+- **比较**批量最大似然、贝叶斯推断、在线学习这三类思路在计算开销、统计效率、实际可用性上的差别。
+- **评估**学到的偏好模型，使用多种指标，包括 AUC、对数似然和校准误差。
+- **应用**正则化手段（L2 惩罚、早停）来防止过拟合、提升泛化。
+- **完成**k 折交叉验证，在偏好学习场景里做模型选择和超参数调节。
+- **实现**现代优化方法（Adam、学习率调度），并通过损失曲线和梯度范数判断是否收敛。
+- **分析**来自语言模型对齐的真实偏好数据，处理噪声、稀疏、冷启动等实际问题。
 :::
 
-::: {.callout-tip title="Suggested Lecture Plan" collapse="true"}
-This chapter can be covered in two 50-minute lectures plus a hands-on lab session:
+::: {.callout-tip title="建议课时安排" collapse="true"}
+本章可以安排两次 50 分钟的课，再加一次上机实践：
 
-**Lecture 1** (Sections 3.1--3.4): Core parameter estimation methods
+**第 1 次课**（3.1--3.4 节）：参数估计的核心方法
 
-- Train/test splitting and evaluation metrics (10 min)
-- Maximum likelihood estimation for Bradley-Terry: derivation, implementation, evaluation (20 min)
-- Bayesian inference with MCMC: posterior distributions, Metropolis-Hastings (15 min)
-- Comparison of MLE vs Bayesian approaches (5 min)
+- 训练/测试划分与评估指标（10 分钟）
+- Bradley-Terry 的最大似然估计：推导、实现、评估（20 分钟）
+- 用 MCMC 做贝叶斯推断：后验分布、Metropolis-Hastings（15 分钟）
+- 最大似然与贝叶斯方法的对比（5 分钟）
 
-**Lecture 2** (Sections 3.5--3.8): Advanced learning topics
+**第 2 次课**（3.5--3.8 节）：进阶学习主题
 
-- Online learning with Elo ratings: derivation as SGD, applications (15 min)
-- Regularization and overfitting: L2 penalty, validation curves (15 min)
-- Cross-validation and model selection (10 min)
-- Optimization methods: GD vs Adam, learning rate schedules (10 min)
+- 用 Elo 等级分做在线学习：推导成随机梯度上升、应用（15 分钟）
+- 正则化与过拟合：L2 惩罚、验证曲线（15 分钟）
+- 交叉验证与模型选择（10 分钟）
+- 优化方法：梯度下降与 Adam、学习率调度（10 分钟）
 
-**Lab session**: Real-world application and exercises
+**上机实践**：真实场景与练习
 
-- Apply methods to LLM preference data (30 min)
-- Work on selected exercises (20 min)
+- 把方法用到语言模型偏好数据上（30 分钟）
+- 选做部分练习题（20 分钟）
 :::
 
-Designing a good reward signal by hand for a complex AI system is difficult and error-prone. Instead of manually specifying desirable behavior, we can learn a utility signal from preference data. In this chapter, we explore how to infer an underlying utility from various forms of feedback. Throughout, we include mathematical formulations and code examples to illustrate the learning process.
+给一个复杂的 AI 系统手工设计一个好的奖励信号，既困难又容易出错。与其手动规定"什么行为是好行为"，不如从偏好数据里学出一个效用信号。本章讨论如何从各种形式的反馈中推断出背后的效用。我们会一路给出数学形式和代码示例，帮助理解整个学习过程。
 
-## Chapter Overview
+## 本章内容安排
 
-@sec-latent-variable in Chapter 2 established the foundational models for preference data: the Rasch model for item-wise responses, the Bradley-Terry model for pairwise comparisons, and K-dimensional factor models for richer representations. We saw how these models formalize the relationship between latent parameters and observed choices.
+第 1 章的 @sec-latent-variable 一节建立了偏好数据的基础模型：面向逐条响应的 Rasch 模型、面向两两比较的 Bradley-Terry 模型，以及表达力更强的 K 维因子模型，并说明了隐参数与观测选择之间的关系。
 
-This chapter addresses the central question of **learning**: given observed preference data, how do we estimate the parameters of these models? We explore four complementary perspectives on parameter learning, each with distinct advantages:
+本章要回答的是**学习**这个核心问题：给定观测到的偏好数据，怎么估计这些模型的参数？我们从几个互补的角度看参数学习，各有长处：
 
-- **Maximum Likelihood Estimation** (@sec-mle): Find parameters that maximize the probability of observed data. Fast and scalable, but provides only point estimates.
-- **Bayesian Inference** (@sec-bayesian, @sec-gp-inference): Treat parameters as random variables with prior distributions. We cover both parametric models (using MCMC) and nonparametric Gaussian Process models (using Laplace approximation). Quantifies uncertainty but requires more computation.
-- **Online Learning** (@sec-online): Update estimates incrementally as new data arrives. Essential for dynamic systems with continuously arriving feedback.
+- **最大似然估计**（@sec-mle）：找一组参数，让观测数据出现的概率最大。快、可扩展，但只给出点估计。
+- **贝叶斯推断**（@sec-bayesian、@sec-gp-inference）：把参数看成带先验分布的随机变量。参数模型用 MCMC，非参数的高斯过程模型用拉普拉斯近似。能量化不确定性，但计算量更大。
+- **在线学习**（@sec-online）：新数据一到就增量更新估计。对反馈持续到达的动态系统必不可少。
 
-Beyond these core methods, we cover essential machine learning techniques for practical applications:
+除了这些核心方法，本章还会讲实际应用中必须掌握的机器学习技术：
 
-- **Regularization** (@sec-regularization): Prevent overfitting through L2 penalties and early stopping.
-- **Model Selection** (@sec-model-selection): Use cross-validation to tune hyperparameters and compare approaches.
-- **Optimization** (@sec-optimization): Improve convergence with modern methods like Adam and adaptive learning rates.
-- **Real-World Application** (@sec-real-world): Apply all methods to language model preference data, confronting practical challenges.
+- **正则化**（@sec-regularization）：用 L2 惩罚和早停防止过拟合。
+- **模型选择**（@sec-model-selection）：用交叉验证调超参数、比较不同做法。
+- **优化**（@sec-optimization）：用 Adam、自适应学习率等现代方法改善收敛。
+- **真实场景**（@sec-real-world）：把所有方法用到语言模型的偏好数据上，直面其中的实际困难。
 
-Chapters 4-6 will build on these learning foundations to address active data collection (Chapter 4), decision-making under learned preferences (Chapter 5), and heterogeneous populations (Chapter 6).
+第 4 至 6 章会在这个学习基础上继续讨论主动采集数据（第 4 章）、按学到的偏好做决策（第 5 章）以及人群不一致的情形（第 6 章）。
 
-## Learning from Preference Data
+## 从偏好数据中学习
 
-@sec-latent-variable introduced the latent variable models for preference data: the Rasch model for item-wise responses, K-dimensional factor models (including the logistic factor model and the ideal point model), and the Bradley-Terry model for pairwise comparisons. We saw how these models relate user parameters $U_i$ and item parameters $V_j$ to observed responses, and how pairwise models can be derived from item-wise models.
+@sec-latent-variable 介绍了偏好数据的隐变量模型：面向逐条响应的 Rasch 模型、K 维因子模型（包括逻辑因子模型和理想点模型），以及面向两两比较的 Bradley-Terry 模型。我们看到这些模型如何把用户参数 $U_i$、物品参数 $V_j$ 与观测响应联系起来，也看到成对模型如何从逐条模型推出。
 
-This chapter focuses on *learning* the parameters of these models from observed data. We cover three complementary approaches:
+本章关注的是*学习*这些模型的参数，共三种互补做法：
 
-1. **Maximum Likelihood Estimation** for Bradley-Terry and Rasch models — finding parameters that maximize the probability of the observed data
-2. **Bayesian Inference** for uncertainty quantification — treating parameters as random variables with prior distributions
-3. **Online Learning** with the Elo rating system — updating parameter estimates incrementally as new data arrives
+1. 对 Bradley-Terry 与 Rasch 模型做**最大似然估计**——找出让观测数据概率最大的参数
+2. 用**贝叶斯推断**量化不确定性——把参数看成带先验分布的随机变量
+3. 用 **Elo 等级分做在线学习**——新数据一到就增量更新参数估计
 
-We begin by discussing how to split preference data into training and test sets, then develop estimation procedures for each approach.
+先讨论怎么把偏好数据划分成训练集和测试集，再针对每种做法给出具体的估计流程。
 
 {{< include _plt_setup.qmd >}}
 
@@ -122,11 +122,11 @@ U = rng.normal(loc=0.0, scale=1, size=N) # users' appetites
 V = rng.normal(loc=0.0, scale=1, size=M) # items' appeals
 ```
 
-## Maximum Likelihood Estimation {#sec-mle}
+## 最大似然估计 {#sec-mle}
 
-Given a response from a particular generating process, there are various standard statistical inference procedures, such as maximum likelihood, maximum marginal likelihood, or Bayesian inference. These procedures are designed to infer parameters that are generalizable to new datasets. Hence, we discuss the training and testing dataset next. 
+给定某个生成过程产生的响应，标准的统计推断做法有若干种，例如最大似然、最大边际似然、贝叶斯推断。这些做法的目的，都是推断出能推广到新数据上的参数。因此我们接下来先讲训练集与测试集。
 
-The simplest train/test splitting is random, where we select a random subset (e.g., 80%) of the response matrix to be in the training set, and the rest in the test set. We can demonstrate, for example, with the Bradley-Terry response with 80% training and 20% testing data:
+最简单的划分是随机划分：随机选一部分响应矩阵（例如 80%）作训练集，其余作测试集。比如可以拿 Bradley-Terry 生成的响应数据做一个 80% 训练、20% 测试的划分：
 
 ```{pyodide-python}
 #| autorun: true
@@ -199,18 +199,18 @@ plt.legend(handles=legend_patches, loc='upper left', bbox_to_anchor=(1, 1))
 plt.show()
 ```
 
-Having the train and test datasets from the Bradley–Terry response, which are denoted as $\mathcal{D}_{\text{train}}$ and $\mathcal{D}_{\text{test}}$, we first demonstrate the parameter learning with full information maximum likelihood estimation on a single user:
+这样我们就从 Bradley–Terry 的响应中得到了训练集与测试集，分别记作 $\mathcal{D}_{\text{train}}$ 和 $\mathcal{D}_{\text{test}}$。先在单个用户上演示如何用全信息最大似然来学参数：
 
 $$
 \hat{V} = \arg\max_{V} \sum_{j,j' \in \mathcal{D}_{\text{train}}} \log p(Y_{0,jj'} | \sigma(H_{0,jj'})), \quad H_{0} = V 1_M^\top - 1_M V^\top,
 $$ {#eq-mle-objective}
-where $1_M$ is a column vector of 1 with length $M$ and $H_{0,jj'} = v_j-v_{j'}$ for a fixed user $0$. The optimization can be carried out with standard optimizers, such as gradient descent.
+其中 $1_M$ 是长度为 $M$ 的全 1 列向量，对固定的用户 $0$ 有 $H_{0,jj'} = v_j-v_{j'}$。这个最优化用现成的优化器（例如梯度下降）即可完成。
 
-::: {.callout-warning title="Assumption: Connected Comparison Graph"}
-The MLE for Bradley-Terry parameters exists and is unique if and only if the **comparison graph is strongly connected**---that is, for every pair of items $(j, k)$, there exists a chain of comparisons linking $j$ to $k$ [see @ford1957solution]. If some items have never been compared (directly or transitively), their utility parameters are not identifiable and the MLE diverges to $\pm\infty$. In practice, sparse datasets (e.g., LLM evaluation where each response pair is annotated only once) frequently produce disconnected comparison graphs. Regularization (@sec-regularization) addresses this by shrinking all parameters toward zero, effectively imposing a prior that prevents divergence.
+::: {.callout-warning title="假设：比较图必须连通"}
+Bradley-Terry 参数的最大似然解存在且唯一，当且仅当**比较图强连通**——也就是对任意一对物品 $(j, k)$，都存在一条比较链把 $j$ 和 $k$ 连起来【见 @ford1957solution】。如果某些物品从没被比较过（直接或间接都没有），它们的效用参数就不可识别，最大似然估计会发散到 $\pm\infty$。实际中，稀疏数据（比如语言模型评测里每对回答只标注一次）经常导致比较图不连通。正则化（@sec-regularization）可以缓解这个问题：它把所有参数往零收缩，相当于加了一个防止发散的先验。
 :::
 
-Let $\mathcal{N}_m^+ = \{(m,k) \in \mathcal{D}_{\text{train}}\}$ be pairs recorded in the order $(m,k)$. Let $\mathcal{N}_m^- = \{(k,m) \in \mathcal{D}_{\text{train}}\}$ be pairs recorded in the order $(k,m)$. Define residuals $r_{mk} = y_{mk} - \sigma(V_m - V_k)$ and $r_{km} = y_{km} - \sigma(V_k-V_m)$. Then
+记 $\mathcal{N}_m^+ = \{(m,k) \in \mathcal{D}_{\text{train}}\}$ 为按 $(m,k)$ 顺序记录的那些对，$\mathcal{N}_m^- = \{(k,m) \in \mathcal{D}_{\text{train}}\}$ 为按 $(k,m)$ 顺序记录的那些对。再定义残差 $r_{mk} = y_{mk} - \sigma(V_m - V_k)$ 与 $r_{km} = y_{km} - \sigma(V_k-V_m)$，于是
 
 $$
 \frac{\partial \ell}{\partial V_m}
@@ -218,7 +218,7 @@ $$
 - \sum_{(k,m)\in \mathcal{N}^-_m} r_{km}.
 $$ {#eq-mle-gradient}
 
-This shows the contribution of data about $m$ only. Each comparison with opponent $k$ adds a term equal to the observed-minus-predicted win indicator, with a plus sign if $m$ is listed first and a minus sign if $m$ is listed second. Intuitively, if $m$ beats $k$ more often than the model predicts, the residual is positive and the gradient pushes $V_m$ up. If $m$ loses to $k$ more than predicted, the residual is negative and the gradient pushes $V_m$ down.
+这个式子只涉及和 $m$ 有关的数据。每和对手 $k$ 比较一次，就贡献一项"观测减去预测"的胜场指示：$m$ 排在前面时取正号，$m$ 排在后面时取负号。直观地说：如果 $m$ 赢 $k$ 的次数比模型预测得多，残差为正，梯度就把 $V_m$ 往上推；如果 $m$ 输给 $k$ 的次数比预测得多，残差为负，梯度把 $V_m$ 往下压。
 
 ```{pyodide-python}
 #| autorun: true
@@ -277,7 +277,7 @@ plt.ylim(0.75, 0.85)
 plt.show()
 ```
 
-In this synthetic setting, one way to interpret the result is to compare with the Bayes optimal AUC. Here we quantify an upper bound on achievable test AUC under the assumed data-generating process. For each test pair $(j,k)$ we know the ground-truth win probability $P_{jk}=\sigma(V_j-V_k)$ from the simulator. The Bayes-optimal score for that pair is exactly this probability, $s^*_{jk}=P_{jk}$. Any classifier that ranks pairs by $s^*$ maximizes AUC in expectation because it orders pairs by their true success probabilities. To estimate the corresponding Bayes AUC on our finite test set, we keep the same index set of pairs and repeatedly resample binary labels $Y_{jk} \sim \mathrm{Bern}(P_{jk})$, then compute $\mathrm{AUC}(s^*, Y)$ on each resample using a tie-aware definition. The mean of these Monte Carlo AUCs is the Bayes-optimal test AUC, and the empirical quantiles give a sampling range induced purely by label noise. For comparison, we compute the model’s AUC by replacing $s^*_{jk}$ with the learned scores $s^{*\text{model}}_{jk}=\sigma(\hat V_j-\hat V_k)$. The gap between the two summarizes how far the fitted model is from the oracle ranking implied by the true $P^*_{jk}$ on the exact same test pairs.
+在这个人造数据的环境里，解读结果的一种办法是拿它和贝叶斯最优 AUC 比较。这里我们想量化：在假定的数据生成过程下，测试 AUC 能达到的上限是多少。对每个测试对 $(j,k)$，我们从模拟器知道真实胜率 $P_{jk}=\sigma(V_j-V_k)$，而这个对上的贝叶斯最优分数正是这个概率本身，即 $s^*_{jk}=P_{jk}$。任何按 $s^*$ 给样本排序的分类器都在期望意义下把 AUC 最大化，因为它就是按真实的成功概率排序的。要在我们这份有限的测试集上估计对应的贝叶斯 AUC，就保持这一批对不变，反复重新抽样二值标签 $Y_{jk} \sim \mathrm{Bern}(P_{jk})$，每次用一个考虑并列的定义算出 $\mathrm{AUC}(s^*, Y)$。这些蒙特卡洛 AUC 的均值就是贝叶斯最优测试 AUC，经验分位数则给出完全由标签噪声造成的波动范围。作对比，我们把 $s^*_{jk}$ 换成模型学到的分数 $s^{*\text{model}}_{jk}=\sigma(\hat V_j-\hat V_k)$，算出模型的 AUC。两者之间的差距说明：在同一批测试对上，拟合出的模型离真实 $P^*_{jk}$ 所隐含的那个"神谕排序"有多远。
 
 ```{pyodide-python}
 #| autorun: true
@@ -313,7 +313,7 @@ print(f"Mean AUC over resamples. Bayes: {np.mean(bayes_list):.4f}. Model: {np.me
 print(f"5–95% range Bayes: {np.percentile(bayes_list,[5,95])}. Model: {np.percentile(model_list,[5,95])}.")
 ```
 
-The result shows that the inference has found a good solution compared to the Bayes optimal estimator! An additional, natural test is to see if the estimated parameters match the true ones. Since the likelihood function only pays attention to the difference of item appeal for any pair, the appeal is only identifiable up to a shift and scale transform. The standard practice is to center and whiten the solution.
+结果显示：和贝叶斯最优估计相比，这次推断找到的解已经相当不错。还有一个很自然的检验，是看估计出的参数与真实参数是否一致。由于似然函数对任意一对物品只看两者吸引力之差，吸引力只能识别到"差一个平移和缩放"。标准做法是把解做中心化与白化（center and whiten）。
 
 ```{pyodide-python}
 #| autorun: true
@@ -344,33 +344,33 @@ mse = np.mean((V - V_hat_aligned) ** 2)
 print(f"After center and whiten: Corr {corr:.4f}, MSE: {mse:.6f}")
 ```
 
-::: {.callout-tip title="Looking Ahead: Regularization"}
-MLE can overfit when parameters outnumber observations. @sec-regularization introduces L2 regularization, which adds a penalty $\frac{\lambda}{2}\|V\|_2^2$ to the objective. This is equivalent to MAP estimation with a Gaussian prior—connecting MLE to the Bayesian framework we develop next.
+::: {.callout-tip title="往后预告：正则化"}
+当参数个数超过观测个数时，最大似然会过拟合。@sec-regularization 会介绍 L2 正则化：在目标函数上加一项惩罚 $\frac{\lambda}{2}\|V\|_2^2$。这等价于在高斯先验下做 MAP 估计——由此把最大似然和接下来要讲的贝叶斯框架连了起来。
 :::
 
-## Bayesian Inference {#sec-bayesian}
+## 贝叶斯推断 {#sec-bayesian}
 
-A Bayesian approach provides a natural alternative to maximum likelihood for parameter estimation. Instead of finding a single point estimate, we place a prior distribution on parameters and update it using the likelihood from observed comparisons. This yields a posterior distribution that captures both central estimates and the uncertainty around them. We first cover parametric models using MCMC, then extend to nonparametric Gaussian Process models using Laplace approximation.
+贝叶斯方法是最大似然之外一条很自然的参数估计路线。我们不再只求一个点估计，而是给参数设一个先验分布，再用观测比较给出的似然去更新它。这样得到的后验分布既给出中心估计，也给出围绕它的不确定性。下面先讲用 MCMC 处理参数模型，再延伸到用拉普拉斯近似处理非参数的高斯过程模型。
 
-### Parametric Models
+### 参数模型
 
-For the Bradley–Terry model with finite-dimensional item parameters $V$, we place i.i.d. standard normal priors and update them using the Bernoulli likelihood from observed comparisons. In practice, this posterior cannot be computed in closed form, so we turn to Markov chain Monte Carlo (MCMC), which constructs a sequence of samples that, in the limit, follow the posterior distribution.
+对物品参数 $V$ 维度有限的 Bradley–Terry 模型，我们给参数设独立同分布的标准正态先验，再用观测比较的伯努利似然来更新。实际计算时这个后验没有闭式解，于是转向马尔可夫链蒙特卡洛（MCMC）：它构造出一串样本，极限情形下这些样本就服从后验分布。
 
-The Metropolis–Hastings (MH) algorithm is straightforward to apply: at each step, we propose a new value for one or more coordinates of (V) (e.g., from a Gaussian centered at the current state), compute the acceptance ratio as the ratio of posterior densities between the proposed and current states, and accept the proposal with that probability. Repeating this process produces a chain of samples that can be used to approximate posterior means, variances, or other functionals of interest. This approach not only yields point predictions but also quantifies uncertainty about the relative strengths of items under the Bradley–Terry model.
+Metropolis–Hastings（MH）算法直接用就行：每一步为 $V$ 的一个或多个坐标提议一个新值（比如从以当前状态为中心的高斯分布里抽），把接受比例算成提议状态与当前状态的后验密度之比，再以这个概率决定是否接受。重复这个过程就得到一条样本链，可以用来近似后验均值、方差，或任何你关心的量。这样做不只给出点预测，还能量化"在 Bradley–Terry 模型下各物品实力相对高低"的不确定性。
 
-Let the prior be i.i.d. standard normal for each item parameter: $p(V) = \prod_{j=1}^M \mathcal N(V_j \mid 0, 1)$. Then the posterior distribution is $p(V \mid \mathcal D) = p(\mathcal D \mid V)p(V)/p(\mathcal D),$ where the likelihood is
+设每个物品参数的先验都是独立同分布的标准正态：$p(V) = \prod_{j=1}^M \mathcal N(V_j \mid 0, 1)$。那么后验分布为 $p(V \mid \mathcal D) = p(\mathcal D \mid V)p(V)/p(\mathcal D)$，其中似然是
 $$
 p(\mathcal D \mid V) = \prod_{(j,j')\in\mathcal I} \sigma(V_j - V_{j'})^{Y_{jj'}}
 \bigl(1-\sigma(V_j - V_{j'})\bigr)^{1-Y_{jj'}}.
 $$ {#eq-bt-likelihood}
 
-The denominator is the marginal likelihood (evidence), which is intractable in closed form, so we resort to MCMC (e.g., MH) to sample from the posterior. Suppose we are at current (parameter) state $V^{(t)}$. We propose a new state $V'$ from a proposal distribution, such as Gaussian: $q(V' \mid V^{(t)}) = \mathcal N (V'; V^{(t)}, \tau^2 I),$ where $\tau^2$ is a step-size variance. This proposal is symmetric, meaning $q(V' \mid V^{(t)}) = q(V^{(t)} \mid V').$ For any proposal distribution $q(V' \mid V^{(t)})$, the Metropolis–Hastings acceptance probability is
+分母是边际似然（也叫证据），没有闭式解，所以我们要靠 MCMC（例如 MH）从后验里采样。设当前（参数）状态为 $V^{(t)}$，我们从某个提议分布（比如高斯分布）里提出一个新状态 $V'$：$q(V' \mid V^{(t)}) = \mathcal N (V'; V^{(t)}, \tau^2 I)$，其中 $\tau^2$ 是步长方差。这个提议是对称的，即 $q(V' \mid V^{(t)}) = q(V^{(t)} \mid V')$。对任意提议分布 $q(V' \mid V^{(t)})$，Metropolis–Hastings 的接受概率是
 
 $$
 \alpha = \min \left\{1, \frac{p(V' \mid \mathcal D) \cdot q(V^{(t)} \mid V')}{p(V^{(t)} \mid \mathcal D) \cdot q(V' \mid V^{(t)})}\right\}.
 $$ {#eq-mh-acceptance-general}
 
-This says: accept the proposal with probability proportional to how much more plausible it is under the posterior, adjusted by how easy it is to propose back. If we choose a Gaussian proposal, the proposal terms cancel out in the ratio due to symmetry. So the acceptance rule simplifies to
+意思是：接受这个提议的概率，与它在后验下"更合理多少"成正比，再按"从提议点走回来的难易程度"做修正。如果选高斯提议分布，由于对称性，比例里的提议项会互相抵消，接受规则就简化成
 $$
 \alpha = \min \left\{1, \frac{p(V' \mid \mathcal D)}{p(V^{(t)} \mid \mathcal D)}\right\} = \min \left\{1, \frac{p(\mathcal D \mid V') \cdot p(V')}{p(\mathcal D \mid V^{(t)}) \cdot p(V^{(t)})}\right\}.
 $$ {#eq-mh-acceptance-symmetric}
@@ -419,8 +419,8 @@ acc_rate = acc / steps
 print(f"[MH] Acceptance rate: {acc_rate:.3f} with prop_scale={prop_scale}")
 ```
 
-::: {.callout-warning title="Assumption: MCMC Has Converged"}
-Metropolis-Hastings produces samples from the posterior *asymptotically*, but in finite time, the chain may not have converged. A reasonable acceptance rate (20--50%) is necessary but not sufficient: the chain may mix slowly between modes or explore only a local region of the posterior. In practice, one should run **multiple independent chains** from dispersed starting points and check convergence using diagnostics such as the Gelman-Rubin $\hat{R}$ statistic (which should be close to 1.0) and effective sample size. The Laplace approximation introduced below avoids sampling entirely but assumes the posterior is unimodal and approximately Gaussian---an assumption that fails when data is sparse or the posterior is multimodal.
+::: {.callout-warning title="假设：MCMC 已经收敛"}
+Metropolis-Hastings 只是*渐近地*给出服从后验的样本；有限时间内，链可能并没有收敛。一个合理的接受率（20--50%）是必要的，但并不足够：链可能在两个峰之间混合得很慢，或者只在后验的一小块局部区域里打转。实践中应当从分散的多个初值出发跑**多条相互独立的链**，并用 Gelman-Rubin $\hat{R}$ 统计量（应当接近 1.0）、有效样本量这类诊断来判断是否收敛。下面要介绍的拉普拉斯近似完全不用采样，但它假设后验是单峰且近似高斯的——数据稀疏或后验多峰时，这个假设就不成立了。
 :::
 
 ```{pyodide-python}
@@ -447,37 +447,37 @@ ax_hist.set_title("Posterior")
 plt.show()
 ```
 
-### Gaussian Processes {#sec-gp-inference}
+### 高斯过程 {#sec-gp-inference}
 
-MCMC works well for finite-dimensional parameter vectors, but what if we want to learn a *nonparametric* reward function? Gaussian Processes (GPs) extend Bayesian inference to *function spaces*, placing a prior distribution over reward functions $r \sim \mathcal{GP}(m, k)$ and combining it with the Bradley-Terry likelihood for preferences. The challenge is that this likelihood is *non-Gaussian*, breaking the standard GP posterior formulas and requiring approximations like Laplace.
+MCMC 处理维度有限的参数向量很合适，但如果我们想学的是一个*非参数*的奖励函数呢？高斯过程（Gaussian Processes, GPs）把贝叶斯推断扩展到*函数空间*：在奖励函数上放一个先验 $r \sim \mathcal{GP}(m, k)$，再和刻画偏好的 Bradley-Terry 似然结合。难点在于这个似然*不是高斯的*，标准的 GP 后验公式因此不再成立，必须借助拉普拉斯近似这类近似办法。
 
-**The inference problem.** Given pairwise comparisons $\mathcal{D} = \{(x_A^{(i)}, x_B^{(i)}, y_i)\}_{i=1}^n$ where $y_i = 1$ if item $A$ was preferred, we want to compute the posterior:
+**推断问题。** 给定两两比较 $\mathcal{D} = \{(x_A^{(i)}, x_B^{(i)}, y_i)\}_{i=1}^n$，其中若物品 $A$ 更被偏好则 $y_i = 1$，我们想算出后验：
 $$
 p(r \mid \mathcal{D}) \propto p(\mathcal{D} \mid r) \cdot p(r)
 $$ {#eq-gp-posterior}
 
-The likelihood follows the Bradley-Terry model:
+似然服从 Bradley-Terry 模型：
 $$
 p(y_i = 1 \mid r) = \sigma\left(r(x_A^{(i)}) - r(x_B^{(i)})\right)
 $$ {#eq-gp-bt-likelihood}
 
-Because this sigmoid likelihood is not Gaussian, the posterior $p(r \mid \mathcal{D})$ is no longer a Gaussian Process.
+因为这个 sigmoid 似然不是高斯的，后验 $p(r \mid \mathcal{D})$ 就不再是高斯过程了。
 
-#### Laplace Approximation
+#### 拉普拉斯近似
 
-The **Laplace approximation** provides a tractable Gaussian approximation to the true posterior:
+**拉普拉斯近似**给出真实后验的一个可计算的高斯近似：
 
-1. **Find the posterior mode** $\mathbf{r}^* = \arg\max_{\mathbf{r}} \log p(\mathcal{D} \mid \mathbf{r}) + \log p(\mathbf{r})$
-2. **Approximate with a Gaussian** centered at the mode, using the Hessian of the log-posterior as precision
+1. **求后验众数** $\mathbf{r}^* = \arg\max_{\mathbf{r}} \log p(\mathcal{D} \mid \mathbf{r}) + \log p(\mathbf{r})$
+2. **用一个以众数为中心的高斯来近似**，把对数后验的 Hessian 当作精度矩阵
 
-For preference data with GP prior (zero mean), the mode satisfies:
+对于带 GP 先验（零均值）的偏好数据，众数满足：
 $$
 \mathbf{r}^* = \arg\max_{\mathbf{r}} \sum_{i=1}^n \log \sigma\left(y_i (r(x_A^{(i)}) - r(x_B^{(i)}))\right) - \frac{1}{2}\mathbf{r}^\top K^{-1} \mathbf{r}
 $$ {#eq-gp-mode}
 
-where $K$ is the kernel matrix and $\mathbf{r} = [r(x_1), \ldots, r(x_m)]^\top$ collects function values at all unique points appearing in comparisons.
+其中 $K$ 是核矩阵，$\mathbf{r} = [r(x_1), \ldots, r(x_m)]^\top$ 把所有在比较中出现过的不同点上的函数值收集在一起。
 
-**Newton's method for finding the mode.** The gradient and Hessian of the log-posterior are:
+**用牛顿法求众数。** 对数后验的梯度与 Hessian 分别是：
 $$
 \nabla_{\mathbf{r}} \log p(\mathbf{r} \mid \mathcal{D}) = \mathbf{g} - K^{-1}\mathbf{r}
 $$ {#eq-gp-gradient}
@@ -485,17 +485,17 @@ $$
 \nabla^2_{\mathbf{r}} \log p(\mathbf{r} \mid \mathcal{D}) = -W - K^{-1}
 $$ {#eq-gp-hessian}
 
-where $\mathbf{g}$ is the gradient of the log-likelihood and $W$ is a diagonal matrix with entries $W_{ii} = p_i(1 - p_i)$ for predictions $p_i = \sigma(r(x_A^{(i)}) - r(x_B^{(i)}))$.
+其中 $\mathbf{g}$ 是对数似然的梯度，$W$ 是对角矩阵，对角元为 $W_{ii} = p_i(1 - p_i)$，这里的预测值 $p_i = \sigma(r(x_A^{(i)}) - r(x_B^{(i)}))$。
 
-**The approximate posterior.** After finding $\mathbf{r}^*$, the Laplace approximation gives:
+**近似后的后验。** 求出 $\mathbf{r}^*$ 之后，拉普拉斯近似给出：
 $$
 p(\mathbf{r} \mid \mathcal{D}) \approx \mathcal{N}\left(\mathbf{r}^*, (K^{-1} + W)^{-1}\right)
 $$ {#eq-laplace-posterior}
 
-This is structurally similar to standard GP regression, but with the data-dependent precision matrix $W$ arising from the Bradley-Terry likelihood rather than observation noise.
+它的形式和标准的 GP 回归很像，只是那个由数据决定的精度矩阵 $W$ 来自 Bradley-Terry 似然，而不是观测噪声。
 
-::: {.callout-warning title="Limitations of the Laplace Approximation"}
-The Laplace approximation replaces the true posterior with a Gaussian centered at the MAP estimate $\mathbf{r}^*$. This approximation can be poor when: (1) the posterior is **multimodal** (e.g., when items form disconnected clusters with few cross-cluster comparisons), (2) the MAP is near a **boundary** of the parameter space, or (3) there are **very few comparisons** so the likelihood barely constrains the posterior. In these settings, the Gaussian approximation underestimates posterior uncertainty and can produce overconfident predictions. Alternatives include expectation propagation (EP), which approximates each likelihood factor separately, or full MCMC sampling as described above.
+::: {.callout-warning title="拉普拉斯近似的局限"}
+拉普拉斯近似把真实后验替换成以 MAP 估计 $\mathbf{r}^*$ 为中心的高斯。以下情形这个近似会很差：(1) 后验是**多峰的**（例如物品分成若干互不相连的簇、簇间比较很少）；(2) MAP 落在参数空间的**边界**附近；(3) **比较条数极少**，似然几乎约束不住后验。这些情况下，高斯近似会低估后验不确定性，给出过于自信的判断。可选的替代办法包括期望传播（expectation propagation, EP）——它对似然的每一项分别做近似——或者像上面那样用完整的 MCMC 采样。
 :::
 
 ```{pyodide-python}
@@ -590,70 +590,70 @@ print(f"Learned from {n_comparisons} pairwise comparisons")
 print(f"Posterior uncertainty varies: min std = {std_pred.min():.3f}, max std = {std_pred.max():.3f}")
 ```
 
-#### Connection to Fisher Information {#sec-fisher-information}
+#### 与 费雪信息的联系 {#sec-fisher-information}
 
-The Laplace approximation has a natural connection to the Fisher information framework we developed for linear models. The Hessian of the negative log-likelihood at the mode gives the *observed Fisher information*:
+拉普拉斯近似与我们为线性模型建立的 费雪信息框架之间，有一个很自然的联系：负对数似然在众数处的 Hessian 就是*观测 费雪信息*：
 $$
 I_{\text{obs}} = W = \text{diag}(p_1(1-p_1), \ldots, p_n(1-p_n))
 $$ {#eq-fisher-information}
 
-Just as with linear preference models, comparisons with $p \approx 0.5$ contribute the most information (highest $p(1-p)$), while "easy" comparisons where one option clearly dominates contribute little.
+和线性偏好模型一样：$p \approx 0.5$ 的比较提供的信息最多（$p(1-p)$ 最大），而那种一方明显占优的"简单比较"几乎不提供信息。
 
-#### Computational Considerations
+#### 计算上的考虑
 
-**Complexity.** Each Newton iteration requires $O(m^3)$ computation for the matrix solve, where $m$ is the number of unique points. For $n$ comparisons involving $m \leq 2n$ unique points, the total cost is $O(n^3)$ per iteration.
+**计算复杂度。** 每一轮牛顿迭代都要做一次矩阵求解，代价是 $O(m^3)$，其中 $m$ 是不同点的个数。若有 $n$ 条比较、涉及 $m \leq 2n$ 个不同点，那么每轮迭代的总代价就是 $O(n^3)$。
 
-**Scalability.** For large datasets, several approximations are available:
-- **Inducing points**: Approximate the GP using $k \ll m$ pseudo-inputs, reducing complexity to $O(k^2 n)$
-- **Variational inference**: Optimize a lower bound on the marginal likelihood
-- **Conjugate gradient methods**: Avoid explicit matrix inversion
+**可扩展性。** 数据量大时有几种近似办法可用：
+- **归纳点（inducing points）**：用 $k \ll m$ 个伪输入来近似 GP，把复杂度降到 $O(k^2 n)$
+- **变分推断**：最大化边际似然的一个下界
+- **共轭梯度法**：避免显式求逆
 
-**Hyperparameter learning.** The kernel hyperparameters (length-scale $\ell$, signal variance $\sigma_f^2$) can be learned by maximizing the Laplace-approximated marginal likelihood:
+**学习核的超参数。** 核函数的超参数（长度尺度 $\ell$、信号方差 $\sigma_f^2$）可以通过最大化"用拉普拉斯近似得到的边际似然"来学：
 $$
 \log p(\mathcal{D} \mid \theta) \approx \log p(\mathcal{D} \mid \mathbf{r}^*) + \log p(\mathbf{r}^* \mid \theta) + \frac{1}{2}\log |K^{-1} + W|^{-1}
 $$ {#eq-marginal-likelihood}
 
-In Chapter 4, we will see how the GP posterior uncertainty enables *active* query selection—choosing which comparisons to ask to learn most efficiently.
+第 4 章我们会看到，GP 的后验不确定性正好可以用来*主动*挑要问的比较——也就是选择那些最能高效学到信息的比较。
 
-## Online Learning {#sec-online}
+## 在线学习 {#sec-online}
 
-In many applications, comparisons between items arrive sequentially over time rather than being observed all at once. For example, players in online games are continuously matched, or recommendation systems log one user preference at a time. In such settings, it is often computationally infeasible to refit the full Bradley–Terry model by maximum likelihood or MCMC after each new observation. Instead, we want an online update rule that adjusts item strengths incrementally as new outcomes arrive.
+很多应用里，物品之间的比较是随着时间一条条到来的，而不是一次性全部拿到。例如网游里的玩家不断被匹配到一起，推荐系统则一次只记录一位用户的一个偏好。这种场景下，每来一条新数据就用最大似然或 MCMC 重新拟合整个 Bradley–Terry 模型，计算上往往不可行。我们想要的是一条在线更新规则：新结果一到，就把物品实力做增量调整。
 
-This is precisely the motivation behind the **Elo rating system**, originally introduced for ranking chess players and later widely adopted in competitive games, online platforms, and even information retrieval. The key idea is to maintain a current estimate of each item's (or player's) latent strength, and update only the two items involved in a match when a new result comes in.
+这正是 **Elo 等级分系统**背后的动机。它最初用于给国际象棋棋手排名，后来在竞技游戏、在线平台乃至信息检索里都被广泛采用。核心思路是：为每个物品（或每位选手）维护一个隐实力的当前估计，新结果到来时只更新交手的那两个物品。
 
-The Elo rule can be derived as a stochastic gradient ascent method on the Bradley–Terry log-likelihood. Suppose item $j$ plays against item $j'$. Given the current parameters, the log-likelihood gradient with respect to $V_j$ and $V_{j'}$ is
+Elo 规则可以从"对 Bradley–Terry 对数似然做随机梯度上升"推导出来。设物品 $j$ 与物品 $j'$ 交手，在当前参数下，对数似然对 $V_j$ 与 $V_{j'}$ 的梯度是
 $$
 \frac{\partial \ell}{\partial V_j} = (y - p), \qquad
 \frac{\partial \ell}{\partial V_{j'}} = -(y - p).
 $$ {#eq-elo-gradient}
 
-A stochastic gradient ascent step with learning rate $\eta$ gives the update:
+以学习率 $\eta$ 走一步随机梯度上升，就得到更新式：
 $$
   V_j \leftarrow V_j + \eta (y - p), \qquad V_{j'} \leftarrow V_{j'} - \eta (y - p).
 $$ {#eq-elo-update}
 
-This is exactly the Elo update rule. The learning rate $\eta$ is often called the **K-factor** in Elo literature. If $y=1$ (item $j$ wins) but the model predicted a low $p$, then $(y - p)$ is positive and $V_j$ increases, $V_{j'}$ decreases — the system learns that $j$ is stronger than previously believed. If $y=0$ (item $j'$ wins), the opposite adjustment happens. The magnitude of the update is larger when the outcome is surprising (large prediction error), and smaller when the outcome is expected (small prediction error). Thus, Elo is an online learning algorithm for the Bradley–Terry model, interpretable as stochastic gradient ascent with a fixed step size.
+这正是 Elo 的更新规则。学习率 $\eta$ 在 Elo 的文献里通常叫 **K 值（K-factor）**。如果 $y=1$（物品 $j$ 获胜）而模型预测的 $p$ 很低，那么 $(y - p)$ 为正，$V_j$ 上调、$V_{j'}$ 下调——系统由此学到 $j$ 比原先估计的更强。如果 $y=0$（$j'$ 获胜），就做相反的调节。结果越出人意料（预测误差越大），调整幅度就越大；结果在预料之中（预测误差小），调整就小。所以说，Elo 就是 Bradley–Terry 模型的一个在线学习算法，可以理解为固定步长的随机梯度上升。
 
-::: {.callout-caution title="Worked Example: Elo as Stochastic Gradient Ascent" collapse="false"}
-Two chess players have current ratings $V_A = 1500$ and $V_B = 1700$ (using the traditional Elo scale where $\sigma$ operates on $(V_A - V_B)/400$). With $K = 32$:
+::: {.callout-caution title="完整算例：Elo 就是随机梯度上升" collapse="false"}
+两位棋手当前的等级分为 $V_A = 1500$ 与 $V_B = 1700$（沿用传统 Elo 刻度，即 $\sigma$ 作用在 $(V_A - V_B)/400$ 上）。取 $K = 32$：
 
-**Step 1.** Predicted win probability for A:
+**第 1 步。** 预测 A 的胜率：
 $$p = \sigma\left(\frac{V_A - V_B}{400}\right) = \sigma\left(\frac{-200}{400}\right) = \sigma(-0.5) \approx 0.378$$
-Player A is expected to win about 38\% of the time.
+也就是说，预计 A 大约只有 38\% 的胜率。
 
-**Step 2.** Suppose A wins (upset!). The prediction error is $y - p = 1 - 0.378 = 0.622$. Updates:
+**第 2 步。** 假设 A 赢了（冷门！）。预测误差是 $y - p = 1 - 0.378 = 0.622$，于是更新：
 $$V_A \leftarrow 1500 + 32 \times 0.622 = 1500 + 19.9 \approx 1520$$
 $$V_B \leftarrow 1700 - 32 \times 0.622 = 1700 - 19.9 \approx 1680$$
 
-**Step 3.** If instead the favorite B had won ($y = 0$, prediction error $= -0.378$):
+**第 3 步。** 如果反过来是更被看好的 B 赢了（$y = 0$，预测误差 $= -0.378$）：
 $$V_A \leftarrow 1500 - 32 \times 0.378 \approx 1488$$
 $$V_B \leftarrow 1700 + 32 \times 0.378 \approx 1712$$
 
-**Key insight:** Upsets produce larger rating changes (19.9 points) than expected outcomes (12.1 points). This is exactly stochastic gradient ascent: the step size is proportional to the prediction error, so surprising results move parameters more. The $K$-factor controls the tradeoff between responsiveness (large $K$) and stability (small $K$).
+**关键洞见：** 爆冷（下棋弱者取胜）带来的分数变化（19.9 分）明显大于符合预期的结果（12.1 分）。这正是随机梯度上升：步长与预测误差成正比，所以出乎意料的结果让参数动得更多。$K$ 值控制的是"反应灵敏（$K$ 大）"与"结果稳定（$K$ 小）"之间的取舍。
 :::
 
-::: {.callout-warning title="Limitations of Fixed K-Factor Elo"}
-The Elo system with a constant $K$-factor has several limitations. First, it weights all comparisons equally regardless of recency---there is no discounting of old information, so it cannot optimally track **non-stationary** preferences (e.g., an LLM improving through training). Second, a single $K$ must trade off responsiveness against stability for *all* items, even though some items' utilities may be well-established while others are new. Third, unlike Bayesian methods, Elo provides **no uncertainty quantification**---the rating $V_j$ is a point estimate with no associated confidence interval. Systems like Glicko address some of these issues by maintaining per-item uncertainty estimates that decay with inactivity and scale the update magnitude accordingly.
+::: {.callout-warning title="固定 K 值 Elo 的局限"}
+$K$ 值固定的 Elo 系统有几个局限。第一，它对所有比较一视同仁、不考虑时间远近——旧信息不会打折，因此没法很好地跟踪**非平稳**的偏好（例如一个语言模型在训练过程中不断进步）。第二，一个 $K$ 值要在"反应快"和"结果稳"之间替*所有*物品做同一个取舍，可有些物品的效用早已很确定，有些才刚出现。第三，和贝叶斯方法不同，Elo **不提供不确定性量化**——等级分 $V_j$ 只是个点估计，没有配套的置信区间。Glicko 这类系统通过为每个物品维护不确定度估计（长期不活动就让不确定度回升），并据此调节更新幅度，缓解了其中一部分问题。
 :::
 
 ```{pyodide-python}
@@ -687,27 +687,27 @@ p_te_elo = 1.0 / (1.0 + np.exp(-(r[r_te] - r[c_te])))
 auc_elo = auc_from_scores(p_te_elo, y_te)
 ```
 
-## Regularization and Overfitting {#sec-regularization}
+## 正则化与过拟合 {#sec-regularization}
 
-The maximum likelihood estimator maximizes fit to observed training data but may overfit, especially when the number of parameters is large relative to the amount of data. In preference learning, overfitting manifests as learned item parameters that capture noise in the training comparisons rather than true relative strengths. Regularization techniques penalize model complexity to improve generalization to held-out test data.
+最大似然估计把训练数据的拟合度做到最高，但当参数量相对于数据量太大时就会过拟合。在偏好学习里，过拟合的表现是：学到的物品参数捕捉的是训练比较里的噪声，而不是真实的相对强弱。正则化的做法是惩罚模型的复杂度，从而改善在留出的测试数据上的泛化。
 
-### L2 Regularization
+### L2 正则
 
-The most common regularization approach adds an L2 penalty term to the log-likelihood. For the Bradley-Terry model, the regularized objective becomes:
+最常用的正则做法是在对数似然上加一项 L2 惩罚。对 Bradley-Terry 模型，加正则后的目标变成：
 $$
 \mathcal{L}_{\text{reg}}(V) = \sum_{(j,j') \in \mathcal{D}_{\text{train}}} \log p(Y_{jj'} \mid V_j - V_{j'}) - \frac{\lambda}{2} \|V\|_2^2
 $$ {#eq-regularized-objective}
-where $\lambda \geq 0$ is the **regularization strength**. The penalty $\frac{\lambda}{2} \|V\|_2^2 = \frac{\lambda}{2} \sum_{j=1}^M V_j^2$ discourages large parameter values. When $\lambda = 0$, we recover standard MLE. As $\lambda$ increases, parameters shrink toward zero.
+其中 $\lambda \geq 0$ 是**正则强度**。惩罚项 $\frac{\lambda}{2} \|V\|_2^2 = \frac{\lambda}{2} \sum_{j=1}^M V_j^2$ 会抑制过大的参数值。当 $\lambda = 0$ 时就退回普通的最大似然；$\lambda$ 越大，参数越往零收缩。
 
-The regularized gradient adds a simple term to the MLE gradient:
+加了正则之后，梯度只是在原来的最大似然梯度上多了一项：
 $$
 \frac{\partial \mathcal{L}_{\text{reg}}}{\partial V_m} = \sum_{(m,k)\in \mathcal{N}^+_m} r_{mk} - \sum_{(k,m)\in \mathcal{N}^-_m} r_{km} - \lambda V_m
 $$ {#eq-regularized-gradient}
 
-Intuitively, regularization creates a bias-variance tradeoff: small $\lambda$ permits complex fits (low bias, high variance), while large $\lambda$ enforces simpler models (high bias, low variance). The optimal $\lambda$ balances these to minimize test error.
+直观地说，正则化带来的是一个偏差-方差权衡：$\lambda$ 小则允许拟合得很复杂（偏差低、方差高），$\lambda$ 大则强制模型更简单（偏差高、方差低）。最优的 $\lambda$ 就是在两者之间取得平衡，让测试误差最小。
 
-::: {.callout-note title="Connection to Bayesian Inference"}
-L2 regularization corresponds exactly to maximum a posteriori (MAP) estimation with a Gaussian prior $p(V_j) = \mathcal{N}(0, 1/\lambda)$. The regularization strength $\lambda$ is the inverse prior variance: strong regularization (large $\lambda$) means a tight prior belief that parameters are near zero.
+::: {.callout-note title="与贝叶斯推断的联系"}
+L2 正则恰好对应在高斯先验 $p(V_j) = \mathcal{N}(0, 1/\lambda)$ 下做最大后验（MAP）估计。正则强度 $\lambda$ 就是先验方差的倒数：正则越强（$\lambda$ 越大），相当于先验越坚信参数应当接近零。
 :::
 
 ```{pyodide-python}
@@ -792,11 +792,11 @@ print(f"Optimal λ: {lambdas[best_idx]:.3f} (Test AUC: {test_aucs[best_idx]:.4f}
 print(f"Unregularized (λ=0): Train AUC {train_aucs[0]:.4f}, Test AUC {test_aucs[0]:.4f}")
 ```
 
-The validation curve demonstrates the regularization trade-off: at $\lambda = 0$ (no regularization), the model overfits to training data, achieving high training AUC but lower test AUC. As $\lambda$ increases, test performance improves until an optimal point, after which excessive regularization underfits. The gap between training and test AUC narrows with proper regularization, indicating better generalization.
+这条验证曲线把正则化的权衡展示得很清楚：$\lambda = 0$（不加正则）时，模型对训练数据过拟合，训练 AUC 很高但测试 AUC 较低。随着 $\lambda$ 增大，测试性能先变好，到最优点之后，过强的正则又导致欠拟合。正则化取得合适时，训练 AUC 与测试 AUC 之间的差距会缩小，说明泛化更好。
 
-### Early Stopping
+### 早停
 
-An alternative to explicit regularization is **early stopping**: monitor validation performance during training and stop when it begins to degrade, even if training performance continues improving. This exploits the empirical observation that gradient descent follows a path from simple to complex models.
+除了显式加正则项，另一种办法是**早停（early stopping）**：在训练过程中持续监控验证集性能，一旦它开始变差就停下来，哪怕训练集上的性能还在继续提升。这么做的依据是一个常见的经验现象：梯度下降走的是一条"从简单模型到复杂模型"的路径。
 
 ```{pyodide-python}
 #| autorun: true
@@ -848,34 +848,34 @@ print(f"Best validation AUC {val_hist[best_epoch]:.4f} at epoch {best_epoch}")
 print(f"Final epoch ({len(val_hist)-1}): Train {tr_hist[-1]:.4f}, Val {val_hist[-1]:.4f}")
 ```
 
-Early stopping automatically selects model complexity through the training trajectory. Unlike L2 regularization, it requires no tuning of $\lambda$, but does require held-out validation data to monitor.
+早停通过训练过程本身自动选出了模型的复杂度。和 L2 正则不同，它不需要调 $\lambda$，但确实需要留出一份验证数据来监控。
 
-::: {.callout-important title="Key Takeaway: When to Regularize"}
-Regularization is most critical when:
+::: {.callout-important title="本章要点：什么时候必须做正则"}
+下面这些情形里，正则化最关键：
 
-- **Few observations** relative to parameters (e.g., 50 comparisons, 20 items)
-- **Imbalanced data**: Some items have many comparisons, others have few
-- **High noise**: Label noise or measurement error in comparisons
+- 相对于参数，**观测太少**（例如 50 次比较、20 个物品）
+- **数据不平衡**：有些物品比较很多，有些很少
+- **噪声大**：比较结果本身有标注噪声或测量误差
 
-For large datasets with many comparisons per item, overfitting is less of a concern and regularization may have minimal impact. Always use validation data or cross-validation to tune regularization strength.
+如果数据量大、每个物品的比较也很多，过拟合就不是主要矛盾，正则化可能几乎没有影响。但正则强度一定要用验证数据或交叉验证来调。
 :::
 
 
-## Model Selection and Cross-Validation {#sec-model-selection}
+## 模型选择与交叉验证 {#sec-model-selection}
 
-A single train/test split provides one estimate of generalization performance, but this estimate has high variance: a different random split may yield different results. **Cross-validation** (CV) systematically evaluates multiple train/test splits to obtain more reliable performance estimates and enable principled model selection.
+单次训练/测试划分只能给出一个泛化性能的估计，而这个估计的方差很大：换一个随机划分，结果可能就不同。**交叉验证（cross-validation, CV）**系统地评估多个训练/测试划分，从而得到更可靠的性能估计，也让模型选择有据可依。
 
-### K-Fold Cross-Validation
+### k 折交叉验证
 
-In **k-fold cross-validation**, we partition the data into $k$ equally-sized folds. For each fold $i \in \{1, \ldots, k\}$:
+**k 折交叉验证**是把数据分成 $k$ 份大小相近的折。对每一折 $i \in \{1, \ldots, k\}$：
 
-1. Train the model on all folds except fold $i$
-2. Evaluate on fold $i$ (held-out validation)
-3. Record the validation metric (e.g., AUC, log-likelihood)
+1. 用除第 $i$ 折以外的所有折训练模型
+2. 在第 $i$ 折上评估（这一折是留出的验证集）
+3. 记录验证指标（例如 AUC、对数似然）
 
-The final CV score is the average across all $k$ folds: $\text{CV}_k = \frac{1}{k} \sum_{i=1}^k \text{metric}_i$. The standard error quantifies uncertainty in the estimate.
+最终的交叉验证分数是 $k$ 折的平均：$\text{CV}_k = \frac{1}{k} \sum_{i=1}^k \text{metric}_i$。再算出标准误，就能说明这个估计本身有多大不确定性。
 
-For preference data, we partition the set of observed pairwise comparisons (not items) into folds, ensuring each fold contains a representative sample of comparisons.
+对偏好数据来说，应当把**观测到的两两比较集合**分成各折（而不是按物品分），并保证每折都比较有代表性。
 
 ```{pyodide-python}
 #| autorun: true
@@ -924,11 +924,11 @@ print(f"5-Fold CV Scores: {cv_scores}")
 print(f"Mean CV AUC: {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
 ```
 
-The CV estimate of {cv_scores.mean():.4f} ± {cv_scores.std():.4f} is more reliable than a single train/test split. The standard deviation quantifies variability across folds.
+交叉验证给出的估计 {cv_scores.mean():.4f} ± {cv_scores.std():.4f} 比单次训练/测试划分更可靠，其中的标准差说明了各折之间的波动有多大。（原文此处直接打印了代码里的格式化占位符，未代入具体数值，本译文按原样保留。）
 
-### Hyperparameter Tuning with Cross-Validation
+### 用交叉验证调超参数
 
-Cross-validation enables principled hyperparameter selection: evaluate each candidate hyperparameter on CV performance and select the best. For Bradley-Terry, key hyperparameters include regularization strength $\lambda$ and learning rate.
+有了交叉验证，就能有原则地选超参数：把每个候选超参数都放在交叉验证成绩上比较，取最好的那个。对 Bradley-Terry 来说，关键超参数包括正则强度 $\lambda$ 和学习率。
 
 ```{pyodide-python}
 #| autorun: true
@@ -959,18 +959,18 @@ best_lam_idx = np.argmax(cv_means)
 print(f"Best λ: {lambda_grid[best_lam_idx]:.3f} (CV AUC: {cv_means[best_lam_idx]:.4f} ± {cv_stds[best_lam_idx]:.4f})")
 ```
 
-The error bars show the standard deviation across folds, indicating uncertainty in the CV estimate for each hyperparameter. Select the hyperparameter with highest mean CV performance.
+误差线表示各折之间的标准差，说明每个超参数对应的交叉验证估计有多不确定。选平均交叉验证成绩最高的那个超参数即可。
 
-### Beyond AUC: Multiple Evaluation Metrics
+### 不止 AUC：多个评估指标
 
-AUC measures ranking quality but does not capture all aspects of model performance. Additional metrics provide complementary insights:
+AUC 衡量的是排序质量，但模型表现并不是只有这一面。再配几个指标，能看到互补的信息：
 
-**Log-Likelihood**: Measures the probability the model assigns to observed outcomes. Higher is better.
+**对数似然**：衡量模型给实际出现的结果赋予的概率有多高。越大越好。
 $$
 \text{LL} = \sum_{(j,j') \in \mathcal{D}_{\text{test}}} \left[ Y_{jj'} \log \sigma(V_j - V_{j'}) + (1 - Y_{jj'}) \log (1 - \sigma(V_j - V_{j'})) \right]
 $$ {#eq-log-likelihood-metric}
 
-**Calibration Error**: Measures whether predicted probabilities match empirical frequencies. Bin predictions into intervals (e.g., [0.0, 0.1), [0.1, 0.2), ...) and compare average predicted probability to observed frequency in each bin.
+**校准误差**：检查预测的概率与实际频率是否一致。做法是把预测分到若干个区间（例如 [0.0, 0.1)、[0.1, 0.2) 等），在每个区间里比较平均预测概率与实际胜率。
 
 ```{pyodide-python}
 #| autorun: true
@@ -1027,32 +1027,32 @@ for res in metrics_results:
     print(f"{res['lambda']:<8.2f} {res['AUC']:<8.4f} {res['Log-Likelihood']:<12.2f} {res['Calibration Error']:<12.4f}")
 ```
 
-Different metrics may favor different models. AUC focuses on ranking, log-likelihood on probability estimates, and calibration on frequency matching. Use multiple metrics to gain a comprehensive view of model quality.
+不同指标会偏好不同的模型：AUC 只看排序，对数似然看概率估计得好不好，校准误差看频率对不对得上。要全面地了解模型质量，就得几个指标一起看。
 
-::: {.callout-important title="Key Takeaway: Cross-Validation Best Practices"}
-- **Use CV for hyperparameter tuning**, not test set evaluation (avoid overfitting to the test set)
-- **Report mean ± std** across folds to quantify uncertainty
-- **Stratified splitting**: For imbalanced data, ensure each fold has representative class proportions
-- **Temporal splitting**: For sequential data (e.g., chess games over time), use time-based splits instead of random CV to avoid leaking future information into past predictions
-- **Nested CV**: For unbiased performance estimates, use outer CV loop for evaluation and inner CV loop for hyperparameter selection
+::: {.callout-important title="本章要点：交叉验证的常见做法"}
+- **用交叉验证调超参数**，不要拿测试集来调（否则就是对测试集过拟合）
+- **报告各折的均值 ± 标准差**，把不确定性一并说明
+- **分层划分**：数据不平衡时，保证每一折里的类别比例和整体一致
+- **按时间划分**：对有序数据（例如按时间记录的棋局），用基于时间的划分代替随机交叉验证，避免把未来信息泄漏到对过去的预测里
+- **嵌套交叉验证**：想要无偏的性能估计，就用外层交叉验证做评估、内层交叉验证选超参数
 :::
 
-## Optimization Methods {#sec-optimization}
+## 优化方法 {#sec-optimization}
 
-Gradient descent is the foundation for learning Bradley-Terry parameters, but modern optimization methods can accelerate convergence and improve final performance. We compare three widely-used optimizers and discuss when each is appropriate.
+梯度下降是学习 Bradley-Terry 参数的基础，但现代的优化方法能加快收敛、也能改善最终效果。本节比较三种常用的优化器，并说明各自适合在什么时候用。
 
-### Beyond Vanilla Gradient Descent
+### 不止是普通的梯度下降
 
-Standard gradient descent updates parameters with a fixed learning rate: $V \leftarrow V + \eta \nabla \mathcal{L}(V)$. This has two limitations:
+普通梯度下降用固定的学习率更新参数：$V \leftarrow V + \eta \nabla \mathcal{L}(V)$。这有两个缺陷：
 
-1. **Fixed step size**: Large $\eta$ causes instability; small $\eta$ slows convergence
-2. **No momentum**: Each step ignores the optimization history
+1. **步长固定**：$\eta$ 大会不稳定，$\eta$ 小则收敛慢
+2. **没有动量**：每一步都不利用之前的优化历史
 
-Modern optimizers address these issues through adaptive learning rates and momentum.
+现代优化器通过自适应学习率和动量来克服这两点。
 
-### Adam Optimizer
+### Adam 优化器
 
-**Adam** (Adaptive Moment Estimation) maintains running averages of both gradients and squared gradients, adapting the learning rate per parameter. The update rule is:
+**Adam**（Adaptive Moment Estimation，自适应矩估计）同时维护梯度和梯度平方的滑动平均，从而为每个参数自适应地调整学习率。更新规则是：
 
 $$
 \begin{aligned}
@@ -1063,7 +1063,7 @@ V &\leftarrow V + \alpha \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} \quad &\t
 \end{aligned}
 $$ {#eq-adam-update}
 
-where $g_t$ is the gradient at step $t$, $\beta_1 = 0.9$ and $\beta_2 = 0.999$ are typical, and $\epsilon = 10^{-8}$ prevents division by zero.
+其中 $g_t$ 是第 $t$ 步的梯度，$\beta_1 = 0.9$、$\beta_2 = 0.999$ 是常用取值，$\epsilon = 10^{-8}$ 用来避免除零。
 
 ```{pyodide-python}
 #| autorun: true
@@ -1135,39 +1135,39 @@ plt.show()
 print(f"Final loss - GD: {loss_gd[-1]:.4f}, Adam: {loss_adam[-1]:.4f}")
 ```
 
-Adam typically converges faster than vanilla gradient descent and is less sensitive to learning rate tuning. The adaptive per-parameter learning rates help in problems with varying gradient magnitudes across parameters.
+Adam 通常比普通梯度下降收敛更快，对学习率也没那么敏感。当不同参数的梯度大小差别很大时，这种"每个参数各自一套学习率"的自适应做法尤其有帮助。
 
-### Learning Rate Schedules
+### 学习率调度
 
-Instead of a fixed learning rate, **schedules** decay $\eta$ over time to enable large initial steps (fast progress) followed by small refinements (precision):
+与其用一个固定的学习率，不如用**调度策略**让 $\eta$ 随时间衰减：一开始步子大（收敛快），后面步子小（精度高）：
 
-- **Step decay**: $\eta_t = \eta_0 \cdot \gamma^{\lfloor t / k \rfloor}$ (reduce by factor $\gamma$ every $k$ epochs)
-- **Exponential decay**: $\eta_t = \eta_0 e^{-\lambda t}$
-- **Cosine annealing**: $\eta_t = \eta_{\min} + \frac{1}{2}(\eta_0 - \eta_{\min})(1 + \cos(\pi t / T))$
+- **阶梯衰减**：$\eta_t = \eta_0 \cdot \gamma^{\lfloor t / k \rfloor}$（每 $k$ 轮乘上衰减因子 $\gamma$）
+- **指数衰减**：$\eta_t = \eta_0 e^{-\lambda t}$
+- **余弦退火**：$\eta_t = \eta_{\min} + \frac{1}{2}(\eta_0 - \eta_{\min})(1 + \cos(\pi t / T))$
 
-Learning rate schedules are especially useful for training to convergence without extensive hyperparameter tuning.
+想在不做大量超参数搜索的前提下把模型训练到收敛，学习率调度特别有用。
 
-::: {.callout-important title="Key Takeaway: Choosing an Optimizer"}
-**When to use each optimizer:**
+::: {.callout-important title="本章要点：怎么选优化器"}
+**各优化器的适用场景：**
 
-- **Vanilla GD**: Simple problems, well-tuned learning rate available, or for pedagogical clarity
-- **Adam**: Default choice for most problems; robust to learning rate, fast convergence, handles sparse gradients well
-- **SGD with momentum**: When you need the theoretical guarantees of SGD (e.g., convergence proofs) but want faster practical convergence
+- **普通梯度下降**：问题比较简单、学习率已经调好，或者只是为了把过程讲清楚
+- **Adam**：多数问题上的默认选择；对学习率不敏感、收敛快、稀疏梯度也好处理
+- **带动量的 SGD**：需要 SGD 那套理论保证（例如收敛性证明），又希望实际收敛更快时
 
-**Hyperparameter guidelines:**
-- Adam: $\alpha = 0.001$ to $0.1$, default $\beta_1 = 0.9$, $\beta_2 = 0.999$
-- GD: $\eta = 0.01$ to $0.1$, may need careful tuning
-- Learning rate schedules: Helpful when training for many epochs
+**超参数取值参考：**
+- Adam：$\alpha = 0.001$ 到 $0.1$，$\beta_1 = 0.9$、$\beta_2 = 0.999$ 用默认值即可
+- 梯度下降：$\eta = 0.01$ 到 $0.1$，可能需要仔细调
+- 学习率调度：训练轮数很多时很有用
 :::
 
 
-## Real-World Application: LLM Preference Learning {#sec-real-world}
+## 真实场景应用：语言模型的偏好学习 {#sec-real-world}
 
-We now apply all three parameter learning methods to a realistic preference learning scenario inspired by language model alignment. While production LLM alignment uses datasets like Stanford Human Preferences (SHP) or Anthropic's HH-RLHF, we construct a synthetic dataset that captures key properties of real preference data: noisy labels, varying item quality, and response embeddings.
+现在把上面三种参数学习方法全部用到一个受语言模型对齐启发的、贴近现实的偏好学习场景里。真实的语言模型对齐会用 Stanford Human Preferences (SHP)、Anthropic 的 HH-RLHF 这类数据集；我们这里构造一份人造数据，但它抓住了真实偏好数据的几个关键性质：标签有噪声、回答质量参差不齐、回答以向量表示的形式给出。
 
-### Dataset: Simulated LLM Response Preferences
+### 数据集：模拟的语言模型回答偏好
 
-We simulate a setting where a language model generates multiple responses to prompts, and human annotators provide pairwise preferences. Each response is represented by a learned embedding (e.g., from a pretrained model), and the true utility is a linear function of this embedding plus noise.
+我们模拟这样的情形：一个语言模型对同一个提示生成多个回答，人类标注员给出两两偏好。每个回答用一个学到的向量表示（例如来自预训练模型）来表示，而真实效用是这个表示的线性函数再加噪声。
 
 ```{pyodide-python}
 #| autorun: true
@@ -1222,15 +1222,15 @@ print(f"True utility range: [{true_utilities.min():.2f}, {true_utilities.max():.
 print(f"Label noise: ~10% of comparisons are random")
 ```
 
-This synthetic dataset mimics real LLM preference data: responses have embedding representations, utilities are learned functions of embeddings, and annotations contain noise.
+这份人造数据模仿了真实的语言模型偏好数据：回答用向量表示来表示，效用是这些表示的函数，标注里还带噪声。
 
-::: {.callout-important title="Label Noise: Random vs. Systematic"}
-The 10% uniform label noise above is a simplification. In real annotation pipelines, noise is often **systematic** rather than random: annotators may have consistent biases (preferring verbose responses), may be influenced by presentation order, or may satisfice rather than carefully evaluate. Uniform noise attenuates the learned utilities toward zero (biasing toward equal preference) but preserves their *ranking*. Systematic noise, by contrast, can **reverse rankings**---if annotators consistently prefer item $j$ for reasons unrelated to the true objective (e.g., surface fluency over factual accuracy), the MLE will learn the annotators' biases as if they were genuine preferences. This connects to the **inversion problem** discussed in Chapter 6: observed choices may not reflect underlying preferences. Robust estimation methods that model annotator-specific biases or down-weight unreliable annotations can mitigate this issue.
+::: {.callout-important title="标签噪声：随机的与系统性的"}
+上面这 10% 的均匀标签噪声是一种简化。真实的标注流程里，噪声往往是**系统性的**而不是随机的：标注员可能有一贯的偏好（比如偏爱更长的回答）、可能受呈现顺序影响、也可能只是"够用就行"而没有认真比较。均匀的噪声会把学到的效用整体往零压缩（朝"无所谓"的方向偏），但*排序*保持不变。而系统性的噪声则可能**把排序颠倒过来**——如果标注员始终因为与真实目标无关的原因（比如表面流畅度压过事实正确性）偏爱物品 $j$，最大似然就会把标注员的这种偏向当成真实偏好学进去。这与第 6 章要讨论的**反转问题**相连：观察到的选择未必反映背后的偏好。把标注员各自的偏向显式建模、或者降低不可靠标注的权重，可以缓解这个问题。
 :::
 
-### Applying All Three Learning Methods
+### 把三种学习方法都用上
 
-We apply MLE, Bayesian inference, and online learning (Elo) to the same data and compare results.
+我们在同一份数据上分别用最大似然、贝叶斯推断和在线学习（Elo），然后比较结果。
 
 ```{pyodide-python}
 #| autorun: true
@@ -1398,230 +1398,230 @@ fig.suptitle(f'Bayesian Inference (r={corr_bayes:.3f})', y=0.98)
 plt.show()
 ```
 
-### Key Observations
+### 几点观察
 
-The three methods yield similar performance on this synthetic LLM preference task:
+在这个人造的语言模型偏好任务上，三种方法的表现差不多：
 
-1. **MLE** is fastest and most scalable, suitable for large-scale applications
-2. **Bayesian** inference via MCMC provides posterior distributions over utilities, enabling uncertainty quantification—the marginal plot shows how posterior samples vary, and error bars show 95% credible intervals
-3. **Online (Elo)** learns incrementally, ideal for streaming data but may be less data-efficient than batch methods
+1. **最大似然**最快、最好扩展，适合大规模应用
+2. **贝叶斯**推断（用 MCMC）给出效用上的后验分布，因此能量化不确定性——边上那张边际图展示了后验样本的波动范围，误差线是 95% 可信区间
+3. **在线方法（Elo）**是增量学习的，天然适合流式数据，但样本效率可能不如批量方法
 
-All methods successfully recover utilities correlated with the ground truth despite 10% label noise, demonstrating robustness. In production LLM alignment:
+尽管有 10% 的标签噪声，三种方法都成功恢复出与真值相关的效用，说明它们相当稳健。而在真实的语言模型对齐中：
 
-- **Data scale**: Real datasets have 10K-100K+ comparisons
-- **Cold start**: New responses have no comparison history; requires initialization strategies
-- **Computational cost**: MCMC becomes expensive; MLE or online methods preferred
-- **Temporal drift**: User preferences may evolve; online methods naturally adapt
+- **数据规模**：真实数据集往往有 1 万到 10 万条以上的比较
+- **冷启动**：新回答没有比较历史，需要初始化策略
+- **计算成本**：MCMC 开销很大，实际更倾向用最大似然或在线方法
+- **时间漂移**：用户偏好会变，在线方法能自然跟上
 
-::: {.callout-note title="Connecting to DPO"}
-Recall from @sec-llm-example that Direct Preference Optimization (DPO) for language models is equivalent to Bradley-Terry MLE where the "utility" is $\beta \log \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)}$. The MLE techniques developed in this chapter directly apply to DPO training: regularization prevents overfitting to preference data, and optimization methods (Adam, learning rate schedules) accelerate convergence.
+::: {.callout-note title="与 DPO 的联系"}
+回想 @sec-llm-example：语言模型上的直接偏好优化（Direct Preference Optimization, DPO）等价于一次 Bradley-Terry 最大似然，其中的"效用"是 $\beta \log \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)}$。本章讲的这些最大似然技术可以直接用到 DPO 训练上：正则化防止对偏好数据过拟合，优化方法（Adam、学习率调度）则加快收敛。
 :::
 
-::: {.callout-warning title="Common Pitfall: DPO's Hidden Assumptions"}
-DPO is often described as "reward-model-free," but it is not assumption-free. DPO's implicit reward is $r^*(y \mid x) = \beta \log \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)}$, which means: (1) the recovered reward **depends on the reference policy** $\pi_{\text{ref}}$ — different reference models yield different implicit rewards; (2) preferences are assumed to follow **Bradley-Terry** (i.i.d. Gumbel noise), so IIA violations in human judgments propagate silently; (3) the hyperparameter $\beta$ controls the tradeoff between staying close to $\pi_{\text{ref}}$ and optimizing for preferences — too small and the model barely moves; too large and it overfits to noisy labels. Always validate DPO-trained models against held-out preference data.
+::: {.callout-warning title="常见坑：DPO 隐含的假设"}
+人们常说 DPO 是"不需要奖励模型"的，但这不等于它没有假设。DPO 的隐式奖励是 $r^*(y \mid x) = \beta \log \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)}$，这意味着：(1) 学出来的奖励**依赖于参考策略** $\pi_{\text{ref}}$——换不同的参考模型，得到的隐式奖励就不同；(2) 它假设偏好服从 **Bradley-Terry**（噪声独立同分布于 Gumbel），所以人类判断中对 IIA 的违反会被悄悄带进来；(3) 超参数 $\beta$ 控制"离 $\pi_{\text{ref}}$ 近一些"和"更用力地优化偏好"之间的权衡——太小则模型几乎不动，太大则会对噪声标签过拟合。用 DPO 训完的模型，一定要在留出的偏好数据上再验一遍。
 :::
 
-## Summary
+## 小结
 
-- This chapter develops three complementary approaches to estimating preference model parameters from observed comparison data, each with distinct tradeoffs in scalability, uncertainty quantification, and data requirements.
-- **Maximum Likelihood Estimation (MLE)** finds point estimates by maximizing $\ell(V) = \sum \log \sigma(V_j - V_k)$ via gradient ascent. It is fast, scalable, and the foundation for DPO training in language model alignment.
-- **Bayesian inference** via Markov Chain Monte Carlo (MCMC) provides full posterior distributions over parameters, enabling uncertainty quantification---but at substantially higher computational cost. The **Laplace approximation** offers a cheaper Gaussian approximation to the posterior, essential for GP-based preference models where the non-Gaussian likelihood makes exact inference intractable.
-- **Online learning (Elo ratings)** processes comparisons one at a time as streaming data. Elo is precisely **stochastic gradient ascent** on the Bradley-Terry log-likelihood with step size $K$, bridging a 70-year-old rating system to modern optimization.
-- **Regularization** (L2 penalty, early stopping) prevents overfitting, especially when comparisons are sparse. L2 regularization is equivalent to MAP estimation with a Gaussian prior, connecting frequentist and Bayesian perspectives.
-- **Cross-validation** provides principled model selection---choosing regularization strength, model dimensionality, or kernel hyperparameters---by estimating out-of-sample performance without a separate test set.
-- **Evaluation** requires multiple metrics: AUC measures ranking accuracy, log-likelihood measures calibration quality, and calibration error directly assesses whether predicted probabilities match observed frequencies.
-- In practice, all three methods often recover similar utility estimates on well-specified problems; the choice depends on whether you need uncertainty (Bayesian), scalability (MLE), or streaming updates (online).
+- 本章给出了三种互补的做法，从观测到的比较数据中估计偏好模型的参数，三者在可扩展性、不确定性量化、数据需求上各有取舍。
+- **最大似然估计（MLE）**用梯度上升最大化 $\ell(V) = \sum \log \sigma(V_j - V_k)$，求点估计。它快、可扩展，也是语言模型对齐里 DPO 训练的基础。
+- **贝叶斯推断**（用马尔可夫链蒙特卡洛，MCMC）给出参数的完整后验分布，因此能做不确定性量化——但计算代价高得多。**拉普拉斯近似**给出一个更便宜的高斯近似；对基于高斯过程的偏好模型来说它必不可少，因为非高斯似然让精确推断做不动。
+- **在线学习（Elo 等级分）**把比较一条条当流数据处理。Elo 恰好就是在 Bradley-Terry 对数似然上做**随机梯度上升**、步长为 $K$，这把一套有七十年历史的评分系统和现代优化联系了起来。
+- **正则化**（L2 惩罚、早停）防止过拟合，在比较数据稀疏时尤其重要。L2 正则等价于高斯先验下的 MAP 估计，从而把频率派和贝叶斯两派打通。
+- **交叉验证**提供了一种有原则的模型选择办法——挑正则强度、模型维度或核函数超参数——不需要额外留一个测试集也能估计样本外性能。
+- **评估**需要多个指标一起看：AUC 衡量排序是否准确，对数似然衡量概率质量，校准误差则直接检查预测概率与实际频率是否吻合。
+- 实践中，在设定正确的问题上三种方法常常给出接近的效用估计；怎么选，取决于你要的是不确定性（贝叶斯）、可扩展性（最大似然），还是流式更新（在线）。
 
-## Quick Check
+## 快问快答
 
-Test your understanding before proceeding to the exercises.
+做练习之前，先自测一下掌握程度。
 
-1. Why does the Bradley-Terry log-likelihood have a unique maximum when the comparison graph is strongly connected, but may not otherwise?
+1. 为什么比较图强连通时 Bradley-Terry 的对数似然有唯一最大值，否则可能没有？
 
-2. An Elo system uses $K = 32$. After a game where the favorite (predicted 80% win probability) loses, how many rating points does each player gain/lose? What if $K = 16$?
+2. 某个 Elo 系统取 $K = 32$。一场对局里，被看好的一方（预测胜率 80%）输了，双方各加/扣多少分？如果 $K = 16$ 呢？
 
-3. You fit a Bradley-Terry model with no regularization on a sparse dataset (50 items, 100 comparisons). Some items have never been compared. What happens to the MLE for those items? How does L2 regularization help?
+3. 你在一个稀疏数据集（50 个物品、100 次比较）上拟合 Bradley-Terry 模型，不加正则。有些物品从没被比较过。这些物品的最大似然估计会怎样？L2 正则为什么能帮上忙？
 
-4. A colleague says "our model has 95% AUC on the test set, so it's excellent." What additional evaluation would you recommend, and why might high AUC still mask poor performance?
+4. 同事说"我们模型在测试集上 AUC 有 95%，非常好"。你还会建议补充哪些评估？为什么 AUC 很高也可能掩盖真实的问题？
 
-## Discussion Questions
+## 讨论题
 
-- In the synthetic experiments, why is the Bayes optimal AUC less than 1.0 even though we know the true parameters? What does this reveal about the fundamental limits of prediction from noisy preference data?
+- 在人造实验里，我们明明知道真实参数，为什么贝叶斯最优 AUC 仍小于 1.0？这说明从含噪偏好数据做预测存在怎样的根本极限？
 
-- How does L2 regularization affect the bias-variance tradeoff in Bradley-Terry estimation? Under what data conditions (sample size, noise level, number of items) would you expect regularization to have the largest impact on test performance?
+- L2 正则化怎样影响 Bradley-Terry 估计的偏差-方差权衡？在什么样的数据条件下（样本量、噪声水平、物品数量），你会预期正则化对测试性能的影响最大？
 
-- When would you prefer online learning (Elo) over batch learning (MLE) for preference model estimation? Consider computational cost, data arrival patterns, and statistical efficiency. Can you design a hybrid approach that combines benefits of both?
+- 什么时候你会宁可用在线学习（Elo）做偏好模型估计，而不用批量学习（最大似然）？请从计算成本、数据到达方式、统计效率三方面考虑。你能设计一种结合两者优点的混合方案吗？
 
-- The Bayesian approach via MCMC provides posterior distributions over parameters, while MLE gives point estimates. Beyond uncertainty quantification, what practical advantages might the full posterior provide? How would you use posterior samples to make decisions (e.g., which items to present to users)?
+- 贝叶斯方法通过 MCMC 给出参数的后验分布，而最大似然只给点估计。除了量化不确定性，完整的后验还能带来哪些实际好处？你会怎么用后验样本来做决策（例如该给用户展示哪些物品）？
 
-- Cross-validation assumes that folds are exchangeable—that the data distribution is the same across all folds. For sequential preference data (e.g., chess games ordered in time, or LLM preferences from a changing user population), this assumption may be violated. How should cross-validation be adapted for temporal data? What are the risks of using standard k-fold CV on sequential data?
+- 交叉验证假设各折之间是可交换的——所有折的数据分布相同。对有时间顺序的偏好数据（例如按时间排列的棋局，或来自不断变化的人群的语言模型偏好），这个假设可能不成立。面对时间数据，交叉验证应该怎么改？在有序数据上用普通的 k 折交叉验证有什么风险？
 
-- In the LLM preference learning example, all three methods (MLE, Bayesian, Elo) achieved similar test AUC despite different training procedures. Under what circumstances would you expect the methods to diverge in performance? Consider data scale, noise level, model mis-specification, and computational budget.
+- 在语言模型偏好学习的例子里，三种方法（最大似然、贝叶斯、Elo）虽然训练过程不同，测试 AUC 却相近。什么情况下你会预期它们拉开差距？请考虑数据规模、噪声水平、模型设定错误、计算预算。
 
-## Bibliographic Notes
+## 文献说明
 
-**Maximum likelihood estimation** for preference models dates back to @bradley1952rank's original work on paired comparisons. The connection to modern machine learning was established through applications in ranking [@herbrich2006trueskill] and recommender systems [@koren2009matrix]. @hunter2004mm provided efficient MM algorithms for Bradley-Terry MLE that scale to large problems.
+**偏好模型的最大似然估计**可以追溯到 @bradley1952rank 关于两两比较的原始工作；它与现代机器学习的联系，则是在排序 [@herbrich2006trueskill] 和推荐系统 [@koren2009matrix] 这类应用中建立起来的。@hunter2004mm 给出了求解 Bradley-Terry 最大似然的高效 MM 算法，能扩展到大规模问题。
 
-**Bayesian inference for preference data** has a long history in psychometrics and experimental design. @davidson1970extending developed Bayesian approaches for paired comparisons. Modern MCMC methods for Bradley-Terry models are surveyed in @caron2012bayesian. The connection between L2 regularization and Gaussian priors (MAP estimation) is standard in Bayesian machine learning [@murphy2012machine].
+**偏好数据上的贝叶斯推断**在心理测量和试验设计里历史悠久。@davidson1970extending 发展了两两比较的贝叶斯方法。Bradley-Terry 模型的现代 MCMC 方法见 @caron2012bayesian 的综述。L2 正则与高斯先验（MAP 估计）之间的等价关系，是贝叶斯机器学习里的标准内容 [@murphy2012machine]。
 
-**The Elo rating system** was introduced by @elo1978rating for chess rankings and has since been applied broadly to competitive games [@glickman1999parameter introduced the Glicko system with uncertainty estimates], online platforms [@herbrich2006trueskill for Xbox matchmaking], and information retrieval. The interpretation of Elo as stochastic gradient descent on the Bradley-Terry log-likelihood clarifies its connection to machine learning [@weng2006bayesian].
+**Elo 等级分系统**由 @elo1978rating 为国际象棋排名提出，此后被广泛用在竞技对局 [@glickman1999parameter 在其中给出了带不确定性估计的 Glicko 系统]、在线平台 [@herbrich2006trueskill 用于 Xbox 的对战匹配] 以及信息检索中。把 Elo 理解为"在 Bradley-Terry 对数似然上做随机梯度下降"，说清了它和机器学习之间的关系 [@weng2006bayesian]。
 
-**Regularization** in statistical learning has roots in ridge regression [@hoerl1970ridge] and has become central to modern machine learning [@hastie2009elements]. Early stopping as implicit regularization was analyzed by @yao2007early. The bias-variance tradeoff provides the theoretical foundation for why regularization improves generalization [@geman1992neural].
+**正则化**在统计学习里的根源是岭回归（ridge regression）[@hoerl1970ridge]，如今已是现代机器学习的核心内容 [@hastie2009elements]。早停作为一种隐式正则，由 @yao2007early 做过分析。偏差-方差权衡为"正则化为什么能改善泛化"提供了理论基础 [@geman1992neural]。
 
-**Cross-validation** was formalized by @stone1974cross and @geisser1975predictive for model selection. @kohavi1995study provided practical guidance for k-fold CV. Nested cross-validation to avoid selection bias was emphasized by @cawley2010overfitting. Temporal validation strategies for time-series data are discussed in @bergmeir2018note.
+**交叉验证**由 @stone1974cross 与 @geisser1975predictive 正式提出，用于模型选择。@kohavi1995study 给出了 k 折交叉验证的实用建议。为避免选择偏置而使用嵌套交叉验证，强调于 @cawley2010overfitting。时间序列数据的时间验证策略见 @bergmeir2018note。
 
-**Optimization methods** for machine learning are surveyed in @ruder2016overview. Adam was introduced by @kingma2014adam and has become the default optimizer for deep learning. Convergence analysis for gradient descent on convex problems (including logistic regression, which includes Bradley-Terry) is classical [@boyd2004convex]. Learning rate schedules and their impact on generalization are discussed in @loshchilov2016sgdr.
+**机器学习中的优化方法**见 @ruder2016overview 的综述。Adam 由 @kingma2014adam 提出，如今是深度学习的默认优化器。凸问题（包括逻辑回归，Bradley-Terry 也在其内）上梯度下降的收敛分析属于经典内容 [@boyd2004convex]。学习率调度及其对泛化的影响见 @loshchilov2016sgdr。
 
-**LLM alignment** via preference learning gained prominence with @christiano2017deep's introduction of RLHF. The connection to Bradley-Terry and reward modeling was made explicit in @ouyang2022training (InstructGPT). Direct Preference Optimization (DPO) [@rafailov2023direct] showed that RLHF can be reformulated as Bradley-Terry MLE, eliminating the need for a separate reward model. Recent work explores calibration [@stiennon2020learning], robustness to noise [@bai2022constitutional], and scaling laws [@gao2022scaling] for preference-based LLM training.
+**语言模型对齐**中的偏好学习，自 @christiano2017deep 提出 RLHF 之后受到广泛关注。它与 Bradley-Terry、奖励建模的关系在 @ouyang2022training（InstructGPT）中被明确写出。直接偏好优化（DPO）[@rafailov2023direct] 说明 RLHF 可以改写成 Bradley-Terry 最大似然，从而不必再单独训练一个奖励模型。近期工作探讨校准 [@stiennon2020learning]、对噪声的鲁棒性 [@bai2022constitutional]，以及基于偏好的语言模型训练的规模定律 [@gao2022scaling]。
 
-**For further reading**: @agresti2002categorical provides comprehensive coverage of categorical data analysis including paired comparisons. @marden1995analyzing covers ranking models from a statistical perspective. @liu2011learning surveys learning-to-rank methods in information retrieval, many of which build on preference models.
+**想继续读的话**：@agresti2002categorical 全面覆盖了包括两两比较在内的分类数据分析；@marden1995analyzing 从统计角度讲排序模型；@liu2011learning 综述了信息检索中的排序学习方法，其中不少都建立在偏好模型之上。
 
-::: {.callout-tip title="Essential Reading" collapse="true"}
-If you read only five papers from this chapter's references, make them these:
+::: {.callout-tip title="必读文献" collapse="true"}
+如果本章的参考文献你只打算读五篇，就读这五篇：
 
-1. **@elo1978rating** — The Elo rating system: the most widely deployed preference learning algorithm in history
-2. **@herbrich2006trueskill** — TrueSkill: Bayesian preference learning with uncertainty, the Elo successor
-3. **@rafailov2023direct** — DPO as Bradley-Terry MLE, unifying reward modeling and policy optimization
-4. **@ouyang2022training** — InstructGPT: scaling RLHF to large language models
-5. **@hastie2009elements** — The statistical learning textbook covering regularization, cross-validation, and model selection foundations
+1. **@elo1978rating** —— Elo 等级分：历史上部署最广的偏好学习算法
+2. **@herbrich2006trueskill** —— TrueSkill：带不确定性的贝叶斯偏好学习，Elo 的后继
+3. **@rafailov2023direct** —— DPO 即 Bradley-Terry 最大似然，把奖励建模与策略优化统一起来
+4. **@ouyang2022training** —— InstructGPT：把 RLHF 做到大语言模型上
+5. **@hastie2009elements** —— 统计学习教材，正则化、交叉验证与模型选择的基础都在里面
 :::
 
-## Further Reading
+## 延伸阅读
 
-For readers who want to go deeper into the topics introduced in this chapter, we recommend the following:
+想在本章的话题上再深入一些，我们推荐：
 
-- **@hunter2004mm**, "MM Algorithms for Generalized Bradley-Terry Models" — Efficient algorithms for MLE that scale to large comparison datasets, including extensions to ties and home-field advantage.
-- **@caron2012bayesian**, "Efficient Bayesian Inference for Generalized Bradley-Terry Models" — Modern MCMC and variational methods for Bayesian preference learning, including techniques for handling large-scale data.
-- **@glickman1999parameter**, "Parameter Estimation in Large Dynamic Paired Comparison Experiments" — The Glicko rating system, which extends Elo with per-player uncertainty estimates that decay with inactivity, addressing several limitations of fixed K-factor Elo.
-- **@rasmussen2006gaussian**, *Gaussian Processes for Machine Learning*, Ch. 3 — Comprehensive treatment of the Laplace approximation and expectation propagation for GP classification, the theoretical foundation for the GP inference methods used in this chapter.
-- **@gneiting2007strictly**, "Strictly Proper Scoring Rules, Prediction, and Estimation" — The definitive treatment of proper scoring rules and calibration, explaining why cross-entropy (log loss) is the natural loss for preference learning and how to assess whether learned probabilities are well-calibrated.
-- **@ouyang2022training**, "Training Language Models to Follow Instructions with Human Feedback" — The InstructGPT paper that demonstrated RLHF at scale, showing how the MLE, Bayesian, and online methods in this chapter are applied to real LLM alignment.
-- **@hastie2009elements**, *The Elements of Statistical Learning* — The standard reference for regularization theory, bias-variance tradeoff, and cross-validation, providing the statistical foundations for the model selection techniques discussed here.
+- **@hunter2004mm**，"MM Algorithms for Generalized Bradley-Terry Models"——面向大规模比较数据的高效最大似然算法，还扩展到并列、主场优势等情形。
+- **@caron2012bayesian**，"Efficient Bayesian Inference for Generalized Bradley-Terry Models"——贝叶斯偏好学习的现代 MCMC 与变分方法，包括处理大规模数据的技术。
+- **@glickman1999parameter**，"Parameter Estimation in Large Dynamic Paired Comparison Experiments"——Glicko 等级分系统：在 Elo 之外给每位玩家维护不确定性估计，且不确定度会随"久未出场"而衰减，处理了固定 K 值 Elo 的几个缺陷。
+- **@rasmussen2006gaussian**，《Gaussian Processes for Machine Learning》第 3 章——拉普拉斯近似与期望传播的完整讲法，是本章高斯过程推断方法的理论基础。
+- **@gneiting2007strictly**，"Strictly Proper Scoring Rules, Prediction, and Estimation"——关于合适评分规则与校准的权威论述，解释了为什么交叉熵（对数损失）是偏好学习的自然损失，也说明了怎么判断学到的概率是否校准良好。
+- **@ouyang2022training**，"Training Language Models to Follow Instructions with Human Feedback"——InstructGPT 论文，展示了大规模的 RLHF，本章的最大似然、贝叶斯与在线方法正是这样用在真实的语言模型对齐中的。
+- **@hastie2009elements**，《The Elements of Statistical Learning》——正则化理论、偏差-方差权衡与交叉验证的标准参考，为这里讨论的模型选择技术提供统计基础。
 
-## Exercises
+## 练习
 
-Exercises are marked with difficulty levels: (*) for introductory, (**) for intermediate, and (***) for challenging.
+题目按难度标注：(\*) 入门，(\*\*) 中等，(\*\*\*) 较难。
 
-### Gradient Derivation for Plackett-Luce (*)
+### Plackett-Luce 的梯度推导 (*)
 
-The Plackett-Luce model extends Bradley-Terry to full rankings. Given a ranking $(j_1 \succ j_2 \succ \cdots \succ j_M)$, the likelihood is:
+Plackett-Luce 模型把 Bradley-Terry 推广到完整排序。给定一个排序 $(j_1 \succ j_2 \succ \cdots \succ j_M)$，似然是：
 $$
 p(\text{ranking} \mid V) = \prod_{k=1}^{M-1} \frac{\exp(V_{j_k})}{\sum_{\ell=k}^M \exp(V_{j_\ell})}
 $$ {#eq-plackett-luce}
 
-(a) Write the log-likelihood for a single ranking as a function of utilities $V$.
+(a) 把一个排序的对数似然写成效用 $V$ 的函数。
 
-(b) Derive the gradient $\frac{\partial \log p}{\partial V_m}$ for an arbitrary item $m$. *Hint: Consider three cases: $m$ appears at position $k$, $m$ appears after position $k$, and $m$ does not appear in the ranking.*
+(b) 对任意物品 $m$ 推导梯度 $\frac{\partial \log p}{\partial V_m}$。*提示：分三种情况讨论：$m$ 出现在位置 $k$、$m$ 出现在位置 $k$ 之后、$m$ 没出现在这个排序里。*
 
-(c) Implement gradient ascent for Plackett-Luce on simulated ranking data. Compare convergence to Bradley-Terry MLE—which converges faster and why?
+(c) 在模拟的排序数据上实现 Plackett-Luce 的梯度上升。和 Bradley-Terry 的最大似然比较收敛速度——哪个更快，为什么？
 
-### L2 Regularized Bradley-Terry (**)
+### 带 L2 正则的 Bradley-Terry (**)
 
-(a) Implement Bradley-Terry MLE with L2 regularization for a range of $\lambda$ values. Generate synthetic data with $M = 20$ items and vary the number of comparisons from 50 to 500. Plot test AUC vs $\lambda$ for each dataset size.
+(a) 对一系列 $\lambda$ 取值，实现带 L2 正则的 Bradley-Terry 最大似然。用 $M = 20$ 个物品生成人造数据，比较次数从 50 变化到 500。对每个数据规模画出测试 AUC 随 $\lambda$ 变化的曲线。
 
-(b) Explain why the optimal $\lambda$ decreases as the number of comparisons increases. At what rate does it decay?
+(b) 解释为什么最优的 $\lambda$ 会随比较次数增多而变小。它按什么速度衰减？
 
-(c) Derive the Hessian matrix of the regularized log-likelihood. Under what conditions is it positive definite (ensuring a unique global maximum)?
+(c) 推出加了正则项的对数似然的 Hessian 矩阵。在什么条件下它是正定的（从而保证存在唯一的全局最大值）？
 
-### K-Fold Cross-Validation Implementation (**)
+### 实现 k 折交叉验证 (**)
 
-(a) Implement 5-fold cross-validation for Bradley-Terry estimation from scratch (without using sklearn or similar libraries). Your implementation should:
-   - Randomly partition comparison data into 5 folds
-   - Train on 4 folds, validate on 1 fold
-   - Repeat for all 5 folds
-   - Return mean and standard deviation of validation AUC
+(a) 从零实现用于 Bradley-Terry 估计的 5 折交叉验证（不要调 sklearn 之类的库）。实现要：
+   - 把比较数据随机分成 5 折
+   - 用其中 4 折训练、1 折验证
+   - 5 折都轮一遍
+   - 返回验证 AUC 的均值和标准差
 
-(b) Compare your CV implementation to a single 80/20 train/test split over 20 random seeds. Which provides a more stable performance estimate?
+(b) 把你的交叉验证实现与"单次 80/20 划分、重复 20 个随机种子"作比较。哪一种给出的性能估计更稳定？
 
-(c) Extend your implementation to stratified CV: ensure each fold has approximately equal proportions of wins for each item. Why might stratification improve CV estimates for imbalanced data?
+(c) 把你的实现扩展成分层交叉验证：让每一折中各物品的胜场比例大致相同。为什么在面对不平衡数据时，分层能改善交叉验证的估计？
 
-### Learning Rate Sensitivity Analysis (*)
+### 学习率的敏感性分析 (*)
 
-(a) For Bradley-Terry MLE on synthetic data ($M = 15$ items, 100 comparisons), experiment with learning rates $\eta \in \{0.001, 0.01, 0.05, 0.1, 0.5, 1.0\}$. Plot the training loss curve for each learning rate.
+(a) 在人造数据上做 Bradley-Terry 最大似然（$M = 15$ 个物品、100 次比较），把学习率取遍 $\eta \in \{0.001, 0.01, 0.05, 0.1, 0.5, 1.0\}$。为每个学习率画出训练损失曲线。
 
-(b) Identify the learning rate that achieves the lowest final loss. What happens with learning rates that are too large? Too small?
+(b) 找出最终损失最低的学习率。学习率太大时会发生什么？太小呢？
 
-(c) Implement a learning rate schedule (e.g., exponential decay $\eta_t = \eta_0 \cdot 0.95^t$) and compare to fixed learning rate. Does the schedule improve final performance?
+(c) 实现一个学习率调度（例如指数衰减 $\eta_t = \eta_0 \cdot 0.95^t$），与固定学习率比较。调度是否改善了最终效果？
 
-### MCMC Diagnostics (**)
+### MCMC 的收敛诊断 (**)
 
-The Metropolis-Hastings implementation in @sec-bayesian produces a chain of samples. Assess convergence quality:
+@sec-bayesian 里的 Metropolis-Hastings 实现会产生一条样本链。请评估它的收敛质量：
 
-(a) Implement the **effective sample size** (ESS) diagnostic: ESS estimates how many independent samples the chain is equivalent to, accounting for autocorrelation. For a chain $\{V^{(t)}\}_{t=1}^T$, the ESS for parameter $V_j$ is approximately:
+(a) 实现**有效样本量**（effective sample size, ESS）诊断：ESS 考虑自相关，估计这条链相当于多少个独立样本。对一条链 $\{V^{(t)}\}_{t=1}^T$，参数 $V_j$ 的 ESS 近似为：
 $$
 \text{ESS}_j = \frac{T}{1 + 2\sum_{k=1}^K \rho_k}
 $$ {#eq-effective-sample-size}
-where $\rho_k$ is the autocorrelation at lag $k$.
+其中 $\rho_k$ 是滞后 $k$ 的自相关。
 
-(b) Run the MH algorithm from @sec-bayesian with different proposal step sizes $\tau \in \{0.01, 0.05, 0.1, 0.5\}$. Plot ESS vs $\tau$. What happens when $\tau$ is too small? Too large?
+(b) 用不同的提议步长 $\tau \in \{0.01, 0.05, 0.1, 0.5\}$ 运行 @sec-bayesian 的 MH 算法，画出 ESS 随 $\tau$ 的曲线。$\tau$ 太小会怎样？太大呢？
 
-(c) Implement trace plots for multiple chains (run MH 3 times with different initializations). Do all chains converge to the same stationary distribution?
+(c) 为多条链实现轨迹图（用不同初值把 MH 跑 3 次）。这些链是否都收敛到同一个平稳分布？
 
-### Optimization Method Comparison (**)
+### 优化方法比较 (**)
 
-(a) Implement gradient descent with momentum: $m_t \leftarrow \beta m_{t-1} + \nabla \mathcal{L}(V_t)$, $V_{t+1} \leftarrow V_t + \eta m_t$ where $\beta \in [0, 1)$ controls momentum.
+(a) 实现带动量的梯度下降：$m_t \leftarrow \beta m_{t-1} + \nabla \mathcal{L}(V_t)$，$V_{t+1} \leftarrow V_t + \eta m_t$，其中 $\beta \in [0, 1)$ 控制动量大小。
 
-(b) On the same synthetic Bradley-Terry problem, compare four optimizers: vanilla GD, GD with momentum ($\beta = 0.9$), Adam, and RMSprop. Plot convergence curves (loss vs iteration).
+(b) 在同一个人造 Bradley-Terry 问题上比较四种优化器：普通梯度下降、带动量的梯度下降（$\beta = 0.9$）、Adam、RMSprop。画出收敛曲线（损失随迭代的变化）。
 
-(c) For each optimizer, find the best learning rate via grid search. Which optimizer is most sensitive to learning rate tuning?
+(c) 对每种优化器，用网格搜索找出最好的学习率。哪个优化器对学习率最敏感？
 
-### Convergence Proof (***)
+### 收敛性证明 (***)
 
-Prove that gradient ascent on the Bradley-Terry log-likelihood converges to the global maximum (assuming the maximum exists).
+证明：在 Bradley-Terry 的对数似然上做梯度上升会收敛到全局最大值（假设最大值存在）。
 
-(a) Show that the Bradley-Terry log-likelihood is strictly concave when the comparison graph is strongly connected (every pair of items is connected by a directed path of comparisons).
+(a) 证明当比较图强连通时（任意两个物品之间都存在一条由比较构成的有向路径），Bradley-Terry 的对数似然是严格凹的。
 
-(b) Prove that gradient ascent with sufficiently small step size $\eta$ converges to the unique global maximum. *Hint: Use the fact that the gradient vanishes only at the maximum for strictly concave functions.*
+(b) 证明只要步长 $\eta$ 足够小，梯度上升就收敛到唯一的全局最大值。*提示：利用严格凹函数的梯度只在最大值处为零这一事实。*
 
-(c) What happens when the comparison graph is not strongly connected? Construct an example with multiple disconnected components and characterize the set of maximum likelihood estimators.
+(c) 如果比较图不是强连通的会怎样？构造一个含多个不连通分支的例子，并刻画最大似然估计的集合。
 
-### Calibration Metrics (*)
+### 校准指标 (*)
 
-(a) Implement a calibration plot: bin predicted probabilities into 10 intervals $[0, 0.1), [0.1, 0.2), \ldots, [0.9, 1.0]$, and for each bin, compute the average predicted probability and the empirical frequency of wins.
+(a) 实现一张校准图：把预测概率分成 10 个区间 $[0, 0.1), [0.1, 0.2), \ldots, [0.9, 1.0]$，对每个区间计算平均预测概率与实际胜率。
 
-(b) Generate synthetic Bradley-Terry data and fit two models: one correctly specified (Bradley-Terry) and one mis-specified (assume all items have equal utility). Plot calibration curves for both. Which is better calibrated?
+(b) 生成人造 Bradley-Terry 数据，拟合两个模型：一个是设定正确的（Bradley-Terry），一个是设定错误的（假定所有物品效用相同）。画出两者的校准曲线。哪个校准得更好？
 
-(c) Define the Expected Calibration Error (ECE): $\text{ECE} = \sum_{b=1}^B \frac{|B_b|}{N} |\bar{p}_b - \bar{y}_b|$ where $\bar{p}_b$ is the average predicted probability in bin $b$, $\bar{y}_b$ is the empirical frequency, and $|B_b|$ is the number of predictions in bin $b$. Compute ECE for your models.
+(c) 定义期望校准误差（Expected Calibration Error, ECE）：$\text{ECE} = \sum_{b=1}^B \frac{|B_b|}{N} |\bar{p}_b - \bar{y}_b|$，其中 $\bar{p}_b$ 是区间 $b$ 内的平均预测概率，$\bar{y}_b$ 是实际胜率，$|B_b|$ 是区间 $b$ 内的预测条数。给你的模型算出 ECE。
 
-### Online to Batch Convergence (*)
+### 在线方法向批量方法收敛 (*)
 
-(a) Implement Elo with a decreasing K-factor: $K_t = K_0 / \sqrt{t}$ where $t$ is the iteration number. This is known as the Robbins-Monro condition for stochastic approximation.
+(a) 实现 K 值递减的 Elo：$K_t = K_0 / \sqrt{t}$，$t$ 是迭代次数。这就是随机逼近里的 Robbins-Monro 条件。
 
-(b) On synthetic Bradley-Terry data, run Elo with decreasing $K_t$ and compare the final learned parameters to batch MLE. How close do they converge?
+(b) 在人造 Bradley-Terry 数据上跑递减 $K_t$ 的 Elo，把最终学到的参数与批量最大似然的结果比较。它们有多接近？
 
-(c) Prove (or argue informally) that Elo with $K_t = \eta / \sqrt{t}$ converges to the MLE in the limit as $t \to \infty$. Under what conditions does this hold?
+(c) 证明（或给出非严格的论证）：当 $K_t = \eta / \sqrt{t}$ 时，Elo 在 $t \to \infty$ 的极限下收敛到最大似然估计。这个结论需要什么条件？
 
-### Hyperparameter Tuning with Nested Cross-Validation (***)
+### 用嵌套交叉验证调超参数 (***)
 
-To obtain an unbiased estimate of generalization performance when hyperparameters are selected via CV, we use nested (double) CV:
+如果超参数是用交叉验证选出来的，那么要对泛化性能给出无偏估计，就得用嵌套（双重）交叉验证：
 
-- **Outer loop**: K-fold CV to estimate generalization
-- **Inner loop**: For each outer fold, use K-fold CV on the training data to select hyperparameters
+- **外层**：用 K 折交叉验证估计泛化性能
+- **内层**：对每一个外层折，在训练数据上再做 K 折交叉用来选超参数
 
-(a) Implement nested 5-fold CV for Bradley-Terry with L2 regularization. The inner loop tunes $\lambda$, the outer loop estimates test AUC.
+(a) 对带 L2 正则的 Bradley-Terry 实现嵌套 5 折交叉验证。内层调 $\lambda$，外层估计测试 AUC。
 
-(b) Compare the nested CV test AUC estimate to: (i) a single train/test split with CV on training data for $\lambda$ selection, and (ii) CV test AUC when $\lambda$ is selected using the outer CV test set (data leakage). Which is more optimistic? Pessimistic?
+(b) 把嵌套交叉验证得到的测试 AUC 估计与两种做法比较：(i) 单次训练/测试划分、在训练数据上用交叉验证选 $\lambda$；(ii) 用外层交叉验证的测试集来选 $\lambda$、再报告同一个测试集上的 AUC（数据泄漏）。哪一种更乐观？哪一种更悲观？
 
-(c) Why is nested CV important? Give an example where selecting hyperparameters on the same data used for final evaluation leads to overly optimistic performance estimates.
+(c) 为什么嵌套交叉验证很重要？举一个例子，说明在"最终评估所用的数据"上选超参数会导致性能估计过于乐观。
 
-### Real-World Dataset Application (***)
+### 用真实数据集练手 (***)
 
-Apply the methods from this chapter to a real preference dataset:
+把本章的方法用到一个真实的偏好数据集上：
 
-(a) Obtain a dataset such as the Jester jokes dataset (user ratings), a subset of MovieLens, or chess game outcomes from Lichess. Describe the data: number of items, number of comparisons, sparsity.
+(a) 找一个数据集，比如 Jester 笑话数据集（用户评分）、MovieLens 的一个子集，或者 Lichess 的棋局结果。描述这份数据：物品数量、比较次数、稀疏程度。
 
-(b) Apply all three methods (MLE with regularization, Bayesian inference, online Elo) and compare their performance using multiple metrics (AUC, log-likelihood, calibration error). Use cross-validation to tune hyperparameters.
+(b) 把三种方法都用上（带正则的最大似然、贝叶斯推断、在线 Elo），用多个指标（AUC、对数似然、校准误差）比较性能。超参数用交叉验证来选。
 
-(c) Visualize the learned item parameters. Do they agree with intuition (e.g., highly-rated movies have high utility)? Identify the top-5 and bottom-5 items according to each method—do the methods agree?
+(c) 把学到的物品参数可视化。它们和直觉一致吗（例如评分高的电影效用也高）？按每种方法列出前 5 名和后 5 名——几种方法的结论一致吗？
 
-(d) Discuss practical challenges encountered: computational cost, cold-start items, missing data, temporal effects. How would you address these in a production system?
+(d) 讨论你遇到的实际困难：计算开销、冷启动物品、缺失数据、时间效应。在一个生产系统里你会怎么处理这些问题？
 
-### Bias-Variance Tradeoff Demonstration (**)
+### 偏差-方差权衡的演示 (**)
 
-(a) Generate synthetic Bradley-Terry data with $M = 10$ items and vary the training set size $n \in \{20, 50, 100, 200, 500\}$ comparisons. For each $n$ and several regularization strengths $\lambda$, fit models and compute:
-   - **Bias**: Average difference between learned and true parameters
-   - **Variance**: Standard deviation of learned parameters across 50 random datasets
+(a) 生成 $M = 10$ 个物品的 Bradley-Terry 人造数据，把训练集规模取 $n \in \{20, 50, 100, 200, 500\}$ 次比较。对每个 $n$ 和若干正则强度 $\lambda$ 拟合模型，并计算：
+   - **偏差**：学到的参数与真实参数之差的平均值
+   - **方差**：在 50 份随机数据集上学到的参数的标准差
 
-(b) Plot bias and variance vs $\lambda$ for each training set size. Verify that as $\lambda$ increases, bias increases and variance decreases.
+(b) 对每个训练集规模，画出偏差和方差随 $\lambda$ 变化的曲线。验证：随着 $\lambda$ 增大，偏差上升、方差下降。
 
-(c) Plot test AUC vs $\lambda$ and identify the optimal $\lambda$ for each $n$. How does the optimal regularization strength change with dataset size?
+(c) 画出测试 AUC 随 $\lambda$ 变化的曲线，对每个 $n$ 找出最优的 $\lambda$。这个最优点随训练数据增多会怎样移动？这与偏差-方差权衡有什么关系？
