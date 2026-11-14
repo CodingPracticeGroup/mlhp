@@ -76,7 +76,10 @@ format:
           }
         };
         </script>
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+        <!-- 这里原本还有一行手写的 <script src="…/mathjax@3/es5/tex-chtml-full.js">。
+             Quarto 1.11 自带 mathjax@4，两套同时加载时 v4 的组件会检测到
+             "version in use is 3.2.2" 并抛 TypeError，结果整页公式都不排版（实测
+             渲染节点 0 个，上游同页 550 个）。所以删掉那一行，只留 Quarto 管理的引擎。 -->
 
 
   pdf:
