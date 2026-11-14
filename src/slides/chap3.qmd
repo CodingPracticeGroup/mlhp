@@ -1,61 +1,61 @@
 ---
-title: "Machine Learning from Human Preferences"
-subtitle: "Chapter 3: Elicitation"
-footer: "Chapter 3: Elicitation"
+title: "人类偏好机器学习"
+subtitle: "第 3 章：偏好征询"
+footer: "第 3 章：偏好征询"
 ---
 
-## Overview
+## 本讲概览
 
-- Chapters 2--3 established models and learned their parameters
-- Now: **which queries should we ask?**
-- Human feedback is expensive — strategically chosen comparisons can save 80% of annotation cost
-- Central tool: **Fisher information** + **optimal experimental design**
-- Key insight: not all comparisons are equally informative
+- 第 2–3 章已经建立了模型并学会了其中的参数
+- 现在的问题是：**我们该问哪些问题？**
+- 人类的反馈很贵——精心挑选的比较可以省下 80% 的标注成本
+- 核心工具：**费雪信息（Fisher information）** + **最优实验设计**
+- 关键洞见：不同比较的信息量并不一样
 
-## Chapter Roadmap
+## 本章路线
 
-**Lecture 1** — Preference Vectors & Metric Elicitation
+**第 1 讲** — 偏好向量与指标征询
 
-- Fisher information & Rasch model (15 min)
-- Factor models & D/A/E-optimal design (15 min)
-- Pairwise preferences & Sherman-Morrison (10 min)
-- Metric elicitation via binary search (10 min)
+- 费雪信息与 Rasch 模型（15 分钟）
+- 因子模型与 D/A/E-最优设计（15 分钟）
+- 成对偏好与 Sherman-Morrison（10 分钟）
+- 用二分查找做指标征询（10 分钟）
 
-**Lecture 2** — Preference Functions & Active DPO
+**第 2 讲** — 偏好函数与主动式 DPO
 
-- Linear & nonlinear preference functions (15 min)
-- GP active learning (15 min)
-- Active DPO for LLM alignment (15 min)
-- Summary (5 min)
+- 线性与非线性的偏好函数（15 分钟）
+- 高斯过程的主动学习（15 分钟）
+- 面向大模型对齐的主动式 DPO（15 分钟）
+- 小结（5 分钟）
 
-## Connections to Prior Chapters
+## 与前面几章的衔接
 
-| Concept (Ch 2--3) | This Chapter |
+| 前面（第 2–3 章）的概念 | 本章用到哪里 |
 |---|---|
-| Bradley-Terry model | Fisher information, query selection |
-| Factor models $U^\top V$ | D-optimal pair selection |
-| GP preference models | Information-gain acquisition |
-| DPO loss | ADPO active selection |
+| Bradley-Terry 模型 | 费雪信息、提问选择 |
+| 因子模型 $U^\top V$ | D-最优的项目对选择 |
+| 高斯过程偏好模型 | 信息增益采集函数 |
+| DPO 损失 | ADPO 的主动选题 |
 
-> "The purpose of optimal design is to achieve the desired precision with minimum cost." — V.V. Fedorov (1972)
+> "最优设计的目的，是用最小的代价达到所需的精度。" —— V.V. Fedorov（1972）
 
 ---
 
-## 1. Fisher Information
+## 1. 费雪信息
 
-**Definition.** For a parametric model $p(Y \mid \theta)$, the Fisher Information is:
+**定义。** 对参数模型 $p(Y \mid \theta)$，费雪信息定义为：
 
 $$
 \mathcal{I}(\theta) = \mathbb{E}\left[-\frac{\partial^2}{\partial \theta^2} \log p(Y \mid \theta)\right]
 $$
 
-- Quantifies how much a single observation reveals about $\theta$
-- **Cramér-Rao bound**: variance of any unbiased estimator $\geq \mathcal{I}(\theta)^{-1}$
-- Higher Fisher information $\Rightarrow$ more precise estimation per observation
+- 它衡量"一次观察能告诉我们多少关于 $\theta$ 的信息"
+- **克拉美-罗界（Cramér-Rao bound）**：任何无偏估计的方差 $\geq \mathcal{I}(\theta)^{-1}$
+- 费雪信息越高 $\Rightarrow$ 每次观察得到的估计越准
 
-## 1. Fisher Info for the Rasch Model
+## 1. Rasch 模型的费雪信息
 
-For item $j$ with $p_j(U) = \sigma(U + V_j)$:
+对项目 $j$，其 $p_j(U) = \sigma(U + V_j)$：
 
 $$
 \mathcal{I}_j(U) = p_j(U)(1 - p_j(U))
@@ -63,18 +63,18 @@ $$
 
 ![](figures/chap3_fisher_parabola.png){fig-align="center" width="45%"}
 
-## 1. Optimal Item Difficulty {.auto-animate}
+## 1. 最优的项目难度 {.auto-animate}
 
-**Proposition.** $\mathcal{I}_j(U) = p_j(1 - p_j)$ is **maximized when $p_j = 0.5$**, i.e., item difficulty $-V_j$ equals user ability $U$.
+**命题。** $\mathcal{I}_j(U) = p_j(1 - p_j)$ **在 $p_j = 0.5$ 时最大**，也就是项目难度 $-V_j$ 正好等于用户能力 $U$。
 
-- Items that are **too easy** ($p \approx 1$): near-deterministic, teach little
-- Items that are **too hard** ($p \approx 0$): also uninformative
-- Items **matched to ability** ($p \approx 0.5$): maximally informative
-- Best next item: difficulty $-V_j$ close to current estimate of $U$
+- **太简单**的项目（$p \approx 1$）：几乎必然答对，学不到东西
+- **太难**的项目（$p \approx 0$）：同样没有信息量
+- **与能力相当**的项目（$p \approx 0.5$）：信息量最大
+- 下一个最好的项目：难度 $-V_j$ 接近当前对 $U$ 的估计
 
-## 1. Active Item Selection {.auto-animate}
+## 1. 主动选题 {.auto-animate}
 
-Score and cumulative information with prior $U \sim \mathcal{N}(0, \sigma_0^2)$:
+在先验 $U \sim \mathcal{N}(0, \sigma_0^2)$ 下的得分与累计信息量：
 
 $$
 \begin{aligned}
@@ -83,111 +83,111 @@ S(U) &= \sum_{j \in \mathcal{J}} (y_j - p_j(U)) \\
 \end{aligned}
 $$
 
-- **Newton update**: $\hat{U} \leftarrow \hat{U} + S(\hat{U}) / \mathcal{I}(\hat{U})$
-- **Selection rule**: $j_t = \arg\max_j \; p_j(\hat{U})(1 - p_j(\hat{U}))$
-- **Posterior variance**: $\widehat{\text{Var}}(U) \approx \mathcal{I}(\hat{U})^{-1}$
+- **牛顿更新**：$\hat{U} \leftarrow \hat{U} + S(\hat{U}) / \mathcal{I}(\hat{U})$
+- **选择规则**：$j_t = \arg\max_j \; p_j(\hat{U})(1 - p_j(\hat{U}))$
+- **后验方差**：$\widehat{\text{Var}}(U) \approx \mathcal{I}(\hat{U})^{-1}$
 - **Reliability**: $\text{Rel} \approx 1 - \tfrac{1}{N}\sum_i \widehat{\text{Var}}(U_i) / \sigma_U^2$
 
-## 1. Fisher-Active vs Random
+## 1. 主动选题与随机选题的对比
 
 ![](figures/chap3_rasch_active_vs_random.png){fig-align="center" width="55%"}
 
-Fisher-active selection achieves higher reliability with fewer queries by targeting items near $p = 0.5$.
+盯着 $p = 0.5$ 附近的项目问，用更少的提问就能达到更高的可靠性。
 
-## 1. Key Insight
+## 1. 关键洞见
 
-**Measure where uncertainty is highest.**
+**把提问用在不确定性最高的地方。**
 
-- Items near $p = 0.5$ are maximally informative
-- Active selection "hovers" around the user's current location
-- This principle underlies **all** active learning methods in this chapter:
-    - Rasch $\rightarrow$ Factor models $\rightarrow$ Pairwise $\rightarrow$ GPs $\rightarrow$ DPO
+- 接近 $p = 0.5$ 的项目信息量最大
+- 主动选题会一直"绕着"用户当前的位置转
+- 本章所有主动学习方法都建立在同一条原理上：
+    - Rasch $\rightarrow$ 因子模型 $\rightarrow$ 成对比较 $\rightarrow$ GP $\rightarrow$ DPO
 
 ---
 
-## 2. Factor Models: Multi-Dimensional Preferences
+## 2. 因子模型：多维偏好
 
-Generalize Rasch to $K$ dimensions: $H_{ij} = U_i^\top V_j + Z_j$
+把 Rasch 模型推广到 $K$ 维：$H_{ij} = U_i^\top V_j + Z_j$
 
-- User embedding $U_i \in \mathbb{R}^K$, item embedding $V_j \in \mathbb{R}^K$
-- Fisher information per item is a **rank-1 matrix**:
+- 用户向量 $U_i \in \mathbb{R}^K$，物品向量 $V_j \in \mathbb{R}^K$
+- 每个项目贡献的费雪信息是一个 **秩 1 矩阵**：
 
 $$
 \mathcal{I}_j(U) = \sigma(H)(1 - \sigma(H)) \; V_j V_j^\top
 $$
 
 - Cumulative: $\mathcal{I}(U) = \sum_t \sigma(H_{j_t})(1 - \sigma(H_{j_t})) \; V_{j_t} V_{j_t}^\top$
-- Each item contributes information **in the direction** of $V_j$
+- 每个项目只在 $V_j$ 那个**方向上**提供信息
 
-## 2. Optimal Design Criteria (D/A/E)
+## 2. 最优设计准则（D/A/E）
 
-Given Fisher information matrix $\mathcal{I}(U)$:
+给定费雪信息矩阵 $\mathcal{I}(U)$：
 
-| Criterion | Objective | Intuition |
+| 准则 | 目标 | 直观含义 |
 |---|---|---|
-| **A-Optimal** | min tr($\mathcal{I}^{-1}$) | Average variance |
-| **D-Optimal** | max det($\mathcal{I}$) | Volume shrinkage of posterior ellipsoid |
-| **E-Optimal** | max $\lambda_{\min}(\mathcal{I})$ | Worst-case precision |
+| **A-最优** | min tr($\mathcal{I}^{-1}$) | 平均方差最小 |
+| **D-最优** | max det($\mathcal{I}$) | 让后验置信椭球的体积收缩最多 |
+| **E-最优** | max $\lambda_{\min}(\mathcal{I})$ | 保证最差方向上的精度 |
 
-- All three reduce uncertainty, but emphasize different aspects
-- D-optimal naturally **encourages diversity** — redundant directions give diminishing gain
+- 三者都是在降低不确定性，只是侧重点不同
+- D-最优天然**鼓励多样性**——重复方向的边际收益越来越小
 
-## 2. D-Optimal Selection for Factor Models
+## 2. 因子模型下的 D-最优选择
 
-- Pick next item maximizing $\det(\mathcal{I} + \mathcal{I}_j)$
-- Reliability generalized: $\text{Rel} = 1 - \text{tr}(\hat{\Sigma}_{\text{err}}) / \text{tr}(\Sigma_U)$
+- 选让 $\det(\mathcal{I} + \mathcal{I}_j)$ 最大的下一个项目
+- 可靠性作相应推广：$\text{Rel} = 1 - \text{tr}(\hat{\Sigma}_{\text{err}}) / \text{tr}(\Sigma_U)$
 
 ![](figures/chap3_factor_dopt_vs_random.png){fig-align="center" width="55%"}
 
 ---
 
-## 3. Pairwise Preferences
+## 3. 成对偏好
 
-Bradley-Terry for pairs: $p(j \succ k) = \sigma(U^\top(V_j - V_k) + Z_j - Z_k)$
+成对情形下的 Bradley-Terry：$p(j \succ k) = \sigma(U^\top(V_j - V_k) + Z_j - Z_k)$
 
-- Feature difference: $x_{jk} = V_j - V_k$
-- Fisher information per pair:
+- 特征之差：$x_{jk} = V_j - V_k$
+- 每一对提供的费雪信息：
 
 $$
 \mathcal{I}_{jk}(U) = w \cdot x_{jk} x_{jk}^\top, \quad w = p(1 - p)
 $$
 
-- Posterior precision accumulates additively:
+- 后验精度是可以逐项累加的：
 
 $$
 \Lambda_t = \Sigma_0^{-1} + \sum_{s \leq t} w_s \, x_s x_s^\top
 $$
 
-## 3. D-Optimal via Sherman-Morrison
+## 3. 用 Sherman-Morrison 求 D-最优
 
-**Proposition.** The D-optimal acquisition has closed form:
+**命题。** D-最优的采集函数有闭式解：
 
 $$
 \Delta_D(j,k) = \log\det(\Lambda + w\,xx^\top) - \log\det(\Lambda) = \log(1 + w \, x^\top \Sigma \, x)
 $$
 
-- Follows from the matrix determinant lemma: $\det(A + uv^\top) = (1 + v^\top A^{-1} u)\det(A)$
-- Only requires a **vector-matrix-vector product** — efficient for online selection
+- 由行列式引理（matrix determinant lemma）$\det(A + uv^\top) = (1 + v^\top A^{-1} u)\det(A)$ 直接得到
+- 只需算一次 **向量—矩阵—向量乘积**——在线选题时很省
 - A-optimal: $\Delta_A = \tfrac{w \, x^\top \Sigma^2 x}{1 + w \, x^\top \Sigma \, x}$
-- E-optimal proxy: $\Delta_E^{\text{proxy}} = w \, x^\top \Sigma \, x$
+- E-最优的近似替代：$\Delta_E^{\text{proxy}} = w \, x^\top \Sigma \, x$
 
-## 3. Pairwise D-Optimal: Results
+## 3. 成对 D-最优：结果
 
 ![](figures/chap3_pairwise_dopt_vs_random.png){fig-align="center" width="55%"}
 
-D-optimal selection shrinks the posterior ellipsoid efficiently in all directions.
+D-最优选择能在各个方向上都有效地收缩后验置信椭球。
 
 ---
 
-## 4. Metric Elicitation: Motivation
+## 4. 指标征询：动机
 
 :::: {.columns}
 ::: {.column width="65%"}
-- Different classifiers trade off error types differently
-- Which is "best" depends on the implicit **metric**
-- Medical diagnosis: false negatives (missed disease) are costly
-- Spam filtering: false positives (lost email) are costly
-- The practitioner's metric $\mathbf{m}^*$ is **unknown**
+- 不同的分类器对各类错误的取舍并不一样
+- 哪个"最好"，取决于一个没有写出来的**指标**
+- 医学诊断中，假阴性（漏诊）代价很高
+- 垃圾邮件过滤中，假阳性（丢掉的正常邮件）代价很高
+- 工程师真正在用的指标 $\mathbf{m}^*$ 是**未知的**
 :::
 ::: {.column width="35%"}
 ![](figures/model_1.png){width="90%"}
@@ -195,70 +195,70 @@ D-optimal selection shrinks the posterior ellipsoid efficiently in all direction
 :::
 ::::
 
-## 4. Metric Elicitation as Factor Model
+## 4. 把指标征询看成一个因子模型
 
-Metric elicitation is a **$K=2$ factor model** with known item parameters:
+指标征询就是一个物品参数已知的 **$K=2$ 因子模型**：
 
-- "Items" = classifiers with known confusion matrices $V_\theta = (\text{TP}_\theta, \text{TN}_\theta)$
-- "User preference" = unknown metric weights $\mathbf{m} = (m_{11}, m_{00})$
-- Linear Performance Metric: $\phi(C) = m_{11} \cdot \text{TP} + m_{00} \cdot \text{TN} + m_0$
-- Parametrize: $\mathbf{m} = (\cos\theta, \sin\theta)$ for $\theta \in [0, 2\pi]$
+- "物品" = 混淆矩阵已知的各个分类器，$V_\theta = (\text{TP}_\theta, \text{TN}_\theta)$
+- "用户偏好" = 未知的指标权重 $\mathbf{m} = (m_{11}, m_{00})$
+- 线性性能指标（Linear Performance Metric, LPM）：$\phi(C) = m_{11} \cdot \text{TP} + m_{00} \cdot \text{TN} + m_0$
+- 参数化为 $\mathbf{m} = (\cos\theta, \sin\theta)$，其中 $\theta \in [0, 2\pi]$
 
 ![](figures/confusion_matrix.png){fig-align="center" width="35%"}
 
-## 4. Quasiconcavity & Binary Search
+## 4. 拟凹性与二分查找
 
-**Proposition.** For a quasiconcave LPM, the composition $\phi \circ \rho^+$ with the upper boundary of the confusion matrix space is **unimodal**.
+**命题。** 对拟凹的 LPM，把它与混淆矩阵空间的上边界复合得到的 $\phi \circ \rho^+$ 是**单峰**的。
 
 ![](figures/confusion_convex.png){fig-align="center" width="35%"}
 
-- Unimodality $\Rightarrow$ no local maxima $\Rightarrow$ **binary search** works
-- Each iteration: 4 queries, shrinks interval by factor 2
+- 单峰 $\Rightarrow$ 没有局部极大值 $\Rightarrow$ **二分查找**可行
+- 每轮 4 次提问，把区间缩小一半
 
-## 4. Binary Search Algorithm
+## 4. 二分查找算法
 
 ![](figures/unroll_boundary.png){fig-align="center" width="50%"}
 
-- **Query complexity**: $O(\log(1/\epsilon))$ — exponentially better than general 2D estimation at $O(1/\epsilon^2)$
-- Works even under noise with probabilistic oracle responses
+- **提问复杂度**：$O(\log(1/\epsilon))$——比一般二维估计的 $O(1/\epsilon^2)$ 好得多
+- 在噪声下、裁判只给出概率性回答时同样可行
 
-## 4. Metric Elicitation: Extensions
+## 4. 指标征询：推广
 
-- **Bayes optimal classifier**: $\bar{h}(x) = \mathbf{1}[\eta(x) \geq m_{00}/(m_{11} + m_{00})]$
-    - Learning the metric = learning the optimal classification threshold
-- **Linear-fractional metrics** ($F_\beta$, Jaccard): two binary searches, still $O(\log(1/\epsilon))$
-- **Multiclass**: diagonal LPMs with $K$ classes $\Rightarrow$ $O(K^2 \log(1/\epsilon))$ queries
+- **贝叶斯最优分类器**：$\bar{h}(x) = \mathbf{1}[\eta(x) \geq m_{00}/(m_{11} + m_{00})]$
+    - 学到指标 = 学到最优的分类阈值
+- **线性分式指标**（$F_\beta$、Jaccard）：两次二分查找，仍是 $O(\log(1/\epsilon))$
+- **多分类**：对角 LPM 有 $K$ 个类别 $\Rightarrow$ 需要 $O(K^2 \log(1/\epsilon))$ 次提问
 
 ---
 
-## 5. Linear Preference Functions
+## 5. 线性偏好函数
 
-Items scored by shared weight vector: $V_j = W^\top X_j$
+所有项目共用一个权重向量打分：$V_j = W^\top X_j$
 
 $$
 p(j \succ k) = \sigma(W^\top(X_j - X_k))
 $$
 
-- This is **logistic regression** on pairwise feature differences $x_{jk} = X_j - X_k$
-- Fisher information: $\mathcal{I}(W) = p(1-p) \, x_{jk} x_{jk}^\top$
-- Laplace posterior: $\Sigma \approx (\sigma_0^{-2}I + \sum_t p_t(1-p_t) \, x_t x_t^\top)^{-1}$
-- Same D-optimal criterion: $\Delta_D(j,k) = \log(1 + w \, x^\top \Sigma \, x)$
+- 这就是对成对特征之差 $x_{jk} = X_j - X_k$ 做 **logistic 回归**
+- 费雪信息：$\mathcal{I}(W) = p(1-p) \, x_{jk} x_{jk}^\top$
+- 拉普拉斯后验：$\Sigma \approx (\sigma_0^{-2}I + \sum_t p_t(1-p_t) \, x_t x_t^\top)^{-1}$
+- D-最优准则形式不变：$\Delta_D(j,k) = \log(1 + w \, x^\top \Sigma \, x)$
 
-## 5. Linear Preference: Results
+## 5. 线性偏好：结果
 
 ![](figures/chap3_linear_pref_dopt.png){fig-align="center" width="55%"}
 
-D-optimal selection converges faster with the same mathematical framework as before.
+还是同一套数学框架，D-最优选择收敛得更快。
 
-## 5. Robotic Trajectory Learning
+## 5. 机器人轨迹学习
 
 :::: {.columns}
 ::: {.column width="65%"}
-Trajectory reward: $R(\xi) = w^\top \phi(\xi)$
+轨迹奖励：$R(\xi) = w^\top \phi(\xi)$
 
-- Unknown weights $w$, known features $\phi(\xi)$
-- Each comparison "prefer $\xi_A$ over $\xi_B$" gives a **half-space** constraint: $w^\top(\phi(\xi_A) - \phi(\xi_B)) \succ 0$
-- Acquisition: maximize minimum volume removed regardless of answer
+- 权重 $w$ 未知，特征 $\phi(\xi)$ 已知
+- 每次"更偏好 $\xi_A$ 而不是 $\xi_B$"的比较，给出一个**半空间**约束：$w^\top(\phi(\xi_A) - \phi(\xi_B)) \succ 0$
+- 采集准则：不管答案是哪一边，都让被切掉的体积尽可能小
 
 [@pmlr-v87-biyik18a]{.citation}
 :::
@@ -267,29 +267,29 @@ Trajectory reward: $R(\xi) = w^\top \phi(\xi)$
 :::
 ::::
 
-## 5. Trajectory Learning: Results & Extensions
+## 5. 轨迹学习：结果与推广
 
-- **Driving simulator**: 0 queries $\rightarrow$ erratic; 30 queries $\rightarrow$ lane following; 70 queries $\rightarrow$ collision avoidance
-- Active selection achieves target performance **faster** — critical for time-sensitive applications (e.g., exoskeleton rehabilitation)
-- **Foundation models** (R3M, Voltron): pretrained representations give 2--3x higher success with 5--10x fewer demos
+- **驾驶模拟器**：0 次提问 $\rightarrow$ 开得摇摇晃晃；30 次 $\rightarrow$ 能沿着车道开；70 次 $\rightarrow$ 会避让碰撞
+- 主动选题能**更快**达到目标表现——这对时间敏感的应用很关键（例如外骨骼康复）
+- **基础模型**（R3M、Voltron）：用预训练表示，成功率提高 2–3 倍，演示量少 5–10 倍
 
-## 5. Non-Linear Scoring Functions {.auto-animate}
+## 5. 非线性打分函数 {.auto-animate}
 
-For non-linear scorer $V_j = f_\theta(X_j)$, linearize around $\hat\theta$:
+对非线性打分函数 $V_j = f_\theta(X_j)$，在 $\hat\theta$ 附近做线性化：
 
 $$
 f_\theta(X_j) \approx f_{\hat\theta}(X_j) + J_j \,\Delta\theta, \quad J_j = \left.\frac{\partial f_\theta(X_j)}{\partial \theta}\right|_{\hat\theta}
 $$
 
-Pairwise logit:
+成对的 logit：
 
 $$
 \underbrace{f_\theta(X_j) - f_\theta(X_k)}_{\text{logit}} \approx \underbrace{f_{\hat\theta}(X_j) - f_{\hat\theta}(X_k)}_{\text{offset}} + \underbrace{(J_j - J_k)}_{\phi_{jk}} \Delta\theta
 $$
 
-## 5. D-Optimal for Nonlinear Models {.auto-animate}
+## 5. 非线性模型的 D-最优 {.auto-animate}
 
-Replace $x_{jk}$ with Jacobian difference $\phi_{jk} = J_j - J_k$:
+把 $x_{jk}$ 换成雅可比之差 $\phi_{jk} = J_j - J_k$：
 
 $$
 \Sigma^{-1} = \sigma_0^{-2}I + \sum_t w_t \, \phi_t^\top \phi_t
@@ -297,37 +297,37 @@ $$
 
 - D-optimal: $\Delta_D(j,k) = \log(1 + w \, \phi \, \Sigma \, \phi^\top)$
 - A-optimal: $\Delta_A(j,k) = \tfrac{w \, \phi \, \Sigma^2 \, \phi^\top}{1 + w \, \phi \, \Sigma \, \phi^\top}$
-- Only needs **Jacobian rows** + vector-matrix-vector product
-- Same structure as linear case — local linearization is the key trick
+- 只需要**雅可比行** + 一次向量—矩阵—向量乘积
+- 结构与线性情形完全一样——关键技巧就是局部线性化
 
 ---
 
-## 6. GP Active Learning: Motivation
+## 6. 高斯过程的主动学习：动机
 
-- Previous sections: **parametric** models (Rasch, linear, neural net)
-- Gaussian Processes: **nonparametric**, flexible, natural uncertainty
-- GP posterior variance varies across input space
-- Key question: how to actively select queries for GP preference models?
-- Insight: GP uncertainty naturally guides query selection
+- 前面几节讲的都是**参数化**模型（Rasch、线性、神经网络）
+- 高斯过程（GP）是**非参数**的，灵活，而且天生带不确定性
+- GP 的后验方差在输入空间各处并不相同
+- 关键问题：对 GP 偏好模型，怎么主动挑要问的比较？
+- 思路：用 GP 的不确定性来引导提问
 
-## 6. Information-Theoretic Acquisition
+## 6. 信息论采集函数
 
-Mutual information between reward $r$ and observation $y$:
+奖励 $r$ 与观察 $y$ 之间的互信息：
 
 $$
 a(Q) = I(r; y \mid \mathcal{D}, Q) = H(y \mid \mathcal{D}, Q) - \mathbb{E}_{r}[H(y \mid r, Q)]
 $$
 
-**Two terms:**
+**两项的含义：**
 
-1. $H(y \mid \mathcal{D}, Q)$: **predictive entropy** — high when $p(A \succ B) \approx 0.5$
-2. $\mathbb{E}_r[H(y \mid r, Q)]$: **expected conditional entropy** — low for "easy" comparisons
+1. $H(y \mid \mathcal{D}, Q)$：**预测熵**——当 $p(A \succ B) \approx 0.5$ 时很高
+2. $\mathbb{E}_r[H(y \mid r, Q)]$：**期望条件熵**——对"很容易"的比较很低
 
-Want: model is uncertain, but human can give a clear answer.
+我们想要的是：模型自己拿不准，但人能给出明确的回答。
 
-## 6. Practical Computation
+## 6. 实际怎么算
 
-Using Laplace approximation:
+用拉普拉斯近似：
 
 $$
 a(x_A, x_B) = h\!\left(\Phi\!\left(\frac{\mu_A - \mu_B}{\sqrt{2\sigma_{\text{noise}}^2 + g(x_A, x_B)}}\right)\right) - m(x_A, x_B)
@@ -335,59 +335,59 @@ $$
 
 where $g(x_A, x_B) = \sigma_A^2 + \sigma_B^2 - 2\text{Cov}(r(x_A), r(x_B))$
 
-- $h(p)$: binary entropy; $\Phi$: normal CDF
-- **Key property**: trivial query $(x, x)$ is a global **minimizer** — avoids degenerate queries
+- $h(p)$：二元熵；$\Phi$：正态分布的累积分布函数
+- **关键性质**：平凡提问 $(x, x)$ 恰是全局**最小值**——自动避开这种没有意义的提问
 
-## 6. GP Active Learning Algorithm
+## 6. GP 主动学习算法
 
-1. **Initialize** GP prior over reward function
-2. **For each round** $t = 1, \ldots, T$:
-    a. Compute acquisition $a(x_A, x_B)$ for all candidate pairs
-    b. Select pair $(x_A^*, x_B^*)$ maximizing acquisition
-    c. Query oracle for preference
-    d. Update GP posterior via Laplace approximation
-3. **Return** learned reward function with uncertainty
+1. **初始化**：对奖励函数设定 GP 先验
+2. **每一轮** $t = 1, \ldots, T$：
+    a. 对所有候选项目对计算采集值 $a(x_A, x_B)$
+    b. 选出使采集值最大的项目对 $(x_A^*, x_B^*)$
+    c. 向裁判（oracle）询问偏好
+    d. 用拉普拉斯近似更新 GP 后验
+3. **返回**带不确定性的、学到的奖励函数
 
-## 6. GP Active Learning: Results
+## 6. GP 主动学习：结果
 
 ![](figures/chap3_gp_active_results.png){fig-align="center" width="55%"}
 
-Active selection targets uncertain regions, achieving lower error with fewer comparisons.
+主动选题会盯着不确定的区域问，用更少的比较得到更小的误差。
 
-## 6. When to Use GP Active Learning
+## 6. 什么时候该用 GP 主动学习
 
-| Scenario | Recommendation |
+| 场景 | 建议 |
 |---|---|
-| Nonlinear reward structure | GP strongly preferred |
-| Low-to-moderate dimensions ($d \lesssim 10$) | GP works well |
-| Expensive human feedback | Active learning essential |
-| Need uncertainty quantification | GP provides naturally |
-| Large datasets ($n \succ 1000$) | Consider sparse GP |
-| Very high dimensions | Linear models more practical |
+| 奖励结构是非线性的 | 强烈推荐用 GP |
+| 维度较低到中等（$d \lesssim 10$） | GP 效果很好 |
+| 人类反馈很贵 | 必须用主动学习 |
+| 需要量化不确定性 | GP 天然提供 |
+| 数据量很大（$n \succ 1000$） | 考虑稀疏 GP |
+| 维度非常高 | 线性模型更实际
 
 ---
 
-## 7. Active DPO: Motivation
+## 7. 主动式 DPO：动机
 
-Recall DPO assumes Bradley-Terry preferences:
+回顾一下，DPO 假定偏好服从 Bradley-Terry：
 
 $$
 p(y_w \succ y_l \mid x) = \sigma\!\left(\beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}\right)
 $$
 
-- LLMs have **billions** of parameters — exact Fisher information is intractable
-- How can we apply D-optimal design principles from Sections 1--5?
+- 大模型有 **数十亿** 参数，精确的费雪信息算不动
+- 那第 1–5 节的 D-最优设计思想还怎么用？
 
-## 7. Log-Linear Policy Assumption
+## 7. 对数线性策略假设
 
-Approximate policy as **log-linear** in last-layer features:
+把策略近似为对最后一层特征**对数线性**：
 
 $$
 \pi(y \mid x; \theta) \propto \exp(\phi(x, y)^\top \theta)
 $$
 
-- Justified by **neural tangent kernel** perspective
-- DPO loss Hessian takes the form:
+- 依据是**神经正切核（neural tangent kernel）**的观点
+- 这样 DPO 损失的 Hessian 就是这样的形式：
 
 $$
 H(\theta) = \sum_{i=1}^n p_i(1 - p_i) \cdot \Delta\phi_i \, \Delta\phi_i^\top
@@ -395,107 +395,107 @@ $$
 
 where $\Delta\phi_i = \phi(x_i, y_{w,i}) - \phi(x_i, y_{l,i})$
 
-**This IS the Fisher information matrix!**
+**这正是费雪信息矩阵！**
 
-## 7. DPO D-Optimal Criterion
+## 7. DPO 的 D-最优准则
 
-D-optimal selection for DPO:
+DPO 的 D-最优选题：
 
 $$
 \max_S \; \log\det\!\left(\sum_{i \in S} p_i(1 - p_i) \cdot \Delta\phi_i \, \Delta\phi_i^\top\right)
 $$
 
-- **Same mathematical structure** as all previous sections
-- Feature difference: $\Delta\phi_i = \phi(x_i, y_{w,i}) - \phi(x_i, y_{l,i})$
-- Sherman-Morrison still applies for sequential selection
+- **数学结构与前面几节完全相同**
+- 特征之差：$\Delta\phi_i = \phi(x_i, y_{w,i}) - \phi(x_i, y_{l,i})$
+- 序贯选题时 Sherman-Morrison 依然适用
 
-## 7. ADPO Algorithm
+## 7. ADPO 算法
 
-**Active DPO (ADPO):**
+**主动式 DPO（ADPO）：**
 
-1. **Compute features**: $\Delta\phi_i = \phi(x_i, y_{i,1}) - \phi(x_i, y_{i,2})$
-2. **D-optimal selection**:
+1. **计算特征**：$\Delta\phi_i = \phi(x_i, y_{i,1}) - \phi(x_i, y_{i,2})$
+2. **D-最优选题**：
 $$
 i^* = \arg\max_i \; \log\det\!\left(I + p_i(1 - p_i) \, H_t^{-1} \Delta\phi_i \, \Delta\phi_i^\top\right)
 $$
-3. **Query oracle**: obtain human preference for pair $i^*$
-4. **Update**: add to training set, retrain with DPO loss
+3. **询问裁判**：就第 $i^*$ 对项目取得人类偏好
+4. **更新**：加入训练集，用 DPO 损失重新训练
 
-## 7. ADPO Convergence
+## 7. ADPO 的收敛性
 
-**Theorem.** Under log-linear policy + regularity conditions:
+**定理。** 在对数线性策略加上若干正则性条件下：
 
 $$
 \|\hat\theta_n - \theta^*\| = O\!\left(\frac{d}{\sqrt{n}}\right)
 $$
 
-- Matches the **minimax optimal rate** for $d$-dimensional estimation
-- D-optimal ensures Fisher information grows proportionally to $n$
-- Key: effective dimension $d$ is the rank of the Fisher information matrix (last-layer features), not the full parameter count
+- 达到 $d$ 维估计的**极小极大最优速率（minimax optimal rate）**
+- D-最优保证费雪信息矩阵随 $n$ 成比例增长
+- 关键是：有效维度 $d$ 是费雪信息矩阵的秩（最后一层特征的维数），而不是全部参数的个数
 
-## 7. ADPO+ for Offline Settings
+## 7. 面向离线场景的 ADPO+
 
-- **Pool-based**: select from existing unlabeled pairs (fixed response pool)
-- **Batch selection**: select $b$ queries at once for parallel annotation
-- **Diversity**: D-optimal naturally encourages diversity — redundant queries give diminishing log-det gain
-- Practical for production RLHF pipelines with fixed candidate pairs
+- **基于池（pool-based）**：从已有的、未标注的项目对中选（回答候选池固定）
+- **批量选题**：一次选 $b$ 个提问，方便并行标注
+- **多样性**：D-最优天然鼓励多样性——重复的提问带来的行列式增益越来越小
+- 适合候选项目对已固定的生产级 RLHF 流水线
 
-## 7. When Does Active Learning Help for DPO?
+## 7. DPO 什么时候能靠主动学习受益？
 
-| Factor | Active Learning Beneficial? |
+| 因素 | 主动学习是否有益？ |
 |---|---|
-| **Annotation cost** | High cost $\rightarrow$ essential |
-| **Data heterogeneity** | Diverse prompts $\rightarrow$ more room for selection |
-| **Budget constraints** | Limited budget ($\lt$ 10K) $\rightarrow$ largest gains |
-| **Model capacity** | Larger models $\rightarrow$ helps reduce overfitting |
-| **Query pool size** | Large pool $\rightarrow$ more room for intelligent selection |
+| **标注成本** | 成本高 $\rightarrow$ 很有必要 |
+| **数据差异大** | 提示词多样 $\rightarrow$ 选题空间更大 |
+| **预算受限** | 预算有限（$\lt$ 1 万条）$\rightarrow$ 收益最大 |
+| **模型容量** | 模型越大 $\rightarrow$ 越能帮助减轻过拟合 |
+| **候选池规模** | 池子越大 $\rightarrow$ 智能选题的空间越大 |
 
-## 7. GP Active Learning vs ADPO
+## 7. GP 主动学习与 ADPO 的对比
 
-| Aspect | GP Active Learning | ADPO |
+| 方面 | GP 主动学习 | ADPO |
 |---|---|---|
-| Model | Nonparametric (GP) | Parametric (neural) |
+| 模型 | 非参数（GP） | 参数化（神经网络） |
 | Scalability | $O(n^3)$ | $O(d^2 n)$ |
-| Use case | Small datasets, uncertainty | LLM alignment, large models |
-| Acquisition | Information gain | D-optimal design |
-| Theory | Mutual information | Fisher information |
+| 适用场景 | 数据量小、需要不确定性 | 大模型对齐、模型规模大 |
+| 采集函数 | 信息增益 | D-最优设计 |
+| 理论基础 | 互信息 | 费雪信息 |
 
-Both share the core insight: **use model uncertainty to guide query selection**.
+两者的核心洞见是一样的：**用模型的不确定性来引导选题**。
 
 ---
 
-## Summary: Fisher Information Everywhere
+## 小结：处处都有费雪信息
 
-The unifying theme — Fisher information quantifies "informativeness":
+贯穿全章的主线——用费雪信息刻画"有多大的信息量"：
 
-| Model | Fisher Information |
+| 模型 | 费雪信息 |
 |---|---|
-| Rasch (scalar) | $p(1-p)$ |
-| Factor ($K$-dim) | $p(1-p) \, V V^\top$ |
+| Rasch（标量） | $p(1-p)$ |
+| 因子模型（$K$ 维） | $p(1-p) \, V V^\top$ |
 | Pairwise | $p(1-p) \, x \, x^\top$ |
-| GP preferences | Predictive entropy $-$ conditional entropy |
-| DPO (LLM) | $p(1-p) \, \Delta\phi \, \Delta\phi^\top$ |
+| GP 偏好模型 | 预测熵 $-$ 条件熵 |
+| DPO（大模型） | $p(1-p) \, \Delta\phi \, \Delta\phi^\top$ |
 
-## Summary: Key Equations
+## 小结：关键公式
 
-- **D-optimal (Sherman-Morrison)**: $\Delta_D = \log(1 + w \, x^\top \Sigma \, x)$
-- **Metric elicitation**: $O(\log(1/\epsilon))$ queries via binary search on unimodal boundary
-- **ADPO convergence**: $\|\hat\theta_n - \theta^*\| = O(d / \sqrt{n})$
+- **D-最优（Sherman-Morrison）**：$\Delta_D = \log(1 + w \, x^\top \Sigma \, x)$
+- **指标征询**：在单峰的边界上做二分查找，只需 $O(\log(1/\epsilon))$ 次提问
+- **ADPO 的收敛速率**：$\|\hat\theta_n - \theta^*\| = O(d / \sqrt{n})$
 
-All use the same principle: **measure where uncertainty is highest**, whether that's item difficulty, posterior covariance, or GP predictive variance.
+用的都是同一条原则：**把提问用在不确定性最高的地方**——不管这个不确定性来自项目难度、后验协方差，还是 GP 的预测方差。
 
-## Practical Guidance
+## 实践建议
 
-| Setting | Recommended Method |
+| 场景 | 推荐方法 |
 |---|---|
-| Scalar ability (testing, psychometrics) | Rasch + Fisher active |
-| Multi-dimensional preferences | Factor model + D-optimal |
-| Known item features | Linear preference + D-optimal |
-| Unknown nonlinear reward | GP active learning |
-| LLM alignment | ADPO |
-| Metric design | Binary search on LPM |
+| 单一能力值（测验、心理测量） | Rasch + 费雪信息主动选题 |
+| 多维偏好 | 因子模型 + D-最优 |
+| 物品特征已知 | 线性偏好 + D-最优 |
+| 未知的非线性奖励 | GP 主动学习 |
+| 大模型对齐 | ADPO |
+| 设计评价指标 | 在 LPM 上做二分查找 |
 
-## References
+## 参考文献
 
 ::: {.smaller}
 - [@pmlr-v89-hiranandani19a]{.citation}
