@@ -1,40 +1,40 @@
 ---
-title: "Machine Learning from Human Preferences"
-subtitle: "Chapter 1: Foundations"
-footer: "Chapter 1: Foundations"
+title: "人类偏好机器学习"
+subtitle: "第 1 章：基础"
+footer: "第 1 章：基础"
 ---
 
-## Overview
+## 本讲概览
 
-- This chapter lays the theoretical foundation for modeling and predicting choice behavior
-- Historical roots: Thurstone (1920s), Luce (1959), Bradley & Terry (1952), McFadden (Nobel 2000)
-- Central question: **Why is the Bradley-Terry model a reasonable assumption? Where does it come from? When does it fail?**
+- 这一章为"给选择行为建模并做出预测"打下理论基础
+- 历史脉络：Thurstone（1920 年代）、Luce（1959）、Bradley & Terry（1952）、McFadden（2000 年诺贝尔经济学奖）
+- 中心问题：**为什么 Bradley-Terry 模型是一个合理的假设？它从哪里来？什么时候会失效？**
 
 ![](figures/choice_model.jpg){fig-align="center" width="45%"}
 
-## Preference Learning Across ML
+## 偏好学习在机器学习各处都会遇到
 
-Preference data appears throughout machine learning:
+偏好数据在机器学习中随处可见：
 
-- **Recommender systems**: clicks, purchases, ratings reveal $A \succ B$
-- **Information retrieval**: search click on result 3 $\Rightarrow$ preferred over results 1, 2
-- **Robotics & control**: preferences over trajectories (smooth > jerky)
-- **Language model alignment**: annotators compare candidate outputs
-- **Game playing**: Elo ratings = Bradley-Terry model for match outcomes
+- **推荐系统**：点击、购买、评分都在表示 $A \succ B$
+- **信息检索**：点了第 3 条搜索结果 $\Rightarrow$ 说明它比第 1、2 条更好
+- **机器人与控制**：对轨迹的偏好（平滑 优于 颠簸）
+- **语言模型对齐**：标注员在多个候选输出之间做比较
+- **对弈**：Elo 等级分就是比赛胜负上的 Bradley-Terry 模型
 
-Despite the diversity, all share a common mathematical structure: **pairwise comparisons** or **choices from sets** that reveal underlying preferences.
+场景各不相同，但数学结构是同一个：**成对比较**，或者**从一组选项里选一个**，由此透露背后的偏好。
 
-## Application: Marketing & Recommender Systems
+## 应用：市场营销与推荐系统
 
-- Predict demand for new products before production
-- What features affect a car purchase?
+- 在产品投产之前就预测新产品的需求
+- 哪些特征会影响买车的选择？
 
 ![](figures/car_choice.png){fig-align="center" width="55%"}
 
-## Application: Economics & Transportation
+## 应用：经济学与交通
 
-- **Microeconomics**: Random Utility Theory; McFadden: 2000 Nobel Prize
-- **Transportation**: Predicted BART demand before it was built
+- **微观经济学**：随机效用理论；McFadden 因此获得 2000 年诺贝尔经济学奖
+- **交通规划**：BART 轻轨建成之前就预测出了它的客流量
 
 :::: {.columns}
 ::: {.column width="50%"}
@@ -45,11 +45,11 @@ Despite the diversity, all share a common mathematical structure: **pairwise com
 :::
 ::::
 
-## Application: RL, Robotics, and Language Models
+## 应用：强化学习、机器人与语言模型
 
-- **Robotics**: Preferences over trajectories guide policy learning
-- **LLM alignment**: Human feedback drives RLHF and DPO
-- **Game playing**: Elo $\equiv$ Bradley-Terry for match outcomes
+- **机器人**：对轨迹的偏好可以指导策略学习
+- **大模型对齐**：人的反馈驱动了人类反馈强化学习（RLHF）与 DPO
+- **对弈**：Elo $\equiv$ 比赛胜负上的 Bradley-Terry
 
 ![](figures/app_rl_lm.png){fig-align="center" width="35%"}
 
@@ -57,33 +57,33 @@ Despite the diversity, all share a common mathematical structure: **pairwise com
 https://openai.com/research/learning-to-summarize-with-human-feedback
 :::
 
-## Running Example: LLM Alignment
+## 贯穿全章的例子：大模型对齐
 
-Modern LLMs are trained in two phases:
+现代大模型分两个阶段训练：
 
-1. **Pretraining**: Next-token prediction (cross-entropy loss)
-    - Proper scoring rule $\Rightarrow$ calibrated probabilities
-    - Produces capable models, but not aligned ones
+1. **预训练**：预测下一个词（交叉熵损失）
+    - 真评分规则 $\Rightarrow$ 概率是校准的
+    - 这样得到的模型能力很强，但并不对齐
 
-2. **Posttraining (Alignment)**: Learn which outputs humans prefer
-    - **RLHF**: Collect preferences $\rightarrow$ train reward model $\rightarrow$ optimize policy
-    - **DPO**: Skip explicit reward model, optimize directly on preferences
+2. **后训练（对齐）**：学出人更喜欢哪种输出
+    - **RLHF**：收集偏好 $\rightarrow$ 训练奖励模型 $\rightarrow$ 优化策略
+    - **DPO**：跳过显式的奖励模型，直接在偏好上做优化
 
-## RLHF Pipeline
+## RLHF 的流程
 
 ![Choice models in RL](figures/choice_of_rl.png){fig-align="center" width="60%"}
 
-Three steps:
+三步：
 
-1. **Collect preference data**: Sample pairs of responses, ask which is better
-2. **Train a reward model**: $r_\phi(x, y)$ predicts human preference
-3. **Optimize the policy**: Fine-tune LM to maximize reward (with KL constraint)
+1. **收集偏好数据**：抽样成对的回答，问哪个更好
+2. **训练奖励模型**：用 $r_\phi(x, y)$ 预测人的偏好
+3. **优化策略**：微调语言模型使奖励最大（同时加 KL 约束）
 
-## Random Preferences
+## 随机偏好
 
-- Items $j \in \{1, \ldots, M\}$ (products, trajectories, LM responses)
-- Preferences: **random draws** of total orders $\prec$ (total + transitive)
-- Full distribution: $(M!-1)$-dimensional vector
+- 物品 $j \in \{1, \ldots, M\}$（商品、轨迹、语言模型的回答）
+- 偏好：从全序 $\prec$ 中**随机抽取**（全序 + 传递性）
+- 完整的分布是一个 $(M!-1)$ 维的向量
 
 | $M$ | Parameters ($M!-1$) |
 |-----|---------------------|
@@ -91,190 +91,190 @@ Three steps:
 | 4   | 23                  |
 | 10  | 3,628,799           |
 
-**Goal**: Reduce this complexity $\Rightarrow$ IIA collapses it to $M$ parameters
+**目标**：把这种复杂度降下来 $\Rightarrow$ 有了 IIA，就压缩成 $M$ 个参数
 
-## Why Stochastic Preferences?
+## 为什么偏好是随机的？
 
-- **Deterministic preferences** are clean but fail with noisy data
-- Even with randomness, assumptions like transitivity and IIA are strong yet practical
+- **确定性偏好**在数学上干净，但一遇到有噪声的数据就失效
+- 即便引入随机性，传递性、IIA 这些假设仍然很强，但确实好用
 
-Three interpretations of randomness:
+随机性有三种解读：
 
-1. **Heterogeneity**: Different decision-makers have different utilities (Economics/IO view)
-2. **Bounded rationality**: Errors in optimizing utilities (Behavioral view)
-3. **Designer belief**: Uncertainty about true preferences (Bayesian view)
+1. **异质性**：不同决策者的效用本就不同（经济学与产业组织的看法）
+2. **有限理性**：在最优化效用时出了错（行为科学的看法）
+3. **设计者的信念**：对真实偏好本身不确定（贝叶斯的看法）
 
-## Types of Comparison Data (1)
+## 比较数据的类型（一）
 
-**Full preference lists**: $L = (j_1, j_2, \ldots, j_M)$ where $j_1 \succ j_2 \succ \cdots \succ j_M$
+**完整偏好列表**：$L = (j_1, j_2, \ldots, j_M)$，其中 $j_1 \succ j_2 \succ \cdots \succ j_M$
 
-- Most informative, but cognitive load is high
+- 信息量最大，但要人做很多次比较，负担很重
 
-**Choices from subsets**: $(j, \mathcal{S})$ — $j$ is the best from subset $\mathcal{S}$
+**从子集中选择**：$(j, \mathcal{S})$——$j$ 是子集 $\mathcal{S}$ 中最好的那个
 
 $$
 p(j \mid \mathcal{S}) = \sum_{\prec: j \succ k \; \forall k \in \mathcal{S} \setminus \{j\}} p(\prec)
 $$
 
-**Binary comparisons**: $\mathcal{S} = \{j, j'\}$, write $Y_{jj'} = 1$
+**二元比较**：$\mathcal{S} = \{j, j'\}$，记作 $Y_{jj'} = 1$
 
-- Convenient, quick to elicit
-- Prominently used in LLM finetuning and evaluation
+- 方便，问起来也快
+- 在大模型的微调和评测中被大量使用
 
-## Types of Comparison Data (2)
+## 比较数据的类型（二）
 
-**Item-wise responses**: $Y_{ij} \in \{0,1\}$ — user $i$'s response to item $j$
+**逐物品的应答**：$Y_{ij} \in \{0,1\}$——用户 $i$ 对物品 $j$ 的反应
 
-- $Y_{ij} = 1$: acceptance (like, purchase, engagement)
+- $Y_{ij} = 1$：接受（点赞、购买、参与）
 - $Y_{ij} = 0$: rejection
 
-Examples: e-commerce purchases, streaming play/skip, dating swipes, content moderation
+例子：电商购买、视频播放或跳过、约会软件滑动、内容审核
 
-**Outside option**: Accept/reject framing with item $0$
+**外部选项**：把接受/拒绝写成与物品 $0$ 的比较
 
-- $Y_{j0} = 1$: accepting item $j$
-- $Y_{j0} = 0$: rejecting item $j$
+- $Y_{j0} = 1$：接受物品 $j$
+- $Y_{j0} = 0$：拒绝物品 $j$
 
-## The Response Matrix
+## 应答矩阵
 
-$N$ users $\times$ $M$ items yields an $N \times M$ **response matrix** $Y$ with entries $Y_{ij} \in \{0, 1\}$:
+$N$ 个用户 $\times$ $M$ 个物品，得到一张 $N \times M$ 的**应答矩阵** $Y$，元素为 $Y_{ij} \in \{0, 1\}$：
 
 $$
 Y = \begin{bmatrix} Y_{11} & \cdots & Y_{1M} \\ \vdots & \ddots & \vdots \\ Y_{N1} & \cdots & Y_{NM} \end{bmatrix}
 $$
 
-- **Item-wise**: every user-item interaction is one data point — $O(M)$ per user
-- **Pairwise**: $O(M^2)$ possible comparisons — more expensive to collect
+- **逐物品**：每次用户与物品的互动都是一条数据——每个用户 $O(M)$ 条
+- **成对比较**：一共可能有 $O(M^2)$ 次比较——收集起来更贵
 
-## Comparison Data Across Domains
+## 各领域的比较数据
 
-| Domain | Data Type | Example |
+| 领域 | 数据类型 | 例子 |
 |--------|-----------|---------|
-| Recommender systems | Choice from set | Sees $\{A,B,C\}$, clicks $B$ |
-| Information retrieval | Implicit pairwise | Click result 3 $\Rightarrow$ pref. over 1, 2 |
-| LLM alignment | Binary comparison | Annotator: $A \succ B$ |
-| Sports/Chess | Pairwise | Player $j$ beats $k$ |
-| Streaming | Item-wise | Play (1) or skip (0) |
+| 推荐系统 | 从集合中选 | 看到 $\{A,B,C\}$，点了 $B$ |
+| 信息检索 | 隐式成对 | 点了第 3 条 $\Rightarrow$ 说明优于第 1、2 条 |
+| 大模型对齐 | 二元比较 | 标注员判断 $A \succ B$ |
+| 体育/棋类 | 成对 | 选手 $j$ 胜过 $k$ |
+| 流媒体 | 逐物品 | 播放（1）或跳过（0） |
 
-Goal: learn the underlying utility function from observed choices.
+目标：从观察到的选择中，学出背后的效用函数。
 
 ---
 
-## Deterministic Utility Models
+## 确定性效用模型
 
-When different users have different preferences, we need both **user** and **item** parameters:
+当不同用户的偏好不一样时，就需要同时有**用户**参数和**物品**参数：
 
 $$
 p(Y_{ij} = 1) = \sigma(H_{ij}), \quad H_{ij} = f(U_i, V_j)
 $$
 
-- $U_i$: user $i$'s characteristics
-- $V_j$: item $j$'s characteristics
-- Stochasticity enters through Bernoulli sampling $Y_{ij} \sim \text{Bernoulli}(\sigma(H_{ij}))$
-- The function $f$ and dimensionality of $U_i, V_j$ define different model families
+- $U_i$：用户 $i$ 的特征
+- $V_j$：物品 $j$ 的特征
+- 随机性来自伯努利抽样 $Y_{ij} \sim \text{Bernoulli}(\sigma(H_{ij}))$
+- 函数 $f$ 的形式和 $U_i, V_j$ 的维数，决定了模型的族
 
-## The Rasch Model
+## Rasch 模型
 
-The simplest factor model — $f$ is additive:
+最简单的因子模型——$f$ 是相加的形式：
 
 $$
 p(Y_{ij} = 1 \mid U_i, V_j) = \sigma(U_i + V_j)
 $$
 
-- $U_i \in \mathbb{R}$: **user appetite** — general tendency to accept items
-    - High $U_i$: enthusiastic user; Low $U_i$: selective user
-- $V_j \in \mathbb{R}$: **item appeal** — how universally appealing item $j$ is
-    - High $V_j$: crowd-pleaser; Low $V_j$: niche item
-- Acceptance depends only on the **sum** $U_i + V_j$
+- $U_i \in \mathbb{R}$：**用户胃口**——总体上有多容易接受东西
+    - $U_i$ 高：热情的用户；$U_i$ 低：挑剔的用户
+- $V_j \in \mathbb{R}$：**物品吸引力**——物品 $j$ 对大众普遍有多大吸引力
+    - $V_j$ 高：人人都爱的爆款；$V_j$ 低：小众物品
+- 是否接受只取决于这个**和** $U_i + V_j$
 
-## Rasch Implies Bradley-Terry
+## Rasch 会推出 Bradley-Terry
 
-For a **single user**, the Rasch model implies Bradley-Terry for pairwise comparisons:
+对**单个用户**来说，Rasch 模型在成对比较上就推出 Bradley-Terry：
 
 $$
 p(j \succ k \mid i) = \sigma((U_i + V_j) - (U_i + V_k)) = \sigma(V_j - V_k)
 $$
 
-The user-specific parameter $U_i$ **cancels out**!
+与用户有关的参数 $U_i$ **被消掉了**！
 
 ::: {.smaller}
-| Data Type | What It Reveals | Parameters Identified |
+| 数据类型 | 能看出什么 | 可识别的参数 |
 |-----------|-----------------|----------------------|
-| Pairwise $(j \succ k)$ | Item differences only | $V_j - V_k$ (up to constant) |
-| Item-wise $(Y_{ij})$ | User appetites + item appeals | $U_i$ and $V_j$ (up to constant) |
+| 成对比较 $(j \succ k)$ | 只能看出物品之间的差 | $V_j - V_k$（只能到相差一个常数） |
+| 逐物品 $(Y_{ij})$ | 用户胃口加上物品吸引力 | $U_i$ 与 $V_j$（只能到相差一个常数） |
 :::
 
-This explains why recommender systems use item-wise data (clicks, purchases) while ranking systems (chess, LLM eval) can use pairwise comparisons.
+这解释了为什么推荐系统用逐物品的数据（点击、购买），而排序类的任务（棋类、大模型评测）只用成对比较就够了。
 
-## K-Dimensional Factor Models: Dot-Product
+## K 维因子模型：点积形式
 
-Rasch assumes 1D — users might love action but dislike romance.
+Rasch 假设只有一维——可用户也许爱看动作片、不喜欢爱情片。
 
-**Logistic factor model:** $H_{ij} = U_i^\top V_j + Z_j$
+**逻辑回归因子模型：** $H_{ij} = U_i^\top V_j + Z_j$
 
-- $U_i \in \mathbb{R}^K$: **user embedding**; $V_j \in \mathbb{R}^K$: **item embedding**
-- $Z_j \in \mathbb{R}$: item offset (baseline popularity)
-- Dot product measures user-item alignment; $K = 1$ reduces to Rasch
+- $U_i \in \mathbb{R}^K$：**用户向量**；$V_j \in \mathbb{R}^K$：**物品向量**
+- $Z_j \in \mathbb{R}$：物品截距（基础热度）
+- 点积衡量用户与物品的匹配程度；$K = 1$ 时退回 Rasch
 
-Foundation of Netflix Prize, collaborative filtering, two-tower models.
+这是 Netflix 竞赛、协同过滤、双塔模型的基础。
 
-## K-Dimensional Factor Models: Ideal Point
+## K 维因子模型：理想点形式
 
-**Ideal point model**: users prefer items **close** to their ideal point:
+**理想点模型**：用户更喜欢**离自己理想点近**的物品：
 
 $$
 H_{ij} = -\|U_i - V_j\|_2 + Z_j
 $$
 
-- Users and items live in the same $K$-dimensional space
-- Pros: Can learn preferences faster by exploiting geometry
-- Cons: Embedding assumption may be strong; must select distance function
+- 用户和物品处在同一个 $K$ 维空间里
+- 好处：可以利用几何结构，用更少的数据学到偏好
+- 代价：向量化这个假设可能偏强，还要选一个距离函数
 
-Natural for: political preferences (voters vs. candidates), music taste, product specs
+适合的场景：政治偏好（选民与候选人）、音乐口味、产品参数对比
 
 ::: {.citation}
 [@jamieson2011active]{.citation}; [@tatli2022learning]{.citation}
 :::
 
-## Two Views of Stochastic Choice
+## 随机选择的两种看法
 
 :::: {.columns}
 ::: {.column width="50%"}
-**Deterministic utility** (Latent variable):
+**确定性效用**（潜变量视角）：
 
 - $H_{ij} = f(U_i, V_j)$ — fixed
 - Randomness in $Y_{ij} \sim \text{Bernoulli}(\sigma(H_{ij}))$
-- "User has fixed preferences; responses are noisy"
+- "用户的偏好是固定的，只是回答有噪声"
 :::
 ::: {.column width="50%"}
-**Stochastic utility** (Random utility):
+**随机效用**（random utility 视角）：
 
 - $\tilde{H}_{ij} = f(U_i, V_j) + \varepsilon_{ij}$
 - Choice: $j \succ k \iff \tilde{H}_{ij} \gt \tilde{H}_{ik}$
-- "User's utility evaluation fluctuates"
+- "用户对效用的评估本身在波动"
 :::
 ::::
 
-Both yield $p(j \succ k \mid i) = \sigma(V_j - V_k)$ for additive $f$ — **observationally equivalent** for pairwise data.
+对相加形式的 $f$，两者都会得到 $p(j \succ k \mid i) = \sigma(V_j - V_k)$——在成对数据上**观测等价**。
 
-## Stochastic Utility Models
+## 随机效用模型
 
-**Random utility**: $\tilde{H}_j = V_j + \varepsilon_j$
+**随机效用**：$\tilde{H}_j = V_j + \varepsilon_j$
 
-- $V_j$: **mean utility** (deterministic)
-- $\varepsilon_j$: **noise** (stochastic), typically independent across items
+- $V_j$：**平均效用**（确定的部分）
+- $\varepsilon_j$：**噪声**（随机的部分），通常假设各物品之间相互独立
 
-Three interpretations of noise:
+对噪声的三种解读：
 
-1. **Heterogeneity** of decision-makers (Economics/IO)
-2. **Errors** in optimization of utilities (Bounded Rationality)
-3. **Designer's belief** about preferences (Bayesian)
+1. 决策者之间的**异质性**（经济学与产业组织）
+2. 在最优化效用时出的**错误**（有限理性）
+3. **设计者的信念**：对偏好不确定（贝叶斯）
 
-The key simplifying assumption: when $\varepsilon_j$ are i.i.d. $\Rightarrow$ **IIA**
+关键的那个简化假设：当 $\varepsilon_j$ 独立同分布时 $\Rightarrow$ **IIA**
 
-## Binary Choice Models
+## 二元选择模型
 
-**Binary choice with individual attributes**
+**带个体属性的二元选择**
 
 $$
 \begin{cases}
@@ -288,11 +288,11 @@ y_n =
 $$
 
 - $\epsilon \sim$ Logistic: $P_{n1} = \frac{1}{1 + \exp(-\beta s_n)}$
-- $\epsilon \sim$ Standard Normal (probit): $P_{n1} = \Phi(\beta s_n)$
+- $\epsilon \sim$ 标准正态（probit）：$P_{n1} = \Phi(\beta s_n)$
 
-## Bradley-Terry Model
+## Bradley-Terry 模型
 
-**Utility depends on alternative attributes with extreme value noise:**
+**效用由备选方案的属性决定，噪声取极值分布：**
 
 $$
 \begin{cases}
@@ -305,11 +305,11 @@ $$
 \Rightarrow \quad P_{n1} = \frac{\exp(\beta z_{n1})}{\exp(\beta z_{n1}) + \exp(\beta z_{n2})} = \frac{1}{1 + \exp(-\beta (z_{n1} - z_{n2}))}
 $$
 
-- Gaussian noise alternative: $P_{n1} = \Phi(\beta (z_{n1} - z_{n2}))$
+- 也可以换成高斯噪声：$P_{n1} = \Phi(\beta (z_{n1} - z_{n2}))$
 
-## Multiple Alternatives (Softmax)
+## 多个备选方案（Softmax）
 
-**With $J$ alternatives and extreme value noise:**
+**有 $J$ 个备选方案、噪声取极值分布时：**
 
 $$
 \begin{cases}
@@ -318,65 +318,65 @@ U_{ni} = \beta z_{ni} + \epsilon_{ni} \\
 \end{cases} \quad \Rightarrow \quad P_{ni} = \frac{\exp(\beta z_{ni})}{\sum_{j=1}^{J} \exp(\beta z_{nj})}
 $$
 
-- Equivalent to multiclass logistic regression (multinomial logit)
-- Can also replace noise model with Gaussians (multinomial probit)
+- 等价于多分类的逻辑回归（多项 logit）
+- 也可以把噪声换成高斯（多项 probit）
 
-## Plackett-Luce (Rankings)
+## Plackett-Luce（排序）
 
-The Plackett-Luce model extends to **full rankings** as a sequence of choices:
+Plackett-Luce 模型把这套做法推广到**完整排序**，把排序看成一次次选择：
 
 $$
 Pr(\text{ranking } 1, 2, \dots, J) = \prod_{m=1}^{J-1} \frac{\exp(\beta z_m)}{\sum_{j=m}^{J} \exp(\beta z_{nj})}
 $$
 
-- Also known as: rank ordered logit, exploded logit
-- All extensions apply: nonlinear utility, correlated noise, etc.
+- 也叫 rank ordered logit、exploded logit
+- 前面那些推广都用得上：非线性效用、相关噪声等
 
-## Estimation
+## 估计
 
-- **Linear case**: Maximum likelihood estimators (logistic and probit regression)
-- **Complex function classes**: Regularized ML with SGD
-- **Standard tradeoffs**: Bias-variance tradeoff
-    - More complex models generally require more data
-    - Most ML applications pool data across individuals whose differences may matter
+- **线性情形**：最大似然估计（逻辑回归与 probit 回归）
+- **复杂的函数类**：带正则化的机器学习方法，用随机梯度下降
+- **常规的权衡**：偏差—方差权衡
+    - 模型越复杂，通常越吃数据
+    - 大多数机器学习应用会把不同个体的数据合在一起用，而这些个体之间的差异其实可能是要紧的
 
 ---
 
-### Why DPO? {.auto-animate}
+### 为什么需要 DPO？ {.auto-animate}
 
 ![DPO vs PPO](figures/dpo_vs_ppo.png){fig-align="center" width="65%"}
 
-- RLHF pipeline is complex and unstable due to the reward model optimization.
-- DPO is more stable and can be used to optimize the reward model directly.
+- RLHF 的流程比较复杂，而且因为要优化奖励模型，训练不太稳定。
+- DPO 更稳定，可以直接对奖励模型做优化。
 
 [@rafailov2023direct]{.citation}
 
 
 ---
 
-### DPO: Bradley-Terry model {.auto-animate}
+### DPO：Bradley-Terry 模型 {.auto-animate}
 
-- Given prompt $x$ and completions $y_w$ and $y_l$ the choice model gives the preference
+- 给定提示 $x$ 和两个回答 $y_w$、$y_l$，选择模型给出偏好：
 
 $$
 p^*(y_w \succ y_l \mid x) = \frac{\exp(r^*(x, y_w))}{\exp(r^*(x, y_w)) + \exp(r^*(x, y_l))}
 $$
 
-where $r^*(x, y)$ is some latent reward model that we do not have access to (i.e., the human preference)
+其中 $r^*(x, y)$ 是一个我们拿不到真值的隐式奖励模型（也就是人的偏好）
 
 ---
 
-### DPO: Bradley-Terry model {.auto-animate}
+### DPO：Bradley-Terry 模型 {.auto-animate}
 
-Luckily, we can use parameterize the reward model with some neural networks with parameters $\phi$:
+好在我们可以用带参数 $\phi$ 的神经网络来参数化这个奖励模型：
 
-Let us start with the Reward Maximization Objective in RL:
+先从强化学习里的最大化奖励目标出发：
 $$
 \max_{\pi_\theta} \mathbb{E}_{x \sim \mathcal{D}, y \sim \pi_\theta(y|x)} [r_\phi(x, y) - \beta D_{KL}(\pi_\theta(y|x) \| \pi_{\text{ref}}(y|x))]
 $$
 
 ::: {.fragment}
-- Where $\pi_\theta(y|x)$ is the language model, and $\pi_{\text{ref}}(y|x)$ is the reference model (e.g., the language model before fine-tuning)
+- 其中 $\pi_\theta(y|x)$ 是语言模型，$\pi_{\text{ref}}(y|x)$ 是参考模型（例如微调之前的那个语言模型）
 :::
 
 ---
@@ -387,7 +387,7 @@ $$
 \max_{\pi_\theta} \mathbb{E}_{x \sim \mathcal{D}, y \sim \pi_\theta(y|x)} [r_\phi(x, y) - \beta D_{KL}(\pi_\theta(y|x) \| \pi_{\text{ref}}(y|x))]
 $$
 
-Recall the definition of KL divergence:
+回顾 KL 散度的定义：
 $$
 D_{KL}(p \| q) = \sum_{x \in \mathcal{X}} p(x) \log \frac{p(x)}{q(x)} = \mathbb{E}_{x \sim \mathcal{X}} \left[ \log \frac{p(x)}{q(x)} \right]
 $$
@@ -396,7 +396,7 @@ $$
 
 ### {.auto-animate}
 
-Substituting the KL divergence, we can rewrite the objective as:
+把 KL 散度代进去，目标可以改写成：
 $$
 \begin{aligned}
 &\max_{\pi_\theta} \mathbb{E}_{x \sim \mathcal{D}, y \sim \pi_\theta(y|x)} \left[ r_\phi(x, y) - \beta \mathbb{E}_{y \sim \pi_\theta(y|x)} \left[\log \frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)} \right] \right]\\
@@ -408,7 +408,7 @@ $$
 
 ### {.auto-animate}
 
-Then, we can continue to derive the objective as:
+接着继续推导：
 $$
 \begin{aligned}
     &\max_{\pi_\theta} \mathbb{E}_{x \sim \mathcal{D}} \mathbb{E}_{y \sim \pi_\theta(y|x)} \left[ r_\phi(x, y) - \beta \log \frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)} \right] \\
@@ -422,12 +422,12 @@ where $Z(x) = \sum_{y} \pi_{\text{ref}}(y|x) \exp\left(\frac{1}{\beta} r_\phi(x,
 
 ### {.auto-animate}
 
-Because $Z(x)$ is a constant with respect to $\pi_\theta$, we can define:
+由于 $Z(x)$ 相对于 $\pi_\theta$ 是常数，我们可以定义：
 $$
 \pi^*(y|x) = \frac{1}{Z(x)} \pi_{\text{ref}}(y|x) \exp\left(\frac{1}{\beta} r_\phi(x, y)\right)
 $$
 
-Then, we can rewrite the optimization problem as:
+于是这个优化问题就可以写成：
 $$
 \begin{aligned}
 &\min_{\pi_\theta} \mathbb{E}_{x \sim \mathcal{D}} \mathbb{E}_{y \sim \pi_\theta(y|x)} \left[ \log \frac{\pi_\theta(y|x)}{\pi^*(y|x)} - \log Z(x) \right]\\
@@ -439,7 +439,7 @@ $$
 
 ### {.auto-animate}
 
-Thus, the optimal solution (i.e., the optimal language model) is:
+因此，最优解（也就是最优的语言模型）是：
 $$
 \pi_\theta(y|x) = \pi^*(y|x) = \frac{1}{Z(x)} \pi_{\text{ref}}(y|x) \exp\left(\frac{1}{\beta} r_\phi(x, y)\right)
 $$
@@ -448,7 +448,7 @@ $$
 
 ### {.auto-animate}
 
-With some algebra, we can show that the optimal reward model is:
+做一些代数变形就能说明，最优的奖励模型是：
 $$
 \begin{aligned}
 \pi_\theta(y|x) &= \frac{1}{Z(x)} \pi_{\text{ref}}(y|x) \exp\left(\frac{1}{\beta} r_\phi(x, y)\right)\\
@@ -461,17 +461,17 @@ $$
 
 ### {.auto-animate}
 
-Recall the Bradley-Terry model:
+回顾 Bradley-Terry 模型：
 $$
 p_\phi(y_w \succ y_l \mid x) = \frac{\exp(r_\phi(x, y_w))}{\exp(r_\phi(x, y_w)) + \exp(r_\phi(x, y_l))}
 $$
 
-And the optimal reward model:
+再代入最优的奖励模型：
 $$
 r_\phi(x, y) = \beta \log \frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)} + \beta \log Z(x)
 $$
 
-Substituting, we can rewrite the choice model as:
+代进去之后，选择模型可以改写成：
 $$
 \begin{aligned}
 p_\phi(y_w \succ y_l \mid x) &= \frac{1}{1 + \exp\left( \beta \log \frac{\pi_\theta(y_l | x)}{\pi_{\text{ref}}(y_l | x)} - \beta \log \frac{\pi_\theta(y_w | x)}{\pi_{\text{ref}}(y_w | x)} \right)}\\
@@ -481,18 +481,18 @@ $$
 
 ---
 
-### DPO: Bradley-Terry model {.auto-animate}
+### DPO：Bradley-Terry 模型 {.auto-animate}
 
-The reward model loss maximizes the likelihood of the choice model:
+奖励模型的损失，就是把选择模型的似然最大化：
 $$
 \mathcal{L} (r_\theta, \mathcal{D}) = - \mathbb{E}_{(x, y_w, u_l) \sim \mathcal{D}} \left[ \log p_\phi(y_w \succ y_l \mid x) \right]
 $$
 
 ---
 
-### DPO Loss {.auto-animate}
+### DPO 损失 {.auto-animate}
 
-Substituting the optimal reward, we obtain the **DPO loss**:
+把最优奖励代进去，就得到 **DPO 损失**：
 
 $$
 \mathcal{L}_{DPO}(\pi_\theta; \pi_{\text{ref}}) = -\mathbb{E}_{(x, y_w, y_l) \sim D} \left[ \log \sigma\left( \beta \log \frac{\pi_\theta(y_w | x)}{\pi_{\text{ref}}(y_w | x)} - \beta \log \frac{\pi_\theta(y_l | x)}{\pi_{\text{ref}}(y_l | x)} \right) \right]
@@ -508,51 +508,51 @@ $$
 
 ---
 
-## Independence of Irrelevant Alternatives (IIA)
+## 无关备选独立性（IIA）
 
-IIA assumes the **relative likelihood** of choosing $j$ vs $k$ is unchanged by a third alternative $\ell$:
+IIA 假设：选 $j$ 相对于选 $k$ 的**相对可能性**，不会因为多出一个备选 $\ell$ 而改变：
 
 $$
 \frac{p(j \mid \mathcal{S})}{p(k \mid \mathcal{S})} = \frac{p(j \mid \mathcal{S} \cup \{\ell\})}{p(k \mid \mathcal{S} \cup \{\ell\})}
 $$
 
-- Introduced by Luce (1959)
-- Reduces $(M!-1)$ parameters to just $M$ parameters
-- Makes learning feasible!
+- 由 Luce（1959）提出
+- 把 $(M!-1)$ 个参数压缩到只要 $M$ 个
+- 学习从此变得可行！
 
-## IIA-Gumbel Equivalence
+## IIA 与 Gumbel 的等价
 
-**Theorem 1**: A random utility model $H_j$ satisfies IIA **if and only if** $H_j = V_j + \varepsilon_j$ where $\varepsilon_j$ are i.i.d. **Gumbel** distributed.
+**定理 1**：一个随机效用模型 $H_j$ 满足 IIA **当且仅当** $H_j = V_j + \varepsilon_j$，其中的 $\varepsilon_j$ 独立同分布且服从 **Gumbel** 分布。
 
-- Gumbel CDF: $F(x) = e^{-e^{-x}}$
+- Gumbel 的分布函数：$F(x) = e^{-e^{-x}}$
 
-## IIA-Gumbel Equivalence: Proof Sketch
+## IIA 与 Gumbel 等价：证明思路
 
-**(⇐) Gumbel $\Rightarrow$ IIA:**
+**(⇐) Gumbel $\Rightarrow$ IIA：**
 $$
 \frac{p(j \mid \mathcal{S})}{p(k \mid \mathcal{S})} = \frac{e^{V_j}/\sum_{\ell} e^{V_\ell}}{e^{V_k}/\sum_{\ell} e^{V_\ell}} = e^{V_j - V_k}
 $$
-Independent of $\mathcal{S}$ — IIA holds.
+结果与 $\mathcal{S}$ 无关——IIA 成立。
 
-**(⇒) IIA $\Rightarrow$ Gumbel:** IIA forces multiplicative structure; only Gumbel is compatible (Yellott, 1977).
+**(⇒) IIA $\Rightarrow$ Gumbel：** IIA 迫使结构必须是乘性的；能相容的只有 Gumbel（Yellott，1977）。
 
-## Choice Probabilities under IIA
+## IIA 之下的选择概率
 
-**Theorem 2**: Under IIA ($H_j = V_j + \varepsilon_j$, i.i.d. Gumbel), the probabilities are:
+**定理 2**：在 IIA 下（$H_j = V_j + \varepsilon_j$，独立同分布的 Gumbel），各类选择概率为：
 
-**Choices from sets (softmax):**
+**从集合中选（softmax）：**
 $$
 p(j \mid \mathcal{S}) = \frac{e^{V_j}}{\sum_{k \in \mathcal{S}} e^{V_k}} = \operatorname{softmax}_j ((V_k)_{k \in \mathcal{S}})
 $$
 
-**Binary comparisons (Bradley-Terry):**
+**二元比较（Bradley-Terry）：**
 $$
 p(Y_{jj'} = 1) = \sigma(V_j - V_{j'}) = \frac{1}{1 + e^{-(V_j - V_{j'})}}
 $$
 
-## Choice Probabilities under IIA (cont.)
+## IIA 之下的选择概率（续）
 
-**Full rankings (Plackett-Luce):**
+**完整排序（Plackett-Luce）：**
 $$
 p(j_1 \succ \cdots \succ j_M) = \prod_{m=1}^{M-1} \frac{e^{V_{j_m}}}{\sum_{k=m}^{M} e^{V_{j_k}}}
 $$
@@ -562,33 +562,33 @@ $$
 - $p(3 \succ 1) = \sigma(2) \approx 0.88$
 - $p(\cdot \mid \{1,2,3\}) \approx (0.09, 0.24, 0.67)$
 
-## Many Names, One Model
+## 许多名字，同一个模型
 
-All are special cases of random utility with i.i.d. Gumbel noise under IIA:
+它们都是"随机效用 + 独立同分布 Gumbel 噪声 + IIA"的特例：
 
-| Feedback Type | Model Name |
+| 反馈形式 | 模型名称 |
 |--------------|------------|
-| Binary comparisons | Bradley-Terry |
-| Full rankings | Plackett-Luce |
-| Accept/reject | Logistic regression |
-| Choices from subsets | Logit model |
-| Multi-class | Multinomial logit |
+| 二元比较 | Bradley-Terry |
+| 完整排序 | Plackett-Luce |
+| 接受/拒绝 | 逻辑回归 |
+| 从子集中选 | Logit 模型 |
+| 多分类 | 多项 logit |
 
-## IIA Justifies DPO
+## IIA 为 DPO 提供了依据
 
-DPO assumes Bradley-Terry: $p(y \succ y' \mid x) = \sigma(r(x,y) - r(x,y'))$
+DPO 假设偏好服从 Bradley-Terry：$p(y \succ y' \mid x) = \sigma(r(x,y) - r(x,y'))$
 
-Justified by IIA: humans compare implicit rewards with i.i.d. Gumbel noise.
+依据就是 IIA：人在比较隐式奖励时，噪声可看作独立同分布的 Gumbel。
 
-**When BT fails for DPO:**
+**BT 在 DPO 里会失效的情形：**
 
-- **Context effects**: preferences depend on what other options are shown
-- **Intransitive preferences**: $A \succ B \succ C \succ A$
-- **Annotator disagreement**: mixture model needed
+- **情境效应**：偏好会随着同时呈现的其他选项而变
+- **非传递偏好**：$A \succ B \succ C \succ A$
+- **标注者之间有分歧**：需要用混合模型
 
-## Identification Problem
+## 可识别性问题
 
-Different utility vectors can generate **identical** choice probabilities:
+不同的效用向量可以产生**完全一样**的选择概率：
 
 $$
 \frac{e^{V_j + c}}{\sum_{k \in \mathcal{S}} e^{V_k + c}} = \frac{e^c \cdot e^{V_j}}{e^c \cdot \sum_{k} e^{V_k}} = \frac{e^{V_j}}{\sum_{k} e^{V_k}}
@@ -596,65 +596,65 @@ $$
 
 **Implications:**
 
-1. **Normalization required**: Must fix one value (e.g., $V_0 = 0$)
-2. **Only differences matter**: Can only identify $V_j - V_k$, not absolute levels
-3. **Connection to DPO**: The reference policy $\pi_{\text{ref}}$ provides normalization
-    - Implicit reward: $r^*(x,y) = \beta \log \frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)}$
+1. **必须做归一化**：得固定其中一个值（例如设 $V_0 = 0$）
+2. **只有差值有意义**：只能识别出 $V_j - V_k$，识别不出绝对水平
+3. **与 DPO 的联系**：参考策略 $\pi_{\text{ref}}$ 起的就是归一化的作用
+    - 隐式奖励：$r^*(x,y) = \beta \log \frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)}$
 
-## The Rashomon Effect
+## Rashomon 效应
 
-Even after identification, **many structurally different models** can fit data equally well. Named after Kurosawa's 1950 film.
+即使解决了可识别性，**仍然有很多结构完全不同的模型**能把数据拟合同样好。名字来自黑泽明 1950 年的电影《罗生门》。
 
-**Example**: 100 pairwise comparisons, 5 items — all achieve 90% accuracy:
+**例子**：100 次成对比较、5 个物品——下面这些模型都能做到 90% 的准确率：
 
-1. Bradley-Terry with utilities $(0, V_2, V_3, V_4, V_5)$
-2. 2-group mixture with group-specific utilities
-3. Nested logit with correlation parameters
+1. 效用为 $(0, V_2, V_3, V_4, V_5)$ 的 Bradley-Terry
+2. 带分组效用的两群体混合模型
+3. 带相关参数的嵌套 logit
 
-**For alignment**: Many reward functions explain human feedback equally well — which one should we optimize?
+**在对齐问题上**：能同样好地解释人类反馈的奖励函数有很多个——我们该去优化哪一个？
 
-## Connecting Item-wise and Pairwise Models
+## 把逐物品模型与成对模型连起来
 
-**Rasch $\rightarrow$ Bradley-Terry**: User params cancel ($U_i$ disappears)
+**Rasch $\rightarrow$ Bradley-Terry**：用户参数被消掉了（$U_i$ 不见了）
 
-**General factor model**: $p(j \succ k \mid i) = \sigma\left(U_i^\top (V_j - V_k) + (Z_j - Z_k)\right)$
+**一般的因子模型**：$p(j \succ k \mid i) = \sigma\left(U_i^\top (V_j - V_k) + (Z_j - Z_k)\right)$
 
-- This is **not** standard BT — preference depends on user $U_i$!
-- Different users may rank the same items differently
+- 这**不是**标准的 BT——偏好取决于用户 $U_i$！
+- 不同的用户可能给出完全不同的排序
 
-## When Do User Params Cancel?
+## 用户参数什么时候会被消掉？
 
-User-specific parameters $U_i$ cancel when:
+与用户有关的参数 $U_i$ 会在这些情况下消掉：
 
-1. **Rasch model** (additive structure)
-2. **Single user** ($N = 1$)
-3. **Homogeneous population** ($U_i = U$ for all $i$)
+1. **Rasch 模型**（相加结构）
+2. **只有一个用户**（$N = 1$）
+3. **总体是同质的**（对所有 $i$ 都有 $U_i = U$）
 
-Use BT for ranking items globally; factor models for personalization.
+要给物品做全局排序就用 BT；要做个性化就用因子模型。
 
-## IIA Limitation: Population Heterogeneity
+## IIA 的局限：总体是异质的
 
-Sub-populations satisfying IIA $\not\Rightarrow$ full population satisfies IIA
+每个子群体都满足 IIA，$\not\Rightarrow$ 整个总体也满足 IIA
 
-**Mixture model:**
+**混合模型：**
 $$
 p(Y_{jj'} = 1) = \sum_{i=1}^N \alpha_i \, \sigma(V_j^{(i)} - V_{j'}^{(i)})
 $$
 
-**Intuition**: A mixture of Gumbels is not Gumbel (like a mixture of Gaussians is not Gaussian)
+**直观理解**：Gumbel 的混合不再是 Gumbel（就像高斯的混合不再是高斯）
 
-**Solution**: Random coefficients logit $V_j = \beta^\top x_j + \varepsilon_j$, $\beta \sim N(\mu, \Sigma)$
+**解决办法**：随机系数 logit $V_j = \beta^\top x_j + \varepsilon_j$，其中 $\beta \sim N(\mu, \Sigma)$
 
-## IIA Limitation: Red Bus / Blue Bus
+## IIA 的局限：红巴士与蓝巴士
 
-Items 1, 2 are nearly identical (red bus, blue bus); item 3 is different (train).
+物品 1、2 几乎一模一样（红巴士、蓝巴士），物品 3 不同（火车）。
 
-Under IIA with $V_1 = V_2$:
+在 IIA 下取 $V_1 = V_2$：
 
-- Adding the clone **reduces** $p(\text{train} \mid \{1,2,3\})$ vs $p(\text{train} \mid \{1,3\})$
-- Intuitively, demand for train should be unchanged!
+- 多出一个"复制品"之后，$p(\text{train} \mid \{1,2,3\})$ 反而比 $p(\text{train} \mid \{1,3\})$ **更小**
+- 可按常理，火车的需求量不该变！
 
-**The fix**: Allow correlated noise between similar alternatives
+**修正办法**：允许相似的备选方案之间有相关的噪声
 
 $$
 \begin{aligned}
@@ -663,43 +663,43 @@ $$
 \end{aligned}
 $$
 
-when errors for items 1, 2 are perfectly correlated.
+此时物品 1、2 的误差完全相关。
 
-## Beyond Bradley-Terry (1)
+## 走出 Bradley-Terry（一）
 
-- **Probit**: Gaussian noise $\varepsilon \sim \mathcal{N}(0, \Sigma)$
-    - Allows arbitrary correlations; handles red-bus/blue-bus
-    - Disadvantage: no closed-form choice probabilities
+- **Probit**：高斯噪声 $\varepsilon \sim \mathcal{N}(0, \Sigma)$
+    - 允许任意的相关结构，能处理红巴士/蓝巴士问题
+    - 缺点：选择概率没有闭式解
 
-- **Nested logit**: Group alternatives into "nests" with within-nest correlation
-    - IIA within nests, substitution across nests
+- **嵌套 logit**：把备选方案分进若干"巢"，巢内相关
+    - 巢内满足 IIA，巢之间可以互相替代
 
-## Beyond Bradley-Terry (2)
+## 走出 Bradley-Terry（二）
 
-- **Mixed logit** (random coefficients): $\beta \sim F$
-    - Can approximate any random utility model [@mcfadden2000mixed]
+- **混合 logit**（随机系数）：$\beta \sim F$
+    - 可以逼近任意随机效用模型 [@mcfadden2000mixed]
 
-- **Gaussian Processes**: Nonparametric, nonlinear reward $r(x) \sim \mathcal{GP}(m, k)$
-    - RBF kernel: $k(x,x') = \sigma_f^2 \exp(-\|x-x'\|^2 / 2\ell^2)$
-    - Useful when linear rewards are too restrictive
+- **高斯过程**：非参数、非线性的奖励 $r(x) \sim \mathcal{GP}(m, k)$
+    - 径向基核：$k(x,x') = \sigma_f^2 \exp(-\|x-x'\|^2 / 2\ell^2)$
+    - 当线性奖励限制太强时很好用
 
 ---
 
-## Summary (1)
+## 小结（一）
 
-- **Preference data is ubiquitous** in ML: recommenders, IR, robotics, LLMs
-- **Random preferences**: $(M!-1)$ parameters — intractable without simplification
-- **IIA** reduces complexity to $M$ parameters $\Rightarrow$ i.i.d. Gumbel noise
-- **Bradley-Terry**: $p(j \succ k) = \sigma(V_j - V_k)$ — arises from IIA
+- **偏好数据在机器学习中无处不在**：推荐系统、信息检索、机器人、大模型
+- **随机偏好**需要 $(M!-1)$ 个参数——不做简化就算不动
+- **IIA** 把复杂度降到 $M$ 个参数 $\Rightarrow$ 对应独立同分布的 Gumbel 噪声
+- **Bradley-Terry**：$p(j \succ k) = \sigma(V_j - V_k)$——正是从 IIA 推出来的
 
-## Summary (2)
+## 小结（二）
 
-- **Rasch model** connects item-wise and pairwise data; user params cancel
-- **DPO** assumes BT, justified by IIA; full derivation from RL objective
-- **Limitations**: heterogeneity (mixtures), red-bus/blue-bus (cloning), identification, Rashomon effect
-- **Extensions**: probit, nested logit, mixed logit, GPs
+- **Rasch 模型**把逐物品数据与成对数据连了起来；用户参数会被消掉
+- **DPO** 假设 BT，依据是 IIA；从强化学习目标出发的完整推导
+- **局限**：总体异质（混合）、红巴士/蓝巴士（复制品）、可识别性、Rashomon 效应
+- **推广**：probit、嵌套 logit、混合 logit、高斯过程
 
-## References
+## 参考文献
 
 ::: {.smaller}
 - [@train1986qualitative]{.citation}
