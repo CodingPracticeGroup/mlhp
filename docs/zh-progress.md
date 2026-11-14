@@ -23,7 +23,8 @@
 
 - `src/psets/resources` 是指向 `../../resources` 的符号链接。主题 scss 按项目根相对路径引用字体，缺这个链接时 `quarto render` 会报 `lstat '.../src/psets/resources/fonts/et-book/roman-line-figures.ttf'`。
 - CI 里逐个文件渲染（`for f in pset1 pset2 pset3; do quarto render "$f.qmd"; done`）。一次传入多个文档时输出会互相覆盖：实测 `quarto render pset2.qmd pset3.qmd` 后 `pset2.html` 内容变成 pset3。
-- 讲义同理：`src/slides/_quarto.yml` 是嵌套项目（revealjs，输出 `_book/slides/`），主项目不渲染它；嵌套项目只认自己目录下的 `_extensions/`，所以 CI 在 `src/slides` 里再装一次 `coatless-quarto/pyodide`。本地那份 `_extensions` 是旧版 dev 快照，缺 `qpyodide-monaco-editor-init.html`，直接渲染会报 `Error reading dependencies from ...`，`quarto add` 更新后即正常。
+- 讲义同理：`src/slides/_quarto.yml` 是嵌套项目（revealjs，输出 `_book/slides/`），主项目不渲染它；嵌套项目只认自己目录下的 `_extensions/`，所以 CI 在 `src/slides` 里再装一次 `coatless-quarto/pyodide`。
+- 仓库里原本跟踪着一份过期快照 `src/slides/_extensions/coatless/pyodide/`（10 个文件，缺 `qpyodide-monaco-editor-init.html`，但里面的 `qpyodide.lua` 会去读它），CI 一旦命中它就报 `Error reading dependencies from .../qpyodide-monaco-editor-init.html` 并退出码 83。这份快照已在 `zh` 分支删除（`git rm -r src/slides/_extensions/coatless`），改由 CI 每次现装新版；本地也确认删除后 7 个讲稿全部渲染通过。
 
 ## 待做
 
