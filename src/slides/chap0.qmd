@@ -1,63 +1,63 @@
 ---
-title: "Machine Learning from Human Preferences"
-subtitle: "Chapter 0: Introduction"
-footer: "Chapter 0: Introduction"
+title: "人类偏好机器学习"
+subtitle: "第 0 章：开场介绍"
+footer: "第 0 章：开场介绍"
 ---
 
-## Overview
+## 课程概览
 
-*Machine Learning from Human Preferences* explores the challenge of efficiently and effectively eliciting preferences from individuals, groups, and societies and embedding them within AI systems.
+*人类偏好机器学习（Machine Learning from Human Preferences）* 讨论的是这样一个难题：怎么高效又从个人、群体、社会身上把偏好问出来，并把它们放进 AI 系统里。
 
-## Overview
+## 课程概览
 
-We focus on **statistical and conceptual foundations** and **strategies for interactively querying humans** to elicit information that improves learning and applications.
+我们重点关注**统计与概念基础**，以及**如何主动去问人**——问出来的信息能让学习方法和应用更好用。
 
 ![](figures/foundation_strategies.png){fig-align="center" width="80%"}
 
 ## Overview
 
-This class is not exhaustive!
+这门课不求面面俱到！
 
 ![](figures/class_introduction.png){fig-align="center" width="85%"}
 
-## Overview
+## 课程概览
 
-Feedback can be included at any step of training
+训练的每一步都可以引入人的反馈
 
 ![](figures/human_in_nlp_loop.png){fig-align="center" width="75%"}
 
 ::: {.attribution}
-@wang2021putting. Slides modified from Diyi Yang.
+@wang2021putting。幻灯片由 Diyi Yang 的版本修改而来。
 :::
 
-## Overview
+## 课程概览
 
-Feedback-Update Taxonomy
+反馈—更新方式的分类
 
 ::: {.smaller}
-|  | Dataset Update | Loss Function Update | Parameter Space Update |
+|  | 更新数据集 | 更新损失函数 | 更新参数空间 |
 |--|----------------|----------------------|------------------------|
-| **Domain** | Dataset modification, Augmentation, Preprocessing, Data generation from constraint, Fairness, weak supervision, Use unlabeled data, Check synthetic data | Constraint specification, Fairness, Interpretability, Resource constraints | Model editing, Rules, Weights, Model selection, Prior update, Complexity |
-| **Observation** | Active data collection, Add data, Relabel data, Reweighting data, collecting expert labels, Passive observation | Constraint elicitation, Metric learning, Human representations, Collecting contextual information, Generative factors, concept representations, Feature attributions | Feature modification, Add/remove features, Engineering features |
+| **作用域** | 数据集修改、数据增强、预处理、按约束生成数据、公平性、弱监督、利用无标注数据、检查合成数据 | 约束设定、公平性、可解释性、资源限制 | 模型编辑、规则、权重、模型选择、先验更新、复杂度 |
+| **观察方式** | 主动采集数据、加数据、重新标注、重新加权、收集专家标注、被动观察 | 约束征询、指标学习、人的表示、收集情境信息、生成因子、概念表示、特征归因 | 特征修改、增删特征、特征工程 |
 :::
 
 ::: {.attribution}
-@Chen2023Perspectives. Slides modified from Diyi Yang.
+@Chen2023Perspectives。幻灯片由 Diyi Yang 的版本修改而来。
 :::
 
-## Examples: Natural Languages
+## 例子：自然语言
 
 ![](figures/chatgpt.png){fig-align="center" width="70%"}
 
-## Examples: Natural Languages
+## 例子：自然语言
 
-Builds on research studying human feedback in language
+它建立在"用人类反馈研究语言"这条研究线上
 
 ![](figures/document_classification.png){fig-align="center" width="75%"}
 
 [@harpale2004document]{.citation}
 
-## Examples: Natural Languages
+## 例子：自然语言
 
 :::: {.columns}
 ::: {.column width="50%"}
@@ -70,15 +70,15 @@ Builds on research studying human feedback in language
 
 [@he2016human]{.citation}
 
-## Examples: Natural Languages
+## 例子：自然语言
 
 ![](figures/training_rlhf.png){fig-align="center" width="85%"}
 
 [@ouyang2022training]{.citation}
 
-## Examples: Natural Languages
+## 例子：自然语言
 
-OpenAI Experiments with RLHF
+OpenAI 关于人类反馈强化学习的实验
 
 :::: {.columns}
 ::: {.column width="40%"}
@@ -91,19 +91,19 @@ OpenAI Experiments with RLHF
 
 [@stiennon2020learning]{.citation}
 
-## Motivation
+## 为什么要用人的反馈
 
-- Provides a mechanism for gathering signals about correctness that are difficult to describe via data or cost functions, e.g., what does it mean to be funny?
-- Provides signals best defined by stakeholders, e.g., helpfulness, fairness, safety training, and alignment.
-- Useful when evaluation is easier than modeling ideal behavior.
-- Sometimes, we do not care about human preferences per se; we care about fixing model mistakes.
+- 对于"对不对"这类很难用数据或代价函数写清楚的信号（比如"怎样才算好笑"），它能提供一个把这些信号收集起来的办法。
+- 它提供的信号往往只有相关方（stakeholder）说得清，比如有没有用、公平性、安全性训练、对齐。
+- 当"判断做得好不好"比"写出理想行为"更容易时，它特别有用。
+- 有时候我们关心的并不是人类偏好本身，而是要把模型犯的错修掉。
 
-## Motivation
+## 为什么要用人的反馈
 
-We have not figured out how to do it quite right, or we need new approaches
+这件事我们还没做对，或者还需要新的办法
 
-- Human preferences data reflects human biases, such as length and authoritative tone.
-- Human preferences can be unreliable, e.g., reward hacking in RL.
+- 人类偏好数据会带上人的偏见，比如偏爱更长的回答、偏爱更有权威感的语气。
+- 人类偏好并不可靠，例如强化学习里的奖励作弊（reward hacking）。
 
 :::: {.columns}
 ::: {.column width="45%"}
@@ -114,23 +114,23 @@ We have not figured out how to do it quite right, or we need new approaches
 :::
 ::::
 
-## Ethical Issues
+## 伦理问题
 
-- Labeling often depends on low-cost human labor
-- The line between economic opportunity and employment is unclear
-- May cause psychological issues for some workers
+- 标注工作常常依赖低成本的人力
+- 它是经济机会还是就业，界线并不清楚
+- 对一部分标注者可能造成心理问题
 
 ![](figures/openai_ethical.jpg){fig-align="center" width="60%"}
 
-## Ethical Issues
+## 伦理问题
 
 ![](figures/opinion_lm.png)
 
 [@santurkar_whose_2023]{.citation}
 
-## Examples: Dueling Bandits
+## 例子：对决老虎机
 
-Personalize therapy
+个性化治疗方案
 
 :::: {.columns}
 ::: {.column width="50%"}
@@ -141,30 +141,30 @@ Personalize therapy
 :::
 ::::
 
-## Examples: Metric Elicitation
+## 例子：指标征询
 
-- Determine the fairness and performance metric by interacting with individual stakeholders [@NEURIPS2019_1fd09c5f; @pmlr-v89-hiranandani19a]
-- Metric elicitation from stakeholder groups [@robertson2023probabilistic]
+- 通过与各个相关方交互，确定公平性与性能指标 [@NEURIPS2019_1fd09c5f; @pmlr-v89-hiranandani19a]
+- 从相关方群体中征询指标 [@robertson2023probabilistic]
 
 ![](figures/metric_elicitation.png){fig-align="center" width="25%"}
 
-## Examples: Metric Elicitation
+## 例子：指标征询
 
-Why elicit metric preferences?
+为什么要去征询指标偏好？
 
 ![](figures/why_elicit_metric.png)
 
-## Examples: Inverse RL
+## 例子：逆强化学习
 
 ![](figures/cidt.png)
 
 [@robertson2023cooperative]{.citation}
 
-## Examples: Recommender Systems
+## 例子：推荐系统
 
 ![](figures/recom_sys.png)
 
-## Examples: RLHF
+## 例子：人类反馈强化学习（RLHF）
 
 :::: {.columns}
 ::: {.column width="50%"}
@@ -179,15 +179,15 @@ Why elicit metric preferences?
 :::
 ::::
 
-## Examples: Inverse RL
+## 例子：逆强化学习
 
-Flying helicopters using imitation learning and inverse reinforcement learning (IRL)
+用模仿学习与逆强化学习（IRL）让直升机飞起来
 
 {{< video https://www.youtube.com/embed/0JL04JJjocc width="80%" height="400" >}}
 
 [@coates2008learning]{.citation}
 
-## Examples: Inverse RL
+## 例子：逆强化学习
 
 :::: {.columns}
 ::: {.column width="50%"}
@@ -200,85 +200,85 @@ Flying helicopters using imitation learning and inverse reinforcement learning (
 
 [@pmlr-v87-biyik18a]{.citation}
 
-## Examples: Inverse RL
+## 例子：逆强化学习
 
 {{< video https://www.youtube.com/embed/HExrlibCxdI?start=142 width="100%" height="450" >}}
 
 [@biyik2022aprel]{.citation}
 
-## Examples: Inverse RL
+## 例子：逆强化学习
 
-Reward hacking
+奖励作弊（reward hacking）
 
 {{< video https://www.youtube.com/embed/tlOIHko8ySg width="90%" height="450" >}}
 
-## Tradeoffs
+## 权衡
 
-Design of tools for eliciting feedback from humans often has to tradeoff several factors
+设计"向人征询反馈"的工具时，往往要在好几个因素之间做取舍
 
 ![](figures/eliciting_tool.png)
 
-## Key Assumptions & Discussion
+## 关键假设与讨论
 
 ![](figures/assumption+discussion.png)
 
-## Book Structure
+## 全书结构
 
 ::: {.smaller}
-| Part | Focus | Chapters |
+| 部分 | 主题 | 章节 |
 |------|-------|----------|
-| **Part 1: Foundations** | Mathematical groundwork for preference modeling | Ch 1: Foundations |
-| **Part 2: Learning** | How to learn from and act on preferences | Ch 2: Learning, Ch 3: Elicitation, Ch 4: Decisions |
-| **Part 3: Society** | Aggregating preferences and whose preferences count | Ch 5: Aggregation, Ch 6: Whose? |
-| **Conclusion** | Open challenges | Ch 7: Conclusion |
+| **第一部分：基础** | 偏好建模的数学底座 | 第 1 章：基础 |
+| **第二部分：学习** | 怎么从偏好中学习，并根据它行动 | 第 2 章：学习、第 3 章：偏好征询、第 4 章：决策 |
+| **第三部分：社会** | 汇总多方偏好，以及该听谁的偏好 | 第 5 章：聚合、第 6 章：谁的？ |
+| **结语** | 还没解决的问题 | 第 7 章：结语 |
 :::
 
-## Chapter Overview
+## 各章要点
 
 ::: {.smaller}
-- **Ch 1 -- Foundations:** Random preference models, Bradley-Terry, IIA axiom, DPO derivation
-- **Ch 2 -- Learning:** MLE, Bayesian inference, Elo ratings, regularization, LLM preference learning
-- **Ch 3 -- Elicitation:** Fisher information, optimal query selection, active DPO
-- **Ch 4 -- Decisions:** Thompson Sampling, dueling bandits, preferential Bayesian optimization, CIRL
-- **Ch 5 -- Aggregation:** Arrow's theorem, social choice theory, Borda-DPO connection, Community Notes, mechanism design
-- **Ch 6 -- Whose?:** Fairness, value judgments, AI alignment, human-centered design
-- **Ch 7 -- Conclusion:** Open challenges
+- **第 1 章 基础：** 随机偏好模型、Bradley-Terry、无关备选独立性（IIA）公理、DPO 推导
+- **第 2 章 学习：** 最大似然、贝叶斯推断、Elo 等级分、正则化、大模型的偏好学习
+- **第 3 章 偏好征询：** Fisher 信息、最优提问选择、主动式 DPO
+- **第 4 章 决策：** 汤普森采样、对决老虎机、偏好式贝叶斯优化、合作逆强化学习（CIRL）
+- **第 5 章 聚合：** 阿罗不可能定理、社会选择理论、博尔达与 DPO 的联系、Community Notes、机制设计
+- **第 6 章 谁的？：** 公平性、价值判断、AI 对齐、以人为中心的设计
+- **第 7 章 结语：** 还没解决的挑战
 :::
 
-## Reading Pathways
+## 阅读路径
 
 ::: {.smaller}
-| Pathway | Chapters | Audience |
+| 路径 | 章节 | 适合读者 |
 |---------|----------|----------|
-| **Practitioners / Applied AI** | 1, 2, 4 | Early graduate ML course |
-| **Discrete Choice Background** | Skim 1, study 2 & 4 | Economics, IO, demand models |
-| **ML-Heavy** | 2, 3, 4 | Deep learning course |
-| **Society & Theory** | 1, 5, 6 | Computation and society course |
+| **从业者 / 应用人工智能** | 第 1、2、4 章 | 研究生一年级的机器学习课 |
+| **离散选择背景** | 第 1 章快速过一遍，重点读第 2、4 章 | 经济学、产业组织、需求模型 |
+| **以机器学习为主** | 第 2、3、4 章 | 深度学习课程 |
+| **社会与理论** | 第 1、5、6 章 | 计算与社会课程 |
 
-Chapter 1 is foundational to all pathways.
+第 1 章是所有路径的共同基础。
 :::
 
-## Logistics: Course Goals
+## 课程安排：目标
 
-- **Part 1 -- Foundations:** Preference models, Bradley-Terry, IIA, utility theory
-- **Part 2 -- Learning:** Parameter estimation, active elicitation, sequential decisions, bandits
-- **Part 3 -- Society:** Social choice theory, aggregation, fairness, AI alignment
-- **Applications throughout:** Recommender systems, language models, reinforcement learning
-- **Approach:** Breadth across foundations, learning methods, and societal considerations
+- **第一部分 基础：** 偏好模型、Bradley-Terry、IIA、效用理论
+- **第二部分 学习：** 参数估计、主动征询、序贯决策、老虎机
+- **第三部分 社会：** 社会选择理论、偏好聚合、公平性、AI 对齐
+- **贯穿全书的应用：** 推荐系统、语言模型、强化学习
+- **讲法：** 在基础、学习方法与社会考量三方面都铺开
 
-## Logistics: Prerequisites
+## 课程安排：先修要求
 
-CS 221, CS 229, or equivalent. You are expected to:
+CS 221、CS 229 或同等课程。你需要做到：
 
-- Be proficient in Python and LaTeX. Most homework and projects will include a programming component.
-- Be comfortable with machine learning concepts, such as train and test set, model fitting, function class, and loss functions.
+- 熟练使用 Python 和 LaTeX。大部分作业和项目都包含编程部分。
+- 熟悉机器学习的基本概念，例如训练集与测试集、模型拟合、函数类、损失函数。
 
-## Logistics: Books
+## 课程安排：教材
 
-Our textbook is available online at: [mlhp.stanford.edu](https://mlhp.stanford.edu)
+教材是线上的，地址：<https://mlhp.stanford.edu>（本仓库的中文译本见 https://codingpracticegroup.github.io/mlhp/）
 
-## Next Topics
+## 下一讲
 
-Chapter 1: Foundations (Preference Models)
+第 1 章：基础（偏好模型）
 
-## Welcome to CS329H!
+## 欢迎来到 CS329H！
