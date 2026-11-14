@@ -368,7 +368,7 @@ $$
 
 **Properties of $\epsilon$:**
 
-- $\epsilon(b_i, b_i) = 0$ (no self-preference)
+- $\epsilon(b_i, b_i) = 0$（不存在"自己偏好自己"）
 - $\epsilon(b_i, b_j) = -\epsilon(b_j, b_i)$ (antisymmetry)
 - $\epsilon \in (-\tfrac{1}{2},\; \tfrac{1}{2})$（这样概率才合理）
 

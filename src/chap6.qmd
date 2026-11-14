@@ -1702,7 +1702,7 @@ print(f"Senior reviewers ({n_reviewers_senior}): strategic bidding (correlated w
 print(f"Junior reviewers ({n_reviewers_junior}): less strategic bidding")
 ```
 
-Now allocate papers using two approaches:
+接下来用两种方法分配论文：
 
 ```{pyodide-python}
 #| echo: true

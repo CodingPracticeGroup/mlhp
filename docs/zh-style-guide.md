@@ -234,6 +234,9 @@
 
 19. 讲义里有两处章节交叉引用与本书的实际编号不符：`src/slides/chap2.qmd` 开头写"Chapter 2 established models (Rasch, Bradley-Terry, factor models)"（建立模型的是第 1 章），第 322 行写"Connects to **active learning** (Chapter 4)"（主动学习在第 3 章）。这两处按原文照译成"第 2 章""第 4 章"，没有替作者改正——和上游一致更容易核对，读者若按中文站点的目录去找会发现对不上。
 
+20. 上游从 LaTeX 转 Markdown 时留下了 7 处**指向不存在的锚点**的引用（第 4 章 4 处形如 `[\[fig-if\]](…){reference-type="ref" …}`、`[\[th:quebo_regret\]](…)`，第 5 章 3 处形如 `在图 [1.1](#fig-planner-agent){…}`、`（[1](#4optim){…}）`）。这些目标在**上游生成的页面里同样不存在**，点上去没有反应，属于上游的遗留缺陷，不是翻译引入的。处理分两种：第 4 章有 2 处所指内容就在本节，给小标题补上真正的标签 `{#sec-interleaved-filter}`、`{#sec-pbo-setup}`，引用改成 `@sec-interleaved-filter`、`@sec-pbo-setup`（与本书其余 175 处交叉引用同一写法，渲染后是可点击的小节号）；1 处指向本小节已有的定理锚点 `#qeubo-regret`。第 5 章那 3 处所指内容在书里没有对应编号，只删掉失效的编号，正文句子原样保留。因此 `check-translation.py` 对第 4 章会报 `labels`、`cite_keys` 各多出上述几项，已在此登记。
+21. 习题集顶栏的两条导航原本写 `href: ../../index.qmd`、`href: ../teaching.qmd`。习题页由嵌套项目 `src/psets` 单独渲染，那两个 `.qmd` 不在它的项目目录里，Quarto 解析不了，生成的 HTML 里**原样**留下了 `.qmd` 后缀，在 Pages 上是 404。已改为指向已发布页面 `../../index.html`、`../teaching.html`。同时给 `src/psets/_quarto.yml` 补了 `repo-url: "https://github.com/CodingPracticeGroup/mlhp"` 与 `repo-actions: [source]`，让习题页和正文页一样有"查看源码"入口。
+
 ## 5.1 校验脚本的输出怎么读
 
 `scripts/check-translation.py` 有两类已知的假阳性，出现时要人工核对而不是直接改正文：

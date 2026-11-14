@@ -154,7 +154,7 @@ $$
 H_{ij} = U_i^\top V_j + f(C_i)
 $$
 
-Example with reviewer load $n_i$:
+再把审稿工作量 $n_i$ 也放进来：
 
 $$
 H_{ij} = U_i^\top V_j - \lambda n_i

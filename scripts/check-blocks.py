@@ -75,8 +75,8 @@ for n, (eb, ec) in enumerate(zip(b, c)):
         break
 else:
     if len(b) != len(c):
-        more, fewer = (len(c) - len(b), "译稿多"), (len(b) - len(c), "译稿少")
-        print(f"  事件个数不同：译稿比基线{'多' if more > 0 else '少'} {abs(more)} 个"
+        d = len(c) - len(b)
+        print(f"  事件个数不同：译稿比基线{'多' if d > 0 else '少'} {abs(d)} 个"
               "（多半是新增或删除了 callout，需在风格指南第 5 节登记）")
     else:
         print("  开合序列一致，但收尾层数不为 0（有块没有闭合）")

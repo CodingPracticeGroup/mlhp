@@ -59,3 +59,39 @@ python3 scripts/find-untranslated.py src/chapN.qmd   # 还没译的正文（跳�
 python3 scripts/find-english.py     src/chapN.qmd    # 同上，按行段列出，粗一些
 python3 scripts/check-attributes.py                  # 提示框标题等属性是否会被截断
 ```
+
+## 全站复查（译完之后的整站核对）
+
+做法：本地按 CI 的顺序完整渲染一遍（正文 → 习题 → 讲义，顺序不能颠倒，根目录的 `quarto render` 会清空 `_book`），再用 `scripts/check-links.py` 解析 `_book` 里每个页面真实存在的 `<a>`/`<img>`/`<script>`/`<iframe>` 等标签，把相对路径按"原样 / 补 `.html` / 补 `/index.html`"三种写法逐一落点，`#锚点` 与全站收集到的 `id`/`name` 对照。当前结果：23 个页面、1762 条引用，站内引用全部解析通过，断链与失效锚点 0 条；指向上游 `mlhp.stanford.edu` 的 3 条是刻意保留的（首页两条说明"原著在这里"，`slides/chap0` 一条注明教材地址，旁边都给了本站译本链接）。
+
+### 查出并已修的问题
+
+1. **习题页顶栏 404**：`src/psets/_quarto.yml` 的两条导航写成 `.qmd`，嵌套项目解析不到，输出里原样保留 → 改指 `.html`。见风格指南第 5 节第 21 条。
+2. **7 处失效引用**：上游 LaTeX 转 Markdown 留下的 `reference-type="ref"` 与 `[1.1](#fig-…)`，目标在两边都不存在。第 4 章 3 处改为真正的交叉引用（新增 `{#sec-interleaved-filter}`、`{#sec-pbo-setup}` 两个标签），1 处指向已有小节；第 5 章 3 处删掉失效编号、保留正文。见风格指南第 5 节第 20 条。
+3. **我此前批量插译文时留下的重复与残句**：`src/chap5.qmd` 的"第 4 讲"计划被整段写了两遍（一份中文、一份英文），`src/psets/pset2.qmd` 一道小题的前两行重复，`src/psets/pset3.qmd` 有 3 行是跨行句子的英文后半句（`on the heatmap).`、`answer the following:`、`multi-objective case.`），`pset2` 另有 `normalization constant. …` 半句没并进去。这些行删掉或并入译文后，结构与上游重新对齐（重复是我造成的，不是上游的）。
+4. **确实漏译的可见文字**：正文零散句子与整段（第 1 章 120 行那段追问、第 3 章"Visualize the results:"与 DPO 设定开头、第 6 章分配论文那句）、第 4 章 6 段伪代码的英文步骤（交错筛选、DBGD、在线 DPO、POP-BO、qTS、批量 qTS——它们后面的解释早就是中文了，中英夹着读不下去）、9 个标题（第 4 章 qEI/qTS 两个小节、第 5 章"对 RLHF 的含义"、第 7 章 4 个、习题 4 个"Question N: …"）。
+5. `src/teaching.qmd` 里两段过期说明（说习题和讲义还没接进站点）已改成与现状一致的写法。
+
+### 核对过、决定不改
+
+- 参考文献与"延伸阅读"的条目、算法名（Sparring EXP4）、模型输入模板（`<bos><start_of_turn>user`）、被 HTML 注释包住的整段（第 4 章文末那个被上游移走的机器人基础模型案例，页面上不显示）。
+- 讲义里有两处"第 2 章""第 4 章"章节号与实际不符（见第 5 节第 19 条），按原文照译。
+- 全站没有 `site-url`，因此不生成 `sitemap.xml`、页面里也没有 `canonical`/`og:url`；上游同样如此，属于原站行为，不算译本缺陷。若要加，只需在 `_quarto.yml` 的 `website:` 下写 `site-url: "https://codingpracticegroup.github.io/mlhp/"`。
+
+### 现在每次交付前跑的检查
+
+```bash
+python3 scripts/check-translation.py src/chapN.qmd   # 结构不变量
+python3 scripts/check-blocks.py      src/chapN.qmd   # ::: 开合
+python3 scripts/check-attributes.py                  # 提示框标题截断
+python3 scripts/find-untranslated.py src/chapN.qmd   # 还没译的正文
+# 整站核对（必须先渲染正文，再渲染习题、讲义）
+export PATH="$HOME/.local/opt/quarto-1.11.9/bin:$PATH" QUARTO_PYTHON=/tmp/mlhpvenv/bin/python
+quarto render --to html
+(cd src/psets && for f in pset1 pset2 pset3; do quarto render "$f.qmd"; done)
+(cd src/slides && for f in chap0 chap1 chap2 chap3 chap4 chap5 chap6; do quarto render "$f.qmd"; done)
+python3 scripts/check-links.py                       # 逐条解析链接与锚点
+```
+
+`find-untranslated.py` 这次改严了：除了连续英文词数，还要求这一行里出现至少 3 个英文虚词，`IIA Gumbel Bradley Terry` 这类专名连排不再报出来；反过来说，它**报出的基本就是真要译的句子**。它也有看不见的地方——标题里的两个词（`### What Broke`）要靠单独扫标题才能抓到，所以扫标题这一步在 `check-links.py` 之外另跑了一次。
+

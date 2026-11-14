@@ -929,7 +929,7 @@ def start_search():
 ```
 :::
 
-### Question 4: D-optimal Design with Logistic Model (30 points) {#sec-question-4-d-optimal-design-with-logistic-model-30-points .unnumbered}
+### 第 4 题：逻辑模型下的 D-最优设计（30 分） {#sec-question-4-d-optimal-design-with-logistic-model-30-points .unnumbered}
 
 本题在 Bradley-Terry 模型的背景下讨论 D-最优设计。Bradley-Terry 模型是用于成对比较数据的逻辑回归模型。
 给定两个项目 $x_1$ 与 $x_2$，"项目 $x_1$ 比 $x_2$ 更被偏好"的概率建模为：
@@ -958,9 +958,6 @@ D-最优设计要最大化 Fisher 信息矩阵的行列式，从而使所估参�
         $(x_{i1}, x_{i2})$。请实现 `greedy_fisher`。注意：代码里的设定是"已经有了所有项目两两之差构成的数据集"，
         而不是直接选出项目对。
 
-    (ii) **（笔答 + 编程，7 分）** 注意：`posterior_inv_cov` 在标注完所选点后，
-         用拉普拉斯近似得到以真实权重为中心的后验。但你会发现，求 Hessian 时这个近似其实不依赖标签。
-         What difference do you observe between greedy and random
     (ii) **（笔答 + 编程，7 分）** 注意：`posterior_inv_cov` 在标注完所选点后，
          用拉普拉斯近似得到以真实权重为中心的后验。但你会发现，求 Hessian 时这个近似其实不依赖标签。
          请运行 `d_optimal/main.py`，附上后验协方差矩阵范数的图。贪心选择与随机抽样之间你观察到什么差别？贪心的胜率是多少？
@@ -1140,9 +1137,8 @@ plt.show()
          这里我们把 $\phi$ 看作奖励函数。这样的似然会怎样影响 GP 中的后验推断？它在哪些地方引入了额外的复杂度？
 
     (iii) **（笔答 + 编程，6 分）** 给定一批观察到的两两比较，用贝叶斯法则在这些混淆矩阵上
-          推出潜在函数值 $\phi$ 的后验分布。请把后验写成 GP 先验与两两比较似然的函数。
-          normalization constant. Implement the likelihood function in
-          `loglik_from_preferences`.
+          推出潜在函数值 $\phi$ 的后验分布。请把后验写成 GP 先验与两两比较似然的函数，不必管归一化常数。
+          这个似然函数请在 `loglik_from_preferences` 里实现。
 
 (b) **用椭圆切片采样做后验推断（20 分）**
 

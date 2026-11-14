@@ -4,7 +4,7 @@ lang: zh
 ---
 
 ## 习题
-### Question 1: Preferential Bayesian Optimization (30 points) {#sec-question-1-preferential-bayesian-optimization-30-points .unnumbered}
+### 第 1 题：偏好式贝叶斯优化（30 分） {#sec-question-1-preferential-bayesian-optimization-30-points .unnumbered}
 
 **偏好式贝叶斯优化（Preferential Bayesian Optimization, PBO）** 是贝叶斯优化（BO）的一个变体，用来处理"反馈是备选项之间的偏好、而不是明确的数值评分"的场景。
 设你要在空间 $\mathcal{X}$ 上优化一个未知函数 $f$，但得到的不是函数值，只是输入空间中两两点的比较结果。也就是说，给定两个点
@@ -61,9 +61,8 @@ preference: $x_1 \succ x_2$ implies $f(x_1) > f(x_2)$.
 (i) **Copeland 分数（编程，2 分）：** 在 `pbo/forrester_duel.py` 中实现
  `compute_max_copeland_score`。
 
-(ii) **Copeland 采集函数（编程，4 分）：** 实现
-         实现 `copeland_acquisition`。运行 `forrester_duel.py`，并简要讨论被选中的对决（图中的黑色 X）呈现出的规律。
-         on the heatmap).
+(ii) **Copeland 采集函数（编程，4 分）：**
+         实现 `copeland_acquisition`。运行 `forrester_duel.py`，并简要讨论被选中的对决（热力图上的那些黑色 X）呈现出的规律。
 
 ::: {.callout-note title="代码"}
 ```{python ex3-q1}
@@ -255,7 +254,7 @@ if __name__ == "__main__":
 ```
 :::
 
-### Question 2: Linear Dueling Bandit (30 points) {#sec-question-2-linear-dueling-bandit-30-points .unnumbered}
+### 第 2 题：线性对决老虎机（30 分） {#sec-question-2-linear-dueling-bandit-30-points .unnumbered}
 
 在线性对决老虎机问题中，反馈来自动作之间的两两比较，而不是直接的奖励。考虑一个有 $K$ 个动作的有限集合，每个动作用一个特征向量
 表示，$x_1, x_2, \dots, x_K \in \mathbb{R}^d$。设未知的偏好得分为 $f(x_i) = \theta^\top x_i$ 与 $f(x_j) = \theta^\top x_j$，
@@ -704,7 +703,7 @@ if __name__ == "__main__":
 :::
 
 
-### Question 3: Multi-Objective Thompson Sampling in Linear Contextual Bandits (30 points) {#sec-question-3-multi-objective-thompson-sampling-in-linear-contextual-bandits-30-points .unnumbered}
+### 第 3 题：线性情境老虎机中的多目标汤普森采样（30 分） {#sec-question-3-multi-objective-thompson-sampling-in-linear-contextual-bandits-30-points .unnumbered}
 
 汤普森采样（Thompson Sampling, TS）常用于多臂老虎机中的奖励最大化，优化的是各动作上的期望奖励。但在很多现实场景里，其他目标同样有价值，
 例如学到参数的可解释性或可复用性。当未知的奖励函数是用参数模型刻画、而这些参数本身能带来洞见或为后续实验提供线索时尤其如此。
@@ -713,9 +712,8 @@ if __name__ == "__main__":
 
 设想一个多目标设定：不仅要最大化累计奖励，还要在线性情境老虎机中准确学到奖励函数本身的参数。设每个手臂用一个特征向量 $x \in \mathbb{R}^d$ 表示，
 奖励由一个未知的线性模型产生。
-$r = \theta^\top x + \epsilon$, where
-$\epsilon \sim \mathcal{N}(0, \sigma^2)$。基于这些考虑，
-answer the following:
+$r = \theta^\top x + \epsilon$，其中
+$\epsilon \sim \mathcal{N}(0, \sigma^2)$。基于这些考虑，回答下面的问题：
 
 (a) **多目标汤普森采样的理论分析（8 分）**
 
@@ -724,9 +722,8 @@ answer the following:
         参数估计误差 $\|\theta - \hat{\theta}\|_2$。
 说明这种多目标遗憾与线性老虎机中常用的单目标遗憾有何不同。
 
-(ii) **（笔答，3 分）** 推出单目标情形下的期望遗憾界
-单目标情形下的汤普森采样，并描述把这些界推广到多目标情形时会遇到的额外困难。
-         multi-objective case.
+(ii) **（笔答，3 分）** 推出单目标情形下汤普森采样的期望遗憾界，
+并描述把这些界推广到多目标情形时会遇到的额外困难。
 
 (iii) **（笔答，2 分）** 假设改用纯粹的
 面向参数估计的探索做法。请给出参数误差
@@ -943,7 +940,7 @@ if __name__ == '__main__':
 ```
 :::
 
-### Question 4: Mechanism Design in Preference Learning (30 points) {#sec-question-4-mechanism-design-in-preference-learning-30-points .unnumbered}
+### 第 4 题：偏好学习中的机制设计（30 分） {#sec-question-4-mechanism-design-in-preference-learning-30-points .unnumbered}
 
 在机制设计中，一个核心的挑战是：在考虑用户偏好的同时把资源分配好，而用户的偏好可能是私有的、也很复杂。这类问题可以用学习方法来推断用户的偏好，
 从而让设计者做出更有依据的定价与分配决定。考虑这样一个场景：设计者要把一份可分割的资源 $B$ 分给 $N$ 个参与者，每个参与者对自己分到的份额 $x_i$

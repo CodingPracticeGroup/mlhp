@@ -631,7 +631,7 @@ print("Smaller lengthscale → more variation; larger lengthscale → smoother f
 
 :::
 
-For **binary observations**,
+对于**二值观测**，
 $$
 p(Y_{ij}=1 \mid h_i(V_j)) = \sigma(h_i(V_j)),
 $$ {#eq-gp-binary-likelihood}
@@ -1359,24 +1359,24 @@ $$P(a_t = a) =
 0 & \text{otherwise}
 \end{cases}$$ {#eq-ucb}
 
-#### 交错筛选（Interleaved Filter）
+#### 交错筛选（Interleaved Filter） {#sec-interleaved-filter}
 
 这个算法要在离散、有限的老虎机空间里，靠两两比较找出最好的那只老虎机（孔多塞胜者）。下面介绍的是 [@YUE20121538] 为解决对决老虎机问题给出的交错筛选（Interleaved Filter）算法。它先随机定一只*最佳老虎机* $\hat{b}$，再不断拿它去和剩下的老虎机组成的集合 $W$ 里的每只 $b$ 比较，由此得到 $\hat{b}$ 胜过 $b$ 的胜率 $\hat{P}_{\hat{b},b}$ 与置信区间 $\hat{C}_{\hat{b},b}$。若某只 $b$ *有把握地比 $\hat{b}$ 差*，就从 $W$ 中删掉它；若某只 $b'$ *有把握地更好*，就把它立为新的*最佳老虎机* $\hat{b}$，并把原来那只 $\hat{b}$ 和其余所有比新 $\hat{b}$ *更差*的 $b$ 一并从 $W$ 中删掉。这样一直做到 $W$ 为空，最后留下的 $\hat{b}$ 就是预测出的最佳老虎机。
 
 :::: algorithm
 ::: algorithmic
-**input:** $T$, $B=\{b_1, \dots, b_k\}$ $\delta \gets 1/(TK^2)$ 
-Choose $\hat{b} \in B$ randomly
-$W \gets \{b_1, \dots, b_k\} \backslash \{\hat{b}\}$ $\forall b \in W$,
-maintain estimate $\hat{P}_{\hat{b},b}$ of $P(\hat{b} > b)$ according to
-(6) $\forall b \in W$, maintain $1 - \delta$ confidence interval
-$\hat{C}_{\hat{b},b}$ of $\hat{P}_{\hat{b},b}$ according to (7), (8)
-compare $\hat{b}$ and $b$ update $\hat{P}_{\hat{b},b}$,
-$\hat{C}_{\hat{b},b}$ $W \gets W \backslash \{b\}$
+**输入：** $T$、$B=\{b_1, \dots, b_k\}$、$\delta \gets 1/(TK^2)$ 
+随机选一个 $\hat{b} \in B$
+$W \gets \{b_1, \dots, b_k\} \backslash \{\hat{b}\}$ 对每个 $\forall b \in W$，
+按下面的式子维护 $\hat{P}_{\hat{b},b}$，用它估计 $P(\hat{b} > b)$（式
+6）；对每个 $\forall b \in W$，维护 $1 - \delta$ 置信区间
+$\hat{C}_{\hat{b},b}$ 来包住 $\hat{P}_{\hat{b},b}$（式 7、8）
+比较 $\hat{b}$ 与 $b$，更新 $\hat{P}_{\hat{b},b}$、
+$\hat{C}_{\hat{b},b}$，并把该候选移出集合：$W \gets W \backslash \{b\}$
 
-$W \gets W \backslash \{b\}$ $\hat{b} \gets b'$,
-$W \gets W \backslash \{b'\}$ $\forall b \in W$, reset
-$\hat{P}_{\hat{b},b}$ and $\hat{C}_{\hat{b},b}$ $\hat{T} \gets$ Total
+$W \gets W \backslash \{b\}$；把当前猜测换成它：$\hat{b} \gets b'$，
+$W \gets W \backslash \{b'\}$；对每个 $\forall b \in W$，重置
+$\hat{P}_{\hat{b},b}$ 与 $\hat{C}_{\hat{b},b}$。$\hat{T} \gets$ 到这一步为止做过的
 Comparisons Made $(\hat{b}, \hat{T})$
 :::
 ::::
@@ -1406,7 +1406,7 @@ Comparisons Made $(\hat{b}, \hat{T})$
 $$\mathbb{E}\left[R_T\right] \le \left(1 - \frac{1}{T}\right) \mathbb{E}\left[ R_T^{IF} \right] + \frac{1}{T}\mathcal{O}(T) \\
 = \mathcal{O}\left(\mathbb{E}\left[ R_T^{IF} \right] + 1\right)$$ {#eq-if-regret-bound}
 
-有意思的是，原始工作证明了这些上界对强遗憾和弱遗憾都成立。如前所示，交错筛选算法 [\[fig-if\]](#fig-if){reference-type="ref" reference="fig-if"} 给出的是一种稳健的做法：在一组选项之中，只靠带噪声的比较就能确定最优的老虎机或策略。而在为人类偏好建模的现实场景里，通常观察不到真实的奖励值（或者至少不可靠），正因如此，这套方法是刻画人类偏好的一个好用的路子。
+有意思的是，原始工作证明了这些上界对强遗憾和弱遗憾都成立。如前所示，交错筛选算法（@sec-interleaved-filter）给出的是一种稳健的做法：在一组选项之中，只靠带噪声的比较就能确定最优的老虎机或策略。而在为人类偏好建模的现实场景里，通常观察不到真实的奖励值（或者至少不可靠），正因如此，这套方法是刻画人类偏好的一个好用的路子。
 
 不仅如此，该算法还对"选对老虎机的概率""最大遗憾""所需比较次数"都给出了很强的保证。更难得的是，它做到这些并不需要苛刻的限制条件——前面也看到，常用的那些模型都满足它施加的约束。
 
@@ -1588,13 +1588,13 @@ plt.show()
 
 :::: algorithm
 ::: algorithmic
-**input:** $\gamma$, $\delta$, $w_1$ 
+**输入：** $\gamma$、$\delta$、$w_1$ 
 
-Sample unit vector $u_t$ uniformly
+均匀采样一个单位方向 $u_t$
 
 $w_t' \gets P_W(w_t + \delta u_t)$ 
 
-Compare $w_t$ and $w_t'$
+比较 $w_t$ 与 $w_t'$
 
 $w_{t+1} \gets P_W(w_t + \gamma u_t)$ 
 
@@ -1624,11 +1624,11 @@ $$\text{Regret}(T) := \sum_{t=1}^{T} \left[ r_{*}(x_t, a_{t}^{*}) - \frac{r_{*}(
 
 :::: algorithm
 ::: algorithmic
-Initialize $S_0 = \varnothing$. Receive prompt $x_t$ and action space
-$\mathcal{A}_t$. Sample model parameter $\theta_t^j$ from the posterior
-distribution $p^j(\cdot \mid S_{t-1})$ Select response
+初始化 $S_0 = \varnothing$。接收提示 $x_t$ 与动作空间
+$\mathcal{A}_t$。采样模型参数 $\theta_t^j$，取自后验分布
+$p^j(\cdot \mid S_{t-1})$，然后选出回答
 $a_t^j = \arg\max_{a \in \mathcal{A}_t} \langle \theta_t^j, \phi(x_t, a) \rangle$.
-Receive preference $y_t$. Update dataset
+收到偏好 $y_t$。更新数据集
 $S_t \leftarrow S_{t-1} \cup \{(x_t, a_t^1, a_t^2, y_t)\}$.
 :::
 ::::
@@ -1782,7 +1782,7 @@ print(f"Final regret — TS: {regret_ts[-1]:.1f}, ε-Greedy: {regret_eg[-1]:.1f}
 偏好型贝叶斯优化假定神谕只能给出**两两比较**，不给实数打分。当"给绝对分数"在认知上很难做到、或者给出的分数没什么可比性时（比如"这条机器人轨迹有多好，请打 1 到 10 分"），这个假定就很合理；但在有些领域，实数反馈随手可得，而且信息量严格更大——一个实数观测对奖励函数的约束比一次二元比较更强。两种反馈都能拿到时，用实数反馈的标准贝叶斯优化通常更少的询问次数就能找到最优点。偏好型贝叶斯优化在这几种情形下最有价值：（1）对人来说，比较确实比打绝对分更容易；（2）评分标准是随意的，或者不同评审之间对不上；（3）目标是找出*最好*的那个选项，而不是把整条奖励函数估出来。
 :::
 
-### 问题描述
+### 问题描述 {#sec-pbo-setup}
 
 在 $\mathcal{X}$ 上求一张隐偏好函数的最值，可以归结为在 $\mathcal{X} \times \mathcal{X}$ 上决定一串对决。从每场对决 $\left[\mathbf{x}, \mathbf{x}^{\prime}\right] \in$ $\mathcal{X} \times \mathcal{X}$ 得到二值反馈 $\{0,1\}$，表示 $\mathbf{x}$ 是否被偏好于 $\mathbf{x}^{\prime}$（$g(\mathbf{x}) < g(\mathbf{x}^{\prime})$）。我们规定：输出为 $\{1\}$ 时 $\mathbf{x}$ 赢下这场对决，输出为 $\{0\}$ 时 $\mathbf{x}^{\prime}$ 赢。目标是求出 $\mathbf{x}_{\min }$，同时把询问对决的次数尽量少。
 
@@ -1993,7 +1993,7 @@ $$\alpha_{\mathrm{PE}}\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right] \mid \m
 $\mathcal{B}_g = \left\{\tilde{g} \in \mathcal{H}_k \mid\|\tilde{g}\|_k \leq B\right\}$。
 同样地定义
 $f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=g\left(\mathbf{x}^{\prime}\right)-g(\mathbf{x})$，
-再像式 [\[eq:bernoulli_pref\]](#eq:bernoulli_pref){reference-type="ref" reference="eq:bernoulli_pref"} 那样用伯努利分布为偏好函数建模，并假定概率服从 Bradley-Terry 模型，即
+再沿用 @sec-pbo-setup 中的做法，用伯努利分布为偏好函数建模，并假定概率服从 Bradley-Terry 模型，即
 $$\pi_f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)=\sigma\left(f\left(\left[\mathbf{x}, \mathbf{x}^{\prime}\right]\right)\right)=\frac{e^{g(\mathbf{x})}}{e^{g(\mathbf{x})}+e^{g\left(\mathbf{x^{\prime}}\right)}}$$ {#eq-bradley-terry}
 
 $\hat{g}$ 的更新规则见（式 8、6、5）：$$\begin{aligned}
@@ -2022,14 +2022,14 @@ $$\mathbb{P}\left(g \in \mathcal{B}_g^{t+1}, \forall t \geq 1\right) \geq 1-\del
 
 :::: algorithm
 ::: algorithmic
-Given the initial point $\mathbf{x_0} \in \mathcal{X}$ and set
-$\mathcal{B}_g^1 = \mathcal{B}_g$ Set the reference point
-$\mathbf{x_t^{\prime}} = \mathbf{x_{t-1}}$ Compute
+给定初始点 $\mathbf{x_0} \in \mathcal{X}$，并令集合
+$\mathcal{B}_g^1 = \mathcal{B}_g$。设定参照点
+$\mathbf{x_t^{\prime}} = \mathbf{x_{t-1}}$。计算
 $\mathbf{x_t} \in \arg\max_{\mathbf{x} \in \mathcal{X}} \max_{\tilde{g} \in \mathcal{B}_g^t} (\tilde{g}(\mathbf{x}) - \tilde{g}(\mathbf{x_t^{\prime}}))$,
-with the inner optimal function denoted as $\tilde{g}_t$ Obtain the
-output of the duel $y_t$ and append the new data point to
-$\mathcal{D}_t$ Update the maximum likelihood estimator
-$\hat{g}_t^{\mathrm{MLE}}$ and the posterior confidence set
+把内层的最优函数记作 $\tilde{g}_t$。取得
+这场对决的结果 $y_t$，并把新数据点加入
+$\mathcal{D}_t$。更新最大似然估计
+$\hat{g}_t^{\mathrm{MLE}}$ 与后验置信集
 $\mathcal{B}_g^{t+1}$.
 :::
 ::::
@@ -2059,7 +2059,7 @@ $$\underset{X \in \mathbb{X}^q}{\operatorname{argmax}} \mathrm{qEUBO}_n(X) \subs
 
 在和其它先进采集函数的对比实验里，qEUBO 在多数问题上表现最好，qEI 与 qTS 紧随其后。这些结果在 $q>2$（一次给出多个选项）的实验里同样成立。事实上，让人一次比较更多选项时，遗憾的收敛反而更快。遗憾分析在下面详细给出。
 
-#### qEI: Batch Expected Improvement {#qei-batch-expected-improvement .unnumbered}
+#### qEI：批量期望改进 {#qei-batch-expected-improvement .unnumbered}
 
 $$\begin{aligned}
 \mathrm{qEI}= & \mathbb{E}_{\mathbf{y}}\left[\left(\max _{i \in[1, \ldots, q]}\left(\mu_{\min }-y_i\right)\right)_{+}\right] \\
@@ -2067,30 +2067,30 @@ $$\begin{aligned}
 & p\left(y_i \leq \mu_{\min }, y_i \leq y_j \forall j \neq i\right) .
 \end{aligned}$$ {#eq-qei}
 
-#### qTS: Batch Thompson Sampling {#qts-batch-thompson-sampling .unnumbered}
+#### qTS：批量汤普森采样 {#qts-batch-thompson-sampling .unnumbered}
 
 :::: algorithm
 ::: algorithmic
-Initial data
+初始数据
 $\mathcal{D}_{\mathcal{I}(1)}=\{(\mathbf{x}_i, y_i)\}_{i \in \mathcal{I}(1)}$
-Compute current posterior
-$p(\boldsymbol{\theta} \mid \mathcal{D}_{\mathcal{I}(t)})$ Sample
-$\boldsymbol{\theta}$ from
-$p(\boldsymbol{\theta} \mid \mathcal{D}_{\mathcal{I}(t)})$ Select
+计算当前后验
+$p(\boldsymbol{\theta} \mid \mathcal{D}_{\mathcal{I}(t)})$。采样
+$\boldsymbol{\theta}$，来自
+$p(\boldsymbol{\theta} \mid \mathcal{D}_{\mathcal{I}(t)})$。选择
 $k \leftarrow \arg \max_{j \notin \mathcal{I}(t)} \mathbb{E}[y_j \mid \mathbf{x}_j, \boldsymbol{\theta}]$
-Collect $y_k$ by evaluating $f$ at $\mathbf{x}_k$
+在 $\mathbf{x}_k$ 处对 $f$ 求值，得到 $y_k$
 $\mathcal{D}_{\mathcal{I}(t+1)} \leftarrow \mathcal{D}_{\mathcal{I}(t)} \cup \{(\mathbf{x}_k, y_k)\}$
 :::
 ::::
 
 :::: algorithm
 ::: algorithmic
-Initial data
+初始数据
 $\mathcal{D}_{\mathcal{I}(1)}=\{\mathbf{x}_i, y_i\}_{i \in \mathcal{I}(1)}$,
-batch size $S$ Compute current posterior
-$p(\boldsymbol{\theta} \mid \mathcal{D}_{\mathcal{I}(t)})$ Sample
-$\boldsymbol{\theta}$ from
-$p(\boldsymbol{\theta} \mid \mathcal{D}_{\mathcal{I}(t)})$ Select
+批量大小 $S$。计算当前后验
+$p(\boldsymbol{\theta} \mid \mathcal{D}_{\mathcal{I}(t)})$。采样
+$\boldsymbol{\theta}$，来自
+$p(\boldsymbol{\theta} \mid \mathcal{D}_{\mathcal{I}(t)})$。选择
 $k(s) \leftarrow \arg \max_{j \notin \mathcal{I}(t)} \mathbb{E}[y_j \mid \mathbf{x}_j, \boldsymbol{\theta}]$
 $\mathcal{D}_{\mathcal{I}(t+1)} = \mathcal{D}_{\mathcal{I}(t)} \cup \{\mathbf{x}_{k(s)}, y_{k(s)}\}_{s=1}^S$
 :::
@@ -2122,7 +2122,7 @@ $$\label{th:quebo_regret}
     $$\delta \mathbf{P}^{(n)}(f(x)>f(y)) \leq \mathbb{E}^{(n)}\left[\{f(x)-f(y)\}^{+}\right] \leq \Delta \mathbf{P}^{(n)}(f(x)>f(y))$$ {#eq-utility-probability-bounds}
     在 $f$ 的先验之下几乎必然成立。
 
-定理 [\[th:quebo_regret\]](#th:quebo_regret){reference-type="ref" reference="th:quebo_regret"} 证明过程中用到的其它引理，见 @astudillo2023qeubo 附录 B。
+[本节定理](#qeubo-regret)证明过程中用到的其它引理，见 @astudillo2023qeubo 附录 B。
 
 #### qEI 的遗憾 {#qei-regret .unnumbered}
 
@@ -2130,7 +2130,7 @@ $$\label{th:quebo_regret}
 
 ::: theorem
 存在一个问题实例（也就是 $\mathbb{X}$ 和定义在 f 上的贝叶斯先验分布），它满足定理
-[\[th:quebo_regret\]](#th:quebo_regret){reference-type="ref" reference="th:quebo_regret"} 中列出的那些假定；但对这样的实例，若查询序列是靠最大化 qEI 选出来的，就有
+[本节定理](#qeubo-regret)中列出的那些假定；但对这样的实例，若查询序列是靠最大化 qEI 选出来的，就有
 $\mathbb{E}\left[f\left(x^*\right)-\right.$
 $\left.f\left(\widehat{x}_n^*\right)\right] \geq R$ 对所有 $n$ 成立，其中 $R>0$ 是一个常数。
 :::

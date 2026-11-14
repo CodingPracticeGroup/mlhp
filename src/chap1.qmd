@@ -117,7 +117,7 @@ p(y_w \succ y_l \mid x) = \sigma(r^*(x, y_w) - r^*(x, y_l)) = \frac{1}{1 + e^{-(
 $$ {#eq-bradley-terry-dpo}
 这正是 *Bradley-Terry 模型*@bradley1952rank——研究两两比较最老、用得也最多的模型之一。它说的是：偏好物品 $j$ 胜过 $j'$ 的概率，是两者"实力"或效用之差的一个 sigmoid 函数。
 
-This raises natural questions: *Why is the Bradley-Terry model a reasonable assumption? Where does it come from? When does it fail?* Answering these questions is the goal of the rest of this chapter. We will see that Bradley-Terry arises naturally from a *random utility model* with specific noise assumptions, and that its key property---the *Independence of Irrelevant Alternatives*---is both powerful and limiting.
+这几个问题很自然地就冒了出来：*为什么说 Bradley-Terry 模型是个合理的假设？它从哪里来？什么时候会失效？*回答这些问题，正是本章余下部分的目标。我们会看到，Bradley-Terry 模型是从一个*随机效用模型*再加上特定的噪声假设里自然推出来的；而它最要紧的那条性质——*无关选项独立性*——既好用，也是它的局限所在。
 
 ::: {.callout-caution title="动手算一遍：算出 Bradley-Terry 的概率" collapse="false"}
 假设有三位棋手，按 Elo 风格的效用分别是 $V_A = 2.0$、$V_B = 1.0$、$V_C = 0.0$。在 Bradley-Terry 模型下：

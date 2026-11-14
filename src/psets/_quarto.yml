@@ -10,6 +10,9 @@
 #      引用的（resources/fonts/...），嵌套项目的根是本目录，不链接就会报找不到字体而渲染失败。
 #   4. 主项目不会渲染这些文件（book 类型的 project.render 只渲染 chapters 列出的页面），
 #      所以这里显式列出三份习题；pset4.qmd 在上游是 0 字节空文件，不纳入。
+#   5. 顶栏的两个链接必须写已发布页面的地址（.html），不能写 .qmd：这两个文件不在本嵌套项目里，
+#      Quarto 解析不了，会把 ../../index.qmd 原样输出到页面上，点进去就是 404。
+#      同时加上 repo-url / repo-actions，让每页都有回到仓库源码的入口（习题要在本地跑才看得到结果）。
 
 project:
   type: website
@@ -17,14 +20,16 @@ project:
 
 website:
   title: "习题"
+  repo-url: "https://github.com/CodingPracticeGroup/mlhp"
+  repo-actions: [source]
   back-to-top-navigation: true
   page-navigation: true
   navbar:
     left:
       - text: "首页"
-        href: ../../index.qmd
+        href: ../../index.html
       - text: "教学安排"
-        href: ../teaching.qmd
+        href: ../teaching.html
 
 lang: zh
 

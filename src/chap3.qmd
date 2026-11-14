@@ -688,7 +688,7 @@ print("Simulation complete!")
 ```
 :::
 
-Visualize the results:
+把结果画出来看看：
 
 ::: {.callout-note title="Code"}
 ```{pyodide-python}
@@ -764,12 +764,12 @@ $$
 \theta \mid \mathcal D \approx \mathcal N(\hat\theta,;\Sigma),\qquad
 \Sigma^{-1} = \sigma_0^{-2} I + \sum_{t} w_t \phi_t^\top \phi_t
 $$ {#eq-laplace-posterior}
-where $w_t = p_t(1-p_t)$ with $p_t = \sigma\big(f_{\hat\theta}(X_{j_t})-f_{\hat\theta}(X_{k_t})\big)$.
+其中 $w_t = p_t(1-p_t)$，而 $p_t = \sigma\big(f_{\hat\theta}(X_{j_t})-f_{\hat\theta}(X_{k_t})\big)$。
 这和线性情形结构完全一样，只是把 $x_{jk}$ 换成了 $\phi_{jk}=J_j-J_k$，而你需要准备的只有雅可比的每一行 $J_j$。在当前的 $(\hat\theta, \Sigma)$ 处，对一个候选配对 $(j,k)$，先算 $p=\sigma\big(f_{\hat\theta}(X_j)-f_{\hat\theta}(X_k)\big)$ 与 $w = p(1-p)$，再在 $\hat \theta$ 处算出 $\phi = J_j-J_k$。之后套用任意一个标准的最优设计得分，用 Sherman-Morrison 公式即可：
 
-* D-optimal (log-det gain): $\Delta_D(j,k) = \log ( 1 + w\phi \Sigma \phi^\top )$.
-* A-optimal (trace drop): $\Delta_A(j,k) = \dfrac{w \phi \Sigma^2 \phi^\top }{ 1+w \phi \Sigma \phi^\top}$.
-* E-optimal proxy: $\Delta_E^{\text{proxy}}(j,k) = w \phi \Sigma \phi^\top$.
+* D-最优（对数行列式增益）：$\Delta_D(j,k) = \log ( 1 + w\phi \Sigma \phi^\top )$.
+* A-最优（迹的下降量）：$\Delta_A(j,k) = \dfrac{w \phi \Sigma^2 \phi^\top }{ 1+w \phi \Sigma \phi^\top}$.
+* E-最优的替代量：$\Delta_E^{\text{proxy}}(j,k) = w \phi \Sigma \phi^\top$.
 
 选出增益最大的那一对。这么做算得起，因为它只需要一次与 $\Sigma$ 的"向量—矩阵—向量"乘法，再加一行雅可比。像 BALD 那样基于互信息的采集函数，在拉普拉斯高斯近似下会化成同样的式子。拿不准时，最大化 $\Delta_D$ 是个不错的默认选择。
 
@@ -1110,7 +1110,7 @@ print(f"Active achieves {mse_random[-1]/mse_active[-1]:.1f}x lower error")
 
 ### DPO 的设定
 
-Recall from @sec-llm-example that DPO directly optimizes a policy $\pi_\theta$ on preference data without learning an explicit reward model. The key insight is that DPO implicitly assumes Bradley-Terry preferences:
+还记得 @sec-llm-example 里说的：DPO 直接在偏好数据上优化策略 $\pi_\theta$，并不去学一个显式的奖励模型。关键在于，DPO 隐含地假定偏好服从 Bradley-Terry 形式：
 $$
 p(y_w \succ y_l \mid x) = \sigma\left(\beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}\right)
 $$ {#eq-dpo-bradley-terry}
